@@ -94,7 +94,8 @@ export async function GET(
     return new NextResponse(html, {
       headers: { "Content-Type": "text/html" },
     });
-  } catch (error) {
-    return new NextResponse("Internal Server Error", { status: 500 });
+  } catch (error: any) {
+    console.error("Preview Error:", error);
+    return new NextResponse(`Error generating preview: ${error.message || 'Unknown error'}`, { status: 500 });
   }
 }
