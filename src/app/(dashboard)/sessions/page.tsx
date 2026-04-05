@@ -102,7 +102,7 @@ export default function SessionsPage() {
           <p className="text-slate-400">Schedule and track clinical sessions.</p>
         </div>
         <div className="flex gap-4">
-          <Select value={clientFilter} onValueChange={(v) => setClientFilter(v)}>
+          <Select value={clientFilter} onValueChange={(v) => setClientFilter(v || "all")}>
             <SelectTrigger className="w-[200px] bg-slate-900 border-slate-800 text-white">
               <SelectValue placeholder="All Clients" />
             </SelectTrigger>
