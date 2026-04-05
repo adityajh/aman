@@ -33,6 +33,10 @@ export async function POST(
       return new NextResponse("Invoice not found", { status: 404 });
     }
 
+    if (!invoice.client.email) {
+      return new NextResponse("Client email is required to send invoice", { status: 400 });
+    }
+
     const practiceProfile = settings || {
       practiceName: "Aman Counseling",
       counselorName: "Vijay Gopal Sreenivasan",
