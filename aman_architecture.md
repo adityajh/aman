@@ -225,18 +225,18 @@ And three useful views:
 ### Phase 1 — Core MVP *(Weeks 1–5)*
 *Goal: A working system the counselor can use daily. The loop: log session → write note → invoice → record payment.*
 
-| # | Feature | Details |
-|---|---|---|
-| 1 | Auth | Single counselor login (email + password via NextAuth) |
-| 2 | Client management | Add, edit, archive clients. Default fee, contact, tags |
-| 3 | Session logging | Log date, duration, type, status, modality, fee |
-| 4 | SOAP notes | Structured note per session. Blocks: S / O / A / P |
-| 5 | Session status flow | `Scheduled → Completed / No-show / Cancelled` |
-| 6 | Monthly invoice generation | Batch: pick month + client(s) → generate invoice from unbilled sessions |
-| 7 | Invoice PDF | Branded PDF via React Email |
-| 8 | Email invoice | Send PDF via Resend from within the system |
-| 9 | Payment recording | Mark invoice paid/partial; record method + reference |
-| 10 | Dashboard | Unbilled sessions, overdue invoices, monthly revenue, upcoming sessions |
+| # | Feature | Details | Status |
+|---|---|---|---|
+| 1 | Auth | Single counselor login (email + password via NextAuth) | [DONE] |
+| 2 | Client management | Add, edit, archive clients. Default fee, contact, tags | [DONE] |
+| 3 | Session logging | Log date, duration, type, status, modality, fee | [DONE] |
+| 4 | SOAP notes | Structured note per session. Blocks: S / O / A / P | [DONE] |
+| 5 | Session status flow | `Scheduled → Completed / No-show / Cancelled` | [DONE] |
+| 6 | Monthly invoice generation | Batch invoice from unbilled sessions | [DONE] |
+| 7 | Invoice PDF | Branded PDF via React Email | [DONE] |
+| 8 | Email invoice | Send PDF via Gmail SMTP (Nodemailer) | [DONE] |
+| 9 | Payment recording | Mark invoice paid/partial; record method + reference | [DONE] |
+| 10 | Dashboard | Unbilled sessions, generated revenue, upcoming sessions | [DONE] |
 
 ### Phase 2 — Intelligence & Client Portal *(Weeks 6–10)*
 *Goal: Reduce counselor effort on notes. Give clients a self-serve payment view.*
@@ -372,8 +372,10 @@ All secrets stored in Vercel environment variables. Never commit to repo.
 | `DATABASE_URL` | Neon PostgreSQL connection string |
 | `NEXTAUTH_SECRET` | Random 32-char secret for NextAuth |
 | `NEXTAUTH_URL` | App URL (e.g. `https://aman.yourdomain.com`) |
-| `RESEND_API_KEY` | Resend API key for email |
-| `EMAIL_FROM` | Sender email (e.g. `invoices@yourdomain.com`) |
+| `SMTP_USER` | Gmail Address (for invoice sending) |
+| `SMTP_PASS` | Gmail App Password (16-char) |
+| `SMTP_HOST` | `smtp.gmail.com` |
+| `SMTP_PORT` | `465` |
 | `RAZORPAY_KEY_ID` | Razorpay public key *(Phase 2)* |
 | `RAZORPAY_KEY_SECRET` | Razorpay secret *(Phase 2)* |
 | `ANTHROPIC_API_KEY` | Claude API key for AI note drafting *(Phase 2)* |
