@@ -127,14 +127,23 @@ export default function SessionsPage() {
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-6 py-4">
                 <div className="space-y-2">
-                  <Label className="text-slate-300">Client</Label>
+                  <Label className="text-slate-300 font-medium">Client</Label>
                   <Select name="clientId" required>
-                    <SelectTrigger className="bg-slate-950 border-slate-800 h-12">
-                      <SelectValue placeholder="Select client" />
+                    <SelectTrigger className="bg-slate-900 border-slate-700 h-12 text-blue-100 hover:border-lime-500/50 transition-colors">
+                      <SelectValue placeholder="Select a client..." />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-950 border-slate-800">
+                    <SelectContent className="bg-slate-900 border-slate-700 text-slate-100 shadow-xl">
                       {clients.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                        <SelectItem 
+                          key={c.id} 
+                          value={c.id} 
+                          className="focus:bg-lime-400 focus:text-slate-950 cursor-pointer py-3"
+                        >
+                          <div className="flex flex-col">
+                            <span className="font-semibold">{c.name}</span>
+                            {c.email && <span className="text-[10px] opacity-70">{c.email}</span>}
+                          </div>
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -181,14 +190,21 @@ export default function SessionsPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-slate-300">Fee Scheme</Label>
+                    <Label className="text-slate-300 font-medium">Fee Scheme</Label>
                     <Select name="feeSchemeId">
-                      <SelectTrigger className="bg-slate-950 border-slate-800">
+                      <SelectTrigger className="bg-slate-900 border-slate-700 text-blue-50 hover:border-lime-500/50 transition-colors">
                         <SelectValue placeholder="Client Default" />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-950 border-slate-800 text-white">
+                      <SelectContent className="bg-slate-900 border-slate-700 text-white shadow-xl">
                         {feeSchemes.map((s) => (
-                          <SelectItem key={s.id} value={s.id}>{s.name} (₹{s.amount})</SelectItem>
+                          <SelectItem 
+                            key={s.id} 
+                            value={s.id}
+                            className="focus:bg-lime-400 focus:text-slate-950 cursor-pointer py-2"
+                          >
+                            <span className="font-medium">{s.name}</span>
+                            <span className="ml-2 text-xs opacity-60">₹{s.amount}</span>
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>

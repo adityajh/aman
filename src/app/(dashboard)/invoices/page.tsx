@@ -124,18 +124,18 @@ export default function InvoicesPage() {
                 </div>
               ) : (
                 unbilled.map((client) => (
-                  <div key={client.id} className="flex justify-between items-center p-4 border border-slate-800 rounded-lg hover:bg-slate-800/50 transition bg-slate-950">
+                  <div key={client.id} className="flex justify-between items-center p-4 border border-slate-800 rounded-lg bg-slate-950/50 hover:border-lime-500/30 transition-all group">
                     <div className="flex flex-col">
-                      <span className="font-semibold text-sm text-white">{client.name}</span>
-                      <span className="text-xs text-slate-500">{client.sessionCount} sessions • ₹{client.totalAmount}</span>
+                      <span className="font-semibold text-sm text-blue-50 group-hover:text-white transition-colors">{client.name}</span>
+                      <span className="text-[10px] text-slate-500 uppercase tracking-wider">{client.sessionCount} sessions • ₹{client.totalAmount}</span>
                     </div>
                     <Button 
                       size="sm" 
                       onClick={() => handleCreateBatch(client.id)}
                       disabled={isCreating}
-                      className="bg-lime-900/20 text-lime-400 hover:bg-lime-900/40 border border-lime-800"
+                      className="bg-lime-400 text-slate-950 hover:bg-lime-500 font-bold border-none"
                     >
-                      {isCreating ? <Loader2 className="h-3 w-3 animate-spin mr-2" /> : <Plus className="h-3 w-3 mr-2" />}
+                      {isCreating ? <Loader2 className="h-3 w-3 animate-spin mr-2" /> : <Send className="h-3 w-3 mr-2" />}
                       Generate
                     </Button>
                   </div>
