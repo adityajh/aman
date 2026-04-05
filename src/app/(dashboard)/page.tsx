@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { IndianRupee, Calendar, ClipboardCheck, AlertTriangle, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<any>(null);
@@ -91,15 +92,15 @@ export default function DashboardPage() {
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-4">
-            <Button asChild>
-              <Link href="/clients">Add New Client</Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href="/sessions">Schedule Session</Link>
-            </Button>
-            <Button asChild variant="secondary">
-              <Link href="/invoices">Run Monthly Billing</Link>
-            </Button>
+            <Link href="/clients" className={cn(buttonVariants({ variant: "default" }))}>
+              Add New Client
+            </Link>
+            <Link href="/sessions" className={cn(buttonVariants({ variant: "outline" }))}>
+              Schedule Session
+            </Link>
+            <Link href="/invoices" className={cn(buttonVariants({ variant: "secondary" }))}>
+              Run Monthly Billing
+            </Link>
           </CardContent>
         </Card>
       </div>
