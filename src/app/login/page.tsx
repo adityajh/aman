@@ -26,12 +26,12 @@ export default function LoginPage() {
     const result = await signIn("credentials", {
       email,
       password,
+      callbackUrl: "/",
       redirect: false,
     });
 
     if (result?.ok) {
-      router.push("/");
-      router.refresh();
+      window.location.href = "/";
     } else {
       toast.error("Invalid credentials. Please try again.");
       setLoading(false);
