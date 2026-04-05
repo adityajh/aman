@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Aman — Clinical Practice Management
 
-## Getting Started
+Aman is a modern, lightweight practice management system designed for solo counselors. It streamlines the "Golden Path" of clinical work: scheduling sessions, writing clinical notes, and automating monthly invoicing.
 
-First, run the development server:
+## ✨ Core Features
+
+- **Practice Dashboard**: High-level metrics for unbilled sessions, revenue, upcoming appointments, and risk flags.
+- **Client Management**: Secure database for client records, default fees, and intake details.
+- **Sessions Dashboard**: Fast scheduling with modality tracking (In-person, Video, Phone).
+- **SOAP Note Editor**: Professional clinical editor with integrated risk flagging. Completing a note automatically marks the session as billable.
+- **Invoicing Engine**: One-click batch generation of monthly invoices for all clients.
+- **Resend Integration**: Automated delivery of branded HTML invoices directly to client emails.
+
+## 🛠 Tech Stack
+
+- **Framework**: [Next.js 14+](https://nextjs.org/) (App Router, Turbopack)
+- **Database**: [Neon](https://neon.tech/) (Serverless Postgres)
+- **ORM**: [Drizzle ORM](https://orm.drizzle.team/)
+- **Authentication**: [NextAuth.js](https://next-auth.js.org/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) & [shadcn/ui](https://ui.shadcn.com/)
+- **Email**: [Resend](https://resend.com/)
+
+## 🚀 Getting Started
+
+### 1. Prerequisites
+
+- Node.js 18+
+- A Neon PostgreSQL database
+- A Resend API account
+
+### 2. Installation
+
+```bash
+git clone https://github.com/adityajh/aman.git
+cd aman
+npm install
+```
+
+### 3. Environment Variables
+
+Create a `.env.local` file in the root directory:
+
+```env
+DATABASE_URL=postgresql://...
+RESEND_API_KEY=re_...
+NEXTAUTH_SECRET=your_32_char_secret
+NEXTAUTH_URL=http://localhost:3000
+
+# Optional: Default Admin Credentials
+ADMIN_EMAIL=counselor@aman.com
+ADMIN_PASSWORD=password123
+```
+
+### 4. Database Setup
+
+```bash
+npx drizzle-kit push
+```
+
+### 5. Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛤 Roadmap
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- [x] **Phase 1**: MVP (Invoicing, Clients, Sessions, SOAP Notes)
+- [ ] **Phase 2**: AI Assistance (SOAP Note drafting via Claude API)
+- [ ] **Phase 3**: Client Portal (Token-gated payment history view)
+- [ ] **Phase 4**: Advanced Analytics (Mood tracking & progress charts)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📄 License
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
