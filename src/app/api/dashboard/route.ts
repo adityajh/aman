@@ -27,7 +27,12 @@ export async function GET() {
     const [outstandingRevenue] = await db
       .select({ total: sql<string>`sum(${invoices.total})` })
       .from(invoices)
-      .where(or(eq(invoices.status, 'sent'), eq(invoices.status, 'partial'), eq(invoices.status, 'overdue')));
+      .where(or(
+        eq(invoices.status, 'draft'), 
+        eq(invoices.status, 'sent'), 
+        eq(invoices.status, 'partial'), 
+        eq(invoices.status, 'overdue')
+      ));
 
     const [riskFlags] = await db
         .select({ count: sql<number>`count(*)` })

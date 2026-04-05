@@ -20,6 +20,8 @@ export default function SessionsPage() {
   const [feeSchemes, setFeeSchemes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
+  const [selectedClientId, setSelectedClientId] = useState<string>("");
+  const [selectedFeeSchemeId, setSelectedFeeSchemeId] = useState<string>("");
   const [clientFilter, setClientFilter] = useState<string>("all");
 
   const fetchData = async () => {
@@ -73,12 +75,18 @@ export default function SessionsPage() {
   };
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "scheduled": return <Badge variant="outline" className="bg-blue-900/30 text-blue-400 border-blue-800 uppercase text-[10px]">Scheduled</Badge>;
-      case "completed": return <Badge variant="outline" className="bg-green-900/30 text-green-400 border-green-800 uppercase text-[10px]">Completed</Badge>;
-      case "cancelled": return <Badge variant="outline" className="bg-red-900/30 text-red-400 border-red-800 uppercase text-[10px]">Cancelled</Badge>;
-      default: return <Badge variant="outline" className="uppercase text-[10px]">{status}</Badge>;
-    }
+    return (
+      <Badge 
+        variant={status === "completed" ? "default" : "secondary"}
+        className={
+          status === "completed" 
+            ? "bg-lime-100 text-lime-900 hover:bg-lime-100 border-lime-300 font-bold uppercase text-[10px] tracking-wider shadow-sm" 
+            : "bg-slate-200 text-slate-800 border-slate-300 font-bold uppercase text-[10px] tracking-wider"
+        }
+      >
+        {status.replace("_", " ")}
+      </Badge>
+    );
   };
 
   const filteredSessions = clientFilter === "all" 
@@ -129,7 +137,12 @@ export default function SessionsPage() {
               <form onSubmit={handleSubmit} className="space-y-6 py-4">
                 <div className="space-y-2">
                   <Label className="text-slate-700 font-medium">Client</Label>
-                  <Select name="clientId" required>
+                  <Select 
+                    name="clientId" 
+                    required 
+                    value={selectedClientId} 
+                    onValueChange={(v) => setSelectedClientId(v || "")}
+                  >
                     <SelectTrigger className="border-slate-200 h-12 text-slate-900 hover:border-lime-500/50 transition-colors">
                       <SelectValue placeholder="Select a client..." />
                     </SelectTrigger>
@@ -140,7 +153,7 @@ export default function SessionsPage() {
                           value={c.id} 
                           className="focus:bg-lime-100 focus:text-slate-950 cursor-pointer py-2 px-4 border-b border-slate-100 last:border-0"
                         >
-                          <span className="font-semibold block text-slate-900">{c.name}</span>
+                          <span className="font-semibold block text-slate-950">{c.name}</span>
                           {c.email && <span className="text-[10px] block text-slate-500">{c.email}</span>}
                         </SelectItem>
                       ))}
@@ -190,7 +203,11 @@ export default function SessionsPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label className="text-slate-700 font-medium">Fee Scheme</Label>
-                    <Select name="feeSchemeId">
+                    <Select 
+                      name="feeSchemeId"
+                      value={selectedFeeSchemeId}
+                      onValueChange={(v) => setSelectedFeeSchemeId(v || "")}
+                    >
                       <SelectTrigger className="border-slate-200 text-slate-900 hover:border-lime-500/50 transition-colors">
                         <SelectValue placeholder="Client Default" />
                       </SelectTrigger>
@@ -269,9 +286,9 @@ export default function SessionsPage() {
                     </TableCell>
                     <TableCell>
                       {session.invoiceId ? (
-                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 font-medium">Invoiced</Badge>
+                        <Badge variant="outline" className="bg-blue-100 text-blue-900 border-blue-200 font-bold uppercase text-[10px] tracking-wider">Invoiced</Badge>
                       ) : (
-                        <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 font-medium">Unbilled</Badge>
+                        <Badge variant="outline" className="bg-amber-100 text-amber-900 border-amber-200 font-bold uppercase text-[10px] tracking-wider">Unbilled</Badge>
                       )}
                     </TableCell>
                     <TableCell>

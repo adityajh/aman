@@ -88,10 +88,10 @@ export default function InvoicesPage() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "draft": return <Badge variant="outline" className="bg-slate-100 text-slate-600 border-slate-200 font-medium">Draft</Badge>;
-      case "sent": return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 font-medium">Sent</Badge>;
-      case "paid": return <Badge variant="outline" className="bg-lime-100 text-lime-800 border-lime-200 font-medium">Paid</Badge>;
-      default: return <Badge variant="outline" className="font-medium">{status}</Badge>;
+      case "draft": return <Badge variant="outline" className="bg-slate-100 text-slate-900 border-slate-300 font-bold uppercase text-[10px] tracking-wider">Generated</Badge>;
+      case "sent": return <Badge variant="outline" className="bg-blue-100 text-blue-900 border-blue-200 font-bold uppercase text-[10px] tracking-wider">Sent</Badge>;
+      case "paid": return <Badge variant="outline" className="bg-lime-100 text-lime-900 border-lime-300 font-bold uppercase text-[10px] tracking-wider">Paid</Badge>;
+      default: return <Badge variant="outline" className="font-bold uppercase text-[10px] tracking-wider">{status}</Badge>;
     }
   };
 
@@ -207,7 +207,7 @@ export default function InvoicesPage() {
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              className="gap-2 text-lime-700 border-lime-200 hover:bg-lime-50"
+                              className="gap-2 text-lime-900 border-lime-300 bg-lime-50 hover:bg-lime-100 font-bold shadow-sm"
                               onClick={() => handleSendInvoice(invoice.id)}
                               disabled={!!isSending || !invoice.client?.email}
                             >
@@ -215,8 +215,8 @@ export default function InvoicesPage() {
                               Send
                             </Button>
                           ) : (
-                            <div className="flex items-center gap-2 text-xs text-lime-600 font-medium whitespace-nowrap">
-                              <CheckCircle2 className="h-4 w-4" />
+                            <div className="flex items-center gap-2 text-xs text-lime-700 font-bold whitespace-nowrap">
+                              <CheckCircle2 className="h-4 w-4 text-lime-600" />
                               Sent {format(new Date(invoice.sentAt), "d MMM")}
                             </div>
                           )}
