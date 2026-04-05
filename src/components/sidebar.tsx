@@ -8,9 +8,10 @@ import {
   Users, 
   Calendar, 
   FileText, 
-  Settings,
+  Settings, 
+  ShieldCheck, 
   LogOut,
-  ShieldCheck
+  CreditCard
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
@@ -37,6 +38,12 @@ const routes = [
     label: "Invoices",
     icon: FileText,
     href: "/invoices",
+    color: "text-lime-400",
+  },
+  {
+    label: "Fees",
+    icon: CreditCard,
+    href: "/fees",
     color: "text-lime-400",
   },
   {

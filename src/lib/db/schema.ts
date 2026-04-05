@@ -20,6 +20,25 @@ import {
 import { sql, relations } from "drizzle-orm";
 
 // ─────────────────────────────────────────────
+// FEE SCHEMES
+// ─────────────────────────────────────────────
+export const feeSchemes = pgTable(
+  "fee_schemes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    description: text("description"),
+    amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  }
+);
+
+// ─────────────────────────────────────────────
 // CLIENTS
 // ─────────────────────────────────────────────
 export const clients = pgTable(
@@ -43,6 +62,7 @@ export const clients = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
       .default(sql`now()`),
+    defaultFeeSchemeId: uuid("default_fee_scheme_id").references(() => feeSchemes.id, { onDelete: "set null" }),
   },
   (t) => ({
     activeIdx: index("idx_clients_active").on(t.isActive),
@@ -132,6 +152,7 @@ export const sessions = pgTable(
       .default("in_person"),
     feeCharged: numeric("fee_charged", { precision: 10, scale: 2 }),
     feeOverride: boolean("fee_override").notNull().default(false),
+    feeSchemeId: uuid("fee_scheme_id").references(() => feeSchemes.id, { onDelete: "set null" }),
     invoiceId: uuid("invoice_id").references(() => invoices.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -333,6 +354,8 @@ export type NewInvoice = typeof invoices.$inferInsert;
 export type InvoiceLineItem = typeof invoiceLineItems.$inferSelect;
 export type Payment = typeof payments.$inferSelect;
 export type NewPayment = typeof payments.$inferInsert;
+export type FeeScheme = typeof feeSchemes.$inferSelect;
+export type NewFeeScheme = typeof feeSchemes.$inferInsert;
 export type AuditLog = typeof auditLog.$inferSelect;
 export type PracticeSettings = typeof practiceSettings.$inferSelect;
 export type NewPracticeSettings = typeof practiceSettings.$inferInsert;

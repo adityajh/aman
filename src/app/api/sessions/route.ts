@@ -35,18 +35,27 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { clientId, scheduledAt, durationMin, sessionType, modality, feeCharged } = body;
+    const { 
+      clientId, 
+      scheduledAt, 
+      durationMin, 
+      sessionType, 
+      modality, 
+      feeCharged, 
+      feeSchemeId 
+    } = body;
 
-    const newSession = await db.insert(sessions).values({
+    const [newSession] = await db.insert(sessions).values({
       clientId,
       scheduledAt: new Date(scheduledAt),
       durationMin: parseInt(durationMin),
       sessionType,
       modality,
-      feeCharged: feeCharged?.toString(),
+      feeCharged: (feeCharged && feeCharged !== "") ? feeCharged.toString() : undefined,
+      feeSchemeId: (feeSchemeId && feeSchemeId !== "") ? feeSchemeId : undefined,
     }).returning();
 
-    return NextResponse.json(newSession[0]);
+    return NextResponse.json(newSession);
   } catch (error) {
     console.error(error);
     return new NextResponse("Internal Server Error", { status: 500 });
