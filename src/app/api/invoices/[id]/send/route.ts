@@ -11,14 +11,15 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const sessionUser = await getServerSession(authOptions);
   if (!sessionUser) return new NextResponse("Unauthorized", { status: 401 });
 
   try {
     const invoice = await db.query.invoices.findFirst({
-      where: eq(invoices.id, params.id),
+      where: eq(invoices.id, id),
       with: {
         client: true,
         lineItems: true,
@@ -84,7 +85,7 @@ export async function POST(
     await db.update(invoices).set({
       status: 'sent',
       sentAt: new Date(),
-    }).where(eq(invoices.id, params.id));
+    }).where(eq(invoices.id, id));
 
     return NextResponse.json({ success: true });
   } catch (error) {
