@@ -98,51 +98,50 @@ export default function SessionsPage() {
     <div className="p-8 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">Sessions</h1>
-          <p className="text-slate-400">Schedule and track clinical sessions.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Sessions</h1>
+          <p className="text-slate-500">Schedule and track clinical sessions.</p>
         </div>
         <div className="flex gap-4">
           <Select value={clientFilter} onValueChange={(v) => setClientFilter(v || "all")}>
-            <SelectTrigger className="w-[200px] bg-slate-900 border-slate-800 text-white">
+            <SelectTrigger className="w-[200px] border-slate-200">
               <SelectValue placeholder="All Clients" />
             </SelectTrigger>
-            <SelectContent className="bg-slate-900 border-slate-800">
+            <SelectContent className="bg-white border-slate-200">
               <SelectItem value="all">All Clients</SelectItem>
               {clients.map((c) => (
                 <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
+          
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger
               render={
-                <Button className="gap-2 bg-lime-400 text-slate-950 hover:bg-lime-500 font-semibold">
-                  <Plus className="h-4 w-4" /> Schedule Session
+                <Button className="gap-2 bg-lime-500 text-slate-950 hover:bg-lime-600 font-semibold shadow-sm">
+                  <Plus className="h-4 w-4" /> New Session
                 </Button>
               }
             />
-            <DialogContent className="max-w-xl bg-slate-900 border-slate-800 text-white">
+            <DialogContent className="max-w-xl">
               <DialogHeader>
-                <DialogTitle className="text-xl">New Session</DialogTitle>
+                <DialogTitle>New Session</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-6 py-4">
                 <div className="space-y-2">
-                  <Label className="text-slate-300 font-medium">Client</Label>
+                  <Label className="text-slate-700 font-medium">Client</Label>
                   <Select name="clientId" required>
-                    <SelectTrigger className="bg-slate-900 border-slate-700 h-12 text-blue-100 hover:border-lime-500/50 transition-colors">
+                    <SelectTrigger className="border-slate-200 h-12 text-slate-900 hover:border-lime-500/50 transition-colors">
                       <SelectValue placeholder="Select a client..." />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-900 border-slate-700 text-slate-100 shadow-xl">
+                    <SelectContent className="bg-white border-slate-200 shadow-2xl">
                       {clients.map((c) => (
                         <SelectItem 
                           key={c.id} 
                           value={c.id} 
-                          className="focus:bg-lime-400 focus:text-slate-950 cursor-pointer py-3"
+                          className="focus:bg-lime-100 focus:text-slate-950 cursor-pointer py-2 px-4 border-b border-slate-100 last:border-0"
                         >
-                          <div className="flex flex-col">
-                            <span className="font-semibold">{c.name}</span>
-                            {c.email && <span className="text-[10px] opacity-70">{c.email}</span>}
-                          </div>
+                          <span className="font-semibold block text-slate-900">{c.name}</span>
+                          {c.email && <span className="text-[10px] block text-slate-500">{c.email}</span>}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -151,22 +150,22 @@ export default function SessionsPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="scheduledAt" className="text-slate-300">Date & Time</Label>
-                    <Input id="scheduledAt" name="scheduledAt" type="datetime-local" className="bg-slate-950 border-slate-800" required />
+                    <Label htmlFor="scheduledAt" className="text-slate-700">Date & Time</Label>
+                    <Input id="scheduledAt" name="scheduledAt" type="datetime-local" className="border-slate-200" required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="durationMin" className="text-slate-300">Duration (min)</Label>
-                    <Input id="durationMin" name="durationMin" type="number" defaultValue="60" className="bg-slate-950 border-slate-800" required />
+                    <Label htmlFor="durationMin" className="text-slate-700">Duration (min)</Label>
+                    <Input id="durationMin" name="durationMin" type="number" defaultValue="60" className="border-slate-200" required />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-slate-300">Modality</Label>
+                    <Label className="text-slate-700 font-medium">Modality</Label>
                     <Select name="modality" defaultValue="video">
-                      <SelectTrigger className="bg-slate-950 border-slate-800">
+                      <SelectTrigger className="border-slate-200">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-950 border-slate-800 text-white">
+                      <SelectContent className="bg-white border-slate-200">
                         <SelectItem value="video">Video</SelectItem>
                         <SelectItem value="in_person">In Person</SelectItem>
                         <SelectItem value="phone">Phone</SelectItem>
@@ -174,12 +173,12 @@ export default function SessionsPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-slate-300">Session Type</Label>
+                    <Label className="text-slate-700 font-medium">Session Type</Label>
                     <Select name="sessionType" defaultValue="individual">
-                      <SelectTrigger className="bg-slate-950 border-slate-800">
+                      <SelectTrigger className="border-slate-200">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-950 border-slate-800 text-white">
+                      <SelectContent className="bg-white border-slate-200">
                         <SelectItem value="individual">Individual</SelectItem>
                         <SelectItem value="couples">Couples</SelectItem>
                         <SelectItem value="group">Group</SelectItem>
@@ -190,28 +189,28 @@ export default function SessionsPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-slate-300 font-medium">Fee Scheme</Label>
+                    <Label className="text-slate-700 font-medium">Fee Scheme</Label>
                     <Select name="feeSchemeId">
-                      <SelectTrigger className="bg-slate-900 border-slate-700 text-blue-50 hover:border-lime-500/50 transition-colors">
+                      <SelectTrigger className="border-slate-200 text-slate-900 hover:border-lime-500/50 transition-colors">
                         <SelectValue placeholder="Client Default" />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-900 border-slate-700 text-white shadow-xl">
+                      <SelectContent className="bg-white border-slate-200 shadow-2xl">
                         {feeSchemes.map((s) => (
                           <SelectItem 
                             key={s.id} 
                             value={s.id}
-                            className="focus:bg-lime-400 focus:text-slate-950 cursor-pointer py-2"
+                            className="focus:bg-lime-100 focus:text-slate-950 cursor-pointer py-2 px-4 border-b border-slate-100 last:border-0"
                           >
-                            <span className="font-medium">{s.name}</span>
-                            <span className="ml-2 text-xs opacity-60">₹{s.amount}</span>
+                            <span className="font-medium text-slate-900">{s.name}</span>
+                            <span className="ml-2 text-xs text-slate-500 font-normal">₹{s.amount}</span>
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="feeCharged" className="text-slate-300">Override Fee (INR)</Label>
-                    <Input id="feeCharged" name="feeCharged" type="number" className="bg-slate-950 border-slate-800" placeholder="Optional" />
+                    <Label htmlFor="feeCharged" className="text-slate-700 font-medium">Override Fee (INR)</Label>
+                    <Input id="feeCharged" name="feeCharged" type="number" className="border-slate-200" placeholder="Optional" />
                   </div>
                 </div>
                 <Button type="submit" className="w-full bg-lime-400 text-slate-950 hover:bg-lime-500 font-semibold h-12">Schedule</Button>
@@ -221,63 +220,58 @@ export default function SessionsPage() {
         </div>
       </div>
 
-      <Card className="bg-slate-900 border-slate-800">
+      <Card>
         <CardContent className="p-0">
           <Table>
-            <TableHeader className="bg-slate-950">
-              <TableRow className="border-slate-800 hover:bg-slate-950">
-                <TableHead className="text-slate-300">Date & Time</TableHead>
-                <TableHead className="text-slate-300">Client</TableHead>
-                <TableHead className="text-slate-300">Modality</TableHead>
-                <TableHead className="text-slate-300">Billing</TableHead>
-                <TableHead className="text-slate-300">Status</TableHead>
-                <TableHead className="text-right text-slate-300">Actions</TableHead>
+            <TableHeader className="bg-slate-50/50">
+              <TableRow className="hover:bg-transparent">
+                <TableHead>Date & Time</TableHead>
+                <TableHead>Client</TableHead>
+                <TableHead>Modality</TableHead>
+                <TableHead>Billing</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-10 text-slate-400 border-slate-800">Loading sessions...</TableCell>
+                  <TableCell colSpan={6} className="text-center py-10 text-slate-400">Loading sessions...</TableCell>
                 </TableRow>
               ) : filteredSessions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-10 text-muted-foreground border-slate-800">No sessions match your filter.</TableCell>
+                  <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">No sessions match your filter.</TableCell>
                 </TableRow>
               ) : (
                 filteredSessions.map((session) => (
-                  <TableRow key={session.id} className="border-slate-800 hover:bg-slate-800/50">
+                  <TableRow key={session.id}>
                     <TableCell>
                       <div className="flex flex-col">
-                        <span className="font-medium text-white">{format(new Date(session.scheduledAt), "EEE, d MMM")}</span>
-                        <span className="text-xs text-slate-400 flex items-center gap-1">
+                        <span className="font-medium text-slate-900">{format(new Date(session.scheduledAt), "EEE, d MMM")}</span>
+                        <span className="text-xs text-slate-500 flex items-center gap-1">
                           <Clock className="h-3 w-3" />
                           {format(new Date(session.scheduledAt), "h:mm a")} ({session.durationMin}m)
                         </span>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        <User className="h-3 w-3 text-slate-500" />
-                        <span className="text-sm text-slate-300">{session.client?.name}</span>
+                      <div className="flex items-center gap-2 text-slate-700">
+                        <User className="h-3 w-3 text-slate-400" />
+                        <span className="text-sm font-medium">{session.client?.name}</span>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs uppercase flex items-center gap-1 text-slate-500">
-                          {getModalityIcon(session.modality)}
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                           {session.modality.replace("_", " ")}
                         </span>
                       </div>
                     </TableCell>
                     <TableCell>
                       {session.invoiceId ? (
-                        <Badge variant="outline" className="bg-lime-900/40 text-lime-400 border-lime-800 uppercase text-[10px]">
-                          Invoiced
-                        </Badge>
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 font-medium">Invoiced</Badge>
                       ) : (
-                        <Badge variant="outline" className="bg-slate-800 text-slate-400 border-slate-700 uppercase text-[10px]">
-                          Unbilled
-                        </Badge>
+                        <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 font-medium">Unbilled</Badge>
                       )}
                     </TableCell>
                     <TableCell>

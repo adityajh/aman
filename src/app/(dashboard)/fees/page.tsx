@@ -82,13 +82,13 @@ export default function FeesPage() {
     <div className="p-8 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">Fee Management</h1>
-          <p className="text-slate-400">Manage your practice's standardized fee structures.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Fee Management</h1>
+          <p className="text-slate-500">Manage your practice's standardized fee structures.</p>
         </div>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if(!v) setEditingScheme(null); }}>
           <DialogTrigger
             render={
-              <Button className="gap-2 bg-lime-400 text-slate-950 hover:bg-lime-500">
+              <Button className="gap-2 bg-lime-500 text-slate-950 hover:bg-lime-600 font-semibold shadow-sm">
                 <Plus className="h-4 w-4" /> New Fee Scheme
               </Button>
             }
@@ -140,16 +140,16 @@ export default function FeesPage() {
         </Dialog>
       </div>
 
-      <Card className="bg-slate-900 border-slate-800">
+      <Card>
         <CardContent className="p-0">
           <Table>
-            <TableHeader className="bg-slate-950">
-              <TableRow className="hover:bg-slate-950 border-slate-800">
-                <TableHead className="text-slate-300">Name</TableHead>
-                <TableHead className="text-slate-300">Description</TableHead>
-                <TableHead className="text-slate-300">Amount</TableHead>
-                <TableHead className="text-slate-300">Last Updated</TableHead>
-                <TableHead className="text-right text-slate-300">Actions</TableHead>
+            <TableHeader className="bg-slate-50/50">
+              <TableRow className="hover:bg-transparent">
+                <TableHead>Name</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Last Updated</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -163,18 +163,18 @@ export default function FeesPage() {
                 </TableRow>
               ) : (
                 feeSchemes.map((scheme) => (
-                  <TableRow key={scheme.id} className="border-slate-800 hover:bg-slate-800/50">
-                    <TableCell className="font-medium text-white">{scheme.name}</TableCell>
-                    <TableCell className="text-slate-400">{scheme.description || "-"}</TableCell>
-                    <TableCell className="text-lime-400 font-semibold">₹{scheme.amount}</TableCell>
-                    <TableCell className="text-slate-500 text-xs">
+                  <TableRow key={scheme.id}>
+                    <TableCell className="font-medium text-slate-900">{scheme.name}</TableCell>
+                    <TableCell className="text-slate-500">{scheme.description || "-"}</TableCell>
+                    <TableCell className="text-lime-700 font-semibold uppercase tracking-tight">₹{scheme.amount}</TableCell>
+                    <TableCell className="text-slate-400 text-xs">
                       {format(new Date(scheme.updatedAt), "d MMM yyyy")}
                     </TableCell>
                     <TableCell className="text-right space-x-2">
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        className="text-slate-400 hover:text-white"
+                        className="text-slate-400 hover:text-slate-900"
                         onClick={() => { setEditingScheme(scheme); setOpen(true); }}
                       >
                         <Pencil className="h-4 w-4" />
