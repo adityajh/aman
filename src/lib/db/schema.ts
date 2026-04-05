@@ -69,13 +69,8 @@ export const clients = pgTable(
   })
 );
 
-export const clientsRelations = relations(clients, ({ many }) => ({
-  sessions: many(sessions),
-  invoices: many(invoices),
-}));
-
 // ─────────────────────────────────────────────
-// INVOICES (declared before sessions for FK)
+// INVOICES
 // ─────────────────────────────────────────────
 export const invoices = pgTable(
   "invoices",
@@ -114,15 +109,6 @@ export const invoices = pgTable(
     monthIdx: index("idx_invoices_month").on(t.billingMonth),
   })
 );
-
-export const invoicesRelations = relations(invoices, ({ one, many }) => ({
-  client: one(clients, {
-    fields: [invoices.clientId],
-    references: [clients.id],
-  }),
-  lineItems: many(invoiceLineItems),
-  payments: many(payments),
-}));
 
 // ─────────────────────────────────────────────
 // SESSIONS
@@ -169,23 +155,8 @@ export const sessions = pgTable(
   })
 );
 
-export const sessionsRelations = relations(sessions, ({ one }) => ({
-  client: one(clients, {
-    fields: [sessions.clientId],
-    references: [clients.id],
-  }),
-  invoice: one(invoices, {
-    fields: [sessions.invoiceId],
-    references: [invoices.id],
-  }),
-  note: one(sessionNotes, {
-    fields: [sessions.id],
-    references: [sessionNotes.sessionId],
-  }),
-}));
-
 // ─────────────────────────────────────────────
-// SESSION NOTES (SOAP)
+// SESSION NOTES
 // ─────────────────────────────────────────────
 export const sessionNotes = pgTable(
   "session_notes",
@@ -199,7 +170,7 @@ export const sessionNotes = pgTable(
     objective: text("objective"),
     assessment: text("assessment"),
     plan: text("plan"),
-    moodScore: integer("mood_score"),       // 1–10; Phase 2
+    moodScore: integer("mood_score"),
     goalProgress: text("goal_progress"),
     riskFlag: text("risk_flag")
       .$type<"none" | "low" | "medium" | "high">()
@@ -276,7 +247,7 @@ export const payments = pgTable(
 );
 
 // ─────────────────────────────────────────────
-// PORTAL TOKENS (Phase 2)
+// PORTAL TOKENS
 // ─────────────────────────────────────────────
 export const portalTokens = pgTable(
   "portal_tokens",
@@ -299,7 +270,7 @@ export const portalTokens = pgTable(
 );
 
 // ─────────────────────────────────────────────
-// PRACTICE SETTINGS (Single Row)
+// PRACTICE SETTINGS
 // ─────────────────────────────────────────────
 export const practiceSettings = pgTable(
   "practice_settings",
@@ -341,8 +312,53 @@ export const auditLog = pgTable(
 );
 
 // ─────────────────────────────────────────────
-// TYPE EXPORTS (useful for API route typing)
+// RELATIONSHIPS
 // ─────────────────────────────────────────────
+
+export const clientsRelations = relations(clients, ({ many }) => ({
+  sessions: many(sessions),
+  invoices: many(invoices),
+}));
+
+export const invoicesRelations = relations(invoices, ({ one, many }) => ({
+  client: one(clients, {
+    fields: [invoices.clientId],
+    references: [clients.id],
+  }),
+  lineItems: many(invoiceLineItems),
+  payments: many(payments),
+}));
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  client: one(clients, {
+    fields: [sessions.clientId],
+    references: [clients.id],
+  }),
+  invoice: one(invoices, {
+    fields: [sessions.invoiceId],
+    references: [invoices.id],
+  }),
+  note: one(sessionNotes, {
+    fields: [sessions.id],
+    references: [sessionNotes.sessionId],
+  }),
+}));
+
+export const invoiceLineItemsRelations = relations(invoiceLineItems, ({ one }) => ({
+  invoice: one(invoices, {
+    fields: [invoiceLineItems.invoiceId],
+    references: [invoices.id],
+  }),
+  session: one(sessions, {
+    fields: [invoiceLineItems.sessionId],
+    references: [sessions.id],
+  }),
+}));
+
+// ─────────────────────────────────────────────
+// TYPE EXPORTS
+// ─────────────────────────────────────────────
+
 export type Client = typeof clients.$inferSelect;
 export type NewClient = typeof clients.$inferInsert;
 export type Session = typeof sessions.$inferSelect;
