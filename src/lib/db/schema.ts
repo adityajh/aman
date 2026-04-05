@@ -17,7 +17,7 @@ import {
   uniqueIndex,
   index,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
+import { sql, relations } from "drizzle-orm";
 
 // ─────────────────────────────────────────────
 // CLIENTS
@@ -48,6 +48,11 @@ export const clients = pgTable(
     activeIdx: index("idx_clients_active").on(t.isActive),
   })
 );
+
+export const clientsRelations = relations(clients, ({ many }) => ({
+  sessions: many(sessions),
+  invoices: many(invoices),
+}));
 
 // ─────────────────────────────────────────────
 // INVOICES (declared before sessions for FK)
@@ -89,6 +94,15 @@ export const invoices = pgTable(
     monthIdx: index("idx_invoices_month").on(t.billingMonth),
   })
 );
+
+export const invoicesRelations = relations(invoices, ({ one, many }) => ({
+  client: one(clients, {
+    fields: [invoices.clientId],
+    references: [clients.id],
+  }),
+  lineItems: many(invoiceLineItems),
+  payments: many(payments),
+}));
 
 // ─────────────────────────────────────────────
 // SESSIONS
@@ -133,6 +147,21 @@ export const sessions = pgTable(
     invoiceIdx: index("idx_sessions_invoice").on(t.invoiceId),
   })
 );
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  client: one(clients, {
+    fields: [sessions.clientId],
+    references: [clients.id],
+  }),
+  invoice: one(invoices, {
+    fields: [sessions.invoiceId],
+    references: [invoices.id],
+  }),
+  note: one(sessionNotes, {
+    fields: [sessions.id],
+    references: [sessionNotes.sessionId],
+  }),
+}));
 
 // ─────────────────────────────────────────────
 // SESSION NOTES (SOAP)
