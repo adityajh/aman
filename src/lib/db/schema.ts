@@ -278,6 +278,25 @@ export const portalTokens = pgTable(
 );
 
 // ─────────────────────────────────────────────
+// PRACTICE SETTINGS (Single Row)
+// ─────────────────────────────────────────────
+export const practiceSettings = pgTable(
+  "practice_settings",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    counselorName: text("counselor_name").notNull().default("Vijay Gopal Sreenivasan"),
+    practiceName: text("practice_name").notNull().default("Aman Counseling"),
+    address: text("address").default("Noida, Uttar Pradesh"),
+    phone: text("phone").default("+91-0000000000"),
+    email: text("email").default("counselor@aman.com"),
+    monthlyQuote: text("monthly_quote").default("Progress is not a straight line."),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  }
+);
+
+// ─────────────────────────────────────────────
 // AUDIT LOG
 // ─────────────────────────────────────────────
 export const auditLog = pgTable(
@@ -315,3 +334,5 @@ export type InvoiceLineItem = typeof invoiceLineItems.$inferSelect;
 export type Payment = typeof payments.$inferSelect;
 export type NewPayment = typeof payments.$inferInsert;
 export type AuditLog = typeof auditLog.$inferSelect;
+export type PracticeSettings = typeof practiceSettings.$inferSelect;
+export type NewPracticeSettings = typeof practiceSettings.$inferInsert;
