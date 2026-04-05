@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     const [newInvoice] = await db.insert(invoices).values({
       clientId,
       invoiceNumber,
-      billingMonth: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+      billingMonth: format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), "yyyy-MM-dd"),
       subtotal: subtotal.toString(),
       total: subtotal.toString(),
       status: 'draft',
