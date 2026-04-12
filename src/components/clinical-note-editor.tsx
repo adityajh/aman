@@ -12,11 +12,12 @@ import { cn } from "@/lib/utils";
 interface ClinicalNoteEditorProps {
   sessionId: string;
   onSave?: () => void;
+  onClose?: () => void;
 }
 
 const SCORE_LABELS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-export function ClinicalNoteEditor({ sessionId, onSave }: ClinicalNoteEditorProps) {
+export function ClinicalNoteEditor({ sessionId, onSave, onClose }: ClinicalNoteEditorProps) {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [note, setNote] = useState({
@@ -106,6 +107,7 @@ export function ClinicalNoteEditor({ sessionId, onSave }: ClinicalNoteEditorProp
       if (res.ok) {
         toast.success("Clinical Note saved");
         if (onSave) onSave();
+        if (onClose) onClose();
       } else {
         toast.error("Failed to save note");
       }
@@ -127,8 +129,8 @@ export function ClinicalNoteEditor({ sessionId, onSave }: ClinicalNoteEditorProp
   const ScoreSelector = ({ value, onChange, label }: { value: number, onChange: (v: number) => void, label: string }) => (
     <div className="space-y-2">
       <div className="flex justify-between items-center">
-        <Label className="text-xs font-medium text-slate-400">{label}</Label>
-        <span className="text-xs font-bold text-lime-400">{value > 0 ? value : "-"}</span>
+        <Label className="text-xs font-medium text-slate-500">{label}</Label>
+        <span className="text-xs font-bold text-lime-600">{value > 0 ? value : "-"}</span>
       </div>
       <div className="flex gap-1 justify-between">
         {SCORE_LABELS.map(s => (
@@ -139,8 +141,8 @@ export function ClinicalNoteEditor({ sessionId, onSave }: ClinicalNoteEditorProp
             className={cn(
               "flex-1 h-7 rounded text-[10px] font-bold transition-all border",
               value === s 
-                ? "bg-lime-500 border-lime-400 text-slate-950 shadow-[0_0_10px_rgba(132,204,22,0.3)]" 
-                : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500"
+                ? "bg-lime-500 border-lime-400 text-slate-950 shadow-[0_0_10px_rgba(132,204,22,0.2)]" 
+                : "bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200 hover:border-slate-300"
             )}
           >
             {s}
@@ -159,7 +161,7 @@ export function ClinicalNoteEditor({ sessionId, onSave }: ClinicalNoteEditorProp
           <Textarea 
             id="updates" 
             placeholder="Reviewing progress or changes since the last encounter..." 
-            className="min-h-[100px] bg-slate-800/50 border-slate-700 focus:border-lime-500/50 resize-none text-sm"
+            className="min-h-[100px] bg-white border-slate-200 focus:border-lime-500/50 resize-none text-sm text-slate-900"
             value={note.updates}
             onChange={(e) => setNote({ ...note, updates: e.target.value })}
           />
@@ -169,7 +171,7 @@ export function ClinicalNoteEditor({ sessionId, onSave }: ClinicalNoteEditorProp
           <Textarea 
             id="subjective" 
             placeholder="Key themes, breakthroughs, or significant moments from today..." 
-            className="min-h-[100px] bg-slate-800/50 border-slate-700 focus:border-lime-500/50 resize-none text-sm"
+            className="min-h-[100px] bg-white border-slate-200 focus:border-lime-500/50 resize-none text-sm text-slate-900"
             value={note.subjective}
             onChange={(e) => setNote({ ...note, subjective: e.target.value })}
           />
@@ -179,7 +181,7 @@ export function ClinicalNoteEditor({ sessionId, onSave }: ClinicalNoteEditorProp
           <Textarea 
             id="clientActions" 
             placeholder="Homework, reflection tasks, or commitments made by the client..." 
-            className="min-h-[100px] bg-slate-800/50 border-slate-700 focus:border-lime-500/50 resize-none text-sm"
+            className="min-h-[100px] bg-white border-slate-200 focus:border-lime-500/50 resize-none text-sm text-slate-900"
             value={note.clientActions}
             onChange={(e) => setNote({ ...note, clientActions: e.target.value })}
           />
@@ -189,7 +191,7 @@ export function ClinicalNoteEditor({ sessionId, onSave }: ClinicalNoteEditorProp
           <Textarea 
             id="myActions" 
             placeholder="Resources to send, follow-ups, or notes for personal preparation..." 
-            className="min-h-[100px] bg-slate-800/50 border-slate-700 focus:border-lime-500/50 resize-none text-sm"
+            className="min-h-[100px] bg-white border-slate-200 focus:border-lime-500/50 resize-none text-sm text-slate-900"
             value={note.myActions}
             onChange={(e) => setNote({ ...note, myActions: e.target.value })}
           />
@@ -199,7 +201,7 @@ export function ClinicalNoteEditor({ sessionId, onSave }: ClinicalNoteEditorProp
           <Textarea 
             id="agenda" 
             placeholder="Topics deferred or future focus areas identified today..." 
-            className="min-h-[100px] bg-slate-800/50 border-slate-700 focus:border-lime-500/50 resize-none text-sm"
+            className="min-h-[100px] bg-white border-slate-200 focus:border-lime-500/50 resize-none text-sm text-slate-900"
             value={note.agenda}
             onChange={(e) => setNote({ ...note, agenda: e.target.value })}
           />
@@ -209,7 +211,7 @@ export function ClinicalNoteEditor({ sessionId, onSave }: ClinicalNoteEditorProp
           <Textarea 
             id="feedback" 
             placeholder="Reflections on the therapist-client dynamic or session efficacy..." 
-            className="min-h-[100px] bg-slate-800/50 border-slate-700 focus:border-lime-500/50 resize-none text-sm"
+            className="min-h-[100px] bg-white border-slate-200 focus:border-lime-500/50 resize-none text-sm text-slate-900"
             value={note.feedback}
             onChange={(e) => setNote({ ...note, feedback: e.target.value })}
           />
@@ -218,14 +220,14 @@ export function ClinicalNoteEditor({ sessionId, onSave }: ClinicalNoteEditorProp
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* ORS Section */}
-        <div className="space-y-4 p-4 rounded-xl bg-slate-800/30 border border-slate-700/50">
-          <div className="flex justify-between items-center border-b border-slate-700 pb-2">
+        <div className="space-y-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
+          <div className="flex justify-between items-center border-b border-slate-200 pb-2">
             <div className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-lime-400" />
-              <h3 className="text-sm font-bold text-slate-200">ORS (Outcome Rating Scale)</h3>
+              <BarChart3 className="h-4 w-4 text-lime-600" />
+              <h3 className="text-sm font-bold text-slate-900">ORS (Outcome Rating Scale)</h3>
             </div>
             <div className="px-2 py-0.5 rounded bg-lime-500/10 border border-lime-500/20">
-              <span className="text-xs font-bold text-lime-400">Total: {note.orsTotal}/40</span>
+              <span className="text-xs font-bold text-lime-600">Total: {note.orsTotal}/40</span>
             </div>
           </div>
           <div className="space-y-4">
@@ -237,14 +239,14 @@ export function ClinicalNoteEditor({ sessionId, onSave }: ClinicalNoteEditorProp
         </div>
 
         {/* SRS Section */}
-        <div className="space-y-4 p-4 rounded-xl bg-slate-800/30 border border-slate-700/50">
-          <div className="flex justify-between items-center border-b border-slate-700 pb-2">
+        <div className="space-y-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
+          <div className="flex justify-between items-center border-b border-slate-200 pb-2">
             <div className="flex items-center gap-2">
-              <ClipboardList className="h-4 w-4 text-lime-400" />
-              <h3 className="text-sm font-bold text-slate-200">SRS (Session Rating Scale)</h3>
+              <ClipboardList className="h-4 w-4 text-lime-600" />
+              <h3 className="text-sm font-bold text-slate-900">SRS (Session Rating Scale)</h3>
             </div>
             <div className="px-2 py-0.5 rounded bg-lime-500/10 border border-lime-500/20">
-              <span className="text-xs font-bold text-lime-400">Total: {note.srsTotal}/40</span>
+              <span className="text-xs font-bold text-lime-600">Total: {note.srsTotal}/40</span>
             </div>
           </div>
           <div className="space-y-4">
@@ -256,17 +258,17 @@ export function ClinicalNoteEditor({ sessionId, onSave }: ClinicalNoteEditorProp
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-6 border-t border-slate-800">
+      <div className="flex items-center justify-between pt-6 border-t border-slate-200">
         <div className="flex items-center gap-4">
-          <Label className="text-sm font-medium text-slate-300">Risk Flag:</Label>
+          <Label className="text-sm font-medium text-slate-600">Risk Flag:</Label>
           <Select 
             value={note.riskFlag}
             onValueChange={(val: any) => setNote({ ...note, riskFlag: val })}
           >
-            <SelectTrigger className="w-[160px] bg-slate-800 border-slate-700 text-slate-200">
+            <SelectTrigger className="w-[160px] bg-white border-slate-200 text-slate-900">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-slate-900 border-slate-700 text-slate-300">
+            <SelectContent className="bg-white border-slate-200 text-slate-900">
               <SelectItem value="none">None</SelectItem>
               <SelectItem value="low">Low Risk</SelectItem>
               <SelectItem value="medium">Medium Risk</SelectItem>

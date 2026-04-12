@@ -75,19 +75,86 @@ export default function SessionsPage() {
   };
 
   const getStatusBadge = (status: string) => {
-    return (
-      <Badge 
-        variant={status === "completed" ? "default" : "secondary"}
-        className={
-          status === "completed" 
-            ? "bg-lime-100 text-lime-900 hover:bg-lime-100 border-lime-300 font-bold uppercase text-[10px] tracking-wider shadow-sm" 
-            : "bg-slate-200 text-slate-800 border-slate-300 font-bold uppercase text-[10px] tracking-wider"
-        }
-      >
-        {status.replace("_", " ")}
-      </Badge>
-    );
+    switch (status) {
+      case "scheduled": return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Scheduled</Badge>;
+      case "completed": return <Badge variant="outline" className="bg-lime-50 text-lime-700 border-lime-200">Completed</Badge>;
+      case "no_show": return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">No Show</Badge>;
+      case "cancelled": return <Badge variant="outline" className="bg-slate-50 text-slate-500 border-slate-200">Cancelled</Badge>;
+      default: return null;
+    }
   };
+
+  function SessionRow({ session, onRefresh }: { session: any, onRefresh: () => void }) {
+    const [noteOpen, setNoteOpen] = useState(false);
+
+    return (
+      <TableRow className="hover:bg-slate-50/50 transition-colors">
+        <TableCell>
+          <div className="flex flex-col">
+            <span className="font-medium text-slate-900">{format(new Date(session.scheduledAt), "EEE, d MMM")}</span>
+            <span className="text-xs text-slate-500 flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              {format(new Date(session.scheduledAt), "h:mm a")} ({session.durationMin}m)
+            </span>
+          </div>
+        </TableCell>
+        <TableCell>
+          <div className="flex items-center gap-2 text-slate-700">
+            <User className="h-3 w-3 text-slate-400" />
+            <span className="text-sm font-medium">{session.client?.name}</span>
+          </div>
+        </TableCell>
+        <TableCell>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              {session.modality.replace("_", " ")}
+            </span>
+          </div>
+        </TableCell>
+        <TableCell>
+          {session.invoiceId ? (
+            <Badge variant="outline" className="bg-blue-100 text-blue-900 border-blue-200 font-bold uppercase text-[10px] tracking-wider">Invoiced</Badge>
+          ) : (
+            <Badge variant="outline" className="bg-amber-100 text-amber-900 border-amber-200 font-bold uppercase text-[10px] tracking-wider">Unbilled</Badge>
+          )}
+        </TableCell>
+        <TableCell>
+          {getStatusBadge(session.status)}
+        </TableCell>
+        <TableCell className="text-right">
+          <Dialog open={noteOpen} onOpenChange={setNoteOpen}>
+            <DialogTrigger
+              render={
+                <Button variant="ghost" size="sm" className="gap-2 text-lime-600 hover:text-lime-700 hover:bg-lime-50 font-bold">
+                  {session.status === 'completed' ? 'View Note' : 'Write Note'}
+                </Button>
+              }
+            />
+            <DialogContent className="max-w-[95vw] lg:max-w-4xl max-h-[95vh] overflow-y-auto bg-white border-slate-200 text-slate-900 p-0 shadow-2xl">
+              <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-md p-6 border-b border-slate-100 shadow-sm">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2 text-slate-900 text-xl font-bold">
+                    <FileText className="h-6 w-6 text-lime-500" />
+                    Clinical Note: {session.client?.name}
+                    <span className="text-sm font-normal text-slate-400 ml-2">
+                      {format(new Date(session.scheduledAt), "d MMM yyyy")}
+                    </span>
+                  </DialogTitle>
+                </DialogHeader>
+              </div>
+              <div className="p-8">
+                <ClinicalNoteEditor 
+                  sessionId={session.id} 
+                  onSave={onRefresh} 
+                  onClose={() => setNoteOpen(false)}
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
+        </TableCell>
+      </TableRow>
+    );
+  }
 
   const filteredSessions = clientFilter === "all" 
     ? sessions 
@@ -267,70 +334,11 @@ export default function SessionsPage() {
                 </TableRow>
               ) : (
                 filteredSessions.map((session) => (
-                  <TableRow key={session.id}>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className="font-medium text-slate-900">{format(new Date(session.scheduledAt), "EEE, d MMM")}</span>
-                        <span className="text-xs text-slate-500 flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {format(new Date(session.scheduledAt), "h:mm a")} ({session.durationMin}m)
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2 text-slate-700">
-                        <User className="h-3 w-3 text-slate-400" />
-                        <span className="text-sm font-medium">{session.client?.name}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                          {session.modality.replace("_", " ")}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {session.invoiceId ? (
-                        <Badge variant="outline" className="bg-blue-100 text-blue-900 border-blue-200 font-bold uppercase text-[10px] tracking-wider">Invoiced</Badge>
-                      ) : (
-                        <Badge variant="outline" className="bg-amber-100 text-amber-900 border-amber-200 font-bold uppercase text-[10px] tracking-wider">Unbilled</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {getStatusBadge(session.status)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Dialog>
-                        <DialogTrigger
-                          render={
-                            <Button variant="ghost" size="sm" className="gap-2 text-lime-400 hover:text-lime-500 hover:bg-lime-900/20">
-                              {session.status === 'completed' ? 'View Note' : 'Write Note'}
-                            </Button>
-                          }
-                        />
-                        <DialogContent className="max-w-[95vw] lg:max-w-4xl max-h-[95vh] overflow-y-auto bg-slate-900 border-slate-800 text-white p-0">
-                          <div className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur-md p-6 border-b border-slate-800">
-                            <DialogHeader>
-                              <DialogTitle className="flex items-center gap-2 text-white">
-                                <FileText className="h-5 w-5 text-lime-400" />
-                                Clinical Note: {session.client?.name}
-                                <span className="text-sm font-normal text-slate-400 ml-2">
-                                  {format(new Date(session.scheduledAt), "d MMM yyyy")}
-                                </span>
-                              </DialogTitle>
-                            </DialogHeader>
-                          </div>
-                          <div className="p-6">
-                            <ClinicalNoteEditor 
-                              sessionId={session.id} 
-                              onSave={() => fetchData()} 
-                            />
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    </TableCell>
-                  </TableRow>
+                  <SessionRow 
+                    key={session.id} 
+                    session={session} 
+                    onRefresh={fetchData} 
+                  />
                 ))
               )}
             </TableBody>
