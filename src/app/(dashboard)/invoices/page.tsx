@@ -453,7 +453,7 @@ export default function InvoicesPage() {
                     <div key={item.id} className="p-3 bg-slate-50/50 border border-slate-200 rounded-md">
                       <div className="flex justify-between items-start mb-1">
                         <span className="text-sm font-medium text-slate-900">{item.name}</span>
-                        <span className="text-xs font-semibold text-lime-700">₹{item.totalAmount}</span>
+                        <span className="text-xs font-semibold text-lime-700">{item.currency === 'USD' ? '$' : '₹'}{item.totalAmount}</span>
                       </div>
                       <p className="text-[10px] text-slate-500 uppercase tracking-wider">{item.sessionCount} Unbilled Sessions</p>
                     </div>

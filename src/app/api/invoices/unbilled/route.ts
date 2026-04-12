@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { sessions, clients, sessionNotes } from "@/lib/db/schema";
+import { sessions, clients, feeSchemes } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
 import { eq, isNull, and, sql } from "drizzle-orm";
 import { getServerSession } from "next-auth";
@@ -10,7 +10,6 @@ export async function GET() {
   if (!sessionUser) return new NextResponse("Unauthorized", { status: 401 });
 
   try {
-    // Find clients who have completed sessions with no invoiceId
     const unbilledClients = await db
       .select({
         id: clients.id,
@@ -18,9 +17,11 @@ export async function GET() {
         email: clients.email,
         sessionCount: sql<number>`count(${sessions.id})`,
         totalAmount: sql<string>`sum(${sessions.feeCharged})`,
+        currency: sql<string>`COALESCE(MAX(${feeSchemes.currency}), 'INR')`,
       })
       .from(clients)
       .innerJoin(sessions, eq(sessions.clientId, clients.id))
+      .leftJoin(feeSchemes, eq(sessions.feeSchemeId, feeSchemes.id))
       .where(
         and(
           eq(sessions.status, 'completed'),
