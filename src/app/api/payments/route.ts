@@ -120,8 +120,11 @@ export async function POST(req: Request) {
       currency
     });
 
-  } catch (error) {
-    console.error(error);
-    return new NextResponse("Internal Server Error", { status: 500 });
+  } catch (error: any) {
+    console.error("[POST /api/payments] Error:", error?.message, error?.code, JSON.stringify(error));
+    return new NextResponse(
+      JSON.stringify({ error: error?.message || "Unknown error", code: error?.code }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
   }
 }

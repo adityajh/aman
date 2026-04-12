@@ -102,8 +102,14 @@ export default function PaymentsPage() {
         setSelectedClientName("");
         fetchData();
       } else {
-        const errorText = await res.text();
-        toast.error(`Failed to record payment: ${errorText}`);
+        let errMsg = "Unknown error";
+        try {
+          const errJson = await res.json();
+          errMsg = errJson.error || JSON.stringify(errJson);
+        } catch {
+          errMsg = await res.text();
+        }
+        toast.error(`Failed to record payment: ${errMsg}`);
       }
     } catch (err) {
       toast.error("An error occurred");
