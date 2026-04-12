@@ -14,33 +14,33 @@ export async function GET() {
     const now = new Date();
     const firstOfOfMonth = format(startOfMonth(now), "yyyy-MM-dd");
 
-    // 1. Total outstanding (across all persistent invoices)
+    // 1. Total outstanding (grouped by currency)
     const outstandingRes = await db.select({
+      currency: invoices.currency,
       total: sql<number>`sum(total - amount_paid)`
     }).from(invoices)
-    .where(sql`status IN ('draft', 'sent', 'partial', 'overdue')`);
+    .where(sql`status IN ('draft', 'sent', 'partial', 'overdue')`)
+    .groupBy(invoices.currency);
     
-    const totalOutstanding = outstandingRes[0]?.total || 0;
-
-    // 2. Total received this month
+    // 2. Total received this month (grouped by currency)
     const thisMonthRes = await db.select({
+      currency: payments.currency,
       total: sql<number>`sum(amount)`
     }).from(payments)
-    .where(gte(payments.paymentDate, firstOfOfMonth));
+    .where(gte(payments.paymentDate, firstOfOfMonth))
+    .groupBy(payments.currency);
 
-    const totalReceivedThisMonth = thisMonthRes[0]?.total || 0;
-
-    // 3. All-time total received
+    // 3. All-time total received (grouped by currency)
     const allTimeRes = await db.select({
+      currency: payments.currency,
       total: sql<number>`sum(amount)`
-    }).from(payments);
-
-    const totalReceivedAllTime = allTimeRes[0]?.total || 0;
+    }).from(payments)
+    .groupBy(payments.currency);
 
     return NextResponse.json({
-      totalOutstanding,
-      totalReceivedThisMonth,
-      totalReceivedAllTime
+      outstanding: outstandingRes,
+      receivedMonth: thisMonthRes,
+      receivedAllTime: allTimeRes
     });
 
   } catch (error) {

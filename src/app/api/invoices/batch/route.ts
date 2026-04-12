@@ -22,34 +22,41 @@ export async function POST(req: Request) {
 
     for (const clientId of clientIds) {
       try {
-        // 1. Fetch unbilled completed sessions for this client
+        // 1. Fetch unbilled completed sessions for this client (with fee scheme to get currency)
         const unbilledSessions = await db.query.sessions.findMany({
           where: and(
             eq(sessions.clientId, clientId),
             eq(sessions.status, 'completed'),
             isNull(sessions.invoiceId)
-          )
+          ),
+          with: {
+            feeScheme: true
+          }
         });
 
         if (unbilledSessions.length === 0) continue;
 
-        // 2. Generate invoice number (simple count-based)
+        // 2. Determine currency (default to INR if no scheme found)
+        const currency = (unbilledSessions[0] as any).feeScheme?.currency || 'INR';
+
+        // 3. Generate invoice number (simple count-based)
         const result = await db.select({ count: sql<number>`count(*)` }).from(invoices);
         const invoiceNumber = `INV-${new Date().getFullYear()}-${(result[0].count + 1).toString().padStart(4, '0')}`;
 
-        // 3. Calculate totals
+        // 4. Calculate totals
         let subtotal = 0;
         unbilledSessions.forEach(s => {
           subtotal += parseFloat(s.feeCharged || '0');
         });
 
-        // 4. Create invoice
+        // 5. Create invoice with correct currency
         const [newInvoice] = await db.insert(invoices).values({
           clientId,
           invoiceNumber,
           billingMonth: billingMonth || format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), "yyyy-MM-dd"),
           subtotal: subtotal.toString(),
           total: subtotal.toString(),
+          currency,
           status: 'draft',
         }).returning();
 

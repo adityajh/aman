@@ -29,6 +29,7 @@ export const feeSchemes = pgTable(
     name: text("name").notNull(),
     description: text("description"),
     amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+    currency: text("currency").notNull().default("INR"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .default(sql`now()`),
@@ -88,6 +89,7 @@ export const invoices = pgTable(
     taxAmount: numeric("tax_amount", { precision: 10, scale: 2 }).notNull().default("0"),
     total: numeric("total", { precision: 10, scale: 2 }).notNull().default("0"),
     amountPaid: numeric("amount_paid", { precision: 10, scale: 2 }).notNull().default("0"),
+    currency: text("currency").notNull().default("INR"),
     status: text("status")
       .$type<"draft" | "sent" | "paid" | "partial" | "overdue" | "void">()
       .notNull()
@@ -251,6 +253,7 @@ export const payments = pgTable(
       .references(() => clients.id, { onDelete: "restrict" }),
     amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
     paymentDate: date("payment_date").notNull().default(sql`CURRENT_DATE`),
+    currency: text("currency").notNull().default("INR"),
     method: text("method")
       .$type<"cash" | "upi" | "bank_transfer" | "card" | "online" | "other">()
       .notNull(),

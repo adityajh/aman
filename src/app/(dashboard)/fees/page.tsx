@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, IndianRupee } from "lucide-react";
+import { Plus, Pencil, Trash2, IndianRupee, DollarSign, Globe } from "lucide-react";
 import { format } from "date-fns";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function FeesPage() {
   const [feeSchemes, setFeeSchemes] = useState<any[]>([]);
@@ -108,19 +109,31 @@ export default function FeesPage() {
                   required 
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="amount">Amount (INR)</Label>
-                <div className="relative">
-                  <IndianRupee className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
-                  <Input 
-                    id="amount" 
-                    name="amount" 
-                    type="number" 
-                    className="pl-9" 
-                    placeholder="2500" 
-                    defaultValue={editingScheme?.amount} 
-                    required 
-                  />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="currency">Currency</Label>
+                  <Select name="currency" defaultValue={editingScheme?.currency || "INR"}>
+                    <SelectTrigger className="bg-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-slate-200">
+                      <SelectItem value="INR">INR (₹)</SelectItem>
+                      <SelectItem value="USD">USD ($)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="amount">Amount</Label>
+                  <div className="relative">
+                    <Input 
+                      id="amount" 
+                      name="amount" 
+                      type="number" 
+                      placeholder="0.00" 
+                      defaultValue={editingScheme?.amount} 
+                      required 
+                    />
+                  </div>
                 </div>
               </div>
               <div className="space-y-2">
@@ -166,7 +179,11 @@ export default function FeesPage() {
                   <TableRow key={scheme.id}>
                     <TableCell className="font-medium text-slate-900">{scheme.name}</TableCell>
                     <TableCell className="text-slate-500">{scheme.description || "-"}</TableCell>
-                    <TableCell className="text-lime-700 font-semibold uppercase tracking-tight">₹{scheme.amount}</TableCell>
+                    <TableCell className="font-semibold tracking-tight text-slate-900">
+                      <span className={scheme.currency === 'USD' ? 'text-blue-600' : 'text-lime-700'}>
+                        {scheme.currency === 'USD' ? '$' : '₹'}{scheme.amount}
+                      </span>
+                    </TableCell>
                     <TableCell className="text-slate-400 text-xs">
                       {format(new Date(scheme.updatedAt), "d MMM yyyy")}
                     </TableCell>

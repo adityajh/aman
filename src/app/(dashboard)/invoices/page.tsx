@@ -359,13 +359,21 @@ export default function InvoicesPage() {
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-1 font-medium text-slate-900">
-                                <IndianRupee className="h-3 w-3 text-lime-600" />
+                                {invoice.currency === 'USD' ? (
+                                  <DollarSign className="h-3 w-3 text-blue-600" />
+                                ) : (
+                                  <IndianRupee className="h-3 w-3 text-lime-600" />
+                                )}
                                 {invoice.total}
                               </div>
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-1 font-medium text-slate-500">
-                                <IndianRupee className="h-3 w-3" />
+                                {invoice.currency === 'USD' ? (
+                                  <DollarSign className="h-3 w-3" />
+                                ) : (
+                                  <IndianRupee className="h-3 w-3" />
+                                )}
                                 {invoice.amountPaid || "0.00"}
                               </div>
                             </TableCell>
@@ -453,5 +461,16 @@ export default function InvoicesPage() {
     </div>
   );
 }
-import { Clock } from "lucide-react";
-
+import { 
+  FileText, 
+  Search, 
+  Send, 
+  Trash2, 
+  Download, 
+  Eye, 
+  Plus, 
+  IndianRupee, 
+  DollarSign,
+  AlertCircle,
+  Clock 
+} from "lucide-react";

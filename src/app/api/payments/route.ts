@@ -30,25 +30,26 @@ export async function POST(req: Request) {
   if (!sessionUser) return new NextResponse("Unauthorized", { status: 401 });
 
   try {
-    const { clientId, amount, paymentDate, method, referenceId, notes } = await req.json();
+    const { clientId, amount, paymentDate, currency = "INR", method, referenceId, notes } = await req.json();
     let remainingPayment = parseFloat(amount);
 
     if (isNaN(remainingPayment) || remainingPayment <= 0) {
       return new NextResponse("Invalid amount", { status: 400 });
     }
 
-    // 1. Fetch outstanding invoices (sent, partial, overdue) sorted by date ASC (FIFO)
+    // 1. Fetch outstanding invoices of the SAME CURRENCY (FIFO)
     const outstandingInvoices = await db.query.invoices.findMany({
       where: and(
         eq(invoices.clientId, clientId),
-        inArray(invoices.status, ["sent", "partial", "overdue"])
+        eq(invoices.currency, currency),
+        inArray(invoices.status, ["draft", "sent", "partial", "overdue"])
       ),
       orderBy: [asc(invoices.issuedDate), asc(invoices.createdAt)],
     });
 
     const paymentRecords = [];
 
-    // 2. FIFO Allocation
+    // 2. FIFO Allocation (only within the same currency)
     for (const inv of outstandingInvoices) {
       if (remainingPayment <= 0) break;
 
@@ -63,9 +64,13 @@ export async function POST(req: Request) {
       remainingPayment -= allocation;
 
       // Update invoice
-      let status: "paid" | "partial" | "sent" = "partial";
+      let status: "paid" | "partial" | "sent" | "overdue" | "draft" = "partial";
       if (newPaid >= total) {
         status = "paid";
+      } else {
+        // preserve overdue/sent state if not fully paid
+        status = inv.status as any;
+        if (status === "draft") status = "partial";
       }
 
       await db.update(invoices)
@@ -82,22 +87,24 @@ export async function POST(req: Request) {
         invoiceId: inv.id,
         amount: allocation.toFixed(2),
         paymentDate: paymentDate || new Date().toISOString().split("T")[0],
+        currency,
         method,
         referenceId,
         notes: notes ? `${notes} (Allocated to ${inv.invoiceNumber})` : `Allocated to ${inv.invoiceNumber}`,
       });
     }
 
-    // 3. Handle leftover (Credit / Overpayment)
+    // 3. Handle leftover (Credit / Overpayment in that currency)
     if (remainingPayment > 0) {
       paymentRecords.push({
         clientId,
         invoiceId: null,
         amount: remainingPayment.toFixed(2),
         paymentDate: paymentDate || new Date().toISOString().split("T")[0],
+        currency,
         method,
         referenceId,
-        notes: notes ? `${notes} (Excess / Credit)` : "Excess / Credit",
+        notes: notes ? `${notes} (Excess ${currency} Credit)` : `Excess ${currency} Credit`,
       });
     }
 
@@ -109,7 +116,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ 
       success: true, 
       allocated: paymentRecords.length,
-      excess: remainingPayment > 0 ? remainingPayment.toFixed(2) : "0"
+      excess: remainingPayment > 0 ? remainingPayment.toFixed(2) : "0",
+      currency
     });
 
   } catch (error) {

@@ -79,6 +79,7 @@ export default function PaymentsPage() {
     const data = {
       clientId: selectedClientId,
       amount: formData.get("amount"),
+      currency: formData.get("currency"),
       paymentDate: formData.get("paymentDate"),
       method: paymentMethod,
       referenceId: formData.get("referenceId"),
@@ -146,49 +147,53 @@ export default function PaymentsPage() {
             <DialogHeader>
               <DialogTitle>Record New Payment</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleRecordPayment} className="space-y-6 py-4">
-              <div className="space-y-2">
-                <Label className="text-slate-700 font-medium">Select Client</Label>
-                <Select 
-                  value={selectedClientId} 
-                  onValueChange={(id) => {
-                    const cleanId = id || "";
-                    setSelectedClientId(cleanId);
-                    const client = clients.find(c => c.id === cleanId);
-                    setSelectedClientName(client ? client.name : "");
-                  }}
-                >
-                  <SelectTrigger className="w-full border-slate-200 h-10 text-slate-900 shadow-sm bg-white">
-                    <SelectValue placeholder="Pick a client..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white border-slate-200 max-h-[250px] overflow-y-auto shadow-2xl">
-                    {clients.map(c => (
-                      <SelectItem 
-                        key={c.id} 
-                        value={c.id} 
-                        label={c.name}
-                        className="focus:bg-lime-50 focus:text-slate-950 cursor-pointer py-2 px-4 border-b border-slate-50 last:border-0"
-                      >
-                        {c.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-[10px] text-slate-500 italic">Payments will be automatically allocated to the oldest invoices first (FIFO).</p>
-              </div>
-
+            <form onSubmit={handleRecordPayment} className="space-y-6 pt-4">
               <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2 col-span-2">
+                  <Label>Client Name</Label>
+                  <Select 
+                    value={selectedClientId} 
+                    onValueChange={(id) => {
+                      const cleanId = id || "";
+                      setSelectedClientId(cleanId);
+                      const client = clients.find(c => c.id === cleanId);
+                      setSelectedClientName(client ? client.name : "");
+                    }}
+                  >
+                    <SelectTrigger className="w-full border-slate-200 h-10 text-slate-900 shadow-sm bg-white">
+                      <SelectValue placeholder="Pick a client..." />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-slate-200 max-h-[250px] overflow-y-auto shadow-2xl">
+                      {clients.map(c => (
+                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="amount">Amount (INR)</Label>
+                  <Label htmlFor="currency">Currency</Label>
+                  <Select name="currency" defaultValue="INR">
+                    <SelectTrigger className="bg-white border-slate-200">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-slate-200">
+                      <SelectItem value="INR">INR (₹)</SelectItem>
+                      <SelectItem value="USD">USD ($)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="amount">Amount Received</Label>
                   <div className="relative">
-                    <IndianRupee className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
-                    <Input id="amount" name="amount" type="number" step="0.01" className="pl-9 border-slate-200" placeholder="0.00" required />
+                    <Input id="amount" name="amount" type="number" step="0.01" className="pr-10 border-slate-200" placeholder="0.00" required />
                   </div>
                 </div>
-                <div className="space-y-2">
+              </div>
+              <div className="space-y-2">
                   <Label htmlFor="paymentDate">Payment Date</Label>
                   <Input id="paymentDate" name="paymentDate" type="date" defaultValue={format(new Date(), "yyyy-MM-dd")} className="border-slate-200" required />
-                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -245,7 +250,14 @@ export default function PaymentsPage() {
               <Badge className="bg-lime-100 text-lime-700 hover:bg-lime-100 border-0 font-bold">{format(new Date(), "MMMM")}</Badge>
             </div>
             <p className="text-sm font-medium text-slate-500 mb-1">Received This Month</p>
-            <h3 className="text-3xl font-bold text-slate-900 truncate">₹{summary.totalReceivedThisMonth.toLocaleString()}</h3>
+            <div className="flex flex-col gap-1">
+              {summary.receivedMonth?.length > 0 ? summary.receivedMonth.map((r: any) => (
+                <div key={r.currency} className="flex items-baseline gap-1 text-slate-900">
+                  <span className="text-sm font-semibold opacity-60">{r.currency === 'USD' ? '$' : '₹'}</span>
+                  <span className="text-3xl font-bold">{parseFloat(r.total).toLocaleString()}</span>
+                </div>
+              )) : <h3 className="text-3xl font-bold text-slate-900">₹0</h3>}
+            </div>
           </CardContent>
         </Card>
 
@@ -257,20 +269,33 @@ export default function PaymentsPage() {
               </div>
             </div>
             <p className="text-sm font-medium text-slate-500 mb-1">All-Time Total Received</p>
-            <h3 className="text-3xl font-bold text-slate-900 truncate">₹{summary.totalReceivedAllTime.toLocaleString()}</h3>
+            <div className="flex flex-col gap-1">
+              {summary.receivedAllTime?.length > 0 ? summary.receivedAllTime.map((r: any) => (
+                <div key={r.currency} className="flex items-baseline gap-1 text-slate-900">
+                  <span className="text-sm font-semibold opacity-60">{r.currency === 'USD' ? '$' : '₹'}</span>
+                  <span className="text-3xl font-bold">{parseFloat(r.total).toLocaleString()}</span>
+                </div>
+              )) : <h3 className="text-3xl font-bold text-slate-900">₹0</h3>}
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white border-slate-200 shadow-sm overflow-hidden group hover:border-amber-400 transition-colors">
+        <Card className="bg-white border-slate-200 shadow-sm overflow-hidden group hover:border-red-400 transition-colors">
           <CardContent className="p-6">
             <div className="flex justify-between items-start mb-4">
-              <div className="p-2 bg-amber-50 rounded-lg group-hover:bg-amber-100 transition-colors">
-                <AlertCircle className="h-5 w-5 text-amber-600" />
+              <div className="p-2 bg-red-50 rounded-lg group-hover:bg-red-100 transition-colors">
+                <AlertCircle className="h-5 w-5 text-red-600" />
               </div>
-              <Badge variant="outline" className="text-amber-600 border-amber-200">Pending</Badge>
             </div>
             <p className="text-sm font-medium text-slate-500 mb-1">Current Outstanding</p>
-            <h3 className="text-3xl font-bold text-slate-900 truncate">₹{summary.totalOutstanding.toLocaleString()}</h3>
+            <div className="flex flex-col gap-1">
+              {summary.outstanding?.length > 0 ? summary.outstanding.map((r: any) => (
+                <div key={r.currency} className="flex items-baseline gap-1 text-slate-900">
+                  <span className="text-sm font-semibold opacity-60">{r.currency === 'USD' ? '$' : '₹'}</span>
+                  <span className="text-3xl font-bold">{parseFloat(r.total).toLocaleString()}</span>
+                </div>
+              )) : <h3 className="text-3xl font-bold text-slate-900">₹0</h3>}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -338,8 +363,8 @@ export default function PaymentsPage() {
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1 font-bold text-slate-900">
-                        <IndianRupee className="h-3 w-3 text-lime-600" />
+                      <div className="flex items-center justify-end gap-1 font-semibold text-slate-900">
+                        <span className="text-xs opacity-50">{pay.currency === 'USD' ? '$' : '₹'}</span>
                         {pay.amount}
                       </div>
                     </TableCell>
