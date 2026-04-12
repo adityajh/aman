@@ -2,6 +2,19 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [1.3.0] - 2026-04-12
+### Added
+- **Global Quick-filters**: Implemented comprehensive toggle-based filtering for the Sessions and Invoices pages (Scheduled, Completed, Generated, Paid, etc.).
+- **Redesigned Scheduling Dialog**: Overhauled the "New Session" box with full-width selectors, Title Case capitalization for all options, and a "slicker" improved layout.
+- **Dynamic Fee Selection**: Updated the Fee Scheme selector to display the amount (e.g., ₹2000) directly in the selection field once picked.
+- **Enhanced Invoices Table**: Integrated status-aware filtering that dynamically re-groups clients based on selected invoice states.
+
+### Fixed
+- **Outstanding Revenue Sync**: Resolved a dashboard bug where balances showed as zero by synchronizing the internal `'draft'` status with the financial summary engine.
+- **Selection Interaction Recovery**: Fixed the unresponsive client dropdown in the "Record Payment" dialog by migrating to the standard `SelectValue` architecture.
+- **Import Integrity**: Fixed a Vercel deployment failure caused by a missing `cn` utility import in the Sessions page.
+- **UI Capitalization**: Applied consistent Title Case formatting to all clinical modality and session type labels across the platform.
+
 ## [1.2.0] - 2026-04-12
 ### Added
 - **Payments Receipt Ledger**: Introduced a dedicated dashboard for tracking collections, receipts, and pending dues.
