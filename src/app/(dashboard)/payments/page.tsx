@@ -189,7 +189,7 @@ export default function PaymentsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Method</Label>
-                  <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                  <Select value={paymentMethod} onValueChange={(v) => setPaymentMethod(v || "upi")}>
                     <SelectTrigger className="border-slate-200 h-10">
                       <span className="capitalize">{paymentMethod.replace("_", " ")}</span>
                     </SelectTrigger>
