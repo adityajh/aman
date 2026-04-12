@@ -45,6 +45,7 @@ export default function PaymentsPage() {
   const [selectedClientId, setSelectedClientId] = useState("");
   const [selectedClientName, setSelectedClientName] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("upi");
+  const [paymentCurrency, setPaymentCurrency] = useState("INR");
 
   const fetchData = async () => {
     try {
@@ -79,7 +80,7 @@ export default function PaymentsPage() {
     const data = {
       clientId: selectedClientId,
       amount: formData.get("amount"),
-      currency: formData.get("currency"),
+      currency: paymentCurrency,
       paymentDate: formData.get("paymentDate"),
       method: paymentMethod,
       referenceId: formData.get("referenceId"),
@@ -161,21 +162,23 @@ export default function PaymentsPage() {
                     }}
                   >
                     <SelectTrigger className="w-full border-slate-200 h-10 text-slate-900 shadow-sm bg-white">
-                      <SelectValue placeholder="Pick a client..." />
+                      <span className={selectedClientId ? "text-slate-900" : "text-slate-400"}>
+                        {selectedClientName || "Pick a client..."}
+                      </span>
                     </SelectTrigger>
                     <SelectContent className="bg-white border-slate-200 max-h-[250px] overflow-y-auto shadow-2xl">
                       {clients.map(c => (
-                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                        <SelectItem key={c.id} value={c.id} label={c.name}>{c.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="currency">Currency</Label>
-                  <Select name="currency" defaultValue="INR">
+                  <Label>Currency</Label>
+                  <Select value={paymentCurrency} onValueChange={(v) => setPaymentCurrency(v || "INR")}>
                     <SelectTrigger className="bg-white border-slate-200">
-                      <SelectValue />
+                      <span>{paymentCurrency === 'USD' ? 'USD ($)' : 'INR (₹)'}</span>
                     </SelectTrigger>
                     <SelectContent className="bg-white border-slate-200">
                       <SelectItem value="INR">INR (₹)</SelectItem>
