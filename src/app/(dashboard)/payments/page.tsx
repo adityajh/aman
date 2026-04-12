@@ -152,8 +152,9 @@ export default function PaymentsPage() {
                 <Select 
                   value={selectedClientId} 
                   onValueChange={(id) => {
-                    setSelectedClientId(id);
-                    setSelectedClientName(clients.find(c => c.id === id)?.name || "");
+                    const cleanId = id || "";
+                    setSelectedClientId(cleanId);
+                    setSelectedClientName(clients.find(c => c.id === cleanId)?.name || "");
                   }}
                   required
                 >
