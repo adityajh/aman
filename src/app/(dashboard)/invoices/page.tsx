@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Plus, Mail, FileText, User, IndianRupee, Send, Loader2, CheckCircle2, Eye, ExternalLink, Calendar as CalendarIcon, Check } from "lucide-react";
+import { Plus, Mail, FileText, User, IndianRupee, DollarSign, Send, Loader2, CheckCircle2, Eye, ExternalLink, Calendar as CalendarIcon, Check } from "lucide-react";
 import { format } from "date-fns";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
