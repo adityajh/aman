@@ -27,18 +27,19 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { name, email, phone, defaultFee } = body;
+    const { name, email, phone, defaultFee, defaultFeeSchemeId } = body;
 
     const newClient = await db.insert(clients).values({
       name,
       email,
       phone,
       defaultFee: defaultFee?.toString(),
+      defaultFeeSchemeId: defaultFeeSchemeId || undefined,
     }).returning();
 
     return NextResponse.json(newClient[0]);
   } catch (error) {
     console.error(error);
     return new NextResponse("Internal Server Error", { status: 500 });
-  }
 }
+
