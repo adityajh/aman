@@ -159,9 +159,7 @@ export default function PaymentsPage() {
                   }}
                 >
                   <SelectTrigger className="w-full border-slate-200 h-10 text-slate-900 shadow-sm bg-white">
-                    <span className={selectedClientName ? "text-slate-900" : "text-slate-400"}>
-                      {selectedClientName || "Pick a client..."}
-                    </span>
+                    <SelectValue placeholder="Pick a client..." />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-slate-200 max-h-[250px] overflow-y-auto shadow-2xl">
                     {clients.map(c => (

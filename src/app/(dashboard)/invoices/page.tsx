@@ -134,7 +134,7 @@ export default function InvoicesPage() {
   };
 
   const filteredInvoices = invoices.filter(inv => {
-    if (!filterGenerated && inv.status === 'generated') return false;
+    if (!filterGenerated && inv.status === 'draft') return false;
     if (!filterSent && inv.status === 'sent') return false;
     if (!filterPaid && inv.status === 'paid') return false;
     if (!filterOverdue && (inv.status === 'overdue' || inv.status === 'partial')) return false;

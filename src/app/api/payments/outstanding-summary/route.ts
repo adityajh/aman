@@ -18,7 +18,7 @@ export async function GET() {
     const outstandingRes = await db.select({
       total: sql<number>`sum(total - amount_paid)`
     }).from(invoices)
-    .where(sql`status IN ('generated', 'sent', 'partial', 'overdue')`);
+    .where(sql`status IN ('draft', 'sent', 'partial', 'overdue')`);
     
     const totalOutstanding = outstandingRes[0]?.total || 0;
 
