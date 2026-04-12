@@ -34,33 +34,55 @@ export async function POST(
 
   try {
     const body = await req.json();
-    const { subjective, objective, assessment, plan, riskFlag } = body;
+    const { 
+      subjective, objective, assessment, plan, riskFlag,
+      updates, clientActions, myActions, agenda, feedback,
+      orsIndividual, orsInterpersonal, orsSocial, orsOverall, orsTotal,
+      srsRelationship, srsGoals, srsApproach, srsOverall, srsTotal
+    } = body;
 
     // Check if note exists
     const existingNote = await db.query.sessionNotes.findFirst({
       where: eq(sessionNotes.sessionId, id),
     });
 
+    const payload = {
+      subjective,
+      objective,
+      assessment,
+      plan,
+      riskFlag,
+      updates,
+      clientActions,
+      myActions,
+      agenda,
+      feedback,
+      orsIndividual,
+      orsInterpersonal,
+      orsSocial,
+      orsOverall,
+      orsTotal,
+      srsRelationship,
+      srsGoals,
+      srsApproach,
+      srsOverall,
+      srsTotal,
+      completedAt: new Date(),
+    };
+
     let result;
     if (existingNote) {
-      result = await db.update(sessionNotes).set({
-        subjective,
-        objective,
-        assessment,
-        plan,
-        riskFlag,
-        completedAt: new Date(),
-      }).where(eq(sessionNotes.sessionId, id)).returning();
+      result = await db.update(sessionNotes)
+        .set(payload)
+        .where(eq(sessionNotes.sessionId, id))
+        .returning();
     } else {
-      result = await db.insert(sessionNotes).values({
-        sessionId: id,
-        subjective,
-        objective,
-        assessment,
-        plan,
-        riskFlag,
-        completedAt: new Date(),
-      }).returning();
+      result = await db.insert(sessionNotes)
+        .values({
+          sessionId: id,
+          ...payload
+        })
+        .returning();
     }
 
     // Auto-complete the session

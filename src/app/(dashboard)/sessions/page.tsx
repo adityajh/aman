@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Calendar as CalendarIcon, Clock, User, Video, MapPin, Phone, FileText } from "lucide-react";
 import { format } from "date-fns";
-import { SoapNoteEditor } from "@/components/soap-note-editor";
+import { ClinicalNoteEditor } from "@/components/clinical-note-editor";
 
 export default function SessionsPage() {
   const [sessions, setSessions] = useState<any[]>([]);
@@ -151,10 +151,13 @@ export default function SessionsPage() {
                         <SelectItem 
                           key={c.id} 
                           value={c.id} 
+                          textValue={c.name}
                           className="focus:bg-lime-100 focus:text-slate-950 cursor-pointer py-2 px-4 border-b border-slate-100 last:border-0"
                         >
-                          <span className="font-semibold block text-slate-950">{c.name}</span>
-                          {c.email && <span className="text-[10px] block text-slate-500">{c.email}</span>}
+                          <div className="flex flex-col">
+                            <span className="font-semibold block text-slate-950">{c.name}</span>
+                            {c.email && <span className="text-[10px] block text-slate-500">{c.email}</span>}
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -216,10 +219,13 @@ export default function SessionsPage() {
                           <SelectItem 
                             key={s.id} 
                             value={s.id}
+                            textValue={s.name}
                             className="focus:bg-lime-100 focus:text-slate-950 cursor-pointer py-2 px-4 border-b border-slate-100 last:border-0"
                           >
-                            <span className="font-medium text-slate-900">{s.name}</span>
-                            <span className="ml-2 text-xs text-slate-500 font-normal">₹{s.amount}</span>
+                            <div className="flex items-center justify-between w-full gap-4">
+                              <span className="font-medium text-slate-900">{s.name}</span>
+                              <span className="text-xs text-slate-500 font-normal">₹{s.amount}</span>
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -314,7 +320,7 @@ export default function SessionsPage() {
                             </DialogTitle>
                           </DialogHeader>
                           <div className="py-2">
-                            <SoapNoteEditor 
+                            <ClinicalNoteEditor 
                               sessionId={session.id} 
                               onSave={() => fetchData()} 
                             />

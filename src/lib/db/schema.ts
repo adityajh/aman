@@ -170,6 +170,23 @@ export const sessionNotes = pgTable(
     objective: text("objective"),
     assessment: text("assessment"),
     plan: text("plan"),
+    updates: text("updates"),
+    clientActions: text("client_actions"),
+    myActions: text("my_actions"),
+    agenda: text("agenda"),
+    feedback: text("feedback"),
+    // ORS Scores (1-10)
+    orsIndividual: integer("ors_individual"),
+    orsInterpersonal: integer("ors_interpersonal"),
+    orsSocial: integer("ors_social"),
+    orsOverall: integer("ors_overall"),
+    orsTotal: integer("ors_total"),
+    // SRS Scores (1-10)
+    srsRelationship: integer("srs_relationship"),
+    srsGoals: integer("srs_goals"),
+    srsApproach: integer("srs_approach"),
+    srsOverall: integer("srs_overall"),
+    srsTotal: integer("srs_total"),
     moodScore: integer("mood_score"),
     goalProgress: text("goal_progress"),
     riskFlag: text("risk_flag")
@@ -177,9 +194,9 @@ export const sessionNotes = pgTable(
       .notNull()
       .default("none"),
     noteType: text("note_type")
-      .$type<"SOAP" | "DAP" | "BIRP" | "free">()
+      .$type<"SOAP" | "DAP" | "BIRP" | "free" | "CUSTOM">()
       .notNull()
-      .default("SOAP"),
+      .default("CUSTOM"),
     aiDrafted: boolean("ai_drafted").notNull().default(false),
     completedAt: timestamp("completed_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })

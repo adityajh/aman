@@ -12,8 +12,9 @@ import { Plus, User, Mail, Phone, IndianRupee } from "lucide-react";
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<any>(null);
 
   const fetchClients = async () => {
     try {
@@ -149,7 +150,16 @@ export default function ClientsPage() {
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">View Details</Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => {
+                          setSelectedClient(client);
+                          setDetailsOpen(true);
+                        }}
+                      >
+                        View Details
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))
@@ -158,6 +168,72 @@ export default function ClientsPage() {
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+        <DialogContent className="max-w-2xl bg-white border-slate-200">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-slate-950">
+              <User className="h-5 w-5 text-primary" />
+              Client Details: {selectedClient?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedClient && (
+            <div className="space-y-6 py-4">
+              <div className="grid grid-cols-2 gap-8 border-b border-slate-100 pb-6">
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Full Name</Label>
+                    <p className="text-sm font-semibold text-slate-900">{selectedClient.name}</p>
+                  </div>
+                  <div>
+                    <Label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Email Address</Label>
+                    <p className="text-sm text-slate-600">{selectedClient.email || "No email provided"}</p>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Phone Number</Label>
+                    <p className="text-sm text-slate-600">{selectedClient.phone || "No phone provided"}</p>
+                  </div>
+                  <div>
+                    <Label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Default Fee (INR)</Label>
+                    <p className="text-sm font-semibold text-slate-900">₹{selectedClient.defaultFee || "0"}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 pt-2">
+                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Practice Summary</h4>
+                <div className="grid grid-cols-3 gap-4">
+                  <Card className="bg-slate-50 border-slate-100 shadow-none">
+                    <CardContent className="p-4">
+                      <p className="text-[10px] text-slate-500 font-bold uppercase">Total sessions</p>
+                      <p className="text-xl font-bold text-slate-900">-</p>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-slate-50 border-slate-100 shadow-none">
+                    <CardContent className="p-4">
+                      <p className="text-[10px] text-slate-500 font-bold uppercase">Last Session</p>
+                      <p className="text-xl font-bold text-slate-900">-</p>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-slate-50 border-slate-100 shadow-none">
+                    <CardContent className="p-4">
+                      <p className="text-[10px] text-slate-500 font-bold uppercase">Total Billed</p>
+                      <p className="text-xl font-bold text-slate-900">₹0</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+              
+              <div className="pt-4 flex justify-end gap-3">
+                <Button variant="outline" className="text-slate-600 border-slate-200">Edit Profile</Button>
+                <Button className="bg-primary text-primary-foreground">Schedule Session</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
