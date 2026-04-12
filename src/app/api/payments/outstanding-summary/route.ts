@@ -14,28 +14,28 @@ export async function GET() {
     const now = new Date();
     const firstOfOfMonth = format(startOfMonth(now), "yyyy-MM-dd");
 
-    // 1. Total outstanding (grouped by currency)
+    // 1. Total outstanding (grouped by currency with explicit casting)
     const outstandingRes = await db.select({
-      currency: invoices.currency,
-      total: sql<number>`sum(total - amount_paid)`
+      currency: sql<string>`COALESCE(${invoices.currency}, 'INR')`,
+      total: sql<number>`SUM(CAST(${invoices.total} AS NUMERIC) - CAST(${invoices.amountPaid} AS NUMERIC))`
     }).from(invoices)
     .where(sql`status IN ('draft', 'sent', 'partial', 'overdue')`)
-    .groupBy(invoices.currency);
+    .groupBy(sql`COALESCE(${invoices.currency}, 'INR')`);
     
     // 2. Total received this month (grouped by currency)
     const thisMonthRes = await db.select({
-      currency: payments.currency,
-      total: sql<number>`sum(amount)`
+      currency: sql<string>`COALESCE(${payments.currency}, 'INR')`,
+      total: sql<number>`SUM(CAST(${payments.amount} AS NUMERIC))`
     }).from(payments)
     .where(gte(payments.paymentDate, firstOfOfMonth))
-    .groupBy(payments.currency);
+    .groupBy(sql`COALESCE(${payments.currency}, 'INR')`);
 
     // 3. All-time total received (grouped by currency)
     const allTimeRes = await db.select({
-      currency: payments.currency,
-      total: sql<number>`sum(amount)`
+      currency: sql<string>`COALESCE(${payments.currency}, 'INR')`,
+      total: sql<number>`SUM(CAST(${payments.amount} AS NUMERIC))`
     }).from(payments)
-    .groupBy(payments.currency);
+    .groupBy(sql`COALESCE(${payments.currency}, 'INR')`);
 
     return NextResponse.json({
       outstanding: outstandingRes,

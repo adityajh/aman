@@ -10,7 +10,26 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Calendar as CalendarIcon, Clock, User, Video, MapPin, Phone, FileText } from "lucide-react";
+import { 
+  Plus, 
+  Mail, 
+  FileText, 
+  User, 
+  IndianRupee, 
+  DollarSign, 
+  Send, 
+  Trash2, 
+  Download, 
+  Eye, 
+  Search, 
+  ExternalLink, 
+  Calendar as CalendarIcon, 
+  Check, 
+  Clock, 
+  AlertCircle,
+  Loader2, 
+  CheckCircle2 
+} from "lucide-react";
 import { format } from "date-fns";
 import { ClinicalNoteEditor } from "@/components/clinical-note-editor";
 import { cn } from "@/lib/utils";
@@ -24,7 +43,8 @@ export default function SessionsPage() {
   const [selectedClientId, setSelectedClientId] = useState<string>("");
   const [selectedClientName, setSelectedClientName] = useState<string>("");
   const [selectedFeeSchemeId, setSelectedFeeSchemeId] = useState<string>("");
-  const [selectedFeeSchemeName, setSelectedFeeSchemeName] = useState<string>("");
+  const [selectedFeeSchemeLabel, setSelectedFeeSchemeLabel] = useState<string>("Pick a scheme...");
+  const [feeCharged, setFeeCharged] = useState<string>("");
   const [clientFilter, setClientFilter] = useState<string>("all");
   const [clientFilterName, setClientFilterName] = useState<string>("All Clients");
   const [filterCompleted, setFilterCompleted] = useState(true);
@@ -179,15 +199,6 @@ export default function SessionsPage() {
     return true;
   });
 
-  const getModalityIcon = (modality: string) => {
-    switch (modality) {
-      case "video": return <Video className="h-3 w-3" />;
-      case "in_person": return <MapPin className="h-3 w-3" />;
-      case "phone": return <Phone className="h-3 w-3" />;
-      default: return null;
-    }
-  };
-
   return (
     <div className="p-8 space-y-6">
       <div className="flex justify-between items-center">
@@ -264,44 +275,39 @@ export default function SessionsPage() {
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger
               render={
-                <Button className="gap-2 bg-lime-500 text-slate-950 hover:bg-lime-600 font-bold px-6 h-10 shadow-sm">
+                <Button className="gap-2 bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-md">
                   <Plus className="h-4 w-4" /> New Session
                 </Button>
               }
             />
-            <DialogContent className="max-w-xl">
+            <DialogContent className="sm:max-w-xl">
               <DialogHeader>
-                <DialogTitle>New Session</DialogTitle>
+                <DialogTitle>Schedule New Session</DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-6 py-4">
+              <form onSubmit={handleSubmit} className="space-y-6 pt-4">
                 <div className="space-y-2">
-                  <Label className="text-slate-700 font-medium">Client</Label>
+                  <Label htmlFor="clientId">Client</Label>
                   <Select 
-                    name="clientId" 
-                    required 
                     value={selectedClientId} 
-                    onValueChange={(v) => {
-                      const id = v || "";
-                      setSelectedClientId(id);
-                      setSelectedClientName(clients.find(c => c.id === id)?.name || "");
+                    onValueChange={(id) => {
+                      const val = id || "";
+                      setSelectedClientId(val);
+                      setSelectedClientName(clients.find(c => c.id === val)?.name || "");
                     }}
                   >
-                    <SelectTrigger className="w-full border-slate-200 h-10 text-slate-900 hover:border-lime-500/50 transition-colors shadow-sm bg-white">
-                      <span className={selectedClientName ? "text-slate-900" : "text-slate-400"}>
-                        {selectedClientName || "Select a client..."}
-                      </span>
+                    <SelectTrigger className="w-full bg-slate-50 border-slate-200">
+                      <SelectValue placeholder="Pick a client..." />
                     </SelectTrigger>
-                    <SelectContent className="bg-white border-slate-200 shadow-2xl">
-                      {clients.map((c) => (
-                        <SelectItem 
-                          key={c.id} 
-                          value={c.id} 
-                          label={c.name}
-                          className="focus:bg-lime-50 focus:text-slate-950 cursor-pointer py-2 px-4 border-b border-slate-50 last:border-0"
-                        >
-                          <div className="flex flex-col">
-                            <span className="font-semibold block text-slate-950 text-sm">{c.name}</span>
-                            {c.email && <span className="text-[10px] block text-slate-400">{c.email}</span>}
+                    <SelectContent className="bg-white border-slate-200 max-h-[300px] overflow-y-auto shadow-2xl">
+                      {clients.map(c => (
+                        <SelectItem key={c.id} value={c.id}>
+                          <div className="flex flex-col items-start gap-1 py-1">
+                            <span className="font-bold text-slate-900">{c.name}</span>
+                            {c.email && (
+                              <span className="text-[10px] text-slate-400 font-medium tracking-tight bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
+                                {c.email.toLowerCase()}
+                              </span>
+                            )}
                           </div>
                         </SelectItem>
                       ))}
@@ -311,84 +317,97 @@ export default function SessionsPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="scheduledAt" className="text-slate-700">Date & Time</Label>
-                    <Input id="scheduledAt" name="scheduledAt" type="datetime-local" className="border-slate-200" required />
+                    <Label htmlFor="date">Date & Time</Label>
+                    <Input id="date" name="date" type="datetime-local" defaultValue={format(new Date(), "yyyy-MM-dd'T'HH:mm")} className="bg-slate-50 border-slate-200" required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="durationMin" className="text-slate-700">Duration (min)</Label>
-                    <Input id="durationMin" name="durationMin" type="number" defaultValue="60" className="border-slate-200" required />
+                    <Label htmlFor="duration">Duration (min)</Label>
+                    <Input id="duration" name="duration" type="number" defaultValue="60" className="bg-slate-50 border-slate-200" required />
                   </div>
                 </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-slate-700 font-medium">Modality</Label>
+                    <Label htmlFor="modality">Modality</Label>
                     <Select name="modality" defaultValue="video">
-                      <SelectTrigger className="border-slate-200 bg-white">
+                      <SelectTrigger className="bg-slate-50 border-slate-200">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="bg-white border-slate-200">
-                        <SelectItem value="video">Video</SelectItem>
                         <SelectItem value="in_person">In Person</SelectItem>
+                        <SelectItem value="video">Video</SelectItem>
                         <SelectItem value="phone">Phone</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-slate-700 font-medium">Session Type</Label>
+                    <Label htmlFor="sessionType">Session Type</Label>
                     <Select name="sessionType" defaultValue="individual">
-                      <SelectTrigger className="border-slate-200 bg-white">
+                      <SelectTrigger className="bg-slate-50 border-slate-200">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="bg-white border-slate-200">
                         <SelectItem value="individual">Individual</SelectItem>
                         <SelectItem value="couples">Couples</SelectItem>
-                        <SelectItem value="group">Group</SelectItem>
+                        <SelectItem value="group">Group / Family</SelectItem>
                         <SelectItem value="intake">Intake</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label className="text-slate-700 font-medium">Fee Scheme</Label>
-                    <Select 
-                      name="feeSchemeId"
-                      value={selectedFeeSchemeId}
-                      onValueChange={(v) => {
-                        const id = v || "";
-                        setSelectedFeeSchemeId(id);
-                        const scheme = feeSchemes.find(f => f.id === id);
-                        setSelectedFeeSchemeName(scheme ? `${scheme.name} (₹${scheme.amount})` : "");
-                      }}
-                    >
-                      <SelectTrigger className="border-slate-200 text-slate-900 hover:border-lime-500/50 transition-colors bg-white">
-                        <span className={selectedFeeSchemeName ? "text-slate-900" : "text-slate-400"}>
-                          {selectedFeeSchemeName || "Client Default"}
-                        </span>
-                      </SelectTrigger>
-                      <SelectContent className="bg-white border-slate-200 shadow-2xl">
-                        {feeSchemes.map((s) => (
-                          <SelectItem 
-                            key={s.id} 
-                            value={s.id}
-                            label={s.name}
-                            className="focus:bg-lime-100 focus:text-slate-950 cursor-pointer py-2 px-4 border-b border-slate-100 last:border-0"
-                          >
-                            <div className="flex items-center justify-between w-full gap-4">
-                              <span className="font-medium text-slate-900">{s.name}</span>
-                              <span className="text-xs text-slate-500 font-normal">₹{s.amount}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="feeCharged" className="text-slate-700 font-medium">Override Fee (INR)</Label>
-                    <Input id="feeCharged" name="feeCharged" type="number" className="border-slate-200" placeholder="Optional" />
-                  </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="feeSchemeId">Fee Scheme</Label>
+                  <Select 
+                    value={selectedFeeSchemeId} 
+                    onValueChange={(id) => {
+                      const sid = id || "custom";
+                      setSelectedFeeSchemeId(sid);
+                      const scheme = feeSchemes.find(f => f.id === sid);
+                      if (scheme) {
+                        setFeeCharged(scheme.amount);
+                        setSelectedFeeSchemeLabel(`${scheme.name} (${scheme.currency === 'USD' ? '$' : '₹'}${scheme.amount})`);
+                      } else {
+                        setSelectedFeeSchemeLabel("Custom / No Scheme");
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="w-full bg-slate-50 border-slate-200 h-10 shadow-sm">
+                      <span className={selectedFeeSchemeLabel === "Pick a scheme..." ? "text-slate-400" : "text-slate-900"}>
+                        {selectedFeeSchemeLabel}
+                      </span>
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-slate-200 shadow-2xl">
+                      <SelectItem value="custom">Custom / No Scheme</SelectItem>
+                      {feeSchemes.map(f => (
+                        <SelectItem key={f.id} value={f.id}>
+                          {f.name} ({f.currency === 'USD' ? '$' : '₹'}{f.amount})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-                <Button type="submit" className="w-full bg-lime-400 text-slate-950 hover:bg-lime-500 font-semibold h-12">Schedule</Button>
+
+                <div className="space-y-2">
+                  <Label htmlFor="feeCharged">Override Fee (Amount)</Label>
+                  <Input 
+                    id="feeCharged" 
+                    name="feeCharged" 
+                    type="number" 
+                    placeholder="Optional"
+                    value={feeCharged}
+                    onChange={(e) => {
+                      setFeeCharged(e.target.value);
+                      setSelectedFeeSchemeId("custom");
+                      setSelectedFeeSchemeLabel("Custom / No Scheme");
+                    }}
+                    className="bg-slate-50 border-slate-200 h-10"
+                  />
+                </div>
+
+                <Button type="submit" className="w-full bg-lime-400 text-slate-950 hover:bg-lime-500 font-bold h-12 shadow-sm transition-all active:scale-[0.98]">
+                  Schedule Session
+                </Button>
               </form>
             </DialogContent>
           </Dialog>

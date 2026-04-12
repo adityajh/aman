@@ -461,16 +461,3 @@ export default function InvoicesPage() {
     </div>
   );
 }
-import { 
-  FileText, 
-  Search, 
-  Send, 
-  Trash2, 
-  Download, 
-  Eye, 
-  Plus, 
-  IndianRupee, 
-  DollarSign,
-  AlertCircle,
-  Clock 
-} from "lucide-react";
