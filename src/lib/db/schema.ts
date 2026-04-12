@@ -382,6 +382,17 @@ export const invoiceLineItemsRelations = relations(invoiceLineItems, ({ one }) =
   }),
 }));
 
+export const paymentsRelations = relations(payments, ({ one }) => ({
+  client: one(clients, {
+    fields: [payments.clientId],
+    references: [clients.id],
+  }),
+  invoice: one(invoices, {
+    fields: [payments.invoiceId],
+    references: [invoices.id],
+  }),
+}));
+
 // ─────────────────────────────────────────────
 // TYPE EXPORTS
 // ─────────────────────────────────────────────
