@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Plus, User, Mail, Phone, IndianRupee, Pencil, X, Check, Loader2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<any[]>([]);
@@ -18,6 +19,9 @@ export default function ClientsPage() {
   const [selectedClient, setSelectedClient] = useState<any>(null);
   const [editMode, setEditMode] = useState(false);
   const [editSaving, setEditSaving] = useState(false);
+  const [feeSchemes, setFeeSchemes] = useState<any[]>([]);
+  const [selectedFeeSchemeId, setSelectedFeeSchemeId] = useState("");
+  const [selectedFeeSchemeLabel, setSelectedFeeSchemeLabel] = useState("");
 
   const fetchClients = async () => {
     try {
@@ -33,6 +37,7 @@ export default function ClientsPage() {
 
   useEffect(() => {
     fetchClients();
+    fetch("/api/fee-schemes").then(r => r.json()).then(setFeeSchemes).catch(() => {});
   }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -122,8 +127,39 @@ export default function ClientsPage() {
                 <Input id="phone" name="phone" placeholder="+91 9876543210" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="defaultFee">Default Session Fee (INR)</Label>
-                <Input id="defaultFee" name="defaultFee" type="number" placeholder="2000" />
+                <Label>Default Fee Scheme</Label>
+                <Select
+                  value={selectedFeeSchemeId}
+                  onValueChange={(id) => {
+                    const val = id || "";
+                    setSelectedFeeSchemeId(val);
+                    const scheme = feeSchemes.find(f => f.id === val);
+                    if (scheme) {
+                      setSelectedFeeSchemeLabel(`${scheme.name} (${scheme.currency === 'USD' ? '$' : '₹'}${scheme.amount})`);
+                    } else {
+                      setSelectedFeeSchemeLabel("");
+                    }
+                  }}
+                >
+                  <SelectTrigger className="border-slate-200 bg-white h-10">
+                    <span className={selectedFeeSchemeLabel ? "text-slate-900" : "text-slate-400"}>
+                      {selectedFeeSchemeLabel || "Pick a fee scheme..."}
+                    </span>
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-slate-200 shadow-2xl">
+                    {feeSchemes.length === 0 && (
+                      <SelectItem value="none" label="No schemes yet">No fee schemes yet — add one in Fees</SelectItem>
+                    )}
+                    {feeSchemes.map(f => (
+                      <SelectItem key={f.id} value={f.id} label={f.name}>
+                        {f.name} ({f.currency === 'USD' ? '$' : '₹'}{f.amount})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {/* Hidden fields for form submission */}
+                <input type="hidden" name="defaultFeeSchemeId" value={selectedFeeSchemeId} />
+                <input type="hidden" name="defaultFee" value={feeSchemes.find(f => f.id === selectedFeeSchemeId)?.amount || ""} />
               </div>
               <Button type="submit" className="w-full">Save Client</Button>
             </form>
