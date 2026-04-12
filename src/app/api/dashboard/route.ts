@@ -24,16 +24,22 @@ export async function GET() {
       .from(sessions)
       .where(and(eq(sessions.status, 'scheduled'), gte(sessions.scheduledAt, now), lt(sessions.scheduledAt, sevenDaysFromNow)));
 
-    const [outstandingRevenue] = await db
-      .select({ total: sql<string>`sum(${invoices.total})` })
+    // 3. Outstanding Revenue (Split by currency)
+    const outstandingRevenue = await db
+      .select({ 
+        currency: sql<string>`COALESCE(${invoices.currency}, 'INR')`,
+        total: sql<number>`SUM(CAST(${invoices.total} AS NUMERIC) - CAST(${invoices.amountPaid} AS NUMERIC))` 
+      })
       .from(invoices)
       .where(or(
         eq(invoices.status, 'draft'), 
         eq(invoices.status, 'sent'), 
         eq(invoices.status, 'partial'), 
         eq(invoices.status, 'overdue')
-      ));
+      ))
+      .groupBy(sql`COALESCE(${invoices.currency}, 'INR')`);
 
+    // 4. Risk Flags
     const [riskFlags] = await db
         .select({ count: sql<number>`count(*)` })
         .from(sessionNotes)
@@ -42,7 +48,7 @@ export async function GET() {
     return NextResponse.json({
       unbilledSessions: unbilledCount.count || 0,
       upcomingSessions: upcomingCount.count || 0,
-      outstandingAmount: outstandingRevenue.total || "0",
+      outstanding: outstandingRevenue,
       activeRiskFlags: riskFlags.count || 0,
     });
   } catch (error) {

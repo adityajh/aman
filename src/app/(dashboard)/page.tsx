@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { IndianRupee, Calendar, ClipboardCheck, AlertTriangle, ArrowRight } from "lucide-react";
+import { IndianRupee, DollarSign, Wallet, Calendar, ClipboardCheck, AlertTriangle, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -33,9 +33,9 @@ export default function DashboardPage() {
     },
     {
       title: "Outstanding Revenue",
-      value: `₹${stats.outstandingAmount}`,
-      description: "From sent and partial invoices",
-      icon: IndianRupee,
+      value: "split-view", // marker for custom rendering
+      description: "From sent and draft invoices",
+      icon: Wallet,
       color: "text-green-600",
       href: "/invoices",
     },
@@ -74,7 +74,22 @@ export default function DashboardPage() {
               <card.icon className={`h-4 w-4 ${card.color}`} />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{card.value}</div>
+              {card.title === "Outstanding Revenue" ? (
+                <div className="flex flex-col gap-1 min-h-[40px] justify-center">
+                  {stats.outstanding?.length > 0 ? stats.outstanding.map((r: any) => (
+                    <div key={r.currency} className="flex items-baseline gap-1">
+                      <span className="text-xs font-semibold opacity-60">
+                        {r.currency === 'USD' ? '$' : '₹'}
+                      </span>
+                      <span className="text-2xl font-bold">{parseFloat(r.total).toLocaleString()}</span>
+                    </div>
+                  )) : (
+                    <div className="text-2xl font-bold">₹0</div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-2xl font-bold">{card.value}</div>
+              )}
               <p className="text-xs text-muted-foreground mt-1">
                 {card.description}
               </p>

@@ -365,6 +365,10 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
     fields: [sessions.id],
     references: [sessionNotes.sessionId],
   }),
+  feeScheme: one(feeSchemes, {
+    fields: [sessions.feeSchemeId],
+    references: [feeSchemes.id],
+  }),
 }));
 
 export const invoiceLineItemsRelations = relations(invoiceLineItems, ({ one }) => ({
