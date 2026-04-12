@@ -6,9 +6,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Plus, Mail, FileText, User, IndianRupee, Send, Loader2, CheckCircle2, Eye, ExternalLink } from "lucide-react";
+import { Plus, Mail, FileText, User, IndianRupee, Send, Loader2, CheckCircle2, Eye, ExternalLink, Calendar as CalendarIcon, Check } from "lucide-react";
 import { format } from "date-fns";
+import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<any[]>([]);
@@ -18,6 +21,10 @@ export default function InvoicesPage() {
   const [isSending, setIsSending] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [previewId, setPreviewId] = useState<string | null>(null);
+
+  // Batch Selection State
+  const [selectedClients, setSelectedClients] = useState<Set<string>>(new Set());
+  const [billingMonth, setBillingMonth] = useState(format(new Date(), "yyyy-MM-01"));
 
   const fetchData = async () => {
     try {
@@ -42,21 +49,46 @@ export default function InvoicesPage() {
     fetchData();
   }, []);
 
-  const handleCreateBatch = async (clientId: string) => {
+  const toggleClient = (clientId: string) => {
+    const next = new Set(selectedClients);
+    if (next.has(clientId)) {
+      next.delete(clientId);
+    } else {
+      next.add(clientId);
+    }
+    setSelectedClients(next);
+  };
+
+  const toggleAll = () => {
+    if (selectedClients.size === unbilled.length && unbilled.length > 0) {
+      setSelectedClients(new Set());
+    } else {
+      setSelectedClients(new Set(unbilled.map(c => c.id)));
+    }
+  };
+
+  const handleCreateBatch = async () => {
+    if (selectedClients.size === 0) return;
+
     setIsCreating(true);
     try {
       const res = await fetch("/api/invoices/batch", {
         method: "POST",
-        body: JSON.stringify({ clientId }),
+        body: JSON.stringify({ 
+          clientIds: Array.from(selectedClients),
+          billingMonth 
+        }),
         headers: { "Content-Type": "application/json" },
       });
 
       if (res.ok) {
-        toast.success("Invoice generated");
+        const data = await res.json();
+        toast.success(`Generated ${data.count} invoices`);
         fetchData();
         setOpen(false);
+        setSelectedClients(new Set());
       } else {
-        toast.error("Failed to generate invoice");
+        toast.error("Failed to generate invoices");
       }
     } catch (err) {
       toast.error("An error occurred");
@@ -111,36 +143,82 @@ export default function InvoicesPage() {
               </Button>
             }
           />
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Generate Batch Invoices</DialogTitle>
             </DialogHeader>
-            <div className="py-4 space-y-4">
-              <p className="text-sm text-slate-500">The clients below have unbilled completed sessions from previous months.</p>
-              
-              {unbilled.length === 0 ? (
-                <div className="p-8 text-center text-sm text-slate-500 border border-slate-800 rounded-lg bg-slate-950">
-                  No unbilled sessions found.
+            <div className="py-4 space-y-6">
+              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200">
+                <div className="space-y-1">
+                  <Label className="text-xs font-bold text-slate-500 uppercase">Billing Month</Label>
+                  <p className="text-sm font-medium text-slate-900">{format(new Date(billingMonth), "MMMM yyyy")}</p>
                 </div>
-              ) : (
-                unbilled.map((client) => (
-                  <div key={client.id} className="flex justify-between items-center p-4 border border-slate-200 rounded-lg bg-slate-50/50 hover:border-lime-500/30 transition-all group">
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-sm text-slate-900 group-hover:text-blue-700 transition-colors">{client.name}</span>
-                      <span className="text-[10px] text-slate-500 uppercase tracking-wider">{client.sessionCount} sessions • ₹{client.totalAmount}</span>
-                    </div>
-                    <Button 
-                      size="sm" 
-                      onClick={() => handleCreateBatch(client.id)}
-                      disabled={isCreating}
-                      className="bg-lime-400 text-slate-950 hover:bg-lime-500 font-bold border-none"
-                    >
-                      {isCreating ? <Loader2 className="h-3 w-3 animate-spin mr-2" /> : <Send className="h-3 w-3 mr-2" />}
-                      Generate
-                    </Button>
+                <div className="text-right">
+                  <p className="text-xs text-slate-500 mb-1">Total Selected Amount</p>
+                  <p className="text-lg font-bold text-lime-600 flex items-center justify-end">
+                    <IndianRupee className="h-4 w-4" /> 
+                    {unbilled.filter(c => selectedClients.has(c.id)).reduce((acc, c) => acc + parseFloat(c.totalAmount), 0).toFixed(2)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between px-2">
+                  <div className="flex items-center gap-2">
+                    <Checkbox id="selectAll" checked={selectedClients.size === unbilled.length && unbilled.length > 0} onChange={toggleAll} />
+                    <Label htmlFor="selectAll" className="text-xs font-bold text-slate-700 uppercase cursor-pointer">Select All Clients</Label>
                   </div>
-                ))
-              )}
+                  <span className="text-xs text-slate-500 font-medium">{selectedClients.size} of {unbilled.length} selected</span>
+                </div>
+
+                <div className="max-h-[300px] overflow-y-auto border border-slate-200 rounded-lg divide-y divide-slate-100">
+                  {unbilled.length === 0 ? (
+                    <div className="p-8 text-center text-sm text-slate-500 bg-white">
+                      No unbilled sessions found.
+                    </div>
+                  ) : (
+                    unbilled.map((client) => (
+                      <div 
+                        key={client.id} 
+                        className={cn(
+                          "flex items-center gap-4 p-4 transition-colors cursor-pointer hover:bg-slate-50",
+                          selectedClients.has(client.id) ? "bg-lime-50/20" : "bg-white"
+                        )}
+                        onClick={() => toggleClient(client.id)}
+                      >
+                        <Checkbox 
+                          checked={selectedClients.has(client.id)} 
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            toggleClient(client.id);
+                          }} 
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold text-slate-900 truncate">{client.name}</p>
+                          <p className="text-[10px] text-slate-500 uppercase tracking-wider">{client.sessionCount} sessions pending</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-bold text-slate-900 flex items-center justify-end">
+                            <IndianRupee className="h-3 w-3" /> {client.totalAmount}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setOpen(false)} className="text-slate-600">Cancel</Button>
+                <Button 
+                  onClick={handleCreateBatch}
+                  disabled={isCreating || selectedClients.size === 0}
+                  className="bg-lime-400 text-slate-950 hover:bg-lime-500 font-bold px-8"
+                >
+                  {isCreating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
+                  Generate {selectedClients.size} Invoices
+                </Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>

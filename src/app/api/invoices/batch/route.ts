@@ -11,59 +11,78 @@ export async function POST(req: Request) {
   if (!sessionUser) return new NextResponse("Unauthorized", { status: 401 });
 
   try {
-    const { clientId } = await req.json();
+    const { clientIds, billingMonth } = await req.json();
 
-    // 1. Fetch unbilled completed sessions for this client
-    const unbilledSessions = await db.query.sessions.findMany({
-      where: and(
-        eq(sessions.clientId, clientId),
-        eq(sessions.status, 'completed'),
-        isNull(sessions.invoiceId)
-      )
-    });
-
-    if (unbilledSessions.length === 0) {
-      return new NextResponse("No unbilled sessions found", { status: 400 });
+    if (!clientIds || !Array.isArray(clientIds) || clientIds.length === 0) {
+      return new NextResponse("Invalid client IDs provided", { status: 400 });
     }
 
-    // 2. Generate invoice number (simple count-based)
-    const result = await db.select({ count: sql<number>`count(*)` }).from(invoices);
-    const invoiceNumber = `INV-${new Date().getFullYear()}-${(result[0].count + 1).toString().padStart(4, '0')}`;
+    const results = [];
+    const errors = [];
 
-    // 3. Calculate totals
-    let subtotal = 0;
-    unbilledSessions.forEach(s => {
-      subtotal += parseFloat(s.feeCharged || '0');
-    });
+    for (const clientId of clientIds) {
+      try {
+        // 1. Fetch unbilled completed sessions for this client
+        const unbilledSessions = await db.query.sessions.findMany({
+          where: and(
+            eq(sessions.clientId, clientId),
+            eq(sessions.status, 'completed'),
+            isNull(sessions.invoiceId)
+          )
+        });
 
-    // 4. Create invoice
-    const [newInvoice] = await db.insert(invoices).values({
-      clientId,
-      invoiceNumber,
-      billingMonth: format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), "yyyy-MM-dd"),
-      subtotal: subtotal.toString(),
-      total: subtotal.toString(),
-      status: 'draft',
-    }).returning();
+        if (unbilledSessions.length === 0) continue;
 
-    // 5. Create line items and update sessions
-    for (const session of unbilledSessions) {
-      const description = `Session - ${format(new Date(session.scheduledAt), "d MMM yyyy")} (${session.durationMin} min)`;
-      
-      await db.insert(invoiceLineItems).values({
-        invoiceId: newInvoice.id,
-        sessionId: session.id,
-        description,
-        unitPrice: session.feeCharged || '0',
-        amount: session.feeCharged || '0',
-      });
+        // 2. Generate invoice number (simple count-based)
+        const result = await db.select({ count: sql<number>`count(*)` }).from(invoices);
+        const invoiceNumber = `INV-${new Date().getFullYear()}-${(result[0].count + 1).toString().padStart(4, '0')}`;
 
-      await db.update(sessions).set({
-        invoiceId: newInvoice.id,
-      }).where(eq(sessions.id, session.id));
+        // 3. Calculate totals
+        let subtotal = 0;
+        unbilledSessions.forEach(s => {
+          subtotal += parseFloat(s.feeCharged || '0');
+        });
+
+        // 4. Create invoice
+        const [newInvoice] = await db.insert(invoices).values({
+          clientId,
+          invoiceNumber,
+          billingMonth: billingMonth || format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), "yyyy-MM-dd"),
+          subtotal: subtotal.toString(),
+          total: subtotal.toString(),
+          status: 'draft',
+        }).returning();
+
+        // 5. Create line items and update sessions
+        for (const session of unbilledSessions) {
+          const description = `Session - ${format(new Date(session.scheduledAt), "d MMM yyyy")} (${session.durationMin} min)`;
+          
+          await db.insert(invoiceLineItems).values({
+            invoiceId: newInvoice.id,
+            sessionId: session.id,
+            description,
+            unitPrice: session.feeCharged || '0',
+            amount: session.feeCharged || '0',
+          });
+
+          await db.update(sessions).set({
+            invoiceId: newInvoice.id,
+          }).where(eq(sessions.id, session.id));
+        }
+
+        results.push(newInvoice);
+      } catch (err: any) {
+        console.error(`Failed to process client ${clientId}:`, err);
+        errors.push({ clientId, error: err.message });
+      }
     }
 
-    return NextResponse.json(newInvoice);
+    return NextResponse.json({ 
+      success: true, 
+      count: results.length, 
+      invoices: results,
+      errors: errors.length > 0 ? errors : null
+    });
   } catch (error) {
     console.error(error);
     return new NextResponse("Internal Server Error", { status: 500 });
