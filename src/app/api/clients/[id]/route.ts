@@ -12,7 +12,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   try {
     const body = await req.json();
-    const { name, email, phone, defaultFee, notes, defaultFeeSchemeId } = body;
+    const { name, email, phone, defaultFee, intakeNotes, defaultFeeSchemeId } = body;
 
     const [updated] = await db
       .update(clients)
@@ -21,7 +21,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         email: email || undefined,
         phone: phone || undefined,
         defaultFee: defaultFee ? defaultFee.toString() : undefined,
-        notes: notes || undefined,
+        intakeNotes: intakeNotes || undefined,
         defaultFeeSchemeId: defaultFeeSchemeId || undefined,
         updatedAt: new Date(),
       })

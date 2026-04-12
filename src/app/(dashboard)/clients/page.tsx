@@ -270,7 +270,7 @@ export default function ClientsPage() {
                   </div>
                   <div className="space-y-2 col-span-2">
                     <Label htmlFor="edit-notes">Notes / Background</Label>
-                    <Input id="edit-notes" name="notes" defaultValue={selectedClient.notes || ""} placeholder="Any relevant background..." />
+                    <Input id="edit-notes" name="intakeNotes" defaultValue={selectedClient.intakeNotes || ""} placeholder="Any relevant background..." />
                   </div>
                 </div>
                 <div className="flex justify-end gap-3 pt-2">
