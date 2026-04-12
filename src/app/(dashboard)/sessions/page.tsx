@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { Plus, Calendar as CalendarIcon, Clock, User, Video, MapPin, Phone, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { ClinicalNoteEditor } from "@/components/clinical-note-editor";
+import { cn } from "@/lib/utils";
 
 export default function SessionsPage() {
   const [sessions, setSessions] = useState<any[]>([]);
