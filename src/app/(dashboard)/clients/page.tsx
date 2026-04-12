@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Plus, User, Mail, Phone, IndianRupee } from "lucide-react";
+import { Plus, User, Mail, Phone, IndianRupee, Pencil, X, Check, Loader2 } from "lucide-react";
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<any[]>([]);
@@ -16,6 +16,8 @@ export default function ClientsPage() {
   const [open, setOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<any>(null);
+  const [editMode, setEditMode] = useState(false);
+  const [editSaving, setEditSaving] = useState(false);
 
   const fetchClients = async () => {
     try {
@@ -54,6 +56,36 @@ export default function ClientsPage() {
       }
     } catch (err) {
       toast.error("An error occurred");
+    }
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setEditSaving(true);
+    const formData = new FormData(e.currentTarget);
+    const payload = Object.fromEntries(formData);
+
+    try {
+      const res = await fetch(`/api/clients/${selectedClient.id}`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (res.ok) {
+        const updated = await res.json();
+        setSelectedClient(updated);
+        setClients(prev => prev.map(c => c.id === updated.id ? updated : c));
+        setEditMode(false);
+        toast.success("Client profile updated");
+      } else {
+        const err = await res.text();
+        toast.error(`Failed to update: ${err}`);
+      }
+    } catch (err) {
+      toast.error("An error occurred");
+    } finally {
+      setEditSaving(false);
     }
   };
 
@@ -156,6 +188,7 @@ export default function ClientsPage() {
                         size="sm"
                         onClick={() => {
                           setSelectedClient(client);
+                          setEditMode(false);
                           setDetailsOpen(true);
                         }}
                       >
@@ -170,71 +203,112 @@ export default function ClientsPage() {
         </CardContent>
       </Card>
 
-      <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+      <Dialog open={detailsOpen} onOpenChange={(v) => { setDetailsOpen(v); setEditMode(false); }}>
         <DialogContent className="max-w-2xl bg-white border-slate-200">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-slate-950">
               <User className="h-5 w-5 text-primary" />
-              Client Details: {selectedClient?.name}
+              {editMode ? "Edit Profile: " : "Client Details: "}{selectedClient?.name}
             </DialogTitle>
           </DialogHeader>
           {selectedClient && (
-            <div className="space-y-6 py-4">
-              <div className="grid grid-cols-2 gap-8 border-b border-slate-100 pb-6">
-                <div className="space-y-4">
-                  <div>
-                    <Label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Full Name</Label>
-                    <p className="text-sm font-semibold text-slate-900">{selectedClient.name}</p>
+            editMode ? (
+              /* ── Edit Form ── */
+              <form onSubmit={handleEditSubmit} className="space-y-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-name">Full Name</Label>
+                    <Input id="edit-name" name="name" defaultValue={selectedClient.name} required />
                   </div>
-                  <div>
-                    <Label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Email Address</Label>
-                    <p className="text-sm text-slate-600">{selectedClient.email || "No email provided"}</p>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-email">Email</Label>
+                    <Input id="edit-email" name="email" type="email" defaultValue={selectedClient.email || ""} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-phone">Phone</Label>
+                    <Input id="edit-phone" name="phone" defaultValue={selectedClient.phone || ""} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-defaultFee">Default Fee (INR)</Label>
+                    <Input id="edit-defaultFee" name="defaultFee" type="number" defaultValue={selectedClient.defaultFee || ""} />
+                  </div>
+                  <div className="space-y-2 col-span-2">
+                    <Label htmlFor="edit-notes">Notes / Background</Label>
+                    <Input id="edit-notes" name="notes" defaultValue={selectedClient.notes || ""} placeholder="Any relevant background..." />
                   </div>
                 </div>
-                <div className="space-y-4">
-                  <div>
-                    <Label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Phone Number</Label>
-                    <p className="text-sm text-slate-600">{selectedClient.phone || "No phone provided"}</p>
+                <div className="flex justify-end gap-3 pt-2">
+                  <Button type="button" variant="outline" onClick={() => setEditMode(false)} className="gap-2">
+                    <X className="h-4 w-4" /> Cancel
+                  </Button>
+                  <Button type="submit" disabled={editSaving} className="gap-2 bg-lime-400 text-slate-950 hover:bg-lime-500 font-bold">
+                    {editSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                    Save Changes
+                  </Button>
+                </div>
+              </form>
+            ) : (
+              /* ── View Mode ── */
+              <div className="space-y-6 py-4">
+                <div className="grid grid-cols-2 gap-8 border-b border-slate-100 pb-6">
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Full Name</Label>
+                      <p className="text-sm font-semibold text-slate-900">{selectedClient.name}</p>
+                    </div>
+                    <div>
+                      <Label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Email Address</Label>
+                      <p className="text-sm text-slate-600">{selectedClient.email || "No email provided"}</p>
+                    </div>
                   </div>
-                  <div>
-                    <Label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Default Fee (INR)</Label>
-                    <p className="text-sm font-semibold text-slate-900">₹{selectedClient.defaultFee || "0"}</p>
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Phone Number</Label>
+                      <p className="text-sm text-slate-600">{selectedClient.phone || "No phone provided"}</p>
+                    </div>
+                    <div>
+                      <Label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Default Fee (INR)</Label>
+                      <p className="text-sm font-semibold text-slate-900">₹{selectedClient.defaultFee || "0"}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="space-y-4 pt-2">
-                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Practice Summary</h4>
-                <div className="grid grid-cols-3 gap-4">
-                  <Card className="bg-slate-50 border-slate-100 shadow-none">
-                    <CardContent className="p-4">
-                      <p className="text-[10px] text-slate-500 font-bold uppercase">Total sessions</p>
-                      <p className="text-xl font-bold text-slate-900">-</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-slate-50 border-slate-100 shadow-none">
-                    <CardContent className="p-4">
-                      <p className="text-[10px] text-slate-500 font-bold uppercase">Last Session</p>
-                      <p className="text-xl font-bold text-slate-900">-</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-slate-50 border-slate-100 shadow-none">
-                    <CardContent className="p-4">
-                      <p className="text-[10px] text-slate-500 font-bold uppercase">Total Billed</p>
-                      <p className="text-xl font-bold text-slate-900">₹0</p>
-                    </CardContent>
-                  </Card>
+                <div className="space-y-4 pt-2">
+                  <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Practice Summary</h4>
+                  <div className="grid grid-cols-3 gap-4">
+                    <Card className="bg-slate-50 border-slate-100 shadow-none">
+                      <CardContent className="p-4">
+                        <p className="text-[10px] text-slate-500 font-bold uppercase">Total sessions</p>
+                        <p className="text-xl font-bold text-slate-900">-</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-slate-50 border-slate-100 shadow-none">
+                      <CardContent className="p-4">
+                        <p className="text-[10px] text-slate-500 font-bold uppercase">Last Session</p>
+                        <p className="text-xl font-bold text-slate-900">-</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-slate-50 border-slate-100 shadow-none">
+                      <CardContent className="p-4">
+                        <p className="text-[10px] text-slate-500 font-bold uppercase">Total Billed</p>
+                        <p className="text-xl font-bold text-slate-900">₹0</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+                
+                <div className="pt-4 flex justify-end gap-3">
+                  <Button variant="outline" onClick={() => setEditMode(true)} className="gap-2 text-slate-600 border-slate-200">
+                    <Pencil className="h-4 w-4" /> Edit Profile
+                  </Button>
+                  <Button className="bg-primary text-primary-foreground">Schedule Session</Button>
                 </div>
               </div>
-              
-              <div className="pt-4 flex justify-end gap-3">
-                <Button variant="outline" className="text-slate-600 border-slate-200">Edit Profile</Button>
-                <Button className="bg-primary text-primary-foreground">Schedule Session</Button>
-              </div>
-            </div>
+            )
           )}
         </DialogContent>
       </Dialog>
     </div>
   );
 }
+
