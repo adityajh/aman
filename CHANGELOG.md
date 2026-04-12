@@ -8,9 +8,11 @@ All notable changes to the Aman project will be documented in this file.
 - **FIFO Allocation Engine**: Automated payment balancing that settles oldest outstanding invoices first.
 - **Grouped Invoices View**: Redesigned the Invoices page to group by client, displaying session counts and per-invoice payment progress.
 - **Advanced Credits**: Support for recording overpayments and advance payments as unlinked client credits.
-- **Financial Metrics**: New summary cards for Monthly Revenue, All-Time Collections, and Total Outstanding.
+- **Modern Typography**: Replaced Geist with **Inter** for a more refined SaaS aesthetic and **JetBrains Mono** for technical data.
+- **Slick UI Theme**: Shipped a soft off-white background with high-contrast white cards for better visual depth and a modern "slick" feel.
 
 ### Fixed
+- **Build Integrity**: Resolved multiple TypeScript type errors in the Payments page that were causing deployment failures on Vercel.
 - **Dropdown Readability**: Implemented a state-based display name pattern for all entity-backed selectors (Clients, Fees) to permanently resolve the UUID display bug.
 - **Invoice Schema**: Updated tables to support nullable invoice links for advance payments.
 - **API Performance**: Optimized invoice fetching to include session counts and accurate payment status inferences.
