@@ -81,21 +81,41 @@ export default function SessionsPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData);
+
+    const payload = {
+      clientId: selectedClientId,
+      scheduledAt: formData.get("scheduledAt") as string,
+      durationMin: formData.get("durationMin") as string,
+      modality: formData.get("modality") as string,
+      sessionType: formData.get("sessionType") as string,
+      feeSchemeId: selectedFeeSchemeId && selectedFeeSchemeId !== "custom" ? selectedFeeSchemeId : undefined,
+      feeCharged: feeCharged || undefined,
+    };
+
+    if (!payload.clientId) {
+      toast.error("Please select a client.");
+      return;
+    }
 
     try {
       const res = await fetch("/api/sessions", {
         method: "POST",
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
         headers: { "Content-Type": "application/json" },
       });
 
       if (res.ok) {
         toast.success("Session scheduled");
         setOpen(false);
+        setSelectedClientId("");
+        setSelectedClientName("");
+        setSelectedFeeSchemeId("");
+        setSelectedFeeSchemeLabel("Pick a scheme...");
+        setFeeCharged("");
         fetchData();
       } else {
-        toast.error("Failed to schedule session");
+        const errText = await res.text();
+        toast.error(`Failed to schedule session: ${errText}`);
       }
     } catch (err) {
       toast.error("An error occurred");
@@ -296,11 +316,13 @@ export default function SessionsPage() {
                     }}
                   >
                     <SelectTrigger className="w-full bg-slate-50 border-slate-200">
-                      <SelectValue placeholder="Pick a client..." />
+                      <span className={selectedClientId ? "text-slate-900" : "text-slate-400"}>
+                        {selectedClientName || "Pick a client..."}
+                      </span>
                     </SelectTrigger>
                     <SelectContent className="bg-white border-slate-200 max-h-[300px] overflow-y-auto shadow-2xl">
                       {clients.map(c => (
-                        <SelectItem key={c.id} value={c.id}>
+                        <SelectItem key={c.id} value={c.id} label={c.name}>
                           <div className="flex flex-col items-start gap-1 py-1">
                             <span className="font-bold text-slate-900">{c.name}</span>
                             {c.email && (
@@ -317,12 +339,12 @@ export default function SessionsPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="date">Date & Time</Label>
-                    <Input id="date" name="date" type="datetime-local" defaultValue={format(new Date(), "yyyy-MM-dd'T'HH:mm")} className="bg-slate-50 border-slate-200" required />
+                    <Label htmlFor="scheduledAt">Date & Time</Label>
+                    <Input id="scheduledAt" name="scheduledAt" type="datetime-local" defaultValue={format(new Date(), "yyyy-MM-dd'T'HH:mm")} className="bg-slate-50 border-slate-200" required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="duration">Duration (min)</Label>
-                    <Input id="duration" name="duration" type="number" defaultValue="60" className="bg-slate-50 border-slate-200" required />
+                    <Label htmlFor="durationMin">Duration (min)</Label>
+                    <Input id="durationMin" name="durationMin" type="number" defaultValue="60" className="bg-slate-50 border-slate-200" required />
                   </div>
                 </div>
 
