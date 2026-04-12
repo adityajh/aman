@@ -153,7 +153,7 @@ export function ClinicalNoteEditor({ sessionId, onSave }: ClinicalNoteEditorProp
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Qualitative Notes */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         <div className="space-y-2">
           <Label htmlFor="updates" className="text-xs uppercase font-bold text-slate-500 tracking-wider">Updates (from last week)</Label>
           <Textarea 

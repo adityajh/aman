@@ -117,7 +117,7 @@ export default function SessionsPage() {
             <SelectContent className="bg-white border-slate-200">
               <SelectItem value="all">All Clients</SelectItem>
               {clients.map((c) => (
-                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                <SelectItem key={c.id} value={c.id} label={c.name}>{c.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -151,6 +151,7 @@ export default function SessionsPage() {
                         <SelectItem 
                           key={c.id} 
                           value={c.id} 
+                          label={c.name}
                           className="focus:bg-lime-100 focus:text-slate-950 cursor-pointer py-2 px-4 border-b border-slate-100 last:border-0"
                         >
                           <div className="flex flex-col">
@@ -218,6 +219,7 @@ export default function SessionsPage() {
                           <SelectItem 
                             key={s.id} 
                             value={s.id}
+                            label={s.name}
                             className="focus:bg-lime-100 focus:text-slate-950 cursor-pointer py-2 px-4 border-b border-slate-100 last:border-0"
                           >
                             <div className="flex items-center justify-between w-full gap-4">
@@ -307,17 +309,19 @@ export default function SessionsPage() {
                             </Button>
                           }
                         />
-                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-slate-900 border-slate-800 text-white">
-                          <DialogHeader>
-                            <DialogTitle className="flex items-center gap-2 text-white">
-                              <FileText className="h-5 w-5 text-lime-400" />
-                              Clinical Note: {session.client?.name}
-                              <span className="text-sm font-normal text-slate-400 ml-2">
-                                {format(new Date(session.scheduledAt), "d MMM yyyy")}
-                              </span>
-                            </DialogTitle>
-                          </DialogHeader>
-                          <div className="py-2">
+                        <DialogContent className="max-w-[95vw] lg:max-w-4xl max-h-[95vh] overflow-y-auto bg-slate-900 border-slate-800 text-white p-0">
+                          <div className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur-md p-6 border-b border-slate-800">
+                            <DialogHeader>
+                              <DialogTitle className="flex items-center gap-2 text-white">
+                                <FileText className="h-5 w-5 text-lime-400" />
+                                Clinical Note: {session.client?.name}
+                                <span className="text-sm font-normal text-slate-400 ml-2">
+                                  {format(new Date(session.scheduledAt), "d MMM yyyy")}
+                                </span>
+                              </DialogTitle>
+                            </DialogHeader>
+                          </div>
+                          <div className="p-6">
                             <ClinicalNoteEditor 
                               sessionId={session.id} 
                               onSave={() => fetchData()} 
