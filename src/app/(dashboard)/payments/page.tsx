@@ -154,18 +154,25 @@ export default function PaymentsPage() {
                   onValueChange={(id) => {
                     const cleanId = id || "";
                     setSelectedClientId(cleanId);
-                    setSelectedClientName(clients.find(c => c.id === cleanId)?.name || "");
+                    const client = clients.find(c => c.id === cleanId);
+                    setSelectedClientName(client ? client.name : "");
                   }}
-                  required
                 >
-                  <SelectTrigger className="border-slate-200 h-10 text-slate-900">
+                  <SelectTrigger className="w-full border-slate-200 h-10 text-slate-900 shadow-sm bg-white">
                     <span className={selectedClientName ? "text-slate-900" : "text-slate-400"}>
                       {selectedClientName || "Pick a client..."}
                     </span>
                   </SelectTrigger>
-                  <SelectContent className="bg-white border-slate-200 max-h-[250px] overflow-y-auto">
+                  <SelectContent className="bg-white border-slate-200 max-h-[250px] overflow-y-auto shadow-2xl">
                     {clients.map(c => (
-                      <SelectItem key={c.id} value={c.id} label={c.name}>{c.name}</SelectItem>
+                      <SelectItem 
+                        key={c.id} 
+                        value={c.id} 
+                        label={c.name}
+                        className="focus:bg-lime-50 focus:text-slate-950 cursor-pointer py-2 px-4 border-b border-slate-50 last:border-0"
+                      >
+                        {c.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -190,8 +197,8 @@ export default function PaymentsPage() {
                 <div className="space-y-2">
                   <Label>Method</Label>
                   <Select value={paymentMethod} onValueChange={(v) => setPaymentMethod(v || "upi")}>
-                    <SelectTrigger className="border-slate-200 h-10">
-                      <span className="capitalize">{paymentMethod.replace("_", " ")}</span>
+                    <SelectTrigger className="border-slate-200 h-10 bg-white shadow-sm">
+                      <span>{paymentMethod.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}</span>
                     </SelectTrigger>
                     <SelectContent className="bg-white border-slate-200">
                       <SelectItem value="upi">UPI</SelectItem>

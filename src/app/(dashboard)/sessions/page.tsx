@@ -26,6 +26,10 @@ export default function SessionsPage() {
   const [selectedFeeSchemeName, setSelectedFeeSchemeName] = useState<string>("");
   const [clientFilter, setClientFilter] = useState<string>("all");
   const [clientFilterName, setClientFilterName] = useState<string>("All Clients");
+  const [filterCompleted, setFilterCompleted] = useState(true);
+  const [filterScheduled, setFilterScheduled] = useState(true);
+  const [filterInvoiced, setFilterInvoiced] = useState(true);
+  const [filterUninvoiced, setFilterUninvoiced] = useState(true);
 
   const fetchData = async () => {
     try {
@@ -110,7 +114,7 @@ export default function SessionsPage() {
         <TableCell>
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-              {session.modality.replace("_", " ")}
+              {session.modality.split('_').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
             </span>
           </div>
         </TableCell>
@@ -159,9 +163,20 @@ export default function SessionsPage() {
     );
   }
 
-  const filteredSessions = clientFilter === "all" 
-    ? sessions 
-    : sessions.filter(s => s.clientId === clientFilter);
+  const filteredSessions = sessions.filter(s => {
+    // Client Match
+    if (clientFilter !== "all" && s.clientId !== clientFilter) return false;
+    
+    // Status Match
+    if (!filterCompleted && s.status === "completed") return false;
+    if (!filterScheduled && s.status === "scheduled") return false;
+    
+    // Billing Match
+    if (!filterInvoiced && s.invoiceId) return false;
+    if (!filterUninvoiced && !s.invoiceId) return false;
+
+    return true;
+  });
 
   const getModalityIcon = (modality: string) => {
     switch (modality) {
@@ -179,7 +194,7 @@ export default function SessionsPage() {
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Sessions</h1>
           <p className="text-slate-500">Schedule and track clinical sessions.</p>
         </div>
-        <div className="flex gap-4">
+        <div className="flex items-center gap-2">
           <Select 
             value={clientFilter} 
             onValueChange={(v) => {
@@ -192,7 +207,7 @@ export default function SessionsPage() {
               }
             }}
           >
-            <SelectTrigger className="w-[200px] border-slate-200 text-slate-900 font-medium">
+            <SelectTrigger className="w-[180px] border-slate-200 text-slate-900 font-medium h-10 shadow-sm bg-white">
               <span>{clientFilterName}</span>
             </SelectTrigger>
             <SelectContent className="bg-white border-slate-200">
@@ -203,10 +218,52 @@ export default function SessionsPage() {
             </SelectContent>
           </Select>
           
+          <div className="h-6 w-px bg-slate-200 mx-1" />
+
+          <div className="flex bg-slate-100/80 p-1 rounded-lg gap-1 border border-slate-200 shadow-sm">
+            <button 
+              onClick={() => setFilterScheduled(!filterScheduled)}
+              className={cn(
+                "px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all",
+                filterScheduled ? "bg-white text-blue-600 shadow-sm" : "text-slate-400 hover:text-slate-600"
+              )}
+            >
+              Scheduled
+            </button>
+            <button 
+              onClick={() => setFilterCompleted(!filterCompleted)}
+              className={cn(
+                "px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all",
+                filterCompleted ? "bg-white text-lime-600 shadow-sm" : "text-slate-400 hover:text-slate-600"
+              )}
+            >
+              Completed
+            </button>
+            <div className="w-px h-4 bg-slate-200 self-center" />
+            <button 
+              onClick={() => setFilterInvoiced(!filterInvoiced)}
+              className={cn(
+                "px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all",
+                filterInvoiced ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-slate-600"
+              )}
+            >
+              Invoiced
+            </button>
+            <button 
+              onClick={() => setFilterUninvoiced(!filterUninvoiced)}
+              className={cn(
+                "px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all",
+                filterUninvoiced ? "bg-white text-amber-600 shadow-sm" : "text-slate-400 hover:text-slate-600"
+              )}
+            >
+              Unbilled
+            </button>
+          </div>
+
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger
               render={
-                <Button className="gap-2 bg-lime-500 text-slate-950 hover:bg-lime-600 font-semibold shadow-sm">
+                <Button className="gap-2 bg-lime-500 text-slate-950 hover:bg-lime-600 font-bold px-6 h-10 shadow-sm">
                   <Plus className="h-4 w-4" /> New Session
                 </Button>
               }
@@ -228,7 +285,7 @@ export default function SessionsPage() {
                       setSelectedClientName(clients.find(c => c.id === id)?.name || "");
                     }}
                   >
-                    <SelectTrigger className="border-slate-200 h-12 text-slate-900 hover:border-lime-500/50 transition-colors">
+                    <SelectTrigger className="w-full border-slate-200 h-10 text-slate-900 hover:border-lime-500/50 transition-colors shadow-sm bg-white">
                       <span className={selectedClientName ? "text-slate-900" : "text-slate-400"}>
                         {selectedClientName || "Select a client..."}
                       </span>
@@ -239,11 +296,11 @@ export default function SessionsPage() {
                           key={c.id} 
                           value={c.id} 
                           label={c.name}
-                          className="focus:bg-lime-100 focus:text-slate-950 cursor-pointer py-2 px-4 border-b border-slate-100 last:border-0"
+                          className="focus:bg-lime-50 focus:text-slate-950 cursor-pointer py-2 px-4 border-b border-slate-50 last:border-0"
                         >
                           <div className="flex flex-col">
-                            <span className="font-semibold block text-slate-950">{c.name}</span>
-                            {c.email && <span className="text-[10px] block text-slate-500">{c.email}</span>}
+                            <span className="font-semibold block text-slate-950 text-sm">{c.name}</span>
+                            {c.email && <span className="text-[10px] block text-slate-400">{c.email}</span>}
                           </div>
                         </SelectItem>
                       ))}
@@ -265,7 +322,7 @@ export default function SessionsPage() {
                   <div className="space-y-2">
                     <Label className="text-slate-700 font-medium">Modality</Label>
                     <Select name="modality" defaultValue="video">
-                      <SelectTrigger className="border-slate-200">
+                      <SelectTrigger className="border-slate-200 bg-white">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="bg-white border-slate-200">
@@ -278,7 +335,7 @@ export default function SessionsPage() {
                   <div className="space-y-2">
                     <Label className="text-slate-700 font-medium">Session Type</Label>
                     <Select name="sessionType" defaultValue="individual">
-                      <SelectTrigger className="border-slate-200">
+                      <SelectTrigger className="border-slate-200 bg-white">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="bg-white border-slate-200">
@@ -299,10 +356,11 @@ export default function SessionsPage() {
                       onValueChange={(v) => {
                         const id = v || "";
                         setSelectedFeeSchemeId(id);
-                        setSelectedFeeSchemeName(feeSchemes.find(f => f.id === id)?.name || "");
+                        const scheme = feeSchemes.find(f => f.id === id);
+                        setSelectedFeeSchemeName(scheme ? `${scheme.name} (₹${scheme.amount})` : "");
                       }}
                     >
-                      <SelectTrigger className="border-slate-200 text-slate-900 hover:border-lime-500/50 transition-colors">
+                      <SelectTrigger className="border-slate-200 text-slate-900 hover:border-lime-500/50 transition-colors bg-white">
                         <span className={selectedFeeSchemeName ? "text-slate-900" : "text-slate-400"}>
                           {selectedFeeSchemeName || "Client Default"}
                         </span>
