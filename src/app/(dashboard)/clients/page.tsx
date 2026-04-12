@@ -12,6 +12,7 @@ import { Plus, User, Mail, Phone, IndianRupee } from "lucide-react";
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<any>(null);
