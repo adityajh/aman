@@ -245,8 +245,10 @@ export const payments = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     invoiceId: uuid("invoice_id")
-      .notNull()
       .references(() => invoices.id, { onDelete: "restrict" }),
+    clientId: uuid("client_id")
+      .notNull()
+      .references(() => clients.id, { onDelete: "restrict" }),
     amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
     paymentDate: date("payment_date").notNull().default(sql`CURRENT_DATE`),
     method: text("method")
@@ -335,6 +337,7 @@ export const auditLog = pgTable(
 export const clientsRelations = relations(clients, ({ many }) => ({
   sessions: many(sessions),
   invoices: many(invoices),
+  payments: many(payments),
 }));
 
 export const invoicesRelations = relations(invoices, ({ one, many }) => ({

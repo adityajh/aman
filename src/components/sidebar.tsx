@@ -11,7 +11,8 @@ import {
   Settings, 
   ShieldCheck, 
   LogOut,
-  CreditCard
+  CreditCard,
+  Wallet
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
@@ -38,6 +39,12 @@ const routes = [
     label: "Invoices",
     icon: FileText,
     href: "/invoices",
+    color: "text-lime-400",
+  },
+  {
+    label: "Payments",
+    icon: Wallet,
+    href: "/payments",
     color: "text-lime-400",
   },
   {

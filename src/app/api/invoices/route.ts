@@ -14,9 +14,17 @@ export async function GET() {
       orderBy: [desc(invoices.createdAt)],
       with: {
         client: true,
+        lineItems: true,
       },
     });
-    return NextResponse.json(allInvoices);
+
+    // Add sessionCount to each invoice
+    const invoicesWithCount = allInvoices.map(inv => ({
+      ...inv,
+      sessionCount: inv.lineItems.filter(item => item.sessionId).length,
+    }));
+
+    return NextResponse.json(invoicesWithCount);
   } catch (error) {
     console.error(error);
     return new NextResponse("Internal Server Error", { status: 500 });

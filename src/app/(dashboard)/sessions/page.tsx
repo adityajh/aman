@@ -21,8 +21,11 @@ export default function SessionsPage() {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<string>("");
+  const [selectedClientName, setSelectedClientName] = useState<string>("");
   const [selectedFeeSchemeId, setSelectedFeeSchemeId] = useState<string>("");
+  const [selectedFeeSchemeName, setSelectedFeeSchemeName] = useState<string>("");
   const [clientFilter, setClientFilter] = useState<string>("all");
+  const [clientFilterName, setClientFilterName] = useState<string>("All Clients");
 
   const fetchData = async () => {
     try {
@@ -177,9 +180,20 @@ export default function SessionsPage() {
           <p className="text-slate-500">Schedule and track clinical sessions.</p>
         </div>
         <div className="flex gap-4">
-          <Select value={clientFilter} onValueChange={(v) => setClientFilter(v || "all")}>
-            <SelectTrigger className="w-[200px] border-slate-200">
-              <SelectValue placeholder="All Clients" />
+          <Select 
+            value={clientFilter} 
+            onValueChange={(v) => {
+              const val = v || "all";
+              setClientFilter(val);
+              if (val === "all") {
+                setClientFilterName("All Clients");
+              } else {
+                setClientFilterName(clients.find(c => c.id === val)?.name || val);
+              }
+            }}
+          >
+            <SelectTrigger className="w-[200px] border-slate-200 text-slate-900 font-medium">
+              <span>{clientFilterName}</span>
             </SelectTrigger>
             <SelectContent className="bg-white border-slate-200">
               <SelectItem value="all" label="All Clients">All Clients</SelectItem>
@@ -208,10 +222,16 @@ export default function SessionsPage() {
                     name="clientId" 
                     required 
                     value={selectedClientId} 
-                    onValueChange={(v) => setSelectedClientId(v || "")}
+                    onValueChange={(v) => {
+                      const id = v || "";
+                      setSelectedClientId(id);
+                      setSelectedClientName(clients.find(c => c.id === id)?.name || "");
+                    }}
                   >
                     <SelectTrigger className="border-slate-200 h-12 text-slate-900 hover:border-lime-500/50 transition-colors">
-                      <SelectValue placeholder="Select a client..." />
+                      <span className={selectedClientName ? "text-slate-900" : "text-slate-400"}>
+                        {selectedClientName || "Select a client..."}
+                      </span>
                     </SelectTrigger>
                     <SelectContent className="bg-white border-slate-200 shadow-2xl">
                       {clients.map((c) => (
@@ -276,10 +296,16 @@ export default function SessionsPage() {
                     <Select 
                       name="feeSchemeId"
                       value={selectedFeeSchemeId}
-                      onValueChange={(v) => setSelectedFeeSchemeId(v || "")}
+                      onValueChange={(v) => {
+                        const id = v || "";
+                        setSelectedFeeSchemeId(id);
+                        setSelectedFeeSchemeName(feeSchemes.find(f => f.id === id)?.name || "");
+                      }}
                     >
                       <SelectTrigger className="border-slate-200 text-slate-900 hover:border-lime-500/50 transition-colors">
-                        <SelectValue placeholder="Client Default" />
+                        <span className={selectedFeeSchemeName ? "text-slate-900" : "text-slate-400"}>
+                          {selectedFeeSchemeName || "Client Default"}
+                        </span>
                       </SelectTrigger>
                       <SelectContent className="bg-white border-slate-200 shadow-2xl">
                         {feeSchemes.map((s) => (

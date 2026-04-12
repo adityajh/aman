@@ -123,9 +123,29 @@ export default function InvoicesPage() {
       case "draft": return <Badge variant="outline" className="bg-slate-100 text-slate-900 border-slate-300 font-bold uppercase text-[10px] tracking-wider">Generated</Badge>;
       case "sent": return <Badge variant="outline" className="bg-blue-100 text-blue-900 border-blue-200 font-bold uppercase text-[10px] tracking-wider">Sent</Badge>;
       case "paid": return <Badge variant="outline" className="bg-lime-100 text-lime-900 border-lime-300 font-bold uppercase text-[10px] tracking-wider">Paid</Badge>;
+      case "partial": return <Badge variant="outline" className="bg-amber-100 text-amber-900 border-amber-300 font-bold uppercase text-[10px] tracking-wider">Partial</Badge>;
+      case "overdue": return <Badge variant="outline" className="bg-red-100 text-red-900 border-red-300 font-bold uppercase text-[10px] tracking-wider">Overdue</Badge>;
       default: return <Badge variant="outline" className="font-bold uppercase text-[10px] tracking-wider">{status}</Badge>;
     }
   };
+
+  const groupedInvoices = invoices.reduce((acc, inv) => {
+    const clientId = inv.clientId;
+    if (!acc[clientId]) {
+      acc[clientId] = {
+        client: inv.client,
+        items: [],
+        totalAmount: 0,
+      };
+    }
+    acc[clientId].items.push(inv);
+    acc[clientId].totalAmount += parseFloat(inv.total);
+    return acc;
+  }, {} as any);
+
+  const sortedClientIds = Object.keys(groupedInvoices).sort((a, b) => 
+    groupedInvoices[a].client?.name.localeCompare(groupedInvoices[b].client?.name)
+  );
 
   return (
     <div className="p-8 space-y-6">
@@ -232,7 +252,9 @@ export default function InvoicesPage() {
                 <TableRow className="hover:bg-transparent">
                   <TableHead>Invoice #</TableHead>
                   <TableHead>Client</TableHead>
-                  <TableHead>Amount</TableHead>
+                  <TableHead>Sessions</TableHead>
+                  <TableHead>Total</TableHead>
+                  <TableHead>Paid</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -240,68 +262,99 @@ export default function InvoicesPage() {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-10 text-slate-400 border-slate-800">Loading invoices...</TableCell>
+                    <TableCell colSpan={7} className="text-center py-10 text-slate-400 border-slate-800">Loading invoices...</TableCell>
                   </TableRow>
                 ) : invoices.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-10 text-slate-400 border-slate-800">No invoices yet. Use 'New Batch' to generate some.</TableCell>
+                    <TableCell colSpan={7} className="text-center py-10 text-slate-400 border-slate-800">No invoices yet. Use 'New Batch' to generate some.</TableCell>
                   </TableRow>
                 ) : (
-                  invoices.map((invoice) => (
-                    <TableRow key={invoice.id}>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span className="font-medium text-slate-900">{invoice.invoiceNumber}</span>
-                          <span className="text-[10px] text-slate-500 uppercase">{format(new Date(invoice.billingMonth), "MMM yyyy")}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <User className="h-3 w-3 text-slate-400" />
-                          <span className="text-sm text-slate-700">{invoice.client?.name}</span>
-                          {!invoice.client?.email && <Badge variant="outline" className="text-[8px] bg-red-50 text-red-600 border-red-200">MISSING EMAIL</Badge>}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1 font-medium text-slate-900">
-                          <IndianRupee className="h-3 w-3 text-lime-600" />
-                          {invoice.total}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {getStatusBadge(invoice.status)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-slate-400 hover:text-slate-900"
-                            onClick={() => setPreviewId(invoice.id)}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          {invoice.status === 'draft' ? (
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="gap-2 text-lime-900 border-lime-300 bg-lime-50 hover:bg-lime-100 font-bold shadow-sm"
-                              onClick={() => handleSendInvoice(invoice.id)}
-                              disabled={!!isSending || !invoice.client?.email}
-                            >
-                              {isSending === invoice.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                              Send
-                            </Button>
-                          ) : (
-                            <div className="flex items-center gap-2 text-xs text-lime-700 font-bold whitespace-nowrap">
-                              <CheckCircle2 className="h-4 w-4 text-lime-600" />
-                              Sent {format(new Date(invoice.sentAt), "d MMM")}
+                  sortedClientIds.map((clientId) => {
+                    const group = groupedInvoices[clientId];
+                    return (
+                      <React.Fragment key={clientId}>
+                        <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
+                          <TableCell colSpan={7} className="py-2 px-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <User className="h-4 w-4 text-slate-400" />
+                                <span className="font-bold text-slate-900">{group.client?.name}</span>
+                                <Badge variant="secondary" className="text-[10px] py-0">{group.items.length} Invoices</Badge>
+                              </div>
+                              <div className="text-xs font-semibold text-slate-500">
+                                Total Invoiced: <span className="text-lime-700">₹{group.totalAmount.toFixed(2)}</span>
+                              </div>
                             </div>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                          </TableCell>
+                        </TableRow>
+                        {group.items.map((invoice: any) => (
+                          <TableRow key={invoice.id} className="group">
+                            <TableCell className="pl-6">
+                              <div className="flex flex-col">
+                                <span className="font-medium text-slate-900">{invoice.invoiceNumber}</span>
+                                <span className="text-[10px] text-slate-500 uppercase">{format(new Date(invoice.billingMonth), "MMM yyyy")}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm text-slate-700 truncate max-w-[120px]">{group.client?.name}</span>
+                                {!group.client?.email && <Badge variant="outline" className="text-[8px] bg-red-50 text-red-600 border-red-200">MISSING EMAIL</Badge>}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="bg-white text-slate-700 border-slate-200 font-medium">
+                                {invoice.sessionCount || 0} sessions
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1 font-medium text-slate-900">
+                                <IndianRupee className="h-3 w-3 text-lime-600" />
+                                {invoice.total}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1 font-medium text-slate-500">
+                                <IndianRupee className="h-3 w-3" />
+                                {invoice.amountPaid || "0.00"}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {getStatusBadge(invoice.status)}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="text-slate-400 hover:text-slate-900"
+                                  onClick={() => setPreviewId(invoice.id)}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                {invoice.status === 'draft' ? (
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="gap-2 text-lime-900 border-lime-300 bg-lime-50 hover:bg-lime-100 font-bold shadow-sm"
+                                    onClick={() => handleSendInvoice(invoice.id)}
+                                    disabled={!!isSending || !invoice.client?.email}
+                                  >
+                                    {isSending === invoice.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                                    Send
+                                  </Button>
+                                ) : (
+                                  <div className="flex items-center gap-2 text-xs text-lime-700 font-bold whitespace-nowrap">
+                                    <CheckCircle2 className="h-4 w-4 text-lime-600" />
+                                    {invoice.sentAt ? format(new Date(invoice.sentAt), "d MMM") : 'Sent'}
+                                  </div>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </React.Fragment>
+                    );
+                  })
                 )}
               </TableBody>
             </Table>
