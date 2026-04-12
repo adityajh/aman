@@ -151,7 +151,6 @@ export default function SessionsPage() {
                         <SelectItem 
                           key={c.id} 
                           value={c.id} 
-                          textValue={c.name}
                           className="focus:bg-lime-100 focus:text-slate-950 cursor-pointer py-2 px-4 border-b border-slate-100 last:border-0"
                         >
                           <div className="flex flex-col">
@@ -219,7 +218,6 @@ export default function SessionsPage() {
                           <SelectItem 
                             key={s.id} 
                             value={s.id}
-                            textValue={s.name}
                             className="focus:bg-lime-100 focus:text-slate-950 cursor-pointer py-2 px-4 border-b border-slate-100 last:border-0"
                           >
                             <div className="flex items-center justify-between w-full gap-4">
