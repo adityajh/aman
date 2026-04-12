@@ -182,7 +182,7 @@ export default function SessionsPage() {
               <SelectValue placeholder="All Clients" />
             </SelectTrigger>
             <SelectContent className="bg-white border-slate-200">
-              <SelectItem value="all">All Clients</SelectItem>
+              <SelectItem value="all" label="All Clients">All Clients</SelectItem>
               {clients.map((c) => (
                 <SelectItem key={c.id} value={c.id} label={c.name}>{c.name}</SelectItem>
               ))}
