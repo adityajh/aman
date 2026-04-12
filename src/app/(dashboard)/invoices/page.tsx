@@ -21,6 +21,10 @@ export default function InvoicesPage() {
   const [isSending, setIsSending] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [previewId, setPreviewId] = useState<string | null>(null);
+  const [filterGenerated, setFilterGenerated] = useState(true);
+  const [filterSent, setFilterSent] = useState(true);
+  const [filterPaid, setFilterPaid] = useState(true);
+  const [filterOverdue, setFilterOverdue] = useState(true);
 
   // Batch Selection State
   const [selectedClients, setSelectedClients] = useState<Set<string>>(new Set());
@@ -129,7 +133,15 @@ export default function InvoicesPage() {
     }
   };
 
-  const groupedInvoices = invoices.reduce((acc, inv) => {
+  const filteredInvoices = invoices.filter(inv => {
+    if (!filterGenerated && inv.status === 'generated') return false;
+    if (!filterSent && inv.status === 'sent') return false;
+    if (!filterPaid && inv.status === 'paid') return false;
+    if (!filterOverdue && (inv.status === 'overdue' || inv.status === 'partial')) return false;
+    return true;
+  });
+
+  const groupedInvoices = filteredInvoices.reduce((acc: any, inv) => {
     const clientId = inv.clientId;
     if (!acc[clientId]) {
       acc[clientId] = {
@@ -244,6 +256,45 @@ export default function InvoicesPage() {
         </Dialog>
       </div>
 
+      <div className="flex bg-slate-100/80 p-1 rounded-lg gap-1 border border-slate-200 shadow-sm mb-6 w-fit">
+        <button 
+          onClick={() => setFilterGenerated(!filterGenerated)}
+          className={cn(
+            "px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all",
+            filterGenerated ? "bg-white text-slate-500 shadow-sm" : "text-slate-400 hover:text-slate-600"
+          )}
+        >
+          Generated
+        </button>
+        <button 
+          onClick={() => setFilterSent(!filterSent)}
+          className={cn(
+            "px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all",
+            filterSent ? "bg-white text-blue-600 shadow-sm" : "text-slate-400 hover:text-slate-600"
+          )}
+        >
+          Sent
+        </button>
+        <button 
+          onClick={() => setFilterPaid(!filterPaid)}
+          className={cn(
+            "px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all",
+            filterPaid ? "bg-white text-lime-600 shadow-sm" : "text-slate-400 hover:text-slate-600"
+          )}
+        >
+          Paid
+        </button>
+        <button 
+          onClick={() => setFilterOverdue(!filterOverdue)}
+          className={cn(
+            "px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all",
+            filterOverdue ? "bg-white text-red-600 shadow-sm" : "text-slate-400 hover:text-slate-600"
+          )}
+        >
+          Overdue / Partial
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="md:col-span-2">
           <CardContent className="p-0">
@@ -264,9 +315,9 @@ export default function InvoicesPage() {
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-10 text-slate-400 border-slate-800">Loading invoices...</TableCell>
                   </TableRow>
-                ) : invoices.length === 0 ? (
+                ) : filteredInvoices.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-10 text-slate-400 border-slate-800">No invoices yet. Use 'New Batch' to generate some.</TableCell>
+                    <TableCell colSpan={7} className="text-center py-10 text-slate-400 border-slate-800">No invoices match your filters.</TableCell>
                   </TableRow>
                 ) : (
                   sortedClientIds.map((clientId) => {
