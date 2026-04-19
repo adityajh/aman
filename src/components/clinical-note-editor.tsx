@@ -16,6 +16,73 @@ interface ClinicalNoteEditorProps {
   onClose?: () => void;
 }
 
+// ── Stable module-level component ──────────────────────────────────────────
+// Must live OUTSIDE ClinicalNoteEditor so React never remounts it mid-drag.
+function ScoreSelector({ value, onChange, label }: {
+  value: number;
+  onChange: (v: number) => void;
+  label: string;
+}) {
+  const pct = (value / 10) * 100;
+  const trackColor = value <= 3 ? "#ef4444" : value <= 6 ? "#f59e0b" : "#84cc16";
+
+  const handleSlider = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(Math.round(parseFloat(e.target.value) * 10) / 10);
+  };
+
+  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = parseFloat(e.target.value);
+    if (!isNaN(v) && v >= 0 && v <= 10) {
+      onChange(Math.round(v * 10) / 10);
+    }
+  };
+
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-xs font-medium text-slate-500 leading-snug">{label}</Label>
+      <div className="flex items-center gap-3">
+        {/* Slider */}
+        <div className="relative flex-1 h-5 flex items-center">
+          <input
+            type="range"
+            min={0}
+            max={10}
+            step={0.1}
+            value={value}
+            onChange={handleSlider}
+            className="w-full h-2 rounded-full appearance-none cursor-pointer"
+            style={{
+              background: `linear-gradient(to right, ${trackColor} ${pct}%, #e2e8f0 ${pct}%)`,
+            }}
+          />
+        </div>
+        {/* Number input */}
+        <Input
+          type="number"
+          min={0}
+          max={10}
+          step={0.1}
+          value={value === 0 ? "" : value}
+          onChange={handleInput}
+          placeholder="0"
+          className="w-16 h-8 text-center font-bold text-sm border-slate-200 bg-white p-1"
+        />
+        {/* Coloured readout */}
+        <span className="text-xs font-bold w-10 text-right" style={{ color: trackColor }}>
+          {value > 0 ? value.toFixed(1) : "—"}
+        </span>
+      </div>
+      {/* Tick marks */}
+      <div className="flex justify-between px-0.5">
+        {[0, 2.5, 5, 7.5, 10].map(t => (
+          <span key={t} className="text-[9px] text-slate-300 font-medium">{t}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+// ───────────────────────────────────────────────────────────────────────────
+
 
 
 export function ClinicalNoteEditor({ sessionId, onSave, onClose }: ClinicalNoteEditorProps) {
@@ -127,73 +194,6 @@ export function ClinicalNoteEditor({ sessionId, onSave, onClose }: ClinicalNoteE
     );
   }
 
-  const ScoreSelector = ({ value, onChange, label }: { value: number; onChange: (v: number) => void; label: string }) => {
-    const pct = (value / 10) * 100;
-    // Colour: 0-3 red, 3-6 amber, 6-10 lime
-    const trackColor = value <= 3 ? "#ef4444" : value <= 6 ? "#f59e0b" : "#84cc16";
-
-    const handleSlider = (e: React.ChangeEvent<HTMLInputElement>) => {
-      onChange(Math.round(parseFloat(e.target.value) * 10) / 10);
-    };
-
-    const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const v = parseFloat(e.target.value);
-      if (!isNaN(v) && v >= 0 && v <= 10) {
-        onChange(Math.round(v * 10) / 10);
-      } else if (e.target.value === "" || e.target.value === ".") {
-        // allow typing in progress — don't clear yet
-      }
-    };
-
-    return (
-      <div className="space-y-1.5">
-        <div className="flex justify-between items-center">
-          <Label className="text-xs font-medium text-slate-500 leading-snug">{label}</Label>
-        </div>
-        <div className="flex items-center gap-3">
-          {/* Slider */}
-          <div className="relative flex-1 h-5 flex items-center">
-            <input
-              type="range"
-              min={0}
-              max={10}
-              step={0.1}
-              value={value}
-              onChange={handleSlider}
-              className="w-full h-2 rounded-full appearance-none cursor-pointer"
-              style={{
-                background: `linear-gradient(to right, ${trackColor} ${pct}%, #e2e8f0 ${pct}%)`,
-              }}
-            />
-          </div>
-          {/* Number input */}
-          <Input
-            type="number"
-            min={0}
-            max={10}
-            step={0.1}
-            value={value === 0 ? "" : value}
-            onChange={handleInput}
-            placeholder="0"
-            className="w-16 h-8 text-center font-bold text-sm border-slate-200 bg-white p-1"
-          />
-          {/* Score label */}
-          <span
-            className="text-xs font-bold w-10 text-right"
-            style={{ color: trackColor }}
-          >
-            {value > 0 ? value.toFixed(1) : "—"}
-          </span>
-        </div>
-        {/* Tick marks */}
-        <div className="flex justify-between px-0.5">
-          {[0, 2.5, 5, 7.5, 10].map(t => (
-            <span key={t} className="text-[9px] text-slate-300 font-medium">{t}</span>
-          ))}
-        </div>
-      </div>
-    );
-  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
