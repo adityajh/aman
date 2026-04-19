@@ -77,16 +77,20 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               {card.title === "Outstanding Revenue" ? (
-                <div className="flex flex-col gap-1 min-h-[40px] justify-center">
+                <div className="flex flex-col gap-2 min-h-[40px] justify-center">
                   {stats.outstanding?.length > 0 ? stats.outstanding.map((r: any) => (
-                    <div key={r.currency} className="flex items-baseline gap-1">
-                      <span className="text-xs font-semibold opacity-60">
-                        {r.currency === 'USD' ? '$' : '₹'}
-                      </span>
-                      <span className="text-2xl font-bold">{parseFloat(r.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                    <div key={r.currency} className="flex flex-col gap-0.5">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{r.currency}</span>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-xs font-semibold opacity-60">{r.currency === 'USD' ? '$' : '₹'}</span>
+                        <span className="text-2xl font-bold">{parseFloat(r.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                      </div>
                     </div>
                   )) : (
-                    <div className="text-2xl font-bold">₹0.00</div>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">INR</span>
+                      <div className="text-2xl font-bold">₹0.00</div>
+                    </div>
                   )}
                 </div>
               ) : (

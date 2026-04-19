@@ -259,13 +259,21 @@ export default function PaymentsPage() {
               <Badge className="bg-lime-100 text-lime-700 hover:bg-lime-100 border-0 font-bold">{format(new Date(), "MMMM")}</Badge>
             </div>
             <p className="text-sm font-medium text-slate-500 mb-1">Received This Month</p>
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-3">
               {summary.receivedMonth?.length > 0 ? summary.receivedMonth.map((r: any) => (
-                <div key={r.currency} className="flex items-baseline gap-1 text-slate-900">
-                  <span className="text-sm font-semibold opacity-60">{r.currency === 'USD' ? '$' : '₹'}</span>
-                  <span className="text-3xl font-bold">{parseFloat(r.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                <div key={r.currency} className="flex flex-col gap-0.5">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{r.currency}</span>
+                  <div className="flex items-baseline gap-1 text-slate-900">
+                    <span className="text-sm font-semibold opacity-50">{r.currency === 'USD' ? '$' : '₹'}</span>
+                    <span className="text-3xl font-bold">{parseFloat(r.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                  </div>
                 </div>
-              )) : <h3 className="text-3xl font-bold text-slate-900">₹0.00</h3>}
+              )) : (
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">INR</span>
+                  <h3 className="text-3xl font-bold text-slate-900">₹0.00</h3>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -278,13 +286,21 @@ export default function PaymentsPage() {
               </div>
             </div>
             <p className="text-sm font-medium text-slate-500 mb-1">Received YTD (FY)</p>
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-3">
               {summary.receivedYTD?.length > 0 ? summary.receivedYTD.map((r: any) => (
-                <div key={r.currency} className="flex items-baseline gap-1 text-slate-900">
-                  <span className="text-sm font-semibold opacity-60">{r.currency === 'USD' ? '$' : '₹'}</span>
-                  <span className="text-3xl font-bold">{parseFloat(r.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                <div key={r.currency} className="flex flex-col gap-0.5">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{r.currency}</span>
+                  <div className="flex items-baseline gap-1 text-slate-900">
+                    <span className="text-sm font-semibold opacity-50">{r.currency === 'USD' ? '$' : '₹'}</span>
+                    <span className="text-3xl font-bold">{parseFloat(r.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                  </div>
                 </div>
-              )) : <h3 className="text-3xl font-bold text-slate-900">₹0.00</h3>}
+              )) : (
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">INR</span>
+                  <h3 className="text-3xl font-bold text-slate-900">₹0.00</h3>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -297,13 +313,21 @@ export default function PaymentsPage() {
               </div>
             </div>
             <p className="text-sm font-medium text-slate-500 mb-1">Current Outstanding</p>
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-3">
               {summary.outstanding?.length > 0 ? summary.outstanding.map((r: any) => (
-                <div key={r.currency} className="flex items-baseline gap-1 text-slate-900">
-                  <span className="text-sm font-semibold opacity-60">{r.currency === 'USD' ? '$' : '₹'}</span>
-                  <span className="text-3xl font-bold">{parseFloat(r.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                <div key={r.currency} className="flex flex-col gap-0.5">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{r.currency}</span>
+                  <div className="flex items-baseline gap-1 text-slate-900">
+                    <span className="text-sm font-semibold opacity-50">{r.currency === 'USD' ? '$' : '₹'}</span>
+                    <span className="text-3xl font-bold">{parseFloat(r.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                  </div>
                 </div>
-              )) : <h3 className="text-3xl font-bold text-slate-900">₹0.00</h3>}
+              )) : (
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">INR</span>
+                  <h3 className="text-3xl font-bold text-slate-900">₹0.00</h3>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
