@@ -2,6 +2,24 @@
 
 All notable changes to the Aman project will be documented in this file.
  
+## [2.4.0] - 2026-04-19 (Session 2)
+### Added
+- **Client Status Filter**: Dropdown on the Clients page filters by **All / Active / Terminated** (defaults to Active). First letter capitalised in all dropdown labels; value and display label are always identical.
+- **Dashboard — Clickable Clinical Risk Lists**: Deteriorating and Dissatisfied metric cards now show a list of flagged client names below the count. Each name links to the Clients page.
+- **View Sessions Action**: Each row in the Clients table has a new **Sessions** button that navigates directly to the Sessions view pre-filtered to that client's YTD sessions.
+- **Sessions URL Params**: Sessions page reads `?clientId=<id>&timeFilter=<value>` query params on mount to support deep-linking from the Clients table.
+- **Dashboard — Missing Stats Fixed**: `unbilledSessions` (completed, no invoice) and `upcomingSessions` (next 7 days) were being referenced but never returned by the API — now correctly computed and returned.
+- **ORS/SRS Slider Input**: Replaced the 1–10 button-grid score selector in the Clinical Note Editor with a smooth **0–10 range slider** (step 0.1) + synced **number input box**. Both are bidirectionally connected. Slider track colour-codes dynamically: red (0–3), amber (3–6), lime (6–10). Tick marks at 0, 2.5, 5, 7.5, 10 for reference.
+
+### Fixed
+- **Slider Drag Broken**: Slider was mounting/unmounting on every state update because `ScoreSelector` was defined *inside* the parent component. Moved it to module scope — drag is now fully smooth.
+- **Currency Labels Missing**: Payment Ledger summary cards (Received This Month, Received YTD, Outstanding) only showed `₹`/`$` symbols. Now show explicit `INR` / `USD` code labels above each amount. Same fix applied to the Dashboard Outstanding Revenue card.
+- **Dashboard Currency Audit**: Confirmed all financial calculations (FIFO allocation, outstanding totals, received summaries) correctly group by currency and never merge INR and USD amounts.
+- **JSX Parse Error** (`clients/page.tsx` line 500): Missing `</div>` for the flex-wrap toolbar container was causing a Turbopack build failure.
+- **TypeScript Build Error** (recharts `Tooltip.formatter`): Parameter typed as `number` — corrected to `unknown` to satisfy `ValueType | undefined`.
+
+---
+
 ## [2.3.0] - 2026-04-19
 ### Added
 - **Client Progress Charts**: Full ORS and SRS charts per client, accessible via a "Charts" button on every row in the clients table.
