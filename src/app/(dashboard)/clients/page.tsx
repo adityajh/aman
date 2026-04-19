@@ -401,7 +401,7 @@ export default function ClientsPage() {
             </p>
             <div className="space-y-2">
               <Label>Termination Type</Label>
-              <Select value={terminationType} onValueChange={setTerminationType}>
+              <Select value={terminationType} onValueChange={(v) => setTerminationType(v ?? "planned")}>
                 <SelectTrigger className="border-slate-200 bg-slate-50">
                   <SelectValue />
                 </SelectTrigger>
