@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -15,7 +16,7 @@ interface ClinicalNoteEditorProps {
   onClose?: () => void;
 }
 
-const SCORE_LABELS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
 
 export function ClinicalNoteEditor({ sessionId, onSave, onClose }: ClinicalNoteEditorProps) {
   const [loading, setLoading] = useState(false);
@@ -126,31 +127,73 @@ export function ClinicalNoteEditor({ sessionId, onSave, onClose }: ClinicalNoteE
     );
   }
 
-  const ScoreSelector = ({ value, onChange, label }: { value: number, onChange: (v: number) => void, label: string }) => (
-    <div className="space-y-2">
-      <div className="flex justify-between items-center">
-        <Label className="text-xs font-medium text-slate-500">{label}</Label>
-        <span className="text-xs font-bold text-lime-600">{value > 0 ? value : "-"}</span>
-      </div>
-      <div className="flex gap-1 justify-between">
-        {SCORE_LABELS.map(s => (
-          <button
-            key={s}
-            type="button"
-            onClick={() => onChange(s)}
-            className={cn(
-              "flex-1 h-7 rounded text-[10px] font-bold transition-all border",
-              value === s 
-                ? "bg-lime-500 border-lime-400 text-slate-950 shadow-[0_0_10px_rgba(132,204,22,0.2)]" 
-                : "bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200 hover:border-slate-300"
-            )}
+  const ScoreSelector = ({ value, onChange, label }: { value: number; onChange: (v: number) => void; label: string }) => {
+    const pct = (value / 10) * 100;
+    // Colour: 0-3 red, 3-6 amber, 6-10 lime
+    const trackColor = value <= 3 ? "#ef4444" : value <= 6 ? "#f59e0b" : "#84cc16";
+
+    const handleSlider = (e: React.ChangeEvent<HTMLInputElement>) => {
+      onChange(Math.round(parseFloat(e.target.value) * 10) / 10);
+    };
+
+    const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const v = parseFloat(e.target.value);
+      if (!isNaN(v) && v >= 0 && v <= 10) {
+        onChange(Math.round(v * 10) / 10);
+      } else if (e.target.value === "" || e.target.value === ".") {
+        // allow typing in progress — don't clear yet
+      }
+    };
+
+    return (
+      <div className="space-y-1.5">
+        <div className="flex justify-between items-center">
+          <Label className="text-xs font-medium text-slate-500 leading-snug">{label}</Label>
+        </div>
+        <div className="flex items-center gap-3">
+          {/* Slider */}
+          <div className="relative flex-1 h-5 flex items-center">
+            <input
+              type="range"
+              min={0}
+              max={10}
+              step={0.1}
+              value={value}
+              onChange={handleSlider}
+              className="w-full h-2 rounded-full appearance-none cursor-pointer"
+              style={{
+                background: `linear-gradient(to right, ${trackColor} ${pct}%, #e2e8f0 ${pct}%)`,
+              }}
+            />
+          </div>
+          {/* Number input */}
+          <Input
+            type="number"
+            min={0}
+            max={10}
+            step={0.1}
+            value={value === 0 ? "" : value}
+            onChange={handleInput}
+            placeholder="0"
+            className="w-16 h-8 text-center font-bold text-sm border-slate-200 bg-white p-1"
+          />
+          {/* Score label */}
+          <span
+            className="text-xs font-bold w-10 text-right"
+            style={{ color: trackColor }}
           >
-            {s}
-          </button>
-        ))}
+            {value > 0 ? value.toFixed(1) : "—"}
+          </span>
+        </div>
+        {/* Tick marks */}
+        <div className="flex justify-between px-0.5">
+          {[0, 2.5, 5, 7.5, 10].map(t => (
+            <span key={t} className="text-[9px] text-slate-300 font-medium">{t}</span>
+          ))}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
