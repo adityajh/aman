@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -27,7 +28,7 @@ import { format, isWithinInterval, startOfMonth, startOfHour, addHours, differen
 import { ClinicalNoteEditor } from "@/components/clinical-note-editor";
 import { cn } from "@/lib/utils";
 
-export default function SessionsPage() {
+function SessionsPageInner() {
   const [sessions, setSessions] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]);
   const [feeSchemes, setFeeSchemes] = useState<any[]>([]);
@@ -46,9 +47,10 @@ export default function SessionsPage() {
   const [startTime, setStartTime] = useState(format(startOfHour(new Date()), "HH:mm"));
   const [endTime, setEndTime] = useState(format(addHours(startOfHour(new Date()), 1), "HH:mm"));
 
-  // Filters
-  const [timeFilter, setTimeFilter] = useState<string>("ytd"); // Default to YTD
-  const [clientFilter, setClientFilter] = useState<string>("all");
+  // Filters — initialised from URL params if present
+  const searchParams = useSearchParams();
+  const [timeFilter, setTimeFilter] = useState<string>(searchParams.get("timeFilter") ?? "ytd");
+  const [clientFilter, setClientFilter] = useState<string>(searchParams.get("clientId") ?? "all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const fetchData = async () => {
@@ -544,5 +546,13 @@ export default function SessionsPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function SessionsPage() {
+  return (
+    <Suspense fallback={<div className="p-8">Loading sessions...</div>}>
+      <SessionsPageInner />
+    </Suspense>
   );
 }

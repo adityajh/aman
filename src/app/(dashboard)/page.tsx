@@ -2,14 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { IndianRupee, DollarSign, Wallet, Calendar, ClipboardCheck, AlertTriangle, ArrowRight, TrendingDown, Frown, UserX, Activity } from "lucide-react";
+import { IndianRupee, DollarSign, Wallet, Calendar, ClipboardCheck, AlertTriangle, ArrowRight, TrendingDown, Frown, UserX, Activity, ExternalLink } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     fetch("/api/dashboard")
@@ -169,6 +171,20 @@ export default function DashboardPage() {
               </span>
               <span className="text-4xl font-black text-slate-900">{stats.deterioratingClients}</span>
               <p className="text-sm text-slate-500">Clients with decreasing ORS scores</p>
+              {stats.deterioratingList?.length > 0 && (
+                <div className="mt-2 pt-2 border-t border-rose-100 flex flex-col gap-1">
+                  {stats.deterioratingList.map((c: { id: string; name: string }) => (
+                    <button
+                      key={c.id}
+                      onClick={() => router.push(`/clients`)}
+                      className="text-left text-sm font-semibold text-rose-700 hover:text-rose-900 hover:underline flex items-center gap-1 truncate"
+                    >
+                      <ExternalLink className="h-3 w-3 shrink-0" />
+                      {c.name}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -184,6 +200,20 @@ export default function DashboardPage() {
               </span>
               <span className="text-4xl font-black text-slate-900">{stats.dissatisfiedClients}</span>
               <p className="text-sm text-slate-500">Clients falling below SRS cutoff</p>
+              {stats.dissatisfiedList?.length > 0 && (
+                <div className="mt-2 pt-2 border-t border-orange-100 flex flex-col gap-1">
+                  {stats.dissatisfiedList.map((c: { id: string; name: string }) => (
+                    <button
+                      key={c.id}
+                      onClick={() => router.push(`/clients`)}
+                      className="text-left text-sm font-semibold text-orange-700 hover:text-orange-900 hover:underline flex items-center gap-1 truncate"
+                    >
+                      <ExternalLink className="h-3 w-3 shrink-0" />
+                      {c.name}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

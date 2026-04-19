@@ -72,6 +72,8 @@ export async function GET() {
 
     let deterioratingClients = 0;
     let dissatisfiedClients = 0;
+    const deterioratingList: { id: string; name: string }[] = [];
+    const dissatisfiedList: { id: string; name: string }[] = [];
 
     clientSessions.forEach(clientSess => {
       // clientSess is ordered by descending scheduledAt (latest first)
@@ -87,6 +89,7 @@ export async function GET() {
         const initialOrs = sessionsWithOrs[sessionsWithOrs.length - 1].note.orsTotal;
         if ((initialOrs - latestOrs) > orsDeteriorationThreshold) {
           deterioratingClients++;
+          deterioratingList.push({ id: clientDetails.id, name: clientDetails.name });
         }
       }
 
@@ -102,7 +105,10 @@ export async function GET() {
           }
         }
         
-        if (isLow) dissatisfiedClients++;
+        if (isLow) {
+          dissatisfiedClients++;
+          dissatisfiedList.push({ id: clientDetails.id, name: clientDetails.name });
+        }
       }
     });
 
@@ -137,7 +143,9 @@ export async function GET() {
       scheduledYtd,
       completedYtd,
       deterioratingClients,
+      deterioratingList,
       dissatisfiedClients,
+      dissatisfiedList,
       noShowRate: parseFloat(noShowRate)
     });
   } catch (error) {

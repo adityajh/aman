@@ -8,10 +8,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Plus, User, Mail, Phone, IndianRupee, Pencil, X, Check, Loader2, UserMinus, LineChart } from "lucide-react";
+import { Plus, User, Mail, Phone, IndianRupee, Pencil, X, Check, Loader2, UserMinus, LineChart, ListFilter, Calendar } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { ClientProgressChart } from "@/components/client-progress-chart";
+import { useRouter } from "next/navigation";
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<any[]>([]);
@@ -29,18 +30,26 @@ export default function ClientsPage() {
   const [terminationType, setTerminationType] = useState("planned");
   const [chartsOpen, setChartsOpen] = useState(false);
   const [chartsClient, setChartsClient] = useState<any>(null);
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "terminated">("active");
+  const router = useRouter();
 
   const fetchClients = async () => {
     try {
       const res = await fetch("/api/clients");
       const data = await res.json();
       setClients(data);
-    } catch (err) {
-      toast.error("Failed to fetch clients");
+    } catch {
+      toast.error("Failed to fetch clients.");
     } finally {
       setLoading(false);
     }
   };
+
+  const filteredClients = clients.filter(c => {
+    if (statusFilter === "active") return c.isActive;
+    if (statusFilter === "terminated") return !c.isActive;
+    return true;
+  });
 
   useEffect(() => {
     fetchClients();
@@ -132,11 +141,26 @@ export default function ClientsPage() {
 
   return (
     <div className="p-8 space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Clients</h1>
-          <p className="text-muted-foreground">Manage your counselling practice clients here.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Clients</h1>
+          <p className="text-slate-500">Manage your client roster.</p>
         </div>
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Status Filter */}
+          <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-lg border border-slate-200">
+            <ListFilter className="h-4 w-4 text-slate-400 ml-2" />
+            <Select value={statusFilter} onValueChange={(v) => setStatusFilter((v ?? "all") as "all" | "active" | "terminated")}>
+              <SelectTrigger className="w-[160px] border-0 h-8 bg-transparent shadow-none font-semibold focus:ring-0">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-slate-200">
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="terminated">Terminated</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger
             render={
@@ -220,12 +244,12 @@ export default function ClientsPage() {
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-10">Loading clients...</TableCell>
                 </TableRow>
-              ) : clients.length === 0 ? (
+              ) : filteredClients.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">No clients found. Add your first client to get started.</TableCell>
+                  <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">No clients found.</TableCell>
                 </TableRow>
               ) : (
-                clients.map((client) => (
+                filteredClients.map((client) => (
                   <TableRow key={client.id} className="hover:bg-slate-50 transition-colors">
                     <TableCell>
                       <div className="flex flex-col">
@@ -264,6 +288,14 @@ export default function ClientsPage() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          className="gap-1 text-blue-600 hover:text-blue-700"
+                          onClick={() => router.push(`/sessions?clientId=${client.id}&timeFilter=ytd`)}
+                        >
+                          <Calendar className="h-3.5 w-3.5" /> Sessions
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           className="gap-1 text-violet-600 hover:text-violet-700"
                           onClick={() => { setChartsClient(client); setChartsOpen(true); }}
                         >
@@ -278,7 +310,7 @@ export default function ClientsPage() {
                             setDetailsOpen(true);
                           }}
                         >
-                          View Details
+                          Details
                         </Button>
                       </div>
                     </TableCell>
