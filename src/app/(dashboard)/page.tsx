@@ -76,6 +76,7 @@ export default function DashboardPage() {
             <CardContent>
               {card.title === "Outstanding Revenue" ? (
                 <div className="flex flex-col gap-1 min-h-[40px] justify-center">
+                  {stats.outstanding?.length > 0 ? stats.outstanding.map((r: any) => (
                     <div key={r.currency} className="flex items-baseline gap-1">
                       <span className="text-xs font-semibold opacity-60">
                         {r.currency === 'USD' ? '$' : '₹'}
