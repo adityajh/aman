@@ -11,7 +11,6 @@ export async function GET() {
 
   try {
     const allClients = await db.query.clients.findMany({
-      where: eq(clients.isActive, true),
       orderBy: [desc(clients.createdAt)],
     });
     return NextResponse.json(allClients);

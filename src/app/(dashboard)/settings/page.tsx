@@ -22,6 +22,8 @@ export default function SettingsPage() {
     upiId: "",
     orsCutoff: 25,
     srsCutoff: 36,
+    orsDeteriorationThreshold: 5,
+    srsDeclineThreshold: 2,
   });
 
   useEffect(() => {
@@ -39,6 +41,8 @@ export default function SettingsPage() {
             upiId: data.upiId || "",
             orsCutoff: data.orsCutoff ?? 25,
             srsCutoff: data.srsCutoff ?? 36,
+            orsDeteriorationThreshold: data.orsDeteriorationThreshold ?? 5,
+            srsDeclineThreshold: data.srsDeclineThreshold ?? 2,
           });
         }
         setLoading(false);
@@ -184,7 +188,7 @@ export default function SettingsPage() {
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="orsCutoff">ORS Cut-off (Max 40)</Label>
-                <div className="text-xs text-muted-foreground mb-1">Scores below this trigger 'Deteriorating' alerts if scores fall.</div>
+                <div className="text-xs text-muted-foreground mb-1">Standard clinical baseline for initial alerts.</div>
                 <Input
                   id="orsCutoff"
                   type="number"
@@ -195,13 +199,37 @@ export default function SettingsPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="srsCutoff">SRS Cut-off (Max 40)</Label>
-                <div className="text-xs text-muted-foreground mb-1">Scores strictly below this trigger 'Dissatisfied' alerts.</div>
+                <div className="text-xs text-muted-foreground mb-1">Scores strictly below this trigger &apos;Dissatisfied&apos; alerts.</div>
                 <Input
                   id="srsCutoff"
                   type="number"
                   value={settings.srsCutoff}
                   onChange={(e) => setSettings({ ...settings, srsCutoff: parseInt(e.target.value) || 0 })}
                   placeholder="36"
+                />
+              </div>
+            </div>
+            <div className="grid gap-6 md:grid-cols-2 pt-4 border-t border-slate-100">
+              <div className="space-y-2">
+                <Label htmlFor="orsDeterioration">ORS Deterioration Threshold</Label>
+                <div className="text-xs text-muted-foreground mb-1">Identifies &apos;Deteriorating&apos; client if Latest ORS is below Initial ORS by this amount.</div>
+                <Input
+                  id="orsDeterioration"
+                  type="number"
+                  value={settings.orsDeteriorationThreshold}
+                  onChange={(e) => setSettings({ ...settings, orsDeteriorationThreshold: parseInt(e.target.value) || 0 })}
+                  placeholder="5"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="srsDecline">SRS Decline Threshold</Label>
+                <div className="text-xs text-muted-foreground mb-1">Identifies &apos;Dissatisfied&apos; client if Latest SRS drops below Previous SRS by this amount.</div>
+                <Input
+                  id="srsDecline"
+                  type="number"
+                  value={settings.srsDeclineThreshold}
+                  onChange={(e) => setSettings({ ...settings, srsDeclineThreshold: parseInt(e.target.value) || 0 })}
+                  placeholder="2"
                 />
               </div>
             </div>

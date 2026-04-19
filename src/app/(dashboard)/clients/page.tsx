@@ -8,8 +8,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Plus, User, Mail, Phone, IndianRupee, Pencil, X, Check, Loader2 } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Plus, User, Mail, Phone, IndianRupee, Pencil, X, Check, Loader2, UserMinus } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<any[]>([]);
@@ -22,6 +23,9 @@ export default function ClientsPage() {
   const [feeSchemes, setFeeSchemes] = useState<any[]>([]);
   const [selectedFeeSchemeId, setSelectedFeeSchemeId] = useState("");
   const [selectedFeeSchemeLabel, setSelectedFeeSchemeLabel] = useState("");
+  const [terminateOpen, setTerminateOpen] = useState(false);
+  const [terminationReason, setTerminationReason] = useState("");
+  const [terminationType, setTerminationType] = useState("planned");
 
   const fetchClients = async () => {
     try {
@@ -86,6 +90,35 @@ export default function ClientsPage() {
       } else {
         const err = await res.text();
         toast.error(`Failed to update: ${err}`);
+      }
+    } catch (err) {
+      toast.error("An error occurred");
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
+  const handleTerminateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedClient) return;
+    setEditSaving(true);
+    try {
+      const res = await fetch(`/api/clients/${selectedClient.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          isActive: false,
+          terminationReason,
+          terminationType,
+        }),
+        headers: { "Content-Type": "application/json" },
+      });
+      if (res.ok) {
+        toast.success("Client terminated successfully");
+        setTerminateOpen(false);
+        setDetailsOpen(false);
+        fetchClients();
+      } else {
+        toast.error("Failed to terminate client");
       }
     } catch (err) {
       toast.error("An error occurred");
@@ -189,13 +222,14 @@ export default function ClientsPage() {
                 </TableRow>
               ) : (
                 clients.map((client) => (
-                  <TableRow key={client.id}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                          <User className="h-4 w-4" />
+                  <TableRow key={client.id} className="hover:bg-slate-50 transition-colors">
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <div className="font-medium text-slate-900 flex items-center gap-2">
+                          {client.name}
+                          {!client.isActive && <Badge variant="outline" className="bg-rose-50 text-rose-600 border-rose-200 uppercase text-[10px]">Terminated</Badge>}
                         </div>
-                        {client.name}
+                        <span className="text-xs text-slate-500">Since {new Date(client.createdAt).toLocaleDateString()}</span>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -333,15 +367,68 @@ export default function ClientsPage() {
                   </div>
                 </div>
                 
-                <div className="pt-4 flex justify-end gap-3">
+                </div>
+                
+                <div className="pt-4 flex justify-end gap-3 flex-wrap">
+                  {selectedClient.isActive && (
+                    <Button variant="outline" onClick={() => setTerminateOpen(true)} className="gap-2 text-rose-600 border-rose-200 hover:bg-rose-50 mr-auto">
+                      <UserMinus className="h-4 w-4" /> Terminate Client
+                    </Button>
+                  )}
                   <Button variant="outline" onClick={() => setEditMode(true)} className="gap-2 text-slate-600 border-slate-200">
                     <Pencil className="h-4 w-4" /> Edit Profile
                   </Button>
-                  <Button className="bg-primary text-primary-foreground">Schedule Session</Button>
+                  {selectedClient.isActive && <Button className="bg-primary text-primary-foreground">Schedule Session</Button>}
                 </div>
               </div>
             )
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Termination Dialog */}
+      <Dialog open={terminateOpen} onOpenChange={(v) => {
+        setTerminateOpen(v);
+        if (!v) { setTerminationReason(""); setTerminationType("planned"); }
+      }}>
+        <DialogContent className="max-w-md bg-white border-slate-200">
+          <DialogHeader>
+            <DialogTitle className="text-rose-600 flex items-center gap-2">
+              <UserMinus className="h-5 w-5" /> Terminate Service
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleTerminateSubmit} className="space-y-4 pt-4">
+            <p className="text-sm text-slate-600">
+              You are resolving active services for <span className="font-bold">{selectedClient?.name}</span>. Data will be preserved.
+            </p>
+            <div className="space-y-2">
+              <Label>Termination Type</Label>
+              <Select value={terminationType} onValueChange={setTerminationType}>
+                <SelectTrigger className="border-slate-200 bg-slate-50">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-slate-200">
+                  <SelectItem value="planned">Planned (Graduation / Successful)</SelectItem>
+                  <SelectItem value="unplanned">Unplanned (Dropout / Referred)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Termination Reason & Details</Label>
+              <Input 
+                value={terminationReason} 
+                onChange={(e) => setTerminationReason(e.target.value)} 
+                placeholder="e.g. Completed goals..." 
+                required 
+              />
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button type="button" variant="outline" onClick={() => setTerminateOpen(false)}>Cancel</Button>
+              <Button type="submit" disabled={editSaving} className="bg-rose-500 hover:bg-rose-600 text-white font-bold gap-2">
+                {editSaving && <Loader2 className="h-4 w-4 animate-spin" />} Terminate 
+              </Button>
+            </div>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

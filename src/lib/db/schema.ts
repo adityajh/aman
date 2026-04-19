@@ -56,6 +56,9 @@ export const clients = pgTable(
       .default("per_session"),
     tags: text("tags").array(),
     isActive: boolean("is_active").notNull().default(true),
+    terminationReason: text("termination_reason"),
+    terminationType: text("termination_type").$type<"planned" | "unplanned">(),
+    terminatedAt: timestamp("terminated_at", { withTimezone: true }),
     intakeNotes: text("intake_notes"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -308,6 +311,8 @@ export const practiceSettings = pgTable(
     monthlyQuote: text("monthly_quote").default("Progress is not a straight line."),
     orsCutoff: integer("ors_cutoff").notNull().default(25),
     srsCutoff: integer("srs_cutoff").notNull().default(36),
+    orsDeteriorationThreshold: integer("ors_deterioration_threshold").notNull().default(5),
+    srsDeclineThreshold: integer("srs_decline_threshold").notNull().default(2),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
       .default(sql`now()`),

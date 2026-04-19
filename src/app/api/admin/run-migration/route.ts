@@ -39,6 +39,26 @@ export async function GET() {
       name: "practice_settings.srs_cutoff add column",
       query: `ALTER TABLE practice_settings ADD COLUMN IF NOT EXISTS srs_cutoff integer NOT NULL DEFAULT 36`
     },
+    {
+      name: "practice_settings.ors_deterioration_threshold add column",
+      query: `ALTER TABLE practice_settings ADD COLUMN IF NOT EXISTS ors_deterioration_threshold integer NOT NULL DEFAULT 5`
+    },
+    {
+      name: "practice_settings.srs_decline_threshold add column",
+      query: `ALTER TABLE practice_settings ADD COLUMN IF NOT EXISTS srs_decline_threshold integer NOT NULL DEFAULT 2`
+    },
+    {
+      name: "clients.termination_reason add column",
+      query: `ALTER TABLE clients ADD COLUMN IF NOT EXISTS termination_reason text`
+    },
+    {
+      name: "clients.termination_type add column",
+      query: `ALTER TABLE clients ADD COLUMN IF NOT EXISTS termination_type text`
+    },
+    {
+      name: "clients.terminated_at add column",
+      query: `ALTER TABLE clients ADD COLUMN IF NOT EXISTS terminated_at timestamptz`
+    },
   ];
 
   for (const step of steps) {

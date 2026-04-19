@@ -24,12 +24,13 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { counselorName, practiceName, address, phone, email, monthlyQuote, upiId, orsCutoff, srsCutoff } = body;
+    const { counselorName, practiceName, address, phone, email, monthlyQuote, upiId, orsCutoff, srsCutoff, orsDeteriorationThreshold, srsDeclineThreshold } = body;
 
     const existing = await db.query.practiceSettings.findFirst();
 
     if (existing) {
-      const updated = await db.update(practiceSettings)
+      const inserted = await db
+        .update(practiceSettings)
         .set({
           counselorName,
           practiceName,
@@ -40,13 +41,16 @@ export async function POST(req: Request) {
           upiId,
           orsCutoff,
           srsCutoff,
+          orsDeteriorationThreshold,
+          srsDeclineThreshold,
           updatedAt: new Date(),
         })
         .where(sql`id = ${existing.id}`)
         .returning();
-      return NextResponse.json(updated[0]);
+      return NextResponse.json(inserted[0]);
     } else {
-      const inserted = await db.insert(practiceSettings)
+      const inserted = await db
+        .insert(practiceSettings)
         .values({
           counselorName,
           practiceName,
@@ -57,6 +61,8 @@ export async function POST(req: Request) {
           upiId,
           orsCutoff,
           srsCutoff,
+          orsDeteriorationThreshold,
+          srsDeclineThreshold,
         })
         .returning();
       return NextResponse.json(inserted[0]);

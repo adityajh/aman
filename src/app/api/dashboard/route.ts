@@ -21,11 +21,14 @@ export async function GET() {
     const settings = settingsData[0];
     const orsCutoff = settings?.orsCutoff ?? 25;
     const srsCutoff = settings?.srsCutoff ?? 36;
+    const orsDeteriorationThreshold = settings?.orsDeteriorationThreshold ?? 5;
+    const srsDeclineThreshold = settings?.srsDeclineThreshold ?? 2;
 
     // Fetch all sessions with notes
     const allSessions = await db.query.sessions.findMany({
       with: {
-        note: true
+        note: true,
+        client: true
       },
       orderBy: (sessions, { desc }) => [desc(sessions.scheduledAt)]
     });
@@ -72,11 +75,17 @@ export async function GET() {
 
     clientSessions.forEach(clientSess => {
       // clientSess is ordered by descending scheduledAt (latest first)
+      if (clientSess.length === 0) return;
+      
+      // Exclude inactive clients from dashboard clinical alert counts
+      const clientDetails = clientSess[0].client;
+      if (clientDetails && !clientDetails.isActive) return;
+
       const sessionsWithOrs = clientSess.filter(s => s.note?.orsTotal != null);
       if (sessionsWithOrs.length >= 2) {
         const latestOrs = sessionsWithOrs[0].note.orsTotal;
-        const prevOrs = sessionsWithOrs[1].note.orsTotal;
-        if (latestOrs < prevOrs) {
+        const initialOrs = sessionsWithOrs[sessionsWithOrs.length - 1].note.orsTotal;
+        if ((initialOrs - latestOrs) > orsDeteriorationThreshold) {
           deterioratingClients++;
         }
       }
@@ -84,9 +93,16 @@ export async function GET() {
       const sessionsWithSrs = clientSess.filter(s => s.note?.srsTotal != null);
       if (sessionsWithSrs.length >= 1) {
         const latestSrs = sessionsWithSrs[0].note.srsTotal;
-        if (latestSrs < srsCutoff) {
-          dissatisfiedClients++;
+        let isLow = latestSrs < srsCutoff;
+        
+        if (!isLow && sessionsWithSrs.length >= 2) {
+          const prevSrs = sessionsWithSrs[1].note.srsTotal;
+          if ((prevSrs - latestSrs) > srsDeclineThreshold) {
+            isLow = true;
+          }
         }
+        
+        if (isLow) dissatisfiedClients++;
       }
     });
 

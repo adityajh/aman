@@ -12,7 +12,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   try {
     const body = await req.json();
-    const { name, email, phone, defaultFee, intakeNotes, defaultFeeSchemeId } = body;
+    const { name, email, phone, defaultFee, intakeNotes, defaultFeeSchemeId, isActive, terminationReason, terminationType } = body;
 
     const [updated] = await db
       .update(clients)
@@ -23,6 +23,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         defaultFee: defaultFee ? defaultFee.toString() : undefined,
         intakeNotes: intakeNotes || undefined,
         defaultFeeSchemeId: defaultFeeSchemeId || undefined,
+        isActive: isActive !== undefined ? isActive : undefined,
+        terminationReason: terminationReason !== undefined ? terminationReason : undefined,
+        terminationType: terminationType !== undefined ? terminationType : undefined,
+        terminatedAt: isActive === false ? new Date() : undefined,
         updatedAt: new Date(),
       })
       .where(eq(clients.id, id))
