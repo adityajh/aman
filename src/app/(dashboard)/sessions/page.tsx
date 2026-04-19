@@ -264,7 +264,7 @@ export default function SessionsPage() {
           {/* Time Filter */}
           <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-lg border border-slate-200">
             <CalendarDays className="h-4 w-4 text-slate-400 ml-2" />
-            <Select value={timeFilter} onValueChange={setTimeFilter}>
+            <Select value={timeFilter} onValueChange={(v) => setTimeFilter(v || "ytd")}>
               <SelectTrigger className="w-[140px] border-0 h-8 bg-transparent shadow-none font-semibold focus:ring-0">
                 <SelectValue />
               </SelectTrigger>
@@ -280,7 +280,7 @@ export default function SessionsPage() {
           {/* Client Filter */}
           <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-lg border border-slate-200">
             <Filter className="h-4 w-4 text-slate-400 ml-2" />
-            <Select value={clientFilter} onValueChange={setClientFilter}>
+            <Select value={clientFilter} onValueChange={(v) => setClientFilter(v || "all")}>
               <SelectTrigger className="w-[160px] border-0 h-8 bg-transparent shadow-none font-semibold focus:ring-0">
                 <SelectValue placeholder="All Clients" />
               </SelectTrigger>
