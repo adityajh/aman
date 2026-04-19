@@ -161,6 +161,7 @@ export default function ClientsPage() {
               </SelectContent>
             </Select>
           </div>
+        </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger
             render={
