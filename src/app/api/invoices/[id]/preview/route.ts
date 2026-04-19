@@ -34,8 +34,16 @@ export async function GET(
       address: "Noida, Uttar Pradesh",
       phone: "+91-0000000000",
       email: "counselor@aman.com",
-      monthlyQuote: "Progress is not a straight line."
+      monthlyQuote: "Progress is not a straight line.",
+      upiId: ""
     };
+
+    const formatCurrency = (val: any) => {
+      const num = parseFloat(val || "0");
+      return num.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+    };
+
+    const currencySymbol = invoice.currency === 'USD' ? '$' : '₹';
 
     // Return the HTML for preview
     const html = `
@@ -43,7 +51,6 @@ export async function GET(
         <div style="border-bottom: 2px solid #bef264; padding-bottom: 20px; margin-bottom: 20px;">
           <h1 style="color: #1e3a8a; margin: 0; font-size: 24px;">${profile.practiceName}</h1>
           <p style="margin: 5px 0 0; color: #64748b; font-size: 14px;">
-            ${profile.counselorName}<br>
             ${(profile.address || "").replace(/\n/g, '<br>')}<br>
             ${profile.phone} | ${profile.email}
           </p>
@@ -64,12 +71,12 @@ export async function GET(
               ${invoice.lineItems.map((item: any) => `
                 <tr style="border-bottom: 1px solid #f1f5f9;">
                   <td style="padding: 12px 10px; font-size: 14px;">${item.description}</td>
-                  <td style="padding: 12px 10px; text-align: right; font-size: 14px;">₹${item.amount}</td>
+                  <td style="padding: 12px 10px; text-align: right; font-size: 14px;">${currencySymbol}${formatCurrency(item.amount)}</td>
                 </tr>
               `).join('')}
               <tr>
                 <td style="padding: 20px 10px 10px; font-weight: bold; font-size: 15px;">Total Due</td>
-                <td style="padding: 20px 10px 10px; text-align: right; font-weight: bold; font-size: 18px; color: #1e3a8a;">₹${invoice.total}</td>
+                <td style="padding: 20px 10px 10px; text-align: right; font-weight: bold; font-size: 18px; color: #1e3a8a;">${currencySymbol}${formatCurrency(invoice.total)}</td>
               </tr>
             </tbody>
           </table>
@@ -82,6 +89,7 @@ export async function GET(
             <strong>Account #:</strong> 499 034528 006<br>
             <strong>IFSC:</strong> HSBC 0110007<br>
             <strong>Account Name:</strong> Vijay Gopal Sreenivasan
+            ${profile.upiId ? `<br><strong>UPI ID:</strong> ${profile.upiId}` : ''}
           </p>
         </div>
         

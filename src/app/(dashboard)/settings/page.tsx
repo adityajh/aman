@@ -19,6 +19,7 @@ export default function SettingsPage() {
     phone: "",
     email: "",
     monthlyQuote: "",
+    upiId: "",
   });
 
   useEffect(() => {
@@ -33,6 +34,7 @@ export default function SettingsPage() {
             phone: data.phone || "",
             email: data.email || "",
             monthlyQuote: data.monthlyQuote || "",
+            upiId: data.upiId || "",
           });
         }
         setLoading(false);
@@ -141,6 +143,26 @@ export default function SettingsPage() {
                   value={settings.phone}
                   onChange={(e) => setSettings({ ...settings, phone: e.target.value })}
                   placeholder="+91-0000000000"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building className="h-5 w-5 text-primary" /> Payment Details
+              </CardTitle>
+              <CardDescription>Specify your primary UPI ID for collections.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="upiId">UPI ID</Label>
+                <Input
+                  id="upiId"
+                  value={settings.upiId}
+                  onChange={(e) => setSettings({ ...settings, upiId: e.target.value })}
+                  placeholder="name@bank / mobile@upi"
                 />
               </div>
             </CardContent>

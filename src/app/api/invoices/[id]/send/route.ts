@@ -41,8 +41,16 @@ export async function POST(
       address: "Noida, Uttar Pradesh",
       phone: "+91-0000000000",
       email: "counselor@aman.com",
-      monthlyQuote: "Progress is not a straight line."
+      monthlyQuote: "Progress is not a straight line.",
+      upiId: ""
     };
+
+    const formatCurrency = (val: any) => {
+      const num = parseFloat(val || "0");
+      return num.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+    };
+
+    const currencySymbol = invoice.currency === 'USD' ? '$' : '₹';
 
     // Configure Nodemailer transporter (Gmail SMTP)
     const transporter = nodemailer.createTransport({
@@ -60,7 +68,6 @@ export async function POST(
         <div style="border-bottom: 4px solid #bef264; padding-bottom: 24px; margin-bottom: 24px;">
           <h1 style="color: #1a365d; margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.025em;">${practiceProfile.practiceName}</h1>
           <p style="margin: 8px 0 0; color: #4a5568; font-size: 15px; line-height: 1.5;">
-            <strong>${practiceProfile.counselorName}</strong><br>
             ${(practiceProfile.address || "").replace(/\n/g, '<br>')}<br>
             ${practiceProfile.phone} | ${practiceProfile.email}
           </p>
@@ -68,7 +75,7 @@ export async function POST(
 
         <h2 style="color: #2b6cb0; font-size: 20px; font-weight: 700; margin-bottom: 16px;">Invoice: #${invoice.invoiceNumber}</h2>
         <p style="font-size: 16px; margin-bottom: 24px;">Dear <strong>${invoice.client.name}</strong>,</p>
-        <p style="font-size: 15px; color: #4a5568; line-height: 1.6; margin-bottom: 24px;">Please find the session invoice for your recent consultations at ${practiceProfile.practiceName}. Thank you for your continued trust.</p>
+        <p style="font-size: 15px; color: #4a5568; line-height: 1.6; margin-bottom: 24px;">Please find the billing details for your recent therapy sessions. Thank you for your continued trust in the therapeutic process.</p>
         
         <div style="background-color: #f7fafc; padding: 24px; border-radius: 8px; margin: 24px 0; border: 1px solid #e2e8f0;">
           <table style="width: 100%; border-collapse: collapse;">
@@ -82,12 +89,12 @@ export async function POST(
               ${invoice.lineItems.map((item: any) => `
                 <tr style="border-bottom: 1px solid #e2e8f0;">
                   <td style="padding: 16px 12px; font-size: 15px; color: #2d3748;">${item.description}</td>
-                  <td style="padding: 16px 12px; text-align: right; font-size: 15px; color: #2d3748; font-weight: 600;">₹${item.amount}</td>
+                  <td style="padding: 16px 12px; text-align: right; font-size: 15px; color: #2d3748; font-weight: 600;">${currencySymbol}${formatCurrency(item.amount)}</td>
                 </tr>
               `).join('')}
               <tr>
                 <td style="padding: 24px 12px 12px; font-weight: 800; font-size: 16px; color: #1a365d;">Total Payable</td>
-                <td style="padding: 24px 12px 12px; text-align: right; font-weight: 800; font-size: 22px; color: #2b6cb0;">₹${invoice.total}</td>
+                <td style="padding: 24px 12px 12px; text-align: right; font-weight: 800; font-size: 22px; color: #2b6cb0;">${currencySymbol}${formatCurrency(invoice.total)}</td>
               </tr>
             </tbody>
           </table>
@@ -101,6 +108,7 @@ export async function POST(
             <strong>Account #:</strong> 499 034528 006<br>
             <strong>IFSC:</strong> HSBC 0110007<br>
             <strong>Account Name:</strong> Vijay Gopal Sreenivasan
+            ${practiceProfile.upiId ? `<br><strong>UPI ID:</strong> ${practiceProfile.upiId}` : ''}
           </p>
         </div>
         
@@ -123,7 +131,7 @@ export async function POST(
     await transporter.sendMail({
       from: `"${practiceProfile.practiceName}" <${process.env.SMTP_USER}>`,
       to: invoice.client.email,
-      subject: `Invoice ${invoice.invoiceNumber} from ${practiceProfile.practiceName}`,
+      subject: `Invoice ${invoice.invoiceNumber} for therapy sessions`,
       html: htmlContent,
     });
 

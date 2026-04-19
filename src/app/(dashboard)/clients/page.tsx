@@ -99,7 +99,7 @@ export default function ClientsPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Clients</h1>
-          <p className="text-muted-foreground">Manage your pastoral practice clients here.</p>
+          <p className="text-muted-foreground">Manage your counselling practice clients here.</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger

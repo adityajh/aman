@@ -18,6 +18,8 @@ export async function GET(req: Request) {
       orderBy: [desc(sessions.scheduledAt)],
       with: {
         client: true,
+        feeScheme: true,
+        invoice: true,
       },
     });
 
@@ -38,17 +40,29 @@ export async function POST(req: Request) {
     const { 
       clientId, 
       scheduledAt, 
-      durationMin, 
+      endedAt,
       sessionType, 
       modality, 
       feeCharged, 
       feeSchemeId 
     } = body;
 
+    let durationMin = 60; // Default
+    const start = new Date(scheduledAt);
+    const end = endedAt ? new Date(endedAt) : null;
+
+    if (end && end > start) {
+      const diffMs = end.getTime() - start.getTime();
+      const rawMin = diffMs / (1000 * 60);
+      // Round to nearest 15 mins, min 15 mins
+      durationMin = Math.max(15, Math.round(rawMin / 15) * 15);
+    }
+
     const [newSession] = await db.insert(sessions).values({
       clientId,
-      scheduledAt: new Date(scheduledAt),
-      durationMin: parseInt(durationMin),
+      scheduledAt: start,
+      endedAt: end,
+      durationMin: durationMin,
       sessionType,
       modality,
       feeCharged: (feeCharged && feeCharged !== "") ? feeCharged.toString() : undefined,

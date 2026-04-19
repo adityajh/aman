@@ -24,7 +24,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { counselorName, practiceName, address, phone, email, monthlyQuote } = body;
+    const { counselorName, practiceName, address, phone, email, monthlyQuote, upiId } = body;
 
     const existing = await db.query.practiceSettings.findFirst();
 
@@ -37,6 +37,7 @@ export async function POST(req: Request) {
           phone,
           email,
           monthlyQuote,
+          upiId,
           updatedAt: new Date(),
         })
         .where(sql`id = ${existing.id}`)
@@ -51,6 +52,7 @@ export async function POST(req: Request) {
           phone,
           email,
           monthlyQuote,
+          upiId,
         })
         .returning();
       return NextResponse.json(inserted[0]);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -12,25 +12,18 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { 
   Plus, 
-  Mail, 
   FileText, 
   User, 
   IndianRupee, 
   DollarSign, 
-  Send, 
-  Trash2, 
-  Download, 
-  Eye, 
-  Search, 
-  ExternalLink, 
-  Calendar as CalendarIcon, 
-  Check, 
   Clock, 
-  AlertCircle,
-  Loader2, 
-  CheckCircle2 
+  Calendar as CalendarIcon, 
+  CheckCircle2,
+  CalendarDays,
+  Filter,
+  Loader2
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, isWithinInterval, startOfMonth, startOfHour, addHours, differenceInMinutes } from "date-fns";
 import { ClinicalNoteEditor } from "@/components/clinical-note-editor";
 import { cn } from "@/lib/utils";
 
@@ -40,17 +33,22 @@ export default function SessionsPage() {
   const [feeSchemes, setFeeSchemes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
+  
+  // Selection / Form State
   const [selectedClientId, setSelectedClientId] = useState<string>("");
   const [selectedClientName, setSelectedClientName] = useState<string>("");
   const [selectedFeeSchemeId, setSelectedFeeSchemeId] = useState<string>("");
   const [selectedFeeSchemeLabel, setSelectedFeeSchemeLabel] = useState<string>("Pick a scheme...");
   const [feeCharged, setFeeCharged] = useState<string>("");
+  
+  // Date/Time Form State
+  const [startDate, setStartDate] = useState(format(new Date(), "yyyy-MM-dd"));
+  const [startTime, setStartTime] = useState(format(startOfHour(new Date()), "HH:mm"));
+  const [endTime, setEndTime] = useState(format(addHours(startOfHour(new Date()), 1), "HH:mm"));
+
+  // Filters
+  const [timeFilter, setTimeFilter] = useState<string>("ytd"); // Default to YTD
   const [clientFilter, setClientFilter] = useState<string>("all");
-  const [clientFilterName, setClientFilterName] = useState<string>("All Clients");
-  const [filterCompleted, setFilterCompleted] = useState(true);
-  const [filterScheduled, setFilterScheduled] = useState(true);
-  const [filterInvoiced, setFilterInvoiced] = useState(true);
-  const [filterUninvoiced, setFilterUninvoiced] = useState(true);
 
   const fetchData = async () => {
     try {
@@ -78,24 +76,37 @@ export default function SessionsPage() {
     fetchData();
   }, []);
 
+  // Duration Logic
+  const calculatedDuration = useMemo(() => {
+    try {
+      const start = new Date(`${startDate}T${startTime}`);
+      const end = new Date(`${startDate}T${endTime}`);
+      if (end <= start) return 0;
+      const diff = differenceInMinutes(end, start);
+      // Round to nearest 15, min 15
+      return Math.max(15, Math.round(diff / 15) * 15);
+    } catch {
+      return 0;
+    }
+  }, [startDate, startTime, endTime]);
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
 
-    const payload = {
-      clientId: selectedClientId,
-      scheduledAt: formData.get("scheduledAt") as string,
-      durationMin: formData.get("durationMin") as string,
-      modality: formData.get("modality") as string,
-      sessionType: formData.get("sessionType") as string,
-      feeSchemeId: selectedFeeSchemeId && selectedFeeSchemeId !== "custom" ? selectedFeeSchemeId : undefined,
-      feeCharged: feeCharged || undefined,
-    };
-
-    if (!payload.clientId) {
+    if (!selectedClientId) {
       toast.error("Please select a client.");
       return;
     }
+
+    const payload = {
+      clientId: selectedClientId,
+      scheduledAt: `${startDate}T${startTime}:00`,
+      endedAt: `${startDate}T${endTime}:00`,
+      sessionType: "individual", // Default or add back to form if needed
+      modality: "video", // Default or add back to form if needed
+      feeSchemeId: selectedFeeSchemeId && selectedFeeSchemeId !== "custom" ? selectedFeeSchemeId : undefined,
+      feeCharged: feeCharged || undefined,
+    };
 
     try {
       const res = await fetch("/api/sessions", {
@@ -107,11 +118,7 @@ export default function SessionsPage() {
       if (res.ok) {
         toast.success("Session scheduled");
         setOpen(false);
-        setSelectedClientId("");
-        setSelectedClientName("");
-        setSelectedFeeSchemeId("");
-        setSelectedFeeSchemeLabel("Pick a scheme...");
-        setFeeCharged("");
+        resetForm();
         fetchData();
       } else {
         const errText = await res.text();
@@ -122,70 +129,88 @@ export default function SessionsPage() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "scheduled": return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Scheduled</Badge>;
-      case "completed": return <Badge variant="outline" className="bg-lime-50 text-lime-700 border-lime-200">Completed</Badge>;
-      case "no_show": return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">No Show</Badge>;
-      case "cancelled": return <Badge variant="outline" className="bg-slate-50 text-slate-500 border-slate-200">Cancelled</Badge>;
-      default: return null;
+  const resetForm = () => {
+    setSelectedClientId("");
+    setSelectedClientName("");
+    setSelectedFeeSchemeId("");
+    setSelectedFeeSchemeLabel("Pick a scheme...");
+    setFeeCharged("");
+    setStartDate(format(new Date(), "yyyy-MM-dd"));
+    setStartTime(format(startOfHour(new Date()), "HH:mm"));
+    setEndTime(format(addHours(startOfHour(new Date()), 1), "HH:mm"));
+  };
+
+  const getStatusBadge = (session: any) => {
+    const { status, invoiceId, invoice } = session;
+    
+    if (status === "cancelled") return <Badge variant="outline" className="bg-slate-50 text-slate-500 border-slate-200">Cancelled</Badge>;
+    if (status === "no_show") return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">No Show</Badge>;
+    
+    if (status === "scheduled") return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Scheduled</Badge>;
+    
+    // Billing aware statuses
+    if (invoiceId) {
+      // Check if paid (using existing schema logic where amountPaid is tracked)
+      const isPaid = invoice && parseFloat(invoice.amountPaid || "0") >= parseFloat(invoice.total || "0");
+      if (isPaid) return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Received</Badge>;
+      return <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">Invoiced</Badge>;
     }
+    
+    if (status === "completed") return <Badge variant="outline" className="bg-lime-50 text-lime-700 border-lime-200">Completed</Badge>;
+    
+    return null;
   };
 
   function SessionRow({ session, onRefresh }: { session: any, onRefresh: () => void }) {
     const [noteOpen, setNoteOpen] = useState(false);
+    const start = new Date(session.scheduledAt);
+    const end = session.endedAt ? new Date(session.endedAt) : null;
 
     return (
       <TableRow className="hover:bg-slate-50/50 transition-colors">
-        <TableCell>
-          <div className="flex flex-col">
-            <span className="font-medium text-slate-900">{format(new Date(session.scheduledAt), "EEE, d MMM")}</span>
-            <span className="text-xs text-slate-500 flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {format(new Date(session.scheduledAt), "h:mm a")} ({session.durationMin}m)
-            </span>
-          </div>
-        </TableCell>
-        <TableCell>
-          <div className="flex items-center gap-2 text-slate-700">
-            <User className="h-3 w-3 text-slate-400" />
-            <span className="text-sm font-medium">{session.client?.name}</span>
-          </div>
+        <TableCell className="font-medium text-slate-900">
+          {format(start, "EEE, d MMM yyyy")}
         </TableCell>
         <TableCell>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-              {session.modality.split('_').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
-            </span>
+            <User className="h-4 w-4 text-slate-400" />
+            <span className="font-semibold text-slate-700">{session.client?.name}</span>
           </div>
         </TableCell>
-        <TableCell>
-          {session.invoiceId ? (
-            <Badge variant="outline" className="bg-blue-100 text-blue-900 border-blue-200 font-bold uppercase text-[10px] tracking-wider">Invoiced</Badge>
-          ) : (
-            <Badge variant="outline" className="bg-amber-100 text-amber-900 border-amber-200 font-bold uppercase text-[10px] tracking-wider">Unbilled</Badge>
-          )}
+        <TableCell className="text-slate-600 font-medium">
+          {format(start, "h:mm a")}
+        </TableCell>
+        <TableCell className="text-slate-600 font-medium">
+          {end ? format(end, "h:mm a") : "—"}
         </TableCell>
         <TableCell>
-          {getStatusBadge(session.status)}
+          <Badge variant="secondary" className="bg-slate-100 text-slate-700 hover:bg-slate-100 font-bold">
+            {session.durationMin}m
+          </Badge>
+        </TableCell>
+        <TableCell className="font-semibold text-slate-700">
+          {session.feeScheme?.currency === 'USD' ? '$' : '₹'}{parseFloat(session.feeCharged || "0").toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+        </TableCell>
+        <TableCell>
+          {getStatusBadge(session)}
         </TableCell>
         <TableCell className="text-right">
           <Dialog open={noteOpen} onOpenChange={setNoteOpen}>
             <DialogTrigger
               render={
-                <Button variant="ghost" size="sm" className="gap-2 text-lime-600 hover:text-lime-700 hover:bg-lime-50 font-bold">
+                <Button variant="ghost" size="sm" className="gap-2 text-lime-600 hover:text-lime-700 font-bold">
                   {session.status === 'completed' ? 'View Note' : 'Write Note'}
                 </Button>
               }
             />
-            <DialogContent className="max-w-[95vw] lg:max-w-4xl max-h-[95vh] overflow-y-auto bg-white border-slate-200 text-slate-900 p-0 shadow-2xl">
+            <DialogContent className="max-w-[95vw] lg:max-w-4xl max-h-[95vh] overflow-y-auto bg-white p-0 shadow-2xl">
               <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-md p-6 border-b border-slate-100 shadow-sm">
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2 text-slate-900 text-xl font-bold">
                     <FileText className="h-6 w-6 text-lime-500" />
                     Clinical Note: {session.client?.name}
                     <span className="text-sm font-normal text-slate-400 ml-2">
-                      {format(new Date(session.scheduledAt), "d MMM yyyy")}
+                      {format(start, "d MMM yyyy")}
                     </span>
                   </DialogTitle>
                 </DialogHeader>
@@ -204,109 +229,85 @@ export default function SessionsPage() {
     );
   }
 
-  const filteredSessions = sessions.filter(s => {
-    // Client Match
-    if (clientFilter !== "all" && s.clientId !== clientFilter) return false;
-    
-    // Status Match
-    if (!filterCompleted && s.status === "completed") return false;
-    if (!filterScheduled && s.status === "scheduled") return false;
-    
-    // Billing Match
-    if (!filterInvoiced && s.invoiceId) return false;
-    if (!filterUninvoiced && !s.invoiceId) return false;
-
-    return true;
-  });
+  const filteredSessions = useMemo(() => {
+    return sessions.filter(s => {
+      // Client Filter
+      if (clientFilter !== "all" && s.clientId !== clientFilter) return false;
+      
+      // Time Filter (Financial Year logic included)
+      const now = new Date();
+      const sessionDate = new Date(s.scheduledAt);
+      
+      if (timeFilter === "month") {
+        const start = startOfMonth(now);
+        if (sessionDate < start) return false;
+      } else if (timeFilter === "ytd") {
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth(); // 0-indexed, 3 is April
+        const fyStart = new Date(currentMonth >= 3 ? currentYear : currentYear - 1, 3, 1);
+        if (sessionDate < fyStart) return false;
+      }
+      
+      return true;
+    });
+  }, [sessions, clientFilter, timeFilter]);
 
   return (
     <div className="p-8 space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Sessions</h1>
-          <p className="text-slate-500">Schedule and track clinical sessions.</p>
+          <p className="text-slate-500">Log and track professional therapy consultations.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Select 
-            value={clientFilter} 
-            onValueChange={(v) => {
-              const val = v || "all";
-              setClientFilter(val);
-              if (val === "all") {
-                setClientFilterName("All Clients");
-              } else {
-                setClientFilterName(clients.find(c => c.id === val)?.name || val);
-              }
-            }}
-          >
-            <SelectTrigger className="w-[180px] border-slate-200 text-slate-900 font-medium h-10 shadow-sm bg-white">
-              <span>{clientFilterName}</span>
-            </SelectTrigger>
-            <SelectContent className="bg-white border-slate-200">
-              <SelectItem value="all" label="All Clients">All Clients</SelectItem>
-              {clients.map((c) => (
-                <SelectItem key={c.id} value={c.id} label={c.name}>{c.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          <div className="h-6 w-px bg-slate-200 mx-1" />
-
-          <div className="flex bg-slate-100/80 p-1 rounded-lg gap-1 border border-slate-200 shadow-sm">
-            <button 
-              onClick={() => setFilterScheduled(!filterScheduled)}
-              className={cn(
-                "px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all",
-                filterScheduled ? "bg-white text-blue-600 shadow-sm" : "text-slate-400 hover:text-slate-600"
-              )}
-            >
-              Scheduled
-            </button>
-            <button 
-              onClick={() => setFilterCompleted(!filterCompleted)}
-              className={cn(
-                "px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all",
-                filterCompleted ? "bg-white text-lime-600 shadow-sm" : "text-slate-400 hover:text-slate-600"
-              )}
-            >
-              Completed
-            </button>
-            <div className="w-px h-4 bg-slate-200 self-center" />
-            <button 
-              onClick={() => setFilterInvoiced(!filterInvoiced)}
-              className={cn(
-                "px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all",
-                filterInvoiced ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-slate-600"
-              )}
-            >
-              Invoiced
-            </button>
-            <button 
-              onClick={() => setFilterUninvoiced(!filterUninvoiced)}
-              className={cn(
-                "px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all",
-                filterUninvoiced ? "bg-white text-amber-600 shadow-sm" : "text-slate-400 hover:text-slate-600"
-              )}
-            >
-              Unbilled
-            </button>
+        
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Time Filter */}
+          <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-lg border border-slate-200">
+            <CalendarDays className="h-4 w-4 text-slate-400 ml-2" />
+            <Select value={timeFilter} onValueChange={setTimeFilter}>
+              <SelectTrigger className="w-[140px] border-0 h-8 bg-transparent shadow-none font-semibold focus:ring-0">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-slate-200">
+                <SelectItem value="all">All Time</SelectItem>
+                <SelectItem value="ytd">YTD (Apr-Mar)</SelectItem>
+                <SelectItem value="month">This Month</SelectItem>
+                <SelectItem value="custom" disabled>Custom Range</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          <Dialog open={open} onOpenChange={setOpen}>
+          {/* Client Filter */}
+          <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-lg border border-slate-200">
+            <Filter className="h-4 w-4 text-slate-400 ml-2" />
+            <Select value={clientFilter} onValueChange={setClientFilter}>
+              <SelectTrigger className="w-[160px] border-0 h-8 bg-transparent shadow-none font-semibold focus:ring-0">
+                <SelectValue placeholder="All Clients" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-slate-200">
+                <SelectItem value="all">All Clients</SelectItem>
+                {clients.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
             <DialogTrigger
               render={
-                <Button className="gap-2 bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-md">
+                <Button className="gap-2 bg-slate-900 text-white hover:bg-slate-800 shadow-md h-10 px-6 font-bold">
                   <Plus className="h-4 w-4" /> New Session
                 </Button>
               }
             />
-            <DialogContent className="sm:max-w-xl">
+            <DialogContent className="sm:max-w-xl bg-white border-slate-200">
               <DialogHeader>
-                <DialogTitle>Schedule New Session</DialogTitle>
+                <DialogTitle className="text-xl font-bold text-slate-900">Schedule New Session</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-6 pt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="clientId">Client</Label>
+                  <Label className="text-slate-600 font-bold">Client</Label>
                   <Select 
                     value={selectedClientId} 
                     onValueChange={(id) => {
@@ -315,8 +316,8 @@ export default function SessionsPage() {
                       setSelectedClientName(clients.find(c => c.id === val)?.name || "");
                     }}
                   >
-                    <SelectTrigger className="w-full bg-slate-50 border-slate-200">
-                      <span className={selectedClientId ? "text-slate-900" : "text-slate-400"}>
+                    <SelectTrigger className="w-full bg-slate-50 border-slate-200 h-12">
+                      <span className={selectedClientId ? "text-slate-900 font-semibold" : "text-slate-400"}>
                         {selectedClientName || "Pick a client..."}
                       </span>
                     </SelectTrigger>
@@ -325,11 +326,7 @@ export default function SessionsPage() {
                         <SelectItem key={c.id} value={c.id} label={c.name}>
                           <div className="flex flex-col items-start gap-1 py-1">
                             <span className="font-bold text-slate-900">{c.name}</span>
-                            {c.email && (
-                              <span className="text-[10px] text-slate-400 font-medium tracking-tight bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
-                                {c.email.toLowerCase()}
-                              </span>
-                            )}
+                            {c.email && <span className="text-[10px] text-slate-400 uppercase tracking-wider">{c.email}</span>}
                           </div>
                         </SelectItem>
                       ))}
@@ -337,97 +334,78 @@ export default function SessionsPage() {
                   </Select>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="scheduledAt">Date & Time</Label>
-                    <Input id="scheduledAt" name="scheduledAt" type="datetime-local" defaultValue={format(new Date(), "yyyy-MM-dd'T'HH:mm")} className="bg-slate-50 border-slate-200" required />
+                <div className="space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-slate-600 font-bold">Session Date</Label>
+                      <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required className="h-10 bg-white" />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="durationMin">Duration (min)</Label>
-                    <Input id="durationMin" name="durationMin" type="number" defaultValue="60" className="bg-slate-50 border-slate-200" required />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-slate-600 font-bold">Start Time</Label>
+                      <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} required className="h-10 bg-white" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-slate-600 font-bold">Finish Time</Label>
+                      <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} required className="h-10 bg-white" />
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center px-2 py-1 bg-white rounded-lg border border-slate-200 shadow-inner">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Estimated Duration</span>
+                    <span className="text-lg font-black text-lime-600">{calculatedDuration} mins <span className="text-[10px] font-normal text-slate-400">(Rounded)</span></span>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="modality">Modality</Label>
-                    <Select name="modality" defaultValue="video">
-                      <SelectTrigger className="bg-slate-50 border-slate-200">
-                        <SelectValue />
+                    <Label className="text-slate-600 font-bold">Fee Scheme</Label>
+                    <Select 
+                      value={selectedFeeSchemeId} 
+                      onValueChange={(id) => {
+                        const sid = id || "custom";
+                        setSelectedFeeSchemeId(sid);
+                        const scheme = feeSchemes.find(f => f.id === sid);
+                        if (scheme) {
+                          setFeeCharged(scheme.amount);
+                          setSelectedFeeSchemeLabel(`${scheme.name} (${scheme.currency === 'USD' ? '$' : '₹'}${scheme.amount})`);
+                        } else {
+                          setSelectedFeeSchemeLabel("Custom / No Scheme");
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="w-full bg-slate-50 border-slate-200 h-10">
+                        <span className={selectedFeeSchemeLabel === "Pick a scheme..." ? "text-slate-400" : "text-slate-900"}>
+                          {selectedFeeSchemeLabel}
+                        </span>
                       </SelectTrigger>
                       <SelectContent className="bg-white border-slate-200">
-                        <SelectItem value="in_person">In Person</SelectItem>
-                        <SelectItem value="video">Video</SelectItem>
-                        <SelectItem value="phone">Phone</SelectItem>
+                        <SelectItem value="custom">Custom / No Scheme</SelectItem>
+                        {feeSchemes.map(f => (
+                          <SelectItem key={f.id} value={f.id}>
+                            {f.name} ({f.currency === 'USD' ? '$' : '₹'}{f.amount})
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="sessionType">Session Type</Label>
-                    <Select name="sessionType" defaultValue="individual">
-                      <SelectTrigger className="bg-slate-50 border-slate-200">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white border-slate-200">
-                        <SelectItem value="individual">Individual</SelectItem>
-                        <SelectItem value="couples">Couples</SelectItem>
-                        <SelectItem value="group">Group / Family</SelectItem>
-                        <SelectItem value="intake">Intake</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="feeSchemeId">Fee Scheme</Label>
-                  <Select 
-                    value={selectedFeeSchemeId} 
-                    onValueChange={(id) => {
-                      const sid = id || "custom";
-                      setSelectedFeeSchemeId(sid);
-                      const scheme = feeSchemes.find(f => f.id === sid);
-                      if (scheme) {
-                        setFeeCharged(scheme.amount);
-                        setSelectedFeeSchemeLabel(`${scheme.name} (${scheme.currency === 'USD' ? '$' : '₹'}${scheme.amount})`);
-                      } else {
+                    <Label className="text-slate-600 font-bold text-right w-full block">Override Fee</Label>
+                    <Input 
+                      type="number" 
+                      placeholder="Optional"
+                      value={feeCharged}
+                      onChange={(e) => {
+                        setFeeCharged(e.target.value);
+                        setSelectedFeeSchemeId("custom");
                         setSelectedFeeSchemeLabel("Custom / No Scheme");
-                      }
-                    }}
-                  >
-                    <SelectTrigger className="w-full bg-slate-50 border-slate-200 h-10 shadow-sm">
-                      <span className={selectedFeeSchemeLabel === "Pick a scheme..." ? "text-slate-400" : "text-slate-900"}>
-                        {selectedFeeSchemeLabel}
-                      </span>
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border-slate-200 shadow-2xl">
-                      <SelectItem value="custom">Custom / No Scheme</SelectItem>
-                      {feeSchemes.map(f => (
-                        <SelectItem key={f.id} value={f.id}>
-                          {f.name} ({f.currency === 'USD' ? '$' : '₹'}{f.amount})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                      }}
+                      className="bg-slate-50 border-slate-200 h-10 text-right font-bold"
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="feeCharged">Override Fee (Amount)</Label>
-                  <Input 
-                    id="feeCharged" 
-                    name="feeCharged" 
-                    type="number" 
-                    placeholder="Optional"
-                    value={feeCharged}
-                    onChange={(e) => {
-                      setFeeCharged(e.target.value);
-                      setSelectedFeeSchemeId("custom");
-                      setSelectedFeeSchemeLabel("Custom / No Scheme");
-                    }}
-                    className="bg-slate-50 border-slate-200 h-10"
-                  />
-                </div>
-
-                <Button type="submit" className="w-full bg-lime-400 text-slate-950 hover:bg-lime-500 font-bold h-12 shadow-sm transition-all active:scale-[0.98]">
+                <Button type="submit" className="w-full bg-lime-400 text-slate-950 hover:bg-lime-500 font-bold h-14 text-lg shadow-lg active:scale-95 transition-all">
                   Schedule Session
                 </Button>
               </form>
@@ -436,27 +414,34 @@ export default function SessionsPage() {
         </div>
       </div>
 
-      <Card>
+      <Card className="border-slate-200 shadow-sm overflow-hidden">
         <CardContent className="p-0">
           <Table>
-            <TableHeader className="bg-slate-50/50">
-              <TableRow className="hover:bg-transparent">
-                <TableHead>Date & Time</TableHead>
-                <TableHead>Client</TableHead>
-                <TableHead>Modality</TableHead>
-                <TableHead>Billing</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+            <TableHeader className="bg-slate-50 items-center">
+              <TableRow className="hover:bg-transparent border-slate-200">
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest">Date</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest">Client</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest">Start</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest">End</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest">Duration</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest">Fees</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest">Status</TableHead>
+                <TableHead className="text-right py-4 font-bold text-slate-400 uppercase text-xs tracking-widest px-6">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-10 text-slate-400">Loading sessions...</TableCell>
+                  <TableCell colSpan={8} className="text-center py-20">
+                    <Loader2 className="h-10 w-10 animate-spin mx-auto text-slate-200" />
+                    <p className="mt-4 text-slate-400 font-medium">Loading session history...</p>
+                  </TableCell>
                 </TableRow>
               ) : filteredSessions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">No sessions match your filter.</TableCell>
+                  <TableCell colSpan={8} className="text-center py-20 text-slate-400">
+                    No sessions found matching your current filters.
+                  </TableCell>
                 </TableRow>
               ) : (
                 filteredSessions.map((session) => (

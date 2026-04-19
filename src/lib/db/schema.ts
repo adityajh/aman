@@ -123,6 +123,7 @@ export const sessions = pgTable(
       .notNull()
       .references(() => clients.id, { onDelete: "restrict" }),
     scheduledAt: timestamp("scheduled_at", { withTimezone: true }).notNull(),
+    endedAt: timestamp("ended_at", { withTimezone: true }),
     durationMin: integer("duration_min").notNull().default(60),
     sessionType: text("session_type")
       .$type<"individual" | "couples" | "group" | "intake" | "followup">()
@@ -303,6 +304,7 @@ export const practiceSettings = pgTable(
     address: text("address").default("Noida, Uttar Pradesh"),
     phone: text("phone").default("+91-0000000000"),
     email: text("email").default("counselor@aman.com"),
+    upiId: text("upi_id"),
     monthlyQuote: text("monthly_quote").default("Progress is not a straight line."),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()

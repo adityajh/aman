@@ -14,6 +14,12 @@ export async function GET() {
     const now = new Date();
     const firstOfOfMonth = format(startOfMonth(now), "yyyy-MM-dd");
 
+    // Calculate start of Financial Year (April 1st)
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth(); // 0-indexed (0 is Jan, 3 is April)
+    const fyStartDate = new Date(currentMonth >= 3 ? currentYear : currentYear - 1, 3, 1);
+    const firstOfFY = format(fyStartDate, "yyyy-MM-dd");
+
     // 1. Total outstanding (grouped by currency with explicit casting)
     const outstandingRes = await db.select({
       currency: sql<string>`COALESCE(${invoices.currency}, 'INR')`,
@@ -30,17 +36,18 @@ export async function GET() {
     .where(gte(payments.paymentDate, firstOfOfMonth))
     .groupBy(sql`COALESCE(${payments.currency}, 'INR')`);
 
-    // 3. All-time total received (grouped by currency)
-    const allTimeRes = await db.select({
+    // 3. YTD total received (grouped by currency) - FY logic (April to March)
+    const ytdRes = await db.select({
       currency: sql<string>`COALESCE(${payments.currency}, 'INR')`,
       total: sql<number>`SUM(CAST(${payments.amount} AS NUMERIC))`
     }).from(payments)
+    .where(gte(payments.paymentDate, firstOfFY))
     .groupBy(sql`COALESCE(${payments.currency}, 'INR')`);
 
     return NextResponse.json({
       outstanding: outstandingRes,
       receivedMonth: thisMonthRes,
-      receivedAllTime: allTimeRes
+      receivedYTD: ytdRes
     });
 
   } catch (error) {

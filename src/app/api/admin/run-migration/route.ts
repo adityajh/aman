@@ -23,6 +23,14 @@ export async function GET() {
         updated_at timestamptz NOT NULL DEFAULT now()
       )`
     },
+    {
+      name: "practice_settings.upi_id add column",
+      query: `ALTER TABLE practice_settings ADD COLUMN IF NOT EXISTS upi_id text`
+    },
+    {
+      name: "sessions.ended_at add column",
+      query: `ALTER TABLE sessions ADD COLUMN IF NOT EXISTS ended_at timestamptz`
+    },
   ];
 
   for (const step of steps) {

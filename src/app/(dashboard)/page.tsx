@@ -61,7 +61,7 @@ export default function DashboardPage() {
     <div className="p-8 space-y-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Practice Overview</h1>
-        <p className="text-muted-foreground">Welcome back, Counselor. Here's your practice at a glance.</p>
+        <p className="text-muted-foreground">Welcome back. Here's your practice at a glance.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -76,15 +76,14 @@ export default function DashboardPage() {
             <CardContent>
               {card.title === "Outstanding Revenue" ? (
                 <div className="flex flex-col gap-1 min-h-[40px] justify-center">
-                  {stats.outstanding?.length > 0 ? stats.outstanding.map((r: any) => (
                     <div key={r.currency} className="flex items-baseline gap-1">
                       <span className="text-xs font-semibold opacity-60">
                         {r.currency === 'USD' ? '$' : '₹'}
                       </span>
-                      <span className="text-2xl font-bold">{parseFloat(r.total).toLocaleString()}</span>
+                      <span className="text-2xl font-bold">{parseFloat(r.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                     </div>
                   )) : (
-                    <div className="text-2xl font-bold">₹0</div>
+                    <div className="text-2xl font-bold">₹0.00</div>
                   )}
                 </div>
               ) : (
