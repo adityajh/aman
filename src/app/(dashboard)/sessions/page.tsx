@@ -58,12 +58,13 @@ export default function SessionsPage() {
         fetch("/api/clients"),
         fetch("/api/fee-schemes"),
       ]);
-      const [sessionsData, clientsData, feesData] = await Promise.all([
+      const [sessionsPayload, clientsData, feesData] = await Promise.all([
         sessionsRes.json(),
         clientsRes.json(),
         feesRes.json(),
       ]);
-      setSessions(sessionsData);
+      // New API wraps sessions in { sessions, orsCutoff, srsCutoff }
+      setSessions(Array.isArray(sessionsPayload) ? sessionsPayload : (sessionsPayload.sessions ?? []));
       setClients(clientsData);
       setFeeSchemes(feesData);
     } catch (err) {
@@ -193,6 +194,50 @@ export default function SessionsPage() {
         </TableCell>
         <TableCell>
           {getStatusBadge(session)}
+        </TableCell>
+        {/* Clinical columns */}
+        <TableCell className="text-center">
+          <div className="flex flex-col items-center gap-0.5">
+            <span className="text-[10px] text-slate-400 uppercase tracking-widest">Prev</span>
+            <span className="font-bold text-slate-700">{session._clinical?.prevOrs ?? <span className="text-slate-300">—</span>}</span>
+          </div>
+        </TableCell>
+        <TableCell className="text-center">
+          <div className="flex flex-col items-center gap-0.5">
+            <span className="text-[10px] text-slate-400 uppercase tracking-widest">Cur</span>
+            <span className="font-bold text-slate-700">{session._clinical?.currentOrs ?? <span className="text-slate-300">—</span>}</span>
+          </div>
+        </TableCell>
+        <TableCell className="text-center">
+          <div className="flex flex-col items-center gap-0.5">
+            <span className="text-[10px] text-slate-400 uppercase tracking-widest">Prev</span>
+            <span className="font-bold text-slate-700">{session._clinical?.prevSrs ?? <span className="text-slate-300">—</span>}</span>
+          </div>
+        </TableCell>
+        <TableCell className="text-center">
+          <div className="flex flex-col items-center gap-0.5">
+            <span className="text-[10px] text-slate-400 uppercase tracking-widest">Cur</span>
+            <span className="font-bold text-slate-700">{session._clinical?.currentSrs ?? <span className="text-slate-300">—</span>}</span>
+          </div>
+        </TableCell>
+        <TableCell>
+          {session._clinical?.orsStatus || session._clinical?.srsStatus ? (
+            <div className="flex flex-col gap-1">
+              {session._clinical?.orsStatus && (() => {
+                const o = session._clinical.orsStatus;
+                const cls = o === "CSC Achieved" ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                  : o === "RCI Achieved" ? "bg-blue-50 text-blue-700 border-blue-200"
+                  : o === "Deteriorating" ? "bg-rose-50 text-rose-700 border-rose-200"
+                  : "bg-slate-50 text-slate-500 border-slate-200";
+                return <Badge variant="outline" className={`text-[10px] whitespace-nowrap ${cls}`}>ORS: {o}</Badge>;
+              })()}
+              {session._clinical?.srsStatus && (() => {
+                const s2 = session._clinical.srsStatus;
+                const cls2 = s2 === "Satisfied" ? "bg-green-50 text-green-700 border-green-200" : "bg-orange-50 text-orange-700 border-orange-200";
+                return <Badge variant="outline" className={`text-[10px] whitespace-nowrap ${cls2}`}>SRS: {s2}</Badge>;
+              })()}
+            </div>
+          ) : <span className="text-slate-300 text-xs">No data</span>}
         </TableCell>
         <TableCell className="text-right">
           <Dialog open={noteOpen} onOpenChange={setNoteOpen}>
@@ -460,23 +505,28 @@ export default function SessionsPage() {
                 <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest">Client</TableHead>
                 <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest">Start</TableHead>
                 <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest">End</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest">Duration</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-20">Dur.</TableHead>
                 <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest">Fees</TableHead>
                 <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest">Status</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest text-center w-16">ORS Prev</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest text-center w-16">ORS Now</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest text-center w-16">SRS Prev</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest text-center w-16">SRS Now</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest min-w-[160px]">Risk Status</TableHead>
                 <TableHead className="text-right py-4 font-bold text-slate-400 uppercase text-xs tracking-widest px-6">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-20">
+                  <TableCell colSpan={13} className="text-center py-20">
                     <Loader2 className="h-10 w-10 animate-spin mx-auto text-slate-200" />
                     <p className="mt-4 text-slate-400 font-medium">Loading session history...</p>
                   </TableCell>
                 </TableRow>
               ) : filteredSessions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-20 text-slate-400">
+                  <TableCell colSpan={13} className="text-center py-20 text-slate-400">
                     No sessions found matching your current filters.
                   </TableCell>
                 </TableRow>

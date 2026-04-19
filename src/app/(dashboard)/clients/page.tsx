@@ -367,8 +367,6 @@ export default function ClientsPage() {
                   </div>
                 </div>
                 
-                </div>
-                
                 <div className="pt-4 flex justify-end gap-3 flex-wrap">
                   {selectedClient.isActive && (
                     <Button variant="outline" onClick={() => setTerminateOpen(true)} className="gap-2 text-rose-600 border-rose-200 hover:bg-rose-50 mr-auto">
