@@ -37,6 +37,10 @@ export async function GET() {
     let completedMonth = 0;
     let scheduledYtd = 0;
     let completedYtd = 0;
+    let unbilledSessions = 0;
+    let upcomingSessions = 0;
+
+    const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
     let totalPast = 0;
     let noShows = 0;
@@ -57,10 +61,21 @@ export async function GET() {
         if (s.status === 'completed' || s.invoiceId) completedMonth++;
       }
 
-      // No Show Rate (Look at all past sessions that are not scheduled/cancelled but count no_shows)
+      // No Show Rate
       if (s.status !== 'scheduled' && s.status !== 'cancelled') {
         totalPast++;
         if (s.status === 'no_show') noShows++;
+      }
+
+      // Unbilled: completed but not linked to an invoice
+      if (s.status === 'completed' && !s.invoiceId) {
+        unbilledSessions++;
+      }
+
+      // Upcoming: scheduled within the next 7 days
+      const d2 = new Date(s.scheduledAt);
+      if (s.status === 'scheduled' && d2 >= now && d2 <= sevenDaysFromNow) {
+        upcomingSessions++;
       }
 
       // Client mapping for clinical metrics
@@ -138,6 +153,8 @@ export async function GET() {
     return NextResponse.json({
       outstanding: outstandingRevenue,
       activeRiskFlags: riskFlags.count || 0,
+      unbilledSessions,
+      upcomingSessions,
       scheduledMonth,
       completedMonth,
       scheduledYtd,
