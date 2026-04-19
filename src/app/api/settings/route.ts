@@ -24,7 +24,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { counselorName, practiceName, address, phone, email, monthlyQuote, upiId, orsCutoff, srsCutoff, orsDeteriorationThreshold, srsDeclineThreshold } = body;
+    const { counselorName, practiceName, address, phone, email, monthlyQuote, upiId, orsCutoff, srsCutoff, orsDeteriorationThreshold, srsDeclineThreshold, orsRciThreshold, orsAmberLow, orsGreenLow } = body;
 
     const existing = await db.query.practiceSettings.findFirst();
 
@@ -43,6 +43,9 @@ export async function POST(req: Request) {
           srsCutoff,
           orsDeteriorationThreshold,
           srsDeclineThreshold,
+          orsRciThreshold,
+          orsAmberLow,
+          orsGreenLow,
           updatedAt: new Date(),
         })
         .where(sql`id = ${existing.id}`)
@@ -63,6 +66,9 @@ export async function POST(req: Request) {
           srsCutoff,
           orsDeteriorationThreshold,
           srsDeclineThreshold,
+          orsRciThreshold,
+          orsAmberLow,
+          orsGreenLow,
         })
         .returning();
       return NextResponse.json(inserted[0]);

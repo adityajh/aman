@@ -313,6 +313,9 @@ export const practiceSettings = pgTable(
     srsCutoff: integer("srs_cutoff").notNull().default(36),
     orsDeteriorationThreshold: integer("ors_deterioration_threshold").notNull().default(5),
     srsDeclineThreshold: integer("srs_decline_threshold").notNull().default(2),
+    orsRciThreshold: integer("ors_rci_threshold").notNull().default(5),
+    orsAmberLow: integer("ors_amber_low").notNull().default(26),
+    orsGreenLow: integer("ors_green_low").notNull().default(32),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
       .default(sql`now()`),

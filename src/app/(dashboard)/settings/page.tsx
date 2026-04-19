@@ -24,6 +24,9 @@ export default function SettingsPage() {
     srsCutoff: 36,
     orsDeteriorationThreshold: 5,
     srsDeclineThreshold: 2,
+    orsRciThreshold: 5,
+    orsAmberLow: 26,
+    orsGreenLow: 32,
   });
 
   useEffect(() => {
@@ -43,6 +46,9 @@ export default function SettingsPage() {
             srsCutoff: data.srsCutoff ?? 36,
             orsDeteriorationThreshold: data.orsDeteriorationThreshold ?? 5,
             srsDeclineThreshold: data.srsDeclineThreshold ?? 2,
+            orsRciThreshold: data.orsRciThreshold ?? 5,
+            orsAmberLow: data.orsAmberLow ?? 26,
+            orsGreenLow: data.orsGreenLow ?? 32,
           });
         }
         setLoading(false);
@@ -230,6 +236,41 @@ export default function SettingsPage() {
                   value={settings.srsDeclineThreshold}
                   onChange={(e) => setSettings({ ...settings, srsDeclineThreshold: parseInt(e.target.value) || 0 })}
                   placeholder="2"
+                />
+              </div>
+            </div>
+            <div className="grid gap-6 md:grid-cols-3 pt-4 border-t border-slate-100">
+              <div className="space-y-2">
+                <Label htmlFor="orsRci">ORS RCI Threshold</Label>
+                <div className="text-xs text-muted-foreground mb-1">Reliable Change Index: min ORS improvement from first session to count as statistically significant (PCOMS default: 5).</div>
+                <Input
+                  id="orsRci"
+                  type="number"
+                  value={settings.orsRciThreshold}
+                  onChange={(e) => setSettings({ ...settings, orsRciThreshold: parseInt(e.target.value) || 0 })}
+                  placeholder="5"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="orsAmber">ORS Amber Band Start</Label>
+                <div className="text-xs text-muted-foreground mb-1">ORS ≤ this = Red (Distress). Above this = Amber (At Risk).</div>
+                <Input
+                  id="orsAmber"
+                  type="number"
+                  value={settings.orsAmberLow}
+                  onChange={(e) => setSettings({ ...settings, orsAmberLow: parseInt(e.target.value) || 0 })}
+                  placeholder="26"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="orsGreen">ORS Green Band Start</Label>
+                <div className="text-xs text-muted-foreground mb-1">ORS ≥ this = Green (Functional). Also the CSC threshold.</div>
+                <Input
+                  id="orsGreen"
+                  type="number"
+                  value={settings.orsGreenLow}
+                  onChange={(e) => setSettings({ ...settings, orsGreenLow: parseInt(e.target.value) || 0 })}
+                  placeholder="32"
                 />
               </div>
             </div>

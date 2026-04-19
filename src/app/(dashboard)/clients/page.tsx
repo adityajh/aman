@@ -8,9 +8,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Plus, User, Mail, Phone, IndianRupee, Pencil, X, Check, Loader2, UserMinus } from "lucide-react";
+import { Plus, User, Mail, Phone, IndianRupee, Pencil, X, Check, Loader2, UserMinus, LineChart } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { ClientProgressChart } from "@/components/client-progress-chart";
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<any[]>([]);
@@ -26,6 +27,8 @@ export default function ClientsPage() {
   const [terminateOpen, setTerminateOpen] = useState(false);
   const [terminationReason, setTerminationReason] = useState("");
   const [terminationType, setTerminationType] = useState("planned");
+  const [chartsOpen, setChartsOpen] = useState(false);
+  const [chartsClient, setChartsClient] = useState<any>(null);
 
   const fetchClients = async () => {
     try {
@@ -208,17 +211,18 @@ export default function ClientsPage() {
                 <TableHead>Name</TableHead>
                 <TableHead>Contact</TableHead>
                 <TableHead>Default Fee</TableHead>
+                <TableHead className="w-[120px]">ORS Trend</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-10">Loading clients...</TableCell>
+                  <TableCell colSpan={5} className="text-center py-10">Loading clients...</TableCell>
                 </TableRow>
               ) : clients.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-10 text-muted-foreground">No clients found. Add your first client to get started.</TableCell>
+                  <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">No clients found. Add your first client to get started.</TableCell>
                 </TableRow>
               ) : (
                 clients.map((client) => (
@@ -252,18 +256,31 @@ export default function ClientsPage() {
                         {client.defaultFee || "0.00"}
                       </div>
                     </TableCell>
+                    <TableCell className="w-[120px] py-2">
+                      <ClientProgressChart clientId={client.id} clientName={client.name} compact />
+                    </TableCell>
                     <TableCell className="text-right">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => {
-                          setSelectedClient(client);
-                          setEditMode(false);
-                          setDetailsOpen(true);
-                        }}
-                      >
-                        View Details
-                      </Button>
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="gap-1 text-violet-600 hover:text-violet-700"
+                          onClick={() => { setChartsClient(client); setChartsOpen(true); }}
+                        >
+                          <LineChart className="h-3.5 w-3.5" /> Charts
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => {
+                            setSelectedClient(client);
+                            setEditMode(false);
+                            setDetailsOpen(true);
+                          }}
+                        >
+                          View Details
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -427,6 +444,23 @@ export default function ClientsPage() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Client Progress Charts Dialog */}
+      <Dialog open={chartsOpen} onOpenChange={setChartsOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-white border-slate-200">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-slate-900">
+              <LineChart className="h-5 w-5 text-violet-600" />
+              Progress Charts — {chartsClient?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {chartsClient && (
+            <div className="pt-2">
+              <ClientProgressChart clientId={chartsClient.id} clientName={chartsClient.name} />
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
