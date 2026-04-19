@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { IndianRupee, DollarSign, Wallet, Calendar, ClipboardCheck, AlertTriangle, ArrowRight } from "lucide-react";
+import { IndianRupee, DollarSign, Wallet, Calendar, ClipboardCheck, AlertTriangle, ArrowRight, TrendingDown, Frown, UserX, Activity } from "lucide-react";
 import Link from "next/link";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -116,6 +116,90 @@ export default function DashboardPage() {
             <Link href="/invoices" className={cn(buttonVariants({ variant: "secondary" }))}>
               Run Monthly Billing
             </Link>
+          </CardContent>
+        </Card>
+        <Card className="col-span-1 border-blue-100 shadow-sm">
+          <CardHeader className="bg-blue-50/50 pb-4 border-b border-blue-50">
+            <CardTitle className="text-blue-900 font-bold flex items-center gap-2">
+              <Activity className="h-5 w-5 text-blue-600" /> Session Tracking
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="grid grid-cols-2 divide-x divide-slate-100">
+              <div className="p-6">
+                <p className="text-sm font-semibold text-slate-500 uppercase tracking-widest mb-4">This Month</p>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600 font-medium">Scheduled</span>
+                    <span className="text-xl font-bold text-yellow-600">{stats.scheduledMonth}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600 font-medium">Completed</span>
+                    <span className="text-xl font-bold text-blue-600">{stats.completedMonth}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="p-6">
+                <p className="text-sm font-semibold text-slate-500 uppercase tracking-widest mb-4">YTD</p>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600 font-medium">Scheduled</span>
+                    <span className="text-xl font-bold text-yellow-600">{stats.scheduledYtd}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600 font-medium">Completed</span>
+                    <span className="text-xl font-bold text-blue-600">{stats.completedYtd}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="border-rose-100 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-5">
+            <TrendingDown className="h-24 w-24" />
+          </div>
+          <CardContent className="p-6">
+            <div className="flex flex-col gap-2 relative z-10">
+              <span className="text-sm font-bold text-rose-600 uppercase tracking-widest flex items-center gap-2">
+                <TrendingDown className="h-4 w-4" /> Deteriorating
+              </span>
+              <span className="text-4xl font-black text-slate-900">{stats.deterioratingClients}</span>
+              <p className="text-sm text-slate-500">Clients with decreasing ORS scores</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-orange-100 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-5">
+            <Frown className="h-24 w-24" />
+          </div>
+          <CardContent className="p-6">
+            <div className="flex flex-col gap-2 relative z-10">
+              <span className="text-sm font-bold text-orange-600 uppercase tracking-widest flex items-center gap-2">
+                <Frown className="h-4 w-4" /> Dissatisfied
+              </span>
+              <span className="text-4xl font-black text-slate-900">{stats.dissatisfiedClients}</span>
+              <p className="text-sm text-slate-500">Clients falling below SRS cutoff</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-slate-200 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-5">
+            <UserX className="h-24 w-24" />
+          </div>
+          <CardContent className="p-6">
+            <div className="flex flex-col gap-2 relative z-10">
+              <span className="text-sm font-bold text-slate-600 uppercase tracking-widest flex items-center gap-2">
+                <UserX className="h-4 w-4" /> No-Show Rate
+              </span>
+              <span className="text-4xl font-black text-slate-900">{stats.noShowRate}%</span>
+              <p className="text-sm text-slate-500">Of all historical sessions</p>
+            </div>
           </CardContent>
         </Card>
       </div>

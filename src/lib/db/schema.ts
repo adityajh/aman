@@ -306,6 +306,8 @@ export const practiceSettings = pgTable(
     email: text("email").default("counselor@aman.com"),
     upiId: text("upi_id"),
     monthlyQuote: text("monthly_quote").default("Progress is not a straight line."),
+    orsCutoff: integer("ors_cutoff").notNull().default(25),
+    srsCutoff: integer("srs_cutoff").notNull().default(36),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
       .default(sql`now()`),

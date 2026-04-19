@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
-import { sessions, invoices, sessionNotes } from "@/lib/db/schema";
+import { sessions, invoices, sessionNotes, practiceSettings } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
-import { eq, isNull, and, gte, lt, or, sql } from "drizzle-orm";
+import { eq, or, sql } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -11,20 +11,88 @@ export async function GET() {
 
   try {
     const now = new Date();
-    const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-    const firstOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    // Indian Financial Year: Starts April 1st
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+    const fyStart = new Date(currentMonth >= 3 ? currentYear : currentYear - 1, 3, 1);
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    const [unbilledCount] = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(sessions)
-      .where(and(eq(sessions.status, 'completed'), isNull(sessions.invoiceId)));
+    const settingsData = await db.select().from(practiceSettings).limit(1);
+    const settings = settingsData[0];
+    const orsCutoff = settings?.orsCutoff ?? 25;
+    const srsCutoff = settings?.srsCutoff ?? 36;
 
-    const [upcomingCount] = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(sessions)
-      .where(and(eq(sessions.status, 'scheduled'), gte(sessions.scheduledAt, now), lt(sessions.scheduledAt, sevenDaysFromNow)));
+    // Fetch all sessions with notes
+    const allSessions = await db.query.sessions.findMany({
+      with: {
+        note: true
+      },
+      orderBy: (sessions, { desc }) => [desc(sessions.scheduledAt)]
+    });
 
-    // 3. Outstanding Revenue (Split by currency)
+    let scheduledMonth = 0;
+    let completedMonth = 0;
+    let scheduledYtd = 0;
+    let completedYtd = 0;
+
+    let totalPast = 0;
+    let noShows = 0;
+
+    // Grouping for client metrics
+    const clientSessions = new Map<string, any[]>();
+
+    allSessions.forEach(s => {
+      const d = new Date(s.scheduledAt);
+      
+      // Time aggregations
+      if (d >= fyStart) {
+        if (s.status === 'scheduled') scheduledYtd++;
+        if (s.status === 'completed' || s.invoiceId) completedYtd++; // invoiceId implies it was completed
+      }
+      if (d >= monthStart) {
+        if (s.status === 'scheduled') scheduledMonth++;
+        if (s.status === 'completed' || s.invoiceId) completedMonth++;
+      }
+
+      // No Show Rate (Look at all past sessions that are not scheduled/cancelled but count no_shows)
+      if (s.status !== 'scheduled' && s.status !== 'cancelled') {
+        totalPast++;
+        if (s.status === 'no_show') noShows++;
+      }
+
+      // Client mapping for clinical metrics
+      if (!clientSessions.has(s.clientId)) {
+        clientSessions.set(s.clientId, []);
+      }
+      clientSessions.get(s.clientId)!.push(s);
+    });
+
+    let deterioratingClients = 0;
+    let dissatisfiedClients = 0;
+
+    clientSessions.forEach(clientSess => {
+      // clientSess is ordered by descending scheduledAt (latest first)
+      const sessionsWithOrs = clientSess.filter(s => s.note?.orsTotal != null);
+      if (sessionsWithOrs.length >= 2) {
+        const latestOrs = sessionsWithOrs[0].note.orsTotal;
+        const prevOrs = sessionsWithOrs[1].note.orsTotal;
+        if (latestOrs < prevOrs) {
+          deterioratingClients++;
+        }
+      }
+
+      const sessionsWithSrs = clientSess.filter(s => s.note?.srsTotal != null);
+      if (sessionsWithSrs.length >= 1) {
+        const latestSrs = sessionsWithSrs[0].note.srsTotal;
+        if (latestSrs < srsCutoff) {
+          dissatisfiedClients++;
+        }
+      }
+    });
+
+    const noShowRate = totalPast > 0 ? ((noShows / totalPast) * 100).toFixed(1) : "0.0";
+
+    // Outstanding Revenue
     const outstandingRevenue = await db
       .select({ 
         currency: sql<string>`COALESCE(${invoices.currency}, 'INR')`,
@@ -39,17 +107,22 @@ export async function GET() {
       ))
       .groupBy(sql`COALESCE(${invoices.currency}, 'INR')`);
 
-    // 4. Risk Flags
+    // Risk Flags (Medium/High)
     const [riskFlags] = await db
         .select({ count: sql<number>`count(*)` })
         .from(sessionNotes)
         .where(or(eq(sessionNotes.riskFlag, 'medium'), eq(sessionNotes.riskFlag, 'high')));
 
     return NextResponse.json({
-      unbilledSessions: unbilledCount.count || 0,
-      upcomingSessions: upcomingCount.count || 0,
       outstanding: outstandingRevenue,
       activeRiskFlags: riskFlags.count || 0,
+      scheduledMonth,
+      completedMonth,
+      scheduledYtd,
+      completedYtd,
+      deterioratingClients,
+      dissatisfiedClients,
+      noShowRate: parseFloat(noShowRate)
     });
   } catch (error) {
     console.error(error);

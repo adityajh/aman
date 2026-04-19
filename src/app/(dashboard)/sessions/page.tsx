@@ -49,6 +49,7 @@ export default function SessionsPage() {
   // Filters
   const [timeFilter, setTimeFilter] = useState<string>("ytd"); // Default to YTD
   const [clientFilter, setClientFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const fetchData = async () => {
     try {
@@ -143,20 +144,19 @@ export default function SessionsPage() {
   const getStatusBadge = (session: any) => {
     const { status, invoiceId, invoice } = session;
     
-    if (status === "cancelled") return <Badge variant="outline" className="bg-slate-50 text-slate-500 border-slate-200">Cancelled</Badge>;
-    if (status === "no_show") return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">No Show</Badge>;
+    if (status === "cancelled" || status === "no_show") return <Badge variant="outline" className="bg-slate-100 text-slate-500 border-slate-200">{status === "no_show" ? "No Show" : "Cancelled"}</Badge>;
     
-    if (status === "scheduled") return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Scheduled</Badge>;
+    if (status === "scheduled") return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">Scheduled</Badge>;
     
     // Billing aware statuses
     if (invoiceId) {
-      // Check if paid (using existing schema logic where amountPaid is tracked)
       const isPaid = invoice && parseFloat(invoice.amountPaid || "0") >= parseFloat(invoice.total || "0");
       if (isPaid) return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Received</Badge>;
-      return <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">Invoiced</Badge>;
+      // We will show standard 'invoiced' badge
     }
     
-    if (status === "completed") return <Badge variant="outline" className="bg-lime-50 text-lime-700 border-lime-200">Completed</Badge>;
+    if (status === "completed") return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Completed</Badge>;
+
     
     return null;
   };
@@ -248,9 +248,29 @@ export default function SessionsPage() {
         if (sessionDate < fyStart) return false;
       }
       
+      // Status Filter logic
+      if (statusFilter !== "all") {
+        if (statusFilter === "exceptions") {
+          if (s.status !== "cancelled" && s.status !== "no_show") return false;
+        } else if (statusFilter === "scheduled") {
+          if (s.status !== "scheduled") return false;
+        } else if (statusFilter === "completed") {
+          if (s.status !== "completed" || s.invoiceId) return false;
+        } else if (statusFilter === "invoiced") {
+          if (s.status !== "completed" || !s.invoiceId) return false;
+          // check if NOT fully paid
+          const isPaid = s.invoice && parseFloat(s.invoice.amountPaid || "0") >= parseFloat(s.invoice.total || "0");
+          if (isPaid) return false;
+        } else if (statusFilter === "received") {
+          if (s.status !== "completed" || !s.invoiceId) return false;
+          const isPaid = s.invoice && parseFloat(s.invoice.amountPaid || "0") >= parseFloat(s.invoice.total || "0");
+          if (!isPaid) return false;
+        }
+      }
+      
       return true;
     });
-  }, [sessions, clientFilter, timeFilter]);
+  }, [sessions, clientFilter, timeFilter, statusFilter]);
 
   return (
     <div className="p-8 space-y-6">
@@ -265,7 +285,7 @@ export default function SessionsPage() {
           <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-lg border border-slate-200">
             <CalendarDays className="h-4 w-4 text-slate-400 ml-2" />
             <Select value={timeFilter} onValueChange={(v) => setTimeFilter(v || "ytd")}>
-              <SelectTrigger className="w-[140px] border-0 h-8 bg-transparent shadow-none font-semibold focus:ring-0">
+              <SelectTrigger className="w-[180px] border-0 h-8 bg-transparent shadow-none font-semibold focus:ring-0">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-white border-slate-200">
@@ -281,7 +301,7 @@ export default function SessionsPage() {
           <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-lg border border-slate-200">
             <Filter className="h-4 w-4 text-slate-400 ml-2" />
             <Select value={clientFilter} onValueChange={(v) => setClientFilter(v || "all")}>
-              <SelectTrigger className="w-[160px] border-0 h-8 bg-transparent shadow-none font-semibold focus:ring-0">
+              <SelectTrigger className="w-[180px] border-0 h-8 bg-transparent shadow-none font-semibold focus:ring-0">
                 <SelectValue placeholder="All Clients" />
               </SelectTrigger>
               <SelectContent className="bg-white border-slate-200">
@@ -344,7 +364,15 @@ export default function SessionsPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label className="text-slate-600 font-bold">Start Time</Label>
-                      <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} required className="h-10 bg-white" />
+                      <Input type="time" value={startTime} onChange={(e) => {
+                        setStartTime(e.target.value);
+                        if (e.target.value) {
+                          const [h, m] = e.target.value.split(':');
+                          const d = new Date();
+                          d.setHours(parseInt(h) + 1, parseInt(m));
+                          setEndTime(`${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`);
+                        }
+                      }} required className="h-10 bg-white" />
                     </div>
                     <div className="space-y-2">
                       <Label className="text-slate-600 font-bold">Finish Time</Label>
@@ -412,6 +440,15 @@ export default function SessionsPage() {
             </DialogContent>
           </Dialog>
         </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <Button size="sm" variant={statusFilter === "all" ? "default" : "outline"} onClick={() => setStatusFilter("all")} className={statusFilter === "all" ? "bg-slate-800" : "text-slate-600"}>All Statuses</Button>
+        <Button size="sm" variant={statusFilter === "scheduled" ? "default" : "outline"} onClick={() => setStatusFilter("scheduled")} className={statusFilter === "scheduled" ? "bg-yellow-600 hover:bg-yellow-700" : "text-slate-600"}>Scheduled</Button>
+        <Button size="sm" variant={statusFilter === "completed" ? "default" : "outline"} onClick={() => setStatusFilter("completed")} className={statusFilter === "completed" ? "bg-blue-600 hover:bg-blue-700" : "text-slate-600"}>Completed</Button>
+        <Button size="sm" variant={statusFilter === "invoiced" ? "default" : "outline"} onClick={() => setStatusFilter("invoiced")} className={statusFilter === "invoiced" ? "bg-slate-800 hover:bg-slate-900" : "text-slate-600"}>Invoiced</Button>
+        <Button size="sm" variant={statusFilter === "received" ? "default" : "outline"} onClick={() => setStatusFilter("received")} className={statusFilter === "received" ? "bg-green-600 hover:bg-green-700" : "text-slate-600"}>Received</Button>
+        <Button size="sm" variant={statusFilter === "exceptions" ? "default" : "outline"} onClick={() => setStatusFilter("exceptions")} className={statusFilter === "exceptions" ? "bg-slate-500 hover:bg-slate-600" : "text-slate-600"}>Cancelled / No Show</Button>
       </div>
 
       <Card className="border-slate-200 shadow-sm overflow-hidden">

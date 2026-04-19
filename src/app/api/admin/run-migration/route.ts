@@ -31,6 +31,14 @@ export async function GET() {
       name: "sessions.ended_at add column",
       query: `ALTER TABLE sessions ADD COLUMN IF NOT EXISTS ended_at timestamptz`
     },
+    {
+      name: "practice_settings.ors_cutoff add column",
+      query: `ALTER TABLE practice_settings ADD COLUMN IF NOT EXISTS ors_cutoff integer NOT NULL DEFAULT 25`
+    },
+    {
+      name: "practice_settings.srs_cutoff add column",
+      query: `ALTER TABLE practice_settings ADD COLUMN IF NOT EXISTS srs_cutoff integer NOT NULL DEFAULT 36`
+    },
   ];
 
   for (const step of steps) {

@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Save, Loader2, User, Building, MapPin, Phone, Mail, Quote } from "lucide-react";
+import { Save, Loader2, User, Building, MapPin, Phone, Mail, Quote, Activity } from "lucide-react";
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
@@ -20,6 +20,8 @@ export default function SettingsPage() {
     email: "",
     monthlyQuote: "",
     upiId: "",
+    orsCutoff: 25,
+    srsCutoff: 36,
   });
 
   useEffect(() => {
@@ -35,6 +37,8 @@ export default function SettingsPage() {
             email: data.email || "",
             monthlyQuote: data.monthlyQuote || "",
             upiId: data.upiId || "",
+            orsCutoff: data.orsCutoff ?? 25,
+            srsCutoff: data.srsCutoff ?? 36,
           });
         }
         setLoading(false);
@@ -168,6 +172,41 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
         </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5 text-primary" /> Clinical Flags
+            </CardTitle>
+            <CardDescription>System threshold criteria for flagging "dissatisfied" or "at risk" clients via session feedback metrics.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="orsCutoff">ORS Cut-off (Max 40)</Label>
+                <div className="text-xs text-muted-foreground mb-1">Scores below this trigger 'Deteriorating' alerts if scores fall.</div>
+                <Input
+                  id="orsCutoff"
+                  type="number"
+                  value={settings.orsCutoff}
+                  onChange={(e) => setSettings({ ...settings, orsCutoff: parseInt(e.target.value) || 0 })}
+                  placeholder="25"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="srsCutoff">SRS Cut-off (Max 40)</Label>
+                <div className="text-xs text-muted-foreground mb-1">Scores strictly below this trigger 'Dissatisfied' alerts.</div>
+                <Input
+                  id="srsCutoff"
+                  type="number"
+                  value={settings.srsCutoff}
+                  onChange={(e) => setSettings({ ...settings, srsCutoff: parseInt(e.target.value) || 0 })}
+                  placeholder="36"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>

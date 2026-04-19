@@ -1,6 +1,22 @@
 # Changelog
 
 All notable changes to the Aman project will be documented in this file.
+ 
+## [2.0.0] - 2026-04-19
+### Added
+- **Automated Session Duration**: Replaced manual minute entry with a Start/Finish time system that automatically calculates and rounds duration.
+- **Rounding Logic**: Implemented 15-minute interval rounding with a guaranteed 15-minute minimum for any session.
+- **Financial Year (FY) Reporting**: Aligned all YTD (Year-to-Date) dashboard and payment ledger calculations with the Indian Financial Year (April 1st – March 31st).
+- **Billing-Aware Status badges**: Introduced state-aware labels in the session table: **Received** (paid), **Invoiced** (billed), **Completed**, and **Scheduled**.
+- **UPI Integration**: Added dynamic UPI ID management in Settings and automated injection into PDF invoices and emails.
+
+### Changed
+- **Branding & Terminology**: Transitioned "Pastoral Practice" to **"Counselling"** and "Session Invoice" to **"Therapy sessions billing"** across the entire platform.
+- **Indian Accounting Format**: Standardized all currency displays to use the Indian format (comma separators and 2 decimal points).
+- **Invoice Header Refinement**: Simplified invoice branding by removing the personal name and focusing on the practice identity.
+
+### Database
+- **Schema Migration**: Added `ended_at` (timestamptz) and `upi_id` (text) to the sessions and practice settings tables.
 
 ## [1.3.0] - 2026-04-12
 ### Added
