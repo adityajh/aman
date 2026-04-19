@@ -2,6 +2,76 @@
 
 All notable changes to the Aman project will be documented in this file.
  
+## [2.3.0] - 2026-04-19
+### Added
+- **Client Progress Charts**: Full ORS and SRS charts per client, accessible via a "Charts" button on every row in the clients table.
+  - **ORS chart** with three configurable colour bands: Red (Distress ≤25), Amber (At Risk 26–31), Green (Functional ≥32).
+  - **Linear trend line** (dashed) projecting expected progress over the next 4–8 weeks using linear regression on recorded scores.
+  - **Alarm flags** overlaid on the chart when a client is flagged as Deteriorating (ORS) or Dissatisfied (SRS).
+  - **Clinical status badges**: CSC Achieved / RCI Achieved / Deteriorating / Dissatisfied / On Track.
+- **Mini ORS Sparklines**: Compact inline sparkline chart rendered in each row of the Clients table with a `⚠` alert overlay when a risk flag is active.
+- **All Clinical Formulas in Settings**: Six formula-driven thresholds now adjustable from `Settings → Clinical Flags`:
+  - ORS Cut-off (CSC boundary)
+  - SRS Cut-off (alliance alarm)
+  - ORS Deterioration Threshold (drop from first session to flag deteriorating)
+  - SRS Decline Threshold (session-to-session drop to flag dissatisfied)
+  - **ORS RCI Threshold** (min reliable change; PCOMS default = 5)
+  - **ORS Amber Band Start** and **ORS Green Band Start** (controls chart colour zones)
+- **New API route**: `GET /api/clients/[id]/progress` — returns full clinical chart data (ORS/SRS points, trend line, clinical flags) for a given client.
+
+### Fixed
+- TypeScript build error: `Dispatch<SetStateAction<string>>` not assignable to `onValueChange` in Termination Type `Select` (wrapped with null guard `?? "planned"`).
+- TypeScript build error: Recharts `Tooltip` formatter typed as `(v: number)` — corrected to `unknown` to satisfy `ValueType | undefined`.
+
+### Database
+- Added `ors_rci_threshold`, `ors_amber_low`, `ors_green_low` columns to `practice_settings`.
+
+---
+
+## [2.2.0] - 2026-04-19
+### Added
+- **Client Termination Workflow**: Formal discharge flow accessible from every client's details view.
+  - Captures **Planned** (graduation) vs **Unplanned** (dropout/referral) termination type and a free-text reason.
+  - Sets `isActive = false` and timestamps `terminatedAt` — all historical session, invoice, and note data is fully preserved.
+  - Terminated clients display a red `Terminated` badge in the clients list.
+  - Terminated clients are **excluded** from active dashboard clinical alerts (Deteriorating / Dissatisfied).
+- **Advanced Clinical Definitions** (formula-based):
+  - **Deteriorating Client**: `(Initial Session ORS − Latest Session ORS) > ORS Deterioration Threshold`.
+  - **Dissatisfied Client**: `Latest SRS < SRS Cut-off` **OR** `(Previous SRS − Latest SRS) > SRS Decline Threshold`.
+- **Configurable Thresholds** in Settings: ORS Deterioration Threshold (default 5) and SRS Decline Threshold (default 2).
+- **Clinical columns in Sessions table**: ORS Prev, ORS Now, SRS Prev, SRS Now, Risk Status (with colour-coded badges).
+- **Session API enrichment**: `GET /api/sessions` now returns `_clinical` block per session containing initial/previous/current ORS & SRS and computed `orsStatus` + `srsStatus`.
+
+### Fixed
+- Stray `</div>` tag at line 370 of `clients/page.tsx` that caused a Turbopack parse error and blocked Vercel builds.
+
+### Database
+- Added `termination_reason` (text), `termination_type` (text), `terminated_at` (timestamptz) columns to `clients`.
+- Added `ors_deterioration_threshold`, `srs_decline_threshold` columns to `practice_settings`.
+
+---
+
+## [2.1.0] - 2026-04-19
+### Added
+- **ORS / SRS Cut-off Settings**: `Settings → Clinical Flags` card now lets the practitioner define thresholds for Deteriorating (ORS) and Dissatisfied (SRS) alerts.
+- **Auto End-Time on Sessions**: Entering a Start Time automatically populates the Finish Time to exactly Start + 60 minutes.
+- **Status-based pill toggles**: Restored horizontal filter pills (Scheduled, Completed, Invoiced, Received, Exceptions) above the Sessions table.
+- **Dashboard Analytics Suite**:
+  - Scheduled vs Completed sessions (This Month & YTD).
+  - Deteriorating Clients count.
+  - Dissatisfied Clients count.
+  - No-Show Rate (%).
+- **No Show** added as a formal session status.
+
+### Changed
+- Filter labels capitalised ("YTD", "This Month", etc.) and filter dropdown widths widened to prevent text cutoff.
+- Status badge colours standardised: Scheduled = Yellow, Completed = Blue, Received = Green, Cancelled/No Show = Gray.
+
+### Database
+- Added `ors_cutoff`, `srs_cutoff` columns to `practice_settings`.
+
+---
+
 ## [2.0.0] - 2026-04-19
 ### Added
 - **Automated Session Duration**: Replaced manual minute entry with a Start/Finish time system that automatically calculates and rounds duration.
