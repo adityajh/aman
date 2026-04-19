@@ -93,7 +93,7 @@ function OrsSparkline({
         {!compact && (
           <Tooltip
             contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e2e8f0" }}
-            formatter={(v: number) => [`${v}`, "ORS"]}
+            formatter={(v: unknown) => [`${v ?? "-"}`, "ORS"]}
           />
         )}
         <Line
@@ -142,7 +142,7 @@ function SrsChart({
         />
         <Tooltip
           contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e2e8f0" }}
-          formatter={(v: number) => [`${v}`, "SRS"]}
+          formatter={(v: unknown) => [`${v ?? "-"}`, "SRS"]}
         />
         <Line
           type="monotone"
