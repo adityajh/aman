@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Save, Loader2, AlertCircle, BarChart3, ClipboardList } from "lucide-react";
+import { Save, Loader2, AlertCircle, BarChart3, ClipboardList, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
@@ -97,12 +97,19 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
   const sessionId = session.id;
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
-  const [showNumbers, setShowNumbers] = useState(true);
+  const [showNumbers, setShowNumbers] = useState(false);
   
   // Format dates for time input
   const scheduledStart = new Date(session.scheduledAt);
   const scheduledEnd = new Date(scheduledStart.getTime() + (session.durationMin || 60) * 60000);
   
+  const getSafeTimeStr = (dateVal: any, fallbackDate: Date) => {
+    if (!dateVal) return format(fallbackDate, "HH:mm");
+    const d = new Date(dateVal);
+    if (isNaN(d.getTime())) return format(fallbackDate, "HH:mm");
+    return format(d, "HH:mm");
+  };
+
   const [note, setNote] = useState({
     updates: "",
     subjective: "", 
@@ -111,8 +118,8 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
     agenda: "",
     feedback: "",
     // Time tracking
-    actualStartTime: session.actualStartTime ? format(new Date(session.actualStartTime), "HH:mm") : format(scheduledStart, "HH:mm"),
-    actualEndTime: session.actualEndTime ? format(new Date(session.actualEndTime), "HH:mm") : format(scheduledEnd, "HH:mm"),
+    actualStartTime: getSafeTimeStr(session.actualStartTime, scheduledStart),
+    actualEndTime: getSafeTimeStr(session.actualEndTime, scheduledEnd),
     // ORS
     orsIndividual: 0,
     orsInterpersonal: 0,
@@ -310,9 +317,11 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
               <BarChart3 className="h-4 w-4 text-lime-600" />
               <h3 className="text-sm font-bold text-slate-900">ORS (Outcome Rating Scale)</h3>
             </div>
-            <div className="px-2 py-0.5 rounded bg-lime-500/10 border border-lime-500/20">
-              <span className="text-xs font-bold text-lime-600">Total: {note.orsTotal}/40</span>
-            </div>
+            {showNumbers && (
+              <div className="px-2 py-0.5 rounded bg-lime-500/10 border border-lime-500/20">
+                <span className="text-xs font-bold text-lime-600">Total: {note.orsTotal}/40</span>
+              </div>
+            )}
           </div>
           <div className="space-y-4">
             <ScoreSelector label="Individually (Personal well-being)" value={note.orsIndividual} onChange={(v) => updateOrs('orsIndividual', v)} showNumbers={showNumbers} />
@@ -329,9 +338,11 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
               <ClipboardList className="h-4 w-4 text-lime-600" />
               <h3 className="text-sm font-bold text-slate-900">SRS (Session Rating Scale)</h3>
             </div>
-            <div className="px-2 py-0.5 rounded bg-lime-500/10 border border-lime-500/20">
-              <span className="text-xs font-bold text-lime-600">Total: {note.srsTotal}/40</span>
-            </div>
+            {showNumbers && (
+              <div className="px-2 py-0.5 rounded bg-lime-500/10 border border-lime-500/20">
+                <span className="text-xs font-bold text-lime-600">Total: {note.srsTotal}/40</span>
+              </div>
+            )}
           </div>
           <div className="space-y-4">
             <ScoreSelector label="Relationship (I felt heard, understood, and respected)" value={note.srsRelationship} onChange={(v) => updateSrs('srsRelationship', v)} showNumbers={showNumbers} />
@@ -342,27 +353,17 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
         </div>
       </div>
 
-      <div className="flex justify-center -my-4">
-        <div className="flex bg-slate-100 p-1 rounded-full border border-slate-200">
-          <Button 
-            type="button"
-            variant="ghost" 
-            size="sm" 
-            onClick={() => setShowNumbers(true)}
-            className={cn("rounded-full px-4 h-7 text-[10px] font-bold uppercase tracking-wider", showNumbers ? "bg-white text-slate-900 shadow-sm" : "text-slate-500")}
-          >
-            Precise
-          </Button>
-          <Button 
-            type="button"
-            variant="ghost" 
-            size="sm" 
-            onClick={() => setShowNumbers(false)}
-            className={cn("rounded-full px-4 h-7 text-[10px] font-bold uppercase tracking-wider", !showNumbers ? "bg-white text-slate-900 shadow-sm" : "text-slate-500")}
-          >
-            Blind
-          </Button>
-        </div>
+      <div className="flex justify-center -my-4 relative z-10">
+        <Button 
+          type="button"
+          variant="outline" 
+          size="icon" 
+          onClick={() => setShowNumbers(!showNumbers)}
+          className="rounded-full bg-white shadow-sm border-slate-200 text-slate-500 hover:text-slate-900 h-10 w-10"
+          title={showNumbers ? "Hide Scores (Blind Mode)" : "Show Scores (Precise Mode)"}
+        >
+          {showNumbers ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        </Button>
       </div>
 
       <div className="flex items-center justify-between pt-6 border-t border-slate-200">

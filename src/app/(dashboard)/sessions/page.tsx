@@ -417,11 +417,7 @@ function SessionsPageInner() {
             <CalendarDays className="h-4 w-4 text-slate-400 ml-2" />
             <Select value={timeFilter} onValueChange={(v) => setTimeFilter(v || "ytd")}>
               <SelectTrigger className="w-[180px] border-0 h-8 bg-transparent shadow-none font-semibold focus:ring-0">
-                <SelectValue>
-                  {timeFilter === "all" ? "All Time" : 
-                   timeFilter === "ytd" ? "YTD (Apr-Mar)" : 
-                   timeFilter === "month" ? "This Month" : "All Time"}
-                </SelectValue>
+                <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-white border-slate-200">
                 <SelectItem value="all">All Time</SelectItem>
@@ -437,11 +433,7 @@ function SessionsPageInner() {
             <Filter className="h-4 w-4 text-slate-400 ml-2" />
             <Select value={clientFilter} onValueChange={(v) => setClientFilter(v || "active")}>
               <SelectTrigger className="w-[180px] border-0 h-8 bg-transparent shadow-none font-semibold focus:ring-0">
-                <SelectValue>
-                  {clientFilter === "all" ? "All Clients" : 
-                   clientFilter === "active" ? "Active Clients" :
-                   clients.find(c => c.id === clientFilter)?.name ?? "Active Clients"}
-                </SelectValue>
+                <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-white border-slate-200">
                 <SelectItem value="active">Active Clients</SelectItem>
@@ -555,9 +547,13 @@ function SessionsPageInner() {
                         <SelectValue placeholder="Pick a scheme..." />
                       </SelectTrigger>
                       <SelectContent className="bg-white border-slate-200">
-                        <SelectItem value="custom">Custom / No Scheme</SelectItem>
+                        <SelectItem value="custom" label="Custom / No Scheme">Custom / No Scheme</SelectItem>
                         {feeSchemes.map(f => (
-                          <SelectItem key={f.id} value={f.id}>
+                          <SelectItem 
+                            key={f.id} 
+                            value={f.id} 
+                            label={`${f.name} (${f.currency === 'USD' ? '$' : '₹'}${f.amount})`}
+                          >
                             {f.name} ({f.currency === 'USD' ? '$' : '₹'}{f.amount})
                           </SelectItem>
                         ))}
