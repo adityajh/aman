@@ -610,12 +610,12 @@ function SessionsPageInner() {
           <Table>
             <TableHeader className="bg-slate-50 items-center">
               <TableRow className="hover:bg-transparent border-slate-200">
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-36">Date</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest">Client</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-24">Start</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-24">End</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-16">Sch.</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-24">Act.</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-32">Date</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-48">Client</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-20">Start</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-20">End</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-20">Sch.</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-20">Act.</TableHead>
                 <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-20">Inv.</TableHead>
                 <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-28">Fees</TableHead>
                 <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-28">Status</TableHead>
