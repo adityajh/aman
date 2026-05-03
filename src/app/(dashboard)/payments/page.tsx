@@ -163,6 +163,25 @@ export default function PaymentsPage() {
     );
   };
 
+  const filteredPayments = payments.filter((pay) => {
+    if (clientFilter !== "all" && pay.clientId !== clientFilter) return false;
+    
+    if (periodFilter !== "all") {
+      const d = new Date(pay.paymentDate);
+      const now = new Date();
+      if (periodFilter === "this_month") {
+        if (d.getMonth() !== now.getMonth() || d.getFullYear() !== now.getFullYear()) return false;
+      } else if (periodFilter === "last_month") {
+        const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        if (d.getMonth() !== lastMonth.getMonth() || d.getFullYear() !== lastMonth.getFullYear()) return false;
+      } else if (periodFilter === "this_year") {
+        if (d.getFullYear() !== now.getFullYear()) return false;
+      }
+    }
+    
+    return true;
+  });
+
   return (
     <div className="p-8 space-y-8">
       <div className="flex justify-between items-center">
@@ -442,14 +461,14 @@ export default function PaymentsPage() {
                     </div>
                   </TableCell>
                 </TableRow>
-              ) : payments.length === 0 ? (
+              ) : filteredPayments.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-20 text-slate-400">
                     No payment records found.
                   </TableCell>
                 </TableRow>
               ) : (
-                payments.map((pay) => (
+                filteredPayments.map((pay) => (
                   <TableRow key={pay.id} className="group hover:bg-slate-50/50 transition-colors">
                     <TableCell>
                       <span className="text-sm font-medium text-slate-600">
