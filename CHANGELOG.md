@@ -2,7 +2,21 @@
 
 All notable changes to the Aman project will be documented in this file.
  
+## [2.7.0] - 2026-05-03
+### Added
+- **Payment Delete & Re-enter**: Each payment row in the Payments Ledger now has a delete (trash) icon. On confirmation, the payment is deleted and the linked invoice's `amountPaid` and status are automatically recalculated. Use this to correct data entry errors by deleting the wrong amount and re-entering the correct one.
+
+### Changed
+- **Sessions Table**: Removed the 4 ORS Prev / ORS Now / SRS Prev / SRS Now columns to reduce horizontal clutter. The **Risk Status** badge column is retained. Remaining column widths are adjusted proportionally.
+- **Dashboard**: Simplified the Practice Overview. Removed 5 boxes: Upcoming (7 Days), Risk Flags, Deteriorating, Dissatisfied, and No-Show Rate. The dashboard now shows only the two most actionable stats (Unbilled Sessions + Outstanding Revenue) alongside Quick Actions and Session Tracking.
+
+### Fixed
+- **ORS/SRS Arithmetic Type Errors**: Resolved pre-existing TypeScript build failures in `api/sessions/route.ts` and `api/clients/[id]/progress/route.ts` caused by Drizzle returning `numeric(5,1)` columns as `string | number`. All values are now explicitly cast to `Number()` before arithmetic operations.
+
+---
+
 ## [2.6.0] - 2026-05-03
+
 ### Added
 - **Session Cancellation**: Added a Cancel button for scheduled sessions with a confirmation reason dialog.
 - **Active Clients Filter**: "Active Clients" is now the default filter on the Sessions tab, hiding sessions from terminated clients by default.
