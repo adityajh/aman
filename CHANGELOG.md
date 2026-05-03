@@ -2,6 +2,20 @@
 
 All notable changes to the Aman project will be documented in this file.
  
+## [2.6.0] - 2026-05-03
+### Added
+- **Session Cancellation**: Added a Cancel button for scheduled sessions with a confirmation reason dialog.
+- **Active Clients Filter**: "Active Clients" is now the default filter on the Sessions tab, hiding sessions from terminated clients by default.
+- **Invoiced Status**: Sessions that have been invoiced but not yet paid now correctly display an **Invoiced** badge (instead of just "Completed").
+- **Multi-Currency Batch Invoicing**: The batch invoice generation popup now correctly displays split totals for INR and USD when mixed currency clients are selected.
+- **System-wide Currency Audit**: Fixed hardcoded INR symbols in batch popup rows, client detail stat cards, and invoice group headers.
+
+### Fixed
+- **Note Save Error**: Resolved the "Failed to Save Note" error caused by a database type mismatch. ORS/SRS scores now support decimal values (0.1 increments) in the database.
+- **Client Filter Labels**: Improved the client filter dropdown labels to be more descriptive.
+
+---
+
 ## [2.5.0] - 2026-05-03
 ### Added
 - **Duplicate Email Conflict Flow**: System now detects if a new client's email matches an existing profile.

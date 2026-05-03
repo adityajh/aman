@@ -472,7 +472,9 @@ export default function ClientsPage() {
                     <Card className="bg-slate-50 border-slate-100 shadow-none">
                       <CardContent className="p-4">
                         <p className="text-[10px] text-slate-500 font-bold uppercase">Total Billed</p>
-                        <p className="text-xl font-bold text-slate-900">₹0</p>
+                        <p className="text-xl font-bold text-slate-900">
+                          {feeSchemes.find(f => f.id === selectedClient.defaultFeeSchemeId)?.currency === 'USD' ? '$' : '₹'}0
+                        </p>
                       </CardContent>
                     </Card>
                   </div>

@@ -22,7 +22,8 @@ import {
   CheckCircle2,
   CalendarDays,
   Filter,
-  Loader2
+  Loader2,
+  XCircle
 } from "lucide-react";
 import { format, isWithinInterval, startOfMonth, startOfHour, addHours, differenceInMinutes } from "date-fns";
 import { ClinicalNoteEditor } from "@/components/clinical-note-editor";
@@ -50,7 +51,7 @@ function SessionsPageInner() {
   // Filters — initialised from URL params if present
   const searchParams = useSearchParams();
   const [timeFilter, setTimeFilter] = useState<string>(searchParams.get("timeFilter") ?? "ytd");
-  const [clientFilter, setClientFilter] = useState<string>(searchParams.get("clientId") ?? "all");
+  const [clientFilter, setClientFilter] = useState<string>(searchParams.get("clientId") ?? "active");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const fetchData = async () => {
@@ -180,7 +181,7 @@ function SessionsPageInner() {
     if (invoiceId) {
       const isPaid = invoice && parseFloat(invoice.amountPaid || "0") >= parseFloat(invoice.total || "0");
       if (isPaid) return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Received</Badge>;
-      // We will show standard 'invoiced' badge
+      return <Badge variant="outline" className="bg-slate-800 text-slate-100 border-slate-700">Invoiced</Badge>;
     }
     
     if (status === "completed") return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Completed</Badge>;
@@ -193,6 +194,31 @@ function SessionsPageInner() {
     const [noteOpen, setNoteOpen] = useState(false);
     const start = new Date(session.scheduledAt);
     const end = session.endedAt ? new Date(session.endedAt) : null;
+    const [cancelling, setCancelling] = useState(false);
+    const [cancelReason, setCancelReason] = useState("");
+    const [cancelOpen, setCancelOpen] = useState(false);
+
+    const handleCancel = async () => {
+      setCancelling(true);
+      try {
+        const res = await fetch(`/api/sessions/${session.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ status: "cancelled", cancellationReason: cancelReason }),
+          headers: { "Content-Type": "application/json" },
+        });
+        if (res.ok) {
+          toast.success("Session cancelled");
+          setCancelOpen(false);
+          onRefresh();
+        } else {
+          toast.error("Failed to cancel session");
+        }
+      } catch (err) {
+        toast.error("Error cancelling session");
+      } finally {
+        setCancelling(false);
+      }
+    };
 
     return (
       <TableRow className="hover:bg-slate-50/50 transition-colors">
@@ -202,7 +228,10 @@ function SessionsPageInner() {
         <TableCell>
           <div className="flex items-center gap-2">
             <User className="h-4 w-4 text-slate-400" />
-            <span className="font-semibold text-slate-700">{session.client?.name}</span>
+            <span className="font-semibold text-slate-700">
+              {session.client?.name}
+              {!session.client?.isActive && <Badge variant="outline" className="ml-2 text-[8px] bg-rose-50 text-rose-500 border-rose-100">Terminated</Badge>}
+            </span>
           </div>
         </TableCell>
         <TableCell className="text-slate-600 font-medium">
@@ -267,35 +296,73 @@ function SessionsPageInner() {
           ) : <span className="text-slate-300 text-xs">No data</span>}
         </TableCell>
         <TableCell className="text-right">
-          <Dialog open={noteOpen} onOpenChange={setNoteOpen}>
-            <DialogTrigger
-              render={
+          <div className="flex justify-end gap-2">
+            {session.status === "scheduled" && (
+              <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="sm" className="text-rose-500 hover:text-rose-600 hover:bg-rose-50">
+                    <XCircle className="h-4 w-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="bg-white border-slate-200 max-w-sm">
+                  <DialogHeader>
+                    <DialogTitle className="text-rose-600">Cancel Session</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <p className="text-sm text-slate-600">Are you sure you want to cancel this session for <strong>{session.client?.name}</strong>?</p>
+                    <div className="space-y-2">
+                      <Label className="text-xs font-bold uppercase text-slate-400">Cancellation Reason (Optional)</Label>
+                      <Input 
+                        placeholder="e.g. Client requested, Emergency..." 
+                        value={cancelReason}
+                        onChange={(e) => setCancelReason(e.target.value)}
+                        className="bg-slate-50"
+                      />
+                    </div>
+                    <div className="flex justify-end gap-3 pt-2">
+                      <Button variant="outline" onClick={() => setCancelOpen(false)}>Back</Button>
+                      <Button 
+                        onClick={handleCancel} 
+                        disabled={cancelling}
+                        className="bg-rose-500 hover:bg-rose-600 text-white font-bold"
+                      >
+                        {cancelling ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                        Cancel Session
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
+            
+            <Dialog open={noteOpen} onOpenChange={setNoteOpen}>
+              <DialogTrigger asChild>
                 <Button variant="ghost" size="sm" className="gap-2 text-lime-600 hover:text-lime-700 font-bold">
                   {session.status === 'completed' ? 'View Note' : 'Write Note'}
                 </Button>
-              }
-            />
-            <DialogContent className="max-w-[95vw] lg:max-w-4xl max-h-[95vh] overflow-y-auto bg-white p-0 shadow-2xl">
-              <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-md p-6 border-b border-slate-100 shadow-sm">
-                <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2 text-slate-900 text-xl font-bold">
-                    <FileText className="h-6 w-6 text-lime-500" />
-                    Clinical Note: {session.client?.name}
-                    <span className="text-sm font-normal text-slate-400 ml-2">
-                      {format(start, "d MMM yyyy")}
-                    </span>
-                  </DialogTitle>
-                </DialogHeader>
-              </div>
-              <div className="p-8">
-                <ClinicalNoteEditor 
-                  sessionId={session.id} 
-                  onSave={onRefresh} 
-                  onClose={() => setNoteOpen(false)}
-                />
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent className="max-w-[95vw] lg:max-w-4xl max-h-[95vh] overflow-y-auto bg-white p-0 shadow-2xl">
+                <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-md p-6 border-b border-slate-100 shadow-sm">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2 text-slate-900 text-xl font-bold">
+                      <FileText className="h-6 w-6 text-lime-500" />
+                      Clinical Note: {session.client?.name}
+                      <span className="text-sm font-normal text-slate-400 ml-2">
+                        {format(start, "d MMM yyyy")}
+                      </span>
+                    </DialogTitle>
+                  </DialogHeader>
+                </div>
+                <div className="p-8">
+                  <ClinicalNoteEditor 
+                    sessionId={session.id} 
+                    onSave={onRefresh} 
+                    onClose={() => setNoteOpen(false)}
+                  />
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </TableCell>
       </TableRow>
     );
@@ -304,7 +371,11 @@ function SessionsPageInner() {
   const filteredSessions = useMemo(() => {
     return sessions.filter(s => {
       // Client Filter
-      if (clientFilter !== "all" && s.clientId !== clientFilter) return false;
+      if (clientFilter === "active") {
+        if (!s.client?.isActive) return false;
+      } else if (clientFilter !== "all" && s.clientId !== clientFilter) {
+        return false;
+      }
       
       // Time Filter (Financial Year logic included)
       const now = new Date();
@@ -376,13 +447,16 @@ function SessionsPageInner() {
           {/* Client Filter */}
           <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-lg border border-slate-200">
             <Filter className="h-4 w-4 text-slate-400 ml-2" />
-            <Select value={clientFilter} onValueChange={(v) => setClientFilter(v || "all")}>
+            <Select value={clientFilter} onValueChange={(v) => setClientFilter(v || "active")}>
               <SelectTrigger className="w-[180px] border-0 h-8 bg-transparent shadow-none font-semibold focus:ring-0">
                 <SelectValue>
-                  {clientFilter === "all" ? "All Clients" : clients.find(c => c.id === clientFilter)?.name ?? "All Clients"}
+                  {clientFilter === "all" ? "All Clients" : 
+                   clientFilter === "active" ? "Active Clients" :
+                   clients.find(c => c.id === clientFilter)?.name ?? "Active Clients"}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-white border-slate-200">
+                <SelectItem value="active">Active Clients</SelectItem>
                 <SelectItem value="all">All Clients</SelectItem>
                 {clients.map((c) => (
                   <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>

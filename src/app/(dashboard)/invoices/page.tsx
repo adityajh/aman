@@ -206,10 +206,23 @@ export default function InvoicesPage() {
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-slate-500 mb-1">Total Selected Amount</p>
-                  <p className="text-lg font-bold text-lime-600 flex items-center justify-end">
-                    <IndianRupee className="h-4 w-4" /> 
-                    {unbilled.filter(c => selectedClients.has(c.id)).reduce((acc, c) => acc + parseFloat(c.totalAmount), 0).toFixed(2)}
-                  </p>
+                  <div className="flex flex-col items-end gap-1">
+                    {(() => {
+                      const selectedData = unbilled.filter(c => selectedClients.has(c.id));
+                      const totals = selectedData.reduce((acc, c) => {
+                        const cur = c.currency || 'INR';
+                        acc[cur] = (acc[cur] || 0) + parseFloat(c.totalAmount);
+                        return acc;
+                      }, {} as Record<string, number>);
+                      
+                      return Object.entries(totals).map(([cur, amt]) => (
+                        <p key={cur} className="text-lg font-bold text-lime-600 flex items-center justify-end">
+                          {cur === 'USD' ? <DollarSign className="h-4 w-4" /> : <IndianRupee className="h-4 w-4" />}
+                          {amt.toFixed(2)}
+                        </p>
+                      ));
+                    })()}
+                  </div>
                 </div>
               </div>
 
@@ -249,8 +262,9 @@ export default function InvoicesPage() {
                           <p className="text-[10px] text-slate-500 uppercase tracking-wider">{client.sessionCount} sessions pending</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-bold text-slate-900 flex items-center justify-end">
-                            <IndianRupee className="h-3 w-3" /> {client.totalAmount}
+                          <p className="text-sm font-bold text-slate-900 flex items-center justify-end gap-1">
+                            {client.currency === 'USD' ? <DollarSign className="h-3 w-3" /> : <IndianRupee className="h-3 w-3" />}
+                            {client.totalAmount}
                           </p>
                         </div>
                       </div>
@@ -354,8 +368,12 @@ export default function InvoicesPage() {
                                 )}
                                 <Badge variant="secondary" className="text-[10px] py-0">{group.items.length} Invoices</Badge>
                               </div>
-                              <div className="text-xs font-semibold text-slate-500">
-                                Total Invoiced: <span className="text-lime-700">₹{group.totalAmount.toFixed(2)}</span>
+                              <div className="text-xs font-semibold text-slate-500 flex items-center gap-1">
+                                Total Invoiced: 
+                                <span className="text-lime-700 flex items-center">
+                                  {group.items[0]?.currency === 'USD' ? <DollarSign className="h-3 w-3" /> : <IndianRupee className="h-3 w-3" />}
+                                  {group.totalAmount.toFixed(2)}
+                                </span>
                               </div>
                             </div>
                           </TableCell>
