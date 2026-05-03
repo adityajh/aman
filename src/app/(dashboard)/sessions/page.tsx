@@ -251,31 +251,7 @@ function SessionsPageInner() {
         <TableCell>
           {getStatusBadge(session)}
         </TableCell>
-        {/* Clinical columns */}
-        <TableCell className="text-center">
-          <div className="flex flex-col items-center gap-0.5">
-            <span className="text-[10px] text-slate-400 uppercase tracking-widest">Prev</span>
-            <span className="font-bold text-slate-700">{session._clinical?.prevOrs ?? <span className="text-slate-300">—</span>}</span>
-          </div>
-        </TableCell>
-        <TableCell className="text-center">
-          <div className="flex flex-col items-center gap-0.5">
-            <span className="text-[10px] text-slate-400 uppercase tracking-widest">Cur</span>
-            <span className="font-bold text-slate-700">{session._clinical?.currentOrs ?? <span className="text-slate-300">—</span>}</span>
-          </div>
-        </TableCell>
-        <TableCell className="text-center">
-          <div className="flex flex-col items-center gap-0.5">
-            <span className="text-[10px] text-slate-400 uppercase tracking-widest">Prev</span>
-            <span className="font-bold text-slate-700">{session._clinical?.prevSrs ?? <span className="text-slate-300">—</span>}</span>
-          </div>
-        </TableCell>
-        <TableCell className="text-center">
-          <div className="flex flex-col items-center gap-0.5">
-            <span className="text-[10px] text-slate-400 uppercase tracking-widest">Cur</span>
-            <span className="font-bold text-slate-700">{session._clinical?.currentSrs ?? <span className="text-slate-300">—</span>}</span>
-          </div>
-        </TableCell>
+
         <TableCell>
           {session._clinical?.orsStatus || session._clinical?.srsStatus ? (
             <div className="flex flex-col gap-1">
@@ -299,11 +275,13 @@ function SessionsPageInner() {
           <div className="flex justify-end gap-2">
             {session.status === "scheduled" && (
               <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-rose-500 hover:text-rose-600 hover:bg-rose-50">
-                    <XCircle className="h-4 w-4" />
-                  </Button>
-                </DialogTrigger>
+                <DialogTrigger
+                  render={
+                    <Button variant="ghost" size="sm" className="text-rose-500 hover:text-rose-600 hover:bg-rose-50">
+                      <XCircle className="h-4 w-4" />
+                    </Button>
+                  }
+                />
                 <DialogContent className="bg-white border-slate-200 max-w-sm">
                   <DialogHeader>
                     <DialogTitle className="text-rose-600">Cancel Session</DialogTitle>
@@ -336,11 +314,13 @@ function SessionsPageInner() {
             )}
             
             <Dialog open={noteOpen} onOpenChange={setNoteOpen}>
-              <DialogTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-2 text-lime-600 hover:text-lime-700 font-bold">
-                  {session.status === 'completed' ? 'View Note' : 'Write Note'}
-                </Button>
-              </DialogTrigger>
+              <DialogTrigger
+                render={
+                  <Button variant="ghost" size="sm" className="gap-2 text-lime-600 hover:text-lime-700 font-bold">
+                    {session.status === 'completed' ? 'View Note' : 'Write Note'}
+                  </Button>
+                }
+              />
               <DialogContent className="max-w-[95vw] lg:max-w-4xl max-h-[95vh] overflow-y-auto bg-white p-0 shadow-2xl">
                 <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-md p-6 border-b border-slate-100 shadow-sm">
                   <DialogHeader>
@@ -619,32 +599,28 @@ function SessionsPageInner() {
           <Table>
             <TableHeader className="bg-slate-50 items-center">
               <TableRow className="hover:bg-transparent border-slate-200">
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest">Date</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-36">Date</TableHead>
                 <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest">Client</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest">Start</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest">End</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-20">Dur.</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest">Fees</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest">Status</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest text-center w-16">ORS Prev</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest text-center w-16">ORS Now</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest text-center w-16">SRS Prev</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest text-center w-16">SRS Now</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest min-w-[160px]">Risk Status</TableHead>
-                <TableHead className="text-right py-4 font-bold text-slate-400 uppercase text-xs tracking-widest px-6">Actions</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-24">Start</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-24">End</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-16">Dur.</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-28">Fees</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-28">Status</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest min-w-[180px]">Risk Status</TableHead>
+                <TableHead className="text-right py-4 font-bold text-slate-400 uppercase text-xs tracking-widest px-6 w-32">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={13} className="text-center py-20">
+                  <TableCell colSpan={9} className="text-center py-20">
                     <Loader2 className="h-10 w-10 animate-spin mx-auto text-slate-200" />
                     <p className="mt-4 text-slate-400 font-medium">Loading session history...</p>
                   </TableCell>
                 </TableRow>
               ) : filteredSessions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={13} className="text-center py-20 text-slate-400">
+                  <TableCell colSpan={9} className="text-center py-20 text-slate-400">
                     No sessions found matching your current filters.
                   </TableCell>
                 </TableRow>

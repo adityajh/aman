@@ -49,17 +49,17 @@ export async function GET(req: Request) {
       const clientHistory = clientSessionMap.get(s.clientId) ?? [];
       const idx = clientHistory.findIndex(h => h.id === s.id);
 
-      const currentOrs = s.note?.orsTotal ?? null;
-      const currentSrs = s.note?.srsTotal ?? null;
+      const currentOrs = s.note?.orsTotal != null ? Number(s.note.orsTotal) : null;
+      const currentSrs = s.note?.srsTotal != null ? Number(s.note.srsTotal) : null;
 
       // Initial ORS = first session in history with an ORS score
       const firstWithOrs = clientHistory.find(h => h.note?.orsTotal != null);
-      const initialOrs = firstWithOrs?.note?.orsTotal ?? null;
+      const initialOrs = firstWithOrs?.note?.orsTotal != null ? Number(firstWithOrs.note.orsTotal) : null;
 
       // Previous session (chronologically one before this one)
       const prevSession = idx > 0 ? clientHistory[idx - 1] : null;
-      const prevOrs = prevSession?.note?.orsTotal ?? null;
-      const prevSrs = prevSession?.note?.srsTotal ?? null;
+      const prevOrs = prevSession?.note?.orsTotal != null ? Number(prevSession.note.orsTotal) : null;
+      const prevSrs = prevSession?.note?.srsTotal != null ? Number(prevSession.note.srsTotal) : null;
 
       // ORS Clinical Status
       let orsStatus: string | null = null;

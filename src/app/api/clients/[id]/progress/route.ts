@@ -55,13 +55,13 @@ export async function GET(
     if (orsPoints.length >= 2) {
       const n = orsPoints.length;
       const xMean = (n - 1) / 2;
-      const yMean = orsPoints.reduce((a, p) => a + (p.ors ?? 0), 0) / n;
-      const num = orsPoints.reduce((a, p, i) => a + (i - xMean) * ((p.ors ?? 0) - yMean), 0);
+      const yMean = orsPoints.reduce((a, p) => a + Number(p.ors ?? 0), 0) / n;
+      const num = orsPoints.reduce((a, p, i) => a + (i - xMean) * (Number(p.ors ?? 0) - yMean), 0);
       const den = orsPoints.reduce((a, _, i) => a + (i - xMean) ** 2, 0);
       const slope = den !== 0 ? num / den : 0;
 
       const lastDate = new Date(chronological.filter(s => s.note?.orsTotal != null).at(-1)!.scheduledAt);
-      const lastVal = orsPoints.at(-1)!.ors ?? 0;
+      const lastVal = Number(orsPoints.at(-1)!.ors ?? 0);
       orsTrend = Array.from({ length: 5 }, (_, i) => ({
         date: format(addWeeks(lastDate, (i + 1) * 2), "d MMM"),
         trend: Math.min(40, Math.max(0, Math.round((lastVal + slope * (i + 1)) * 10) / 10)),
@@ -69,10 +69,10 @@ export async function GET(
     }
 
     // Determine clinical flags
-    const latestOrs = orsPoints.at(-1)?.ors ?? null;
-    const initialOrs = orsPoints[0]?.ors ?? null;
-    const latestSrs = srsPoints.at(-1)?.srs ?? null;
-    const prevSrs = srsPoints.at(-2)?.srs ?? null;
+    const latestOrs = orsPoints.length > 0 ? Number(orsPoints.at(-1)?.ors ?? null) : null;
+    const initialOrs = orsPoints.length > 0 ? Number(orsPoints[0]?.ors ?? null) : null;
+    const latestSrs = srsPoints.length > 0 ? Number(srsPoints.at(-1)?.srs ?? null) : null;
+    const prevSrs = srsPoints.length > 1 ? Number(srsPoints.at(-2)?.srs ?? null) : null;
 
     const isDeterioriating = latestOrs !== null && initialOrs !== null && (initialOrs - latestOrs) > (settings?.orsDeteriorationThreshold ?? 5);
     const isDissatisfied = latestSrs !== null && (

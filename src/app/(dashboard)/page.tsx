@@ -2,16 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { IndianRupee, DollarSign, Wallet, Calendar, ClipboardCheck, AlertTriangle, ArrowRight, TrendingDown, Frown, UserX, Activity, ExternalLink } from "lucide-react";
+import { Wallet, ClipboardCheck, ArrowRight, Activity } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
     fetch("/api/dashboard")
@@ -35,27 +33,11 @@ export default function DashboardPage() {
     },
     {
       title: "Outstanding Revenue",
-      value: "split-view", // marker for custom rendering
+      value: "split-view",
       description: "From sent and draft invoices",
       icon: Wallet,
       color: "text-green-600",
       href: "/invoices",
-    },
-    {
-      title: "Upcoming (7 Days)",
-      value: stats.upcomingSessions,
-      description: "Scheduled intake/followup",
-      icon: Calendar,
-      color: "text-violet-600",
-      href: "/sessions",
-    },
-    {
-      title: "Risk Flags",
-      value: stats.activeRiskFlags,
-      description: "Clients needing close attention",
-      icon: AlertTriangle,
-      color: stats.activeRiskFlags > 0 ? "text-red-600" : "text-slate-400",
-      href: "/sessions",
     },
   ];
 
@@ -66,7 +48,7 @@ export default function DashboardPage() {
         <p className="text-muted-foreground">Welcome back. Here's your practice at a glance.</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2">
         {cards.map((card) => (
           <Card key={card.title} className="hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -158,81 +140,6 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card className="border-rose-100 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-5">
-            <TrendingDown className="h-24 w-24" />
-          </div>
-          <CardContent className="p-6">
-            <div className="flex flex-col gap-2 relative z-10">
-              <span className="text-sm font-bold text-rose-600 uppercase tracking-widest flex items-center gap-2">
-                <TrendingDown className="h-4 w-4" /> Deteriorating
-              </span>
-              <span className="text-4xl font-black text-slate-900">{stats.deterioratingClients}</span>
-              <p className="text-sm text-slate-500">Clients with decreasing ORS scores</p>
-              {stats.deterioratingList?.length > 0 && (
-                <div className="mt-2 pt-2 border-t border-rose-100 flex flex-col gap-1">
-                  {stats.deterioratingList.map((c: { id: string; name: string }) => (
-                    <button
-                      key={c.id}
-                      onClick={() => router.push(`/clients`)}
-                      className="text-left text-sm font-semibold text-rose-700 hover:text-rose-900 hover:underline flex items-center gap-1 truncate"
-                    >
-                      <ExternalLink className="h-3 w-3 shrink-0" />
-                      {c.name}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-orange-100 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-5">
-            <Frown className="h-24 w-24" />
-          </div>
-          <CardContent className="p-6">
-            <div className="flex flex-col gap-2 relative z-10">
-              <span className="text-sm font-bold text-orange-600 uppercase tracking-widest flex items-center gap-2">
-                <Frown className="h-4 w-4" /> Dissatisfied
-              </span>
-              <span className="text-4xl font-black text-slate-900">{stats.dissatisfiedClients}</span>
-              <p className="text-sm text-slate-500">Clients falling below SRS cutoff</p>
-              {stats.dissatisfiedList?.length > 0 && (
-                <div className="mt-2 pt-2 border-t border-orange-100 flex flex-col gap-1">
-                  {stats.dissatisfiedList.map((c: { id: string; name: string }) => (
-                    <button
-                      key={c.id}
-                      onClick={() => router.push(`/clients`)}
-                      className="text-left text-sm font-semibold text-orange-700 hover:text-orange-900 hover:underline flex items-center gap-1 truncate"
-                    >
-                      <ExternalLink className="h-3 w-3 shrink-0" />
-                      {c.name}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-slate-200 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-5">
-            <UserX className="h-24 w-24" />
-          </div>
-          <CardContent className="p-6">
-            <div className="flex flex-col gap-2 relative z-10">
-              <span className="text-sm font-bold text-slate-600 uppercase tracking-widest flex items-center gap-2">
-                <UserX className="h-4 w-4" /> No-Show Rate
-              </span>
-              <span className="text-4xl font-black text-slate-900">{stats.noShowRate}%</span>
-              <p className="text-sm text-slate-500">Of all historical sessions</p>
             </div>
           </CardContent>
         </Card>

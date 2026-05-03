@@ -24,7 +24,8 @@ import {
   Loader2,
   TrendingUp,
   History,
-  AlertCircle
+  AlertCircle,
+  Trash2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -40,6 +41,26 @@ export default function PaymentsPage() {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
+  const handleDeletePayment = async (id: string) => {
+    setDeletingId(id);
+    try {
+      const res = await fetch(`/api/payments/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        toast.success("Payment deleted and invoice balance recalculated.");
+        setConfirmDeleteId(null);
+        fetchData();
+      } else {
+        toast.error("Failed to delete payment.");
+      }
+    } catch {
+      toast.error("An error occurred.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   // Form State
   const [selectedClientId, setSelectedClientId] = useState("");
@@ -344,12 +365,13 @@ export default function PaymentsPage() {
                 <TableHead>Method</TableHead>
                 <TableHead>Reference / Notes</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
+                <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-20">
+                  <TableCell colSpan={7} className="text-center py-20">
                     <div className="flex flex-col items-center gap-2 text-slate-400">
                       <Loader2 className="h-8 w-8 animate-spin" />
                       <p className="text-sm font-medium">Loading ledger...</p>
@@ -358,7 +380,7 @@ export default function PaymentsPage() {
                 </TableRow>
               ) : payments.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-20 text-slate-400">
+                  <TableCell colSpan={7} className="text-center py-20 text-slate-400">
                     No payment records found.
                   </TableCell>
                 </TableRow>
@@ -403,6 +425,38 @@ export default function PaymentsPage() {
                         <span className="text-xs opacity-50">{pay.currency === 'USD' ? '$' : '₹'}</span>
                         {pay.amount}
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      {confirmDeleteId === pay.id ? (
+                        <div className="flex items-center gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 px-2 text-xs text-slate-500 hover:text-slate-700"
+                            onClick={() => setConfirmDeleteId(null)}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="h-7 px-2 text-xs bg-rose-500 hover:bg-rose-600 text-white font-bold"
+                            disabled={deletingId === pay.id}
+                            onClick={() => handleDeletePayment(pay.id)}
+                          >
+                            {deletingId === pay.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Confirm"}
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 text-slate-300 hover:text-rose-500 hover:bg-rose-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => setConfirmDeleteId(pay.id)}
+                          title="Delete payment"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))
