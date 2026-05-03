@@ -37,7 +37,7 @@ export async function POST(
     const { 
       subjective, objective, assessment, plan, riskFlag,
       updates, clientActions, myActions, agenda, feedback,
-      actualStartTime, actualEndTime, // "HH:mm" strings
+      actualStartTimeISO, actualEndTimeISO, // ISO strings
       orsIndividual, orsInterpersonal, orsSocial, orsOverall, orsTotal,
       srsRelationship, srsGoals, srsApproach, srsOverall, srsTotal
     } = body;
@@ -55,21 +55,9 @@ export async function POST(
     let actualEnd: Date | null = null;
     let invoicedDurationMin = session.durationMin;
 
-    if (actualStartTime && actualEndTime) {
-      const scheduledDate = new Date(session.scheduledAt);
-      const [sh, sm] = actualStartTime.split(":").map(Number);
-      const [eh, em] = actualEndTime.split(":").map(Number);
-      
-      actualStart = new Date(scheduledDate);
-      actualStart.setHours(sh, sm, 0, 0);
-      
-      actualEnd = new Date(scheduledDate);
-      actualEnd.setHours(eh, em, 0, 0);
-      
-      // If end time is before start time, assume it crossed midnight
-      if (actualEnd < actualStart) {
-        actualEnd.setDate(actualEnd.getDate() + 1);
-      }
+    if (actualStartTimeISO && actualEndTimeISO) {
+      actualStart = new Date(actualStartTimeISO);
+      actualEnd = new Date(actualEndTimeISO);
 
       const actualDuration = Math.abs(Math.round((actualEnd.getTime() - actualStart.getTime()) / 60000));
       

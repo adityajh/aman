@@ -192,9 +192,25 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
     setLoading(true);
 
     try {
+      const actStart = new Date(scheduledStart);
+      const [sh, sm] = note.actualStartTime.split(":").map(Number);
+      actStart.setHours(sh, sm, 0, 0);
+
+      const actEnd = new Date(scheduledStart);
+      const [eh, em] = note.actualEndTime.split(":").map(Number);
+      actEnd.setHours(eh, em, 0, 0);
+
+      if (actEnd < actStart) actEnd.setDate(actEnd.getDate() + 1);
+
+      const payload = {
+        ...note,
+        actualStartTimeISO: actStart.toISOString(),
+        actualEndTimeISO: actEnd.toISOString()
+      };
+
       const res = await fetch(`/api/sessions/${sessionId}/note`, {
         method: "POST",
-        body: JSON.stringify(note),
+        body: JSON.stringify(payload),
         headers: { "Content-Type": "application/json" },
       });
 

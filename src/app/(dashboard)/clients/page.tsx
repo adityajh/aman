@@ -239,7 +239,9 @@ export default function ClientsPage() {
                   }}
                 >
                   <SelectTrigger className="border-slate-200 bg-white h-10">
-                    <SelectValue placeholder="Pick a fee scheme..." />
+                    <SelectValue placeholder="Pick a fee scheme...">
+                      {defaultFeeSchemeId && defaultFeeSchemeId !== "none" ? selectedFeeSchemeLabel : "Pick a fee scheme..."}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent className="bg-white border-slate-200 shadow-2xl">
                     {feeSchemes.length === 0 && (
