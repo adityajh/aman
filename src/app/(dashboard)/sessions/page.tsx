@@ -194,6 +194,8 @@ function SessionsPageInner() {
     const [noteOpen, setNoteOpen] = useState(false);
     const start = new Date(session.scheduledAt);
     const end = session.endedAt ? new Date(session.endedAt) : null;
+    const actualStart = session.actualStartTime ? new Date(session.actualStartTime) : null;
+    const actualEnd = session.actualEndTime ? new Date(session.actualEndTime) : null;
     const [cancelling, setCancelling] = useState(false);
     const [cancelReason, setCancelReason] = useState("");
     const [cancelOpen, setCancelOpen] = useState(false);
@@ -245,31 +247,22 @@ function SessionsPageInner() {
             {session.durationMin}m
           </Badge>
         </TableCell>
+        <TableCell className="text-slate-600 font-medium">
+          {actualStart && actualEnd ? (
+            <div className="flex flex-col">
+              <span className="font-bold text-slate-700">{Math.round((actualEnd.getTime() - actualStart.getTime()) / 60000)}m</span>
+              <span className="text-[10px] text-slate-400">{format(actualStart, "h:mm a")} - {format(actualEnd, "h:mm a")}</span>
+            </div>
+          ) : "—"}
+        </TableCell>
+        <TableCell className="text-slate-600 font-medium">
+          {session.invoicedDurationMin ? <span className="font-bold text-slate-700">{session.invoicedDurationMin}m</span> : "—"}
+        </TableCell>
         <TableCell className="font-semibold text-slate-700">
           {session.feeScheme?.currency === 'USD' ? '$' : '₹'}{parseFloat(session.feeCharged || "0").toLocaleString('en-IN', { minimumFractionDigits: 2 })}
         </TableCell>
         <TableCell>
           {getStatusBadge(session)}
-        </TableCell>
-
-        <TableCell>
-          {session._clinical?.orsStatus || session._clinical?.srsStatus ? (
-            <div className="flex flex-col gap-1">
-              {session._clinical?.orsStatus && (() => {
-                const o = session._clinical.orsStatus;
-                const cls = o === "CSC Achieved" ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                  : o === "RCI Achieved" ? "bg-blue-50 text-blue-700 border-blue-200"
-                  : o === "Deteriorating" ? "bg-rose-50 text-rose-700 border-rose-200"
-                  : "bg-slate-50 text-slate-500 border-slate-200";
-                return <Badge variant="outline" className={`text-[10px] whitespace-nowrap ${cls}`}>ORS: {o}</Badge>;
-              })()}
-              {session._clinical?.srsStatus && (() => {
-                const s2 = session._clinical.srsStatus;
-                const cls2 = s2 === "Satisfied" ? "bg-green-50 text-green-700 border-green-200" : "bg-orange-50 text-orange-700 border-orange-200";
-                return <Badge variant="outline" className={`text-[10px] whitespace-nowrap ${cls2}`}>SRS: {s2}</Badge>;
-              })()}
-            </div>
-          ) : <span className="text-slate-300 text-xs">No data</span>}
         </TableCell>
         <TableCell className="text-right">
           <div className="flex justify-end gap-2">
@@ -621,10 +614,11 @@ function SessionsPageInner() {
                 <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest">Client</TableHead>
                 <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-24">Start</TableHead>
                 <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-24">End</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-16">Dur.</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-16">Sch.</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-24">Act.</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-20">Inv.</TableHead>
                 <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-28">Fees</TableHead>
                 <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-28">Status</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest min-w-[180px]">Risk Status</TableHead>
                 <TableHead className="text-right py-4 font-bold text-slate-400 uppercase text-xs tracking-widest px-6 w-32">Actions</TableHead>
               </TableRow>
             </TableHeader>
