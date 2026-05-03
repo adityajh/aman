@@ -273,9 +273,9 @@ function SessionsPageInner() {
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="text-rose-500 hover:text-rose-600 hover:bg-rose-50"
+                      className="text-rose-500 hover:text-rose-600 hover:bg-rose-50 gap-1"
                     >
-                      <XCircle className="h-4 w-4" />
+                      <XCircle className="h-4 w-4" /> Cancel
                     </Button>
                   }
                 />
