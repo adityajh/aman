@@ -218,7 +218,7 @@ export default function InvoicesPage() {
                       return Object.entries(totals).map(([cur, amt]) => (
                         <p key={cur} className="text-lg font-bold text-lime-600 flex items-center justify-end">
                           {cur === 'USD' ? <DollarSign className="h-4 w-4" /> : <IndianRupee className="h-4 w-4" />}
-                          {amt.toFixed(2)}
+                          {(amt as number).toFixed(2)}
                         </p>
                       ));
                     })()}
