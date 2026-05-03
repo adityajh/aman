@@ -25,6 +25,12 @@ All notable changes to the Aman project will be documented in this file.
 - **Session Legacy Dates Crash**: Created fallback safe date strings in the note editor to prevent rendering crashes caused by malformed/missing legacy database timestamps.
 - **Mary Lennon $ Display**: Standardized currency symbol fallback on the Clients page. Profiles without an assigned fee scheme now display fee amounts neutrally rather than defaulting incorrectly to INR.
 - **Database Schema**: Added `actual_start_time`, `actual_end_time`, and `invoiced_duration_min` to the `sessions` table.
+- **Timezone Shift on Session Notes**: Moved date-and-time combination logic to the client-side browser to construct precise UTC ISO strings, preventing the server from applying a 5.5 hour IST offset to user inputs.
+- **Pending Invoice Currency Bug**: Patched the invoice batching API and unbilled revenue summaries to dynamically trace back to the `clients.defaultFeeSchemeId` instead of falling back to INR when a standalone session lacks a fee scheme.
+- **Clients Table Currency Display**: Removed the hardcoded `IndianRupee` icon from the main Clients list and replaced it with a dynamic currency switch bound to the client's default scheme.
+- **Sessions Ledger Currency Display**: Fixed the main Sessions table to fall back to the client's default fee scheme when a session lacks a specific fee scheme, matching the Invoicing behavior.
+- **Dropdown Gibberish**: Fixed the lazy-mounting UUID text bug on the 'Add New Client' modal's Default Fee Scheme dropdown.
+- **Missing Cancel Button Text**: Re-added the "Cancel" text label next to the cancellation icon on Scheduled sessions for clarity.
 
 ---
  
