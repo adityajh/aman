@@ -275,14 +275,17 @@ function SessionsPageInner() {
           <div className="flex justify-end gap-2">
             {session.status === "scheduled" && (
               <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-rose-500 hover:text-rose-600 hover:bg-rose-50"
-                  onClick={() => setCancelOpen(true)}
-                >
-                  <XCircle className="h-4 w-4" />
-                </Button>
+                <DialogTrigger
+                  render={
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-rose-500 hover:text-rose-600 hover:bg-rose-50"
+                    >
+                      <XCircle className="h-4 w-4" />
+                    </Button>
+                  }
+                />
                 <DialogContent className="bg-white border-slate-200 max-w-sm">
                   <DialogHeader>
                     <DialogTitle className="text-rose-600">Cancel Session</DialogTitle>
@@ -315,14 +318,17 @@ function SessionsPageInner() {
             )}
             
             <Dialog open={noteOpen} onOpenChange={setNoteOpen}>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="gap-2 text-lime-600 hover:text-lime-700 font-bold"
-                onClick={() => setNoteOpen(true)}
-              >
-                {session.status === 'completed' ? 'View Note' : 'Write Note'}
-              </Button>
+              <DialogTrigger
+                render={
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="gap-2 text-lime-600 hover:text-lime-700 font-bold"
+                  >
+                    {session.status === 'completed' ? 'View Note' : 'Write Note'}
+                  </Button>
+                }
+              />
               <DialogContent className="max-w-[95vw] lg:max-w-4xl max-h-[95vh] overflow-y-auto bg-white p-0 shadow-2xl">
                 <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-md p-6 border-b border-slate-100 shadow-sm">
                   <DialogHeader>
@@ -337,7 +343,7 @@ function SessionsPageInner() {
                 </div>
                 <div className="p-8">
                   <ClinicalNoteEditor 
-                    sessionId={session.id} 
+                    session={session} 
                     onSave={onRefresh} 
                     onClose={() => setNoteOpen(false)}
                   />
@@ -448,12 +454,13 @@ function SessionsPageInner() {
           </div>
 
           <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
-            <Button 
-              className="gap-2 bg-slate-900 text-white hover:bg-slate-800 shadow-md h-10 px-6 font-bold"
-              onClick={() => setOpen(true)}
-            >
-              <Plus className="h-4 w-4" /> New Session
-            </Button>
+            <DialogTrigger
+              render={
+                <Button className="gap-2 bg-slate-900 text-white hover:bg-slate-800 shadow-md h-10 px-6 font-bold">
+                  <Plus className="h-4 w-4" /> New Session
+                </Button>
+              }
+            />
             <DialogContent className="sm:max-w-xl bg-white border-slate-200">
               <DialogHeader>
                 <DialogTitle className="text-xl font-bold text-slate-900">Schedule New Session</DialogTitle>
@@ -481,9 +488,7 @@ function SessionsPageInner() {
                     }}
                   >
                     <SelectTrigger className="w-full bg-slate-50 border-slate-200 h-12">
-                      <span className={selectedClientId ? "text-slate-900 font-semibold" : "text-slate-400"}>
-                        {selectedClientName || "Pick a client..."}
-                      </span>
+                      <SelectValue placeholder="Pick a client..." />
                     </SelectTrigger>
                     <SelectContent className="bg-white border-slate-200 max-h-[300px] overflow-y-auto shadow-2xl">
                       {clients.map(c => (
@@ -547,9 +552,7 @@ function SessionsPageInner() {
                       }}
                     >
                       <SelectTrigger className="w-full bg-slate-50 border-slate-200 h-10">
-                        <span className={selectedFeeSchemeLabel === "Pick a scheme..." ? "text-slate-400" : "text-slate-900"}>
-                          {selectedFeeSchemeLabel}
-                        </span>
+                        <SelectValue placeholder="Pick a scheme..." />
                       </SelectTrigger>
                       <SelectContent className="bg-white border-slate-200">
                         <SelectItem value="custom">Custom / No Scheme</SelectItem>

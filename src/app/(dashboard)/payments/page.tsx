@@ -43,6 +43,11 @@ export default function PaymentsPage() {
   const [open, setOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [feeSchemes, setFeeSchemes] = useState<any[]>([]);
+
+  // Filters
+  const [clientFilter, setClientFilter] = useState("all");
+  const [periodFilter, setPeriodFilter] = useState("all");
 
   const handleDeletePayment = async (id: string) => {
     setDeletingId(id);
@@ -70,19 +75,22 @@ export default function PaymentsPage() {
 
   const fetchData = async () => {
     try {
-      const [payRes, summaryRes, clientsRes] = await Promise.all([
+      const [payRes, summaryRes, clientsRes, feeRes] = await Promise.all([
         fetch("/api/payments"),
         fetch("/api/payments/outstanding-summary"),
-        fetch("/api/clients")
+        fetch("/api/clients"),
+        fetch("/api/fee-schemes")
       ]);
-      const [payData, summaryData, clientsData] = await Promise.all([
+      const [payData, summaryData, clientsData, feeData] = await Promise.all([
         payRes.json(),
         summaryRes.json(),
-        clientsRes.json()
+        clientsRes.json(),
+        feeRes.json()
       ]);
       setPayments(payData);
       setSummary(summaryData);
       setClients(clientsData);
+      setFeeSchemes(feeData);
     } catch (err) {
       toast.error("Failed to fetch data");
     } finally {
@@ -163,14 +171,47 @@ export default function PaymentsPage() {
           <p className="text-slate-500">Track collections, receipting, and pending dues.</p>
         </div>
         
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger
-            render={
-              <Button className="gap-2 bg-lime-400 text-slate-950 hover:bg-lime-500 font-bold shadow-sm">
-                <Plus className="h-4 w-4" /> Record Payment
-              </Button>
-            }
-          />
+        <div className="flex items-center gap-3">
+          {/* Client Filter */}
+          <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-lg border border-slate-200">
+            <User className="h-4 w-4 text-slate-400 ml-2" />
+            <Select value={clientFilter} onValueChange={(v) => setClientFilter(v || "all")}>
+              <SelectTrigger className="w-[180px] border-0 h-8 bg-transparent shadow-none font-semibold focus:ring-0">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-slate-200 max-h-[200px]">
+                <SelectItem value="all">All Clients</SelectItem>
+                {clients.map(c => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Period Filter */}
+          <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-lg border border-slate-200">
+            <Clock className="h-4 w-4 text-slate-400 ml-2" />
+            <Select value={periodFilter} onValueChange={(v) => setPeriodFilter(v || "all")}>
+              <SelectTrigger className="w-[180px] border-0 h-8 bg-transparent shadow-none font-semibold focus:ring-0">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-slate-200">
+                <SelectItem value="all">All Time</SelectItem>
+                <SelectItem value="this_month">This Month</SelectItem>
+                <SelectItem value="last_month">Last Month</SelectItem>
+                <SelectItem value="this_year">This Year</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger
+              render={
+                <Button className="gap-2 bg-lime-400 text-slate-950 hover:bg-lime-500 font-bold shadow-sm">
+                  <Plus className="h-4 w-4" /> Record Payment
+                </Button>
+              }
+            />
           <DialogContent className="max-w-xl">
             <DialogHeader>
               <DialogTitle>Record New Payment</DialogTitle>
@@ -179,33 +220,37 @@ export default function PaymentsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2 col-span-2">
                   <Label>Client Name</Label>
-                  <Select 
-                    value={selectedClientId} 
-                    onValueChange={(id) => {
-                      const cleanId = id || "";
-                      setSelectedClientId(cleanId);
-                      const client = clients.find(c => c.id === cleanId);
-                      setSelectedClientName(client ? client.name : "");
-                    }}
-                  >
-                    <SelectTrigger className="w-full border-slate-200 h-10 text-slate-900 shadow-sm bg-white">
-                      <span className={selectedClientId ? "text-slate-900" : "text-slate-400"}>
-                        {selectedClientName || "Pick a client..."}
-                      </span>
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border-slate-200 max-h-[250px] overflow-y-auto shadow-2xl">
-                      {clients.map(c => (
-                        <SelectItem key={c.id} value={c.id} label={c.name}>{c.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    <Select 
+                      value={selectedClientId} 
+                      onValueChange={(id) => {
+                        const cleanId = id || "";
+                        setSelectedClientId(cleanId);
+                        const client = clients.find(c => c.id === cleanId);
+                        setSelectedClientName(client ? client.name : "");
+                        
+                        // Auto-set currency based on client's default fee scheme
+                        if (client?.defaultFeeSchemeId) {
+                          const scheme = feeSchemes.find(f => f.id === client.defaultFeeSchemeId);
+                          if (scheme) setPaymentCurrency(scheme.currency);
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="w-full border-slate-200 h-10 text-slate-900 shadow-sm bg-white">
+                        <SelectValue placeholder="Pick a client..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white border-slate-200 max-h-[250px] overflow-y-auto shadow-2xl">
+                        {clients.map(c => (
+                          <SelectItem key={c.id} value={c.id} label={c.name}>{c.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                 </div>
 
                 <div className="space-y-2">
                   <Label>Currency</Label>
                   <Select value={paymentCurrency} onValueChange={(v) => setPaymentCurrency(v || "INR")}>
                     <SelectTrigger className="bg-white border-slate-200">
-                      <span>{paymentCurrency === 'USD' ? 'USD ($)' : 'INR (₹)'}</span>
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-white border-slate-200">
                       <SelectItem value="INR">INR (₹)</SelectItem>
@@ -231,7 +276,7 @@ export default function PaymentsPage() {
                   <Label>Method</Label>
                   <Select value={paymentMethod} onValueChange={(v) => setPaymentMethod(v || "upi")}>
                     <SelectTrigger className="border-slate-200 h-10 bg-white shadow-sm">
-                      <span>{paymentMethod.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}</span>
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-white border-slate-200">
                       <SelectItem value="upi">UPI</SelectItem>

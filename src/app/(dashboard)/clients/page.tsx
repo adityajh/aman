@@ -236,9 +236,7 @@ export default function ClientsPage() {
                   }}
                 >
                   <SelectTrigger className="border-slate-200 bg-white h-10">
-                    <span className={selectedFeeSchemeLabel ? "text-slate-900" : "text-slate-400"}>
-                      {selectedFeeSchemeLabel || "Pick a fee scheme..."}
-                    </span>
+                    <SelectValue placeholder="Pick a fee scheme..." />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-slate-200 shadow-2xl">
                     {feeSchemes.length === 0 && (
@@ -395,9 +393,7 @@ export default function ClientsPage() {
                       }}
                     >
                       <SelectTrigger className="border-slate-200 bg-white h-10">
-                        <span className={selectedFeeSchemeLabel ? "text-slate-900" : "text-slate-400"}>
-                          {selectedFeeSchemeLabel || "Pick a fee scheme..."}
-                        </span>
+                        <SelectValue placeholder="Pick a fee scheme..." />
                       </SelectTrigger>
                       <SelectContent className="bg-white border-slate-200 shadow-2xl">
                         {feeSchemes.map(f => (
@@ -447,7 +443,11 @@ export default function ClientsPage() {
                     <div>
                       <Label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Default Fee</Label>
                       <p className="text-sm font-semibold text-slate-900">
-                        {feeSchemes.find(f => f.id === selectedClient.defaultFeeSchemeId)?.currency === 'USD' ? '$' : '₹'}
+                        {(() => {
+                          const scheme = feeSchemes.find(f => f.id === selectedClient.defaultFeeSchemeId);
+                          if (scheme) return scheme.currency === 'USD' ? '$' : '₹';
+                          return ""; // Neutral display if no scheme
+                        })()}
                         {selectedClient.defaultFee || "0"}
                       </p>
                     </div>
@@ -473,7 +473,11 @@ export default function ClientsPage() {
                       <CardContent className="p-4">
                         <p className="text-[10px] text-slate-500 font-bold uppercase">Total Billed</p>
                         <p className="text-xl font-bold text-slate-900">
-                          {feeSchemes.find(f => f.id === selectedClient.defaultFeeSchemeId)?.currency === 'USD' ? '$' : '₹'}0
+                          {(() => {
+                            const scheme = feeSchemes.find(f => f.id === selectedClient.defaultFeeSchemeId);
+                            if (scheme) return scheme.currency === 'USD' ? '$' : '₹';
+                            return ""; 
+                          })()}0
                         </p>
                       </CardContent>
                     </Card>

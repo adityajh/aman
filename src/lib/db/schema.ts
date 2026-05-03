@@ -132,6 +132,9 @@ export const sessions = pgTable(
       .$type<"individual" | "couples" | "group" | "intake" | "followup">()
       .notNull()
       .default("individual"),
+    actualStartTime: timestamp("actual_start_time", { withTimezone: true }),
+    actualEndTime: timestamp("actual_end_time", { withTimezone: true }),
+    invoicedDurationMin: integer("invoiced_duration_min"),
     status: text("status")
       .$type<"scheduled" | "completed" | "no_show" | "cancelled" | "rescheduled">()
       .notNull()

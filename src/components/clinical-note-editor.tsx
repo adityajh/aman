@@ -9,22 +9,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Save, Loader2, AlertCircle, BarChart3, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 interface ClinicalNoteEditorProps {
-  sessionId: string;
+  session: any; // Full session object for initial times
   onSave?: () => void;
   onClose?: () => void;
 }
 
 // ── Stable module-level component ──────────────────────────────────────────
 // Must live OUTSIDE ClinicalNoteEditor so React never remounts it mid-drag.
-function ScoreSelector({ value, onChange, label }: {
+function ScoreSelector({ value, onChange, label, showNumbers }: {
   value: number;
   onChange: (v: number) => void;
   label: string;
+  showNumbers: boolean;
 }) {
   const pct = (value / 10) * 100;
-  const trackColor = value <= 3 ? "#ef4444" : value <= 6 ? "#f59e0b" : "#84cc16";
+  const trackColor = !showNumbers ? "#e2e8f0" : (value <= 3 ? "#ef4444" : value <= 6 ? "#f59e0b" : "#84cc16");
 
   const handleSlider = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(Math.round(parseFloat(e.target.value) * 10) / 10);
@@ -57,27 +59,33 @@ function ScoreSelector({ value, onChange, label }: {
           />
         </div>
         {/* Number input */}
-        <Input
-          type="number"
-          min={0}
-          max={10}
-          step={0.1}
-          value={value === 0 ? "" : value}
-          onChange={handleInput}
-          placeholder="0"
-          className="w-16 h-8 text-center font-bold text-sm border-slate-200 bg-white p-1"
-        />
-        {/* Coloured readout */}
-        <span className="text-xs font-bold w-10 text-right" style={{ color: trackColor }}>
-          {value > 0 ? value.toFixed(1) : "—"}
-        </span>
+        {showNumbers && (
+          <>
+            <Input
+              type="number"
+              min={0}
+              max={10}
+              step={0.1}
+              value={value === 0 ? "" : value}
+              onChange={handleInput}
+              placeholder="0"
+              className="w-16 h-8 text-center font-bold text-sm border-slate-200 bg-white p-1"
+            />
+            {/* Coloured readout */}
+            <span className="text-xs font-bold w-10 text-right" style={{ color: trackColor }}>
+              {value > 0 ? value.toFixed(1) : "—"}
+            </span>
+          </>
+        )}
       </div>
       {/* Tick marks */}
-      <div className="flex justify-between px-0.5">
-        {[0, 2.5, 5, 7.5, 10].map(t => (
-          <span key={t} className="text-[9px] text-slate-300 font-medium">{t}</span>
-        ))}
-      </div>
+      {showNumbers && (
+        <div className="flex justify-between px-0.5">
+          {[0, 2.5, 5, 7.5, 10].map(t => (
+            <span key={t} className="text-[9px] text-slate-300 font-medium">{t}</span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -85,16 +93,26 @@ function ScoreSelector({ value, onChange, label }: {
 
 
 
-export function ClinicalNoteEditor({ sessionId, onSave, onClose }: ClinicalNoteEditorProps) {
+export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEditorProps) {
+  const sessionId = session.id;
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [showNumbers, setShowNumbers] = useState(true);
+  
+  // Format dates for time input
+  const scheduledStart = new Date(session.scheduledAt);
+  const scheduledEnd = new Date(scheduledStart.getTime() + (session.durationMin || 60) * 60000);
+  
   const [note, setNote] = useState({
     updates: "",
-    subjective: "", // Used for main "Session Notes"
+    subjective: "", 
     clientActions: "",
     myActions: "",
     agenda: "",
     feedback: "",
+    // Time tracking
+    actualStartTime: session.actualStartTime ? format(new Date(session.actualStartTime), "HH:mm") : format(scheduledStart, "HH:mm"),
+    actualEndTime: session.actualEndTime ? format(new Date(session.actualEndTime), "HH:mm") : format(scheduledEnd, "HH:mm"),
     // ORS
     orsIndividual: 0,
     orsInterpersonal: 0,
@@ -197,6 +215,28 @@ export function ClinicalNoteEditor({ sessionId, onSave, onClose }: ClinicalNoteE
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
+      {/* Time Tracking Section */}
+      <div className="grid grid-cols-2 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+        <div className="space-y-2">
+          <Label className="text-xs uppercase font-bold text-slate-500 tracking-wider">Actual Start Time</Label>
+          <Input 
+            type="time" 
+            value={note.actualStartTime} 
+            onChange={(e) => setNote({ ...note, actualStartTime: e.target.value })}
+            className="bg-white border-slate-200"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label className="text-xs uppercase font-bold text-slate-500 tracking-wider">Actual End Time</Label>
+          <Input 
+            type="time" 
+            value={note.actualEndTime} 
+            onChange={(e) => setNote({ ...note, actualEndTime: e.target.value })}
+            className="bg-white border-slate-200"
+          />
+        </div>
+      </div>
+
       {/* Qualitative Notes */}
       <div className="grid grid-cols-1 gap-6">
         <div className="space-y-2">
@@ -274,10 +314,10 @@ export function ClinicalNoteEditor({ sessionId, onSave, onClose }: ClinicalNoteE
             </div>
           </div>
           <div className="space-y-4">
-            <ScoreSelector label="Individually (Personal well-being)" value={note.orsIndividual} onChange={(v) => updateOrs('orsIndividual', v)} />
-            <ScoreSelector label="Interpersonally (Family, close relationships)" value={note.orsInterpersonal} onChange={(v) => updateOrs('orsInterpersonal', v)} />
-            <ScoreSelector label="Socially (Work, school, friendships)" value={note.orsSocial} onChange={(v) => updateOrs('orsSocial', v)} />
-            <ScoreSelector label="Overall (General sense of well-being)" value={note.orsOverall} onChange={(v) => updateOrs('orsOverall', v)} />
+            <ScoreSelector label="Individually (Personal well-being)" value={note.orsIndividual} onChange={(v) => updateOrs('orsIndividual', v)} showNumbers={showNumbers} />
+            <ScoreSelector label="Interpersonally (Family, close relationships)" value={note.orsInterpersonal} onChange={(v) => updateOrs('orsInterpersonal', v)} showNumbers={showNumbers} />
+            <ScoreSelector label="Socially (Work, school, friendships)" value={note.orsSocial} onChange={(v) => updateOrs('orsSocial', v)} showNumbers={showNumbers} />
+            <ScoreSelector label="Overall (General sense of well-being)" value={note.orsOverall} onChange={(v) => updateOrs('orsOverall', v)} showNumbers={showNumbers} />
           </div>
         </div>
 
@@ -293,11 +333,34 @@ export function ClinicalNoteEditor({ sessionId, onSave, onClose }: ClinicalNoteE
             </div>
           </div>
           <div className="space-y-4">
-            <ScoreSelector label="Relationship (I felt heard, understood, and respected)" value={note.srsRelationship} onChange={(v) => updateSrs('srsRelationship', v)} />
-            <ScoreSelector label="Goals and Topics (We worked on what I wanted)" value={note.srsGoals} onChange={(v) => updateSrs('srsGoals', v)} />
-            <ScoreSelector label="Approach or Method (Fit with therapist's approach)" value={note.srsApproach} onChange={(v) => updateSrs('srsApproach', v)} />
-            <ScoreSelector label="Overall (Today's session was right for me)" value={note.srsOverall} onChange={(v) => updateSrs('srsOverall', v)} />
+            <ScoreSelector label="Relationship (I felt heard, understood, and respected)" value={note.srsRelationship} onChange={(v) => updateSrs('srsRelationship', v)} showNumbers={showNumbers} />
+            <ScoreSelector label="Goals and Topics (We worked on what I wanted)" value={note.srsGoals} onChange={(v) => updateSrs('srsGoals', v)} showNumbers={showNumbers} />
+            <ScoreSelector label="Approach or Method (Fit with therapist's approach)" value={note.srsApproach} onChange={(v) => updateSrs('srsApproach', v)} showNumbers={showNumbers} />
+            <ScoreSelector label="Overall (Today's session was right for me)" value={note.srsOverall} onChange={(v) => updateSrs('srsOverall', v)} showNumbers={showNumbers} />
           </div>
+        </div>
+      </div>
+
+      <div className="flex justify-center -my-4">
+        <div className="flex bg-slate-100 p-1 rounded-full border border-slate-200">
+          <Button 
+            type="button"
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setShowNumbers(true)}
+            className={cn("rounded-full px-4 h-7 text-[10px] font-bold uppercase tracking-wider", showNumbers ? "bg-white text-slate-900 shadow-sm" : "text-slate-500")}
+          >
+            Precise
+          </Button>
+          <Button 
+            type="button"
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setShowNumbers(false)}
+            className={cn("rounded-full px-4 h-7 text-[10px] font-bold uppercase tracking-wider", !showNumbers ? "bg-white text-slate-900 shadow-sm" : "text-slate-500")}
+          >
+            Blind
+          </Button>
         </div>
       </div>
 
