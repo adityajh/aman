@@ -2,6 +2,27 @@
 
 All notable changes to the Aman project will be documented in this file.
  
+## [2.8.0] - 2026-05-03
+### Added
+- **Automated Billing Formula**: Sessions now follow a strict duration-based billing logic.
+  - Up to 70 mins → invoiced as 60 mins.
+  - Over 70 mins → rounded to the nearest 15-minute quartile (75, 90, 105, etc.).
+  - `feeCharged` is automatically recalculated upon finalizing a clinical note based on this formula.
+- **Clinical Note "Blind Mode"**: Added a Precise/Blind toggle for ORS and SRS sliders. Blind mode removes all numbers, colors, and tick marks to prevent anchoring bias during assessments.
+- **Session Time Tracking**: Captures `Actual Start Time` and `Actual End Time` within the clinical note editor (defaults to scheduled times).
+- **Payment Ledger Filters**: Added Client-wise and Period-wise (Month/Year) filtering to the Payments page.
+- **Payment Auto-Currency**: Recording a new payment now automatically sets the currency (USD/INR) to match the selected client's default fee scheme.
+
+### Changed
+- **System-wide Dropdown Fix**: Standardized all `<Select>` components across Clients, Sessions, and Payments pages to use built-in `<SelectValue />`. This resolves the bug where initial selection labels appeared out of sync or as raw UUIDs.
+- **Dialog Architecture**: Restored proper `DialogTrigger` registration using the `@base-ui/react` `render=` pattern, fixing the "View Note" dialog error.
+
+### Fixed
+- **Mary Lennon $ Display**: Standardized currency symbol fallback on the Clients page. Profiles without an assigned fee scheme now display fee amounts neutrally rather than defaulting incorrectly to INR.
+- **Database Schema**: Added `actual_start_time`, `actual_end_time`, and `invoiced_duration_min` to the `sessions` table.
+
+---
+ 
 ## [2.7.0] - 2026-05-03
 ### Added
 - **Payment Delete & Re-enter**: Each payment row in the Payments Ledger now has a delete (trash) icon. On confirmation, the payment is deleted and the linked invoice's `amountPaid` and status are automatically recalculated. Use this to correct data entry errors by deleting the wrong amount and re-entering the correct one.
