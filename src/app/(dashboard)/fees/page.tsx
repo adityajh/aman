@@ -117,8 +117,8 @@ export default function FeesPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-white border-slate-200">
-                      <SelectItem value="INR">INR (₹)</SelectItem>
-                      <SelectItem value="USD">USD ($)</SelectItem>
+                      <SelectItem value="INR" label="INR (₹)">INR (₹)</SelectItem>
+                      <SelectItem value="USD" label="USD ($)">USD ($)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

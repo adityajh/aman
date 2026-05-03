@@ -188,9 +188,9 @@ export default function ClientsPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-white border-slate-200">
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="terminated">Terminated</SelectItem>
+                <SelectItem value="all" label="All">All</SelectItem>
+                <SelectItem value="active" label="Active">Active</SelectItem>
+                <SelectItem value="terminated" label="Terminated">Terminated</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -535,8 +535,8 @@ export default function ClientsPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-slate-200">
-                  <SelectItem value="planned">Planned (Graduation / Successful)</SelectItem>
-                  <SelectItem value="unplanned">Unplanned (Dropout / Referred)</SelectItem>
+                  <SelectItem value="planned" label="Planned (Graduation / Successful)">Planned (Graduation / Successful)</SelectItem>
+                  <SelectItem value="unplanned" label="Unplanned (Dropout / Referred)">Unplanned (Dropout / Referred)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

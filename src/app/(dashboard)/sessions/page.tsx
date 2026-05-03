@@ -420,10 +420,10 @@ function SessionsPageInner() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-white border-slate-200">
-                <SelectItem value="all">All Time</SelectItem>
-                <SelectItem value="ytd">YTD (Apr-Mar)</SelectItem>
-                <SelectItem value="month">This Month</SelectItem>
-                <SelectItem value="custom" disabled>Custom Range</SelectItem>
+                <SelectItem value="all" label="All Time">All Time</SelectItem>
+                <SelectItem value="ytd" label="YTD (Apr-Mar)">YTD (Apr-Mar)</SelectItem>
+                <SelectItem value="month" label="This Month">This Month</SelectItem>
+                <SelectItem value="custom" disabled label="Custom Range">Custom Range</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -436,10 +436,10 @@ function SessionsPageInner() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-white border-slate-200">
-                <SelectItem value="active">Active Clients</SelectItem>
-                <SelectItem value="all">All Clients</SelectItem>
+                <SelectItem value="active" label="Active Clients">Active Clients</SelectItem>
+                <SelectItem value="all" label="All Clients">All Clients</SelectItem>
                 {clients.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  <SelectItem key={c.id} value={c.id} label={c.name}>{c.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

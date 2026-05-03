@@ -180,9 +180,9 @@ export default function PaymentsPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-white border-slate-200 max-h-[200px]">
-                <SelectItem value="all">All Clients</SelectItem>
+                <SelectItem value="all" label="All Clients">All Clients</SelectItem>
                 {clients.map(c => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  <SelectItem key={c.id} value={c.id} label={c.name}>{c.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -196,10 +196,10 @@ export default function PaymentsPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-white border-slate-200">
-                <SelectItem value="all">All Time</SelectItem>
-                <SelectItem value="this_month">This Month</SelectItem>
-                <SelectItem value="last_month">Last Month</SelectItem>
-                <SelectItem value="this_year">This Year</SelectItem>
+                <SelectItem value="all" label="All Time">All Time</SelectItem>
+                <SelectItem value="this_month" label="This Month">This Month</SelectItem>
+                <SelectItem value="last_month" label="Last Month">Last Month</SelectItem>
+                <SelectItem value="this_year" label="This Year">This Year</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -253,8 +253,8 @@ export default function PaymentsPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-white border-slate-200">
-                      <SelectItem value="INR">INR (₹)</SelectItem>
-                      <SelectItem value="USD">USD ($)</SelectItem>
+                      <SelectItem value="INR" label="INR (₹)">INR (₹)</SelectItem>
+                      <SelectItem value="USD" label="USD ($)">USD ($)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -279,12 +279,12 @@ export default function PaymentsPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-white border-slate-200">
-                      <SelectItem value="upi">UPI</SelectItem>
-                      <SelectItem value="cash">Cash</SelectItem>
-                      <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-                      <SelectItem value="card">Card</SelectItem>
-                      <SelectItem value="online">Online</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
+                      <SelectItem value="upi" label="UPI">UPI</SelectItem>
+                      <SelectItem value="cash" label="Cash">Cash</SelectItem>
+                      <SelectItem value="bank_transfer" label="Bank Transfer">Bank Transfer</SelectItem>
+                      <SelectItem value="card" label="Card">Card</SelectItem>
+                      <SelectItem value="online" label="Online">Online</SelectItem>
+                      <SelectItem value="other" label="Other">Other</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

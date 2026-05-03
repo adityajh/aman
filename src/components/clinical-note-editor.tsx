@@ -377,10 +377,10 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-white border-slate-200 text-slate-900">
-              <SelectItem value="none">None</SelectItem>
-              <SelectItem value="low">Low Risk</SelectItem>
-              <SelectItem value="medium">Medium Risk</SelectItem>
-              <SelectItem value="high">High Risk</SelectItem>
+              <SelectItem value="none" label="None">None</SelectItem>
+              <SelectItem value="low" label="Low Risk">Low Risk</SelectItem>
+              <SelectItem value="medium" label="Medium Risk">Medium Risk</SelectItem>
+              <SelectItem value="high" label="High Risk">High Risk</SelectItem>
             </SelectContent>
           </Select>
           {note.riskFlag !== "none" && (
