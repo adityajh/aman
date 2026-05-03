@@ -177,7 +177,9 @@ export default function PaymentsPage() {
             <User className="h-4 w-4 text-slate-400 ml-2" />
             <Select value={clientFilter} onValueChange={(v) => setClientFilter(v || "all")}>
               <SelectTrigger className="w-[180px] border-0 h-8 bg-transparent shadow-none font-semibold focus:ring-0">
-                <SelectValue />
+                <SelectValue>
+                  {clientFilter === "all" ? "All Clients" : clients.find(c => c.id === clientFilter)?.name || "All Clients"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-white border-slate-200 max-h-[200px]">
                 <SelectItem value="all" label="All Clients">All Clients</SelectItem>
@@ -193,7 +195,12 @@ export default function PaymentsPage() {
             <Clock className="h-4 w-4 text-slate-400 ml-2" />
             <Select value={periodFilter} onValueChange={(v) => setPeriodFilter(v || "all")}>
               <SelectTrigger className="w-[180px] border-0 h-8 bg-transparent shadow-none font-semibold focus:ring-0">
-                <SelectValue />
+                <SelectValue>
+                  {periodFilter === "all" ? "All Time" :
+                   periodFilter === "this_month" ? "This Month" :
+                   periodFilter === "last_month" ? "Last Month" :
+                   periodFilter === "this_year" ? "This Year" : "All Time"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-white border-slate-200">
                 <SelectItem value="all" label="All Time">All Time</SelectItem>
@@ -236,7 +243,9 @@ export default function PaymentsPage() {
                       }}
                     >
                       <SelectTrigger className="w-full border-slate-200 h-10 text-slate-900 shadow-sm bg-white">
-                        <SelectValue placeholder="Pick a client..." />
+                        <SelectValue>
+                          {selectedClientId ? (clients.find(c => c.id === selectedClientId)?.name || "Pick a client...") : "Pick a client..."}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent className="bg-white border-slate-200 max-h-[250px] overflow-y-auto shadow-2xl">
                         {clients.map(c => (
@@ -250,7 +259,9 @@ export default function PaymentsPage() {
                   <Label>Currency</Label>
                   <Select value={paymentCurrency} onValueChange={(v) => setPaymentCurrency(v || "INR")}>
                     <SelectTrigger className="bg-white border-slate-200">
-                      <SelectValue />
+                      <SelectValue>
+                        {paymentCurrency === "INR" ? "INR (₹)" : "USD ($)"}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent className="bg-white border-slate-200">
                       <SelectItem value="INR" label="INR (₹)">INR (₹)</SelectItem>
@@ -276,7 +287,14 @@ export default function PaymentsPage() {
                   <Label>Method</Label>
                   <Select value={paymentMethod} onValueChange={(v) => setPaymentMethod(v || "upi")}>
                     <SelectTrigger className="border-slate-200 h-10 bg-white shadow-sm">
-                      <SelectValue />
+                      <SelectValue>
+                        {paymentMethod === "upi" ? "UPI" :
+                         paymentMethod === "cash" ? "Cash" :
+                         paymentMethod === "bank_transfer" ? "Bank Transfer" :
+                         paymentMethod === "card" ? "Card" :
+                         paymentMethod === "online" ? "Online" :
+                         paymentMethod === "other" ? "Other" : "UPI"}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent className="bg-white border-slate-200">
                       <SelectItem value="upi" label="UPI">UPI</SelectItem>

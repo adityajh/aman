@@ -417,7 +417,11 @@ function SessionsPageInner() {
             <CalendarDays className="h-4 w-4 text-slate-400 ml-2" />
             <Select value={timeFilter} onValueChange={(v) => setTimeFilter(v || "ytd")}>
               <SelectTrigger className="w-[180px] border-0 h-8 bg-transparent shadow-none font-semibold focus:ring-0">
-                <SelectValue />
+                <SelectValue>
+                  {timeFilter === "all" ? "All Time" : 
+                   timeFilter === "ytd" ? "YTD (Apr-Mar)" : 
+                   timeFilter === "month" ? "This Month" : "All Time"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-white border-slate-200">
                 <SelectItem value="all" label="All Time">All Time</SelectItem>
@@ -433,7 +437,11 @@ function SessionsPageInner() {
             <Filter className="h-4 w-4 text-slate-400 ml-2" />
             <Select value={clientFilter} onValueChange={(v) => setClientFilter(v || "active")}>
               <SelectTrigger className="w-[180px] border-0 h-8 bg-transparent shadow-none font-semibold focus:ring-0">
-                <SelectValue />
+                <SelectValue>
+                  {clientFilter === "active" ? "Active Clients" : 
+                   clientFilter === "all" ? "All Clients" :
+                   clients.find(c => c.id === clientFilter)?.name || "Active Clients"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-white border-slate-200">
                 <SelectItem value="active" label="Active Clients">Active Clients</SelectItem>
@@ -480,7 +488,9 @@ function SessionsPageInner() {
                     }}
                   >
                     <SelectTrigger className="w-full bg-slate-50 border-slate-200 h-12">
-                      <SelectValue placeholder="Pick a client..." />
+                      <SelectValue>
+                        {selectedClientId ? (clients.find(c => c.id === selectedClientId)?.name || "Pick a client...") : "Pick a client..."}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent className="bg-white border-slate-200 max-h-[300px] overflow-y-auto shadow-2xl">
                       {clients.map(c => (
@@ -544,7 +554,15 @@ function SessionsPageInner() {
                       }}
                     >
                       <SelectTrigger className="w-full bg-slate-50 border-slate-200 h-10">
-                        <SelectValue placeholder="Pick a scheme..." />
+                        <SelectValue>
+                          {selectedFeeSchemeId === "custom" ? "Custom / No Scheme" : 
+                           selectedFeeSchemeId ? (
+                             (() => {
+                               const f = feeSchemes.find(f => f.id === selectedFeeSchemeId);
+                               return f ? `${f.name} (${f.currency === 'USD' ? '$' : '₹'}${f.amount})` : "Pick a scheme...";
+                             })()
+                           ) : "Pick a scheme..."}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent className="bg-white border-slate-200">
                         <SelectItem value="custom" label="Custom / No Scheme">Custom / No Scheme</SelectItem>

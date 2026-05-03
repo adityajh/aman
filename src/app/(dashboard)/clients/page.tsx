@@ -23,7 +23,7 @@ export default function ClientsPage() {
   const [editMode, setEditMode] = useState(false);
   const [editSaving, setEditSaving] = useState(false);
   const [feeSchemes, setFeeSchemes] = useState<any[]>([]);
-  const [selectedFeeSchemeId, setSelectedFeeSchemeId] = useState("");
+  const [defaultFeeSchemeId, setSelectedFeeSchemeId] = useState("");
   const [selectedFeeSchemeLabel, setSelectedFeeSchemeLabel] = useState("");
   const [terminateOpen, setTerminateOpen] = useState(false);
   const [terminationReason, setTerminationReason] = useState("");
@@ -185,7 +185,10 @@ export default function ClientsPage() {
             <ListFilter className="h-4 w-4 text-slate-400 ml-2" />
             <Select value={statusFilter} onValueChange={(v) => setStatusFilter((v ?? "all") as "all" | "active" | "terminated")}>
               <SelectTrigger className="w-[160px] border-0 h-8 bg-transparent shadow-none font-semibold focus:ring-0">
-                <SelectValue />
+                <SelectValue>
+                  {statusFilter === "active" ? "Active" :
+                   statusFilter === "terminated" ? "Terminated" : "All"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-white border-slate-200">
                 <SelectItem value="all" label="All">All</SelectItem>
@@ -223,7 +226,7 @@ export default function ClientsPage() {
               <div className="space-y-2">
                 <Label>Default Fee Scheme</Label>
                 <Select
-                  value={selectedFeeSchemeId}
+                  value={defaultFeeSchemeId}
                   onValueChange={(id) => {
                     const val = id || "";
                     setSelectedFeeSchemeId(val);
@@ -250,8 +253,8 @@ export default function ClientsPage() {
                   </SelectContent>
                 </Select>
                 {/* Hidden fields for form submission */}
-                <input type="hidden" name="defaultFeeSchemeId" value={selectedFeeSchemeId} />
-                <input type="hidden" name="defaultFee" value={feeSchemes.find(f => f.id === selectedFeeSchemeId)?.amount || ""} />
+                <input type="hidden" name="defaultFeeSchemeId" value={defaultFeeSchemeId} />
+                <input type="hidden" name="defaultFee" value={feeSchemes.find(f => f.id === defaultFeeSchemeId)?.amount || ""} />
               </div>
               <Button type="submit" className="w-full">Save Client</Button>
             </form>
@@ -382,7 +385,7 @@ export default function ClientsPage() {
                   <div className="space-y-2">
                     <Label>Default Fee Scheme (INR/USD)</Label>
                     <Select
-                      value={selectedFeeSchemeId}
+                      value={defaultFeeSchemeId}
                       onValueChange={(id) => {
                         const val = id || "";
                         setSelectedFeeSchemeId(val);
@@ -393,7 +396,15 @@ export default function ClientsPage() {
                       }}
                     >
                       <SelectTrigger className="border-slate-200 bg-white h-10">
-                        <SelectValue placeholder="Pick a fee scheme..." />
+                        <SelectValue>
+                        {defaultFeeSchemeId === "none" ? "No fee schemes yet — add one in Fees" :
+                         defaultFeeSchemeId ? (
+                           (() => {
+                             const f = feeSchemes.find(f => f.id === defaultFeeSchemeId);
+                             return f ? f.name : "Select a default fee scheme";
+                           })()
+                         ) : "Select a default fee scheme"}
+                      </SelectValue>
                       </SelectTrigger>
                       <SelectContent className="bg-white border-slate-200 shadow-2xl">
                         {feeSchemes.map(f => (
@@ -403,8 +414,8 @@ export default function ClientsPage() {
                         ))}
                       </SelectContent>
                     </Select>
-                    <input type="hidden" name="defaultFeeSchemeId" value={selectedFeeSchemeId} />
-                    <input type="hidden" name="defaultFee" value={feeSchemes.find(f => f.id === selectedFeeSchemeId)?.amount || ""} />
+                    <input type="hidden" name="defaultFeeSchemeId" value={defaultFeeSchemeId} />
+                    <input type="hidden" name="defaultFee" value={feeSchemes.find(f => f.id === defaultFeeSchemeId)?.amount || ""} />
                   </div>
                   <div className="space-y-2 col-span-2">
                     <Label htmlFor="edit-notes">Notes / Background</Label>
@@ -532,7 +543,10 @@ export default function ClientsPage() {
               <Label>Termination Type</Label>
               <Select value={terminationType} onValueChange={(v) => setTerminationType(v ?? "planned")}>
                 <SelectTrigger className="border-slate-200 bg-slate-50">
-                  <SelectValue />
+                  <SelectValue>
+                    {terminationType === "planned" ? "Planned (Graduation / Successful)" :
+                     terminationType === "unplanned" ? "Unplanned (Dropout / Referred)" : "Select reason..."}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="bg-white border-slate-200">
                   <SelectItem value="planned" label="Planned (Graduation / Successful)">Planned (Graduation / Successful)</SelectItem>
