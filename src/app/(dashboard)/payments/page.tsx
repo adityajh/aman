@@ -374,6 +374,9 @@ export default function PaymentsPage() {
                       <div className="flex items-center gap-2">
                         <User className="h-3 w-3 text-slate-400" />
                         <span className="text-sm font-bold text-slate-900">{pay.client?.name}</span>
+                        {pay.client?.isActive === false && (
+                          <Badge variant="outline" className="bg-rose-50 text-rose-600 border-rose-200 uppercase text-[10px] py-0 px-1">Terminated</Badge>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>

@@ -349,6 +349,9 @@ export default function InvoicesPage() {
                               <div className="flex items-center gap-2">
                                 <User className="h-4 w-4 text-slate-400" />
                                 <span className="font-bold text-slate-900">{group.client?.name}</span>
+                                {group.client?.isActive === false && (
+                                  <Badge variant="outline" className="bg-rose-50 text-rose-600 border-rose-200 uppercase text-[10px] py-0">Terminated</Badge>
+                                )}
                                 <Badge variant="secondary" className="text-[10px] py-0">{group.items.length} Invoices</Badge>
                               </div>
                               <div className="text-xs font-semibold text-slate-500">

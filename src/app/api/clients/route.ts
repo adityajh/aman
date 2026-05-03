@@ -26,7 +26,24 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { name, email, phone, defaultFee, defaultFeeSchemeId } = body;
+    const { name, email, phone, defaultFee, defaultFeeSchemeId, forceCreate } = body;
+
+    // Duplicate Check
+    if (email && !forceCreate) {
+      const existing = await db.query.clients.findFirst({
+        where: eq(clients.email, email)
+      });
+      if (existing) {
+        return NextResponse.json({
+          error: "Duplicate Email",
+          client: {
+            id: existing.id,
+            name: existing.name,
+            isActive: existing.isActive
+          }
+        }, { status: 409 });
+      }
+    }
 
     const newClient = await db.insert(clients).values({
       name,

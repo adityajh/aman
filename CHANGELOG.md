@@ -2,6 +2,24 @@
 
 All notable changes to the Aman project will be documented in this file.
  
+## [2.5.0] - 2026-05-03
+### Added
+- **Duplicate Email Conflict Flow**: System now detects if a new client's email matches an existing profile.
+  - Offers **"Restart / Reactivate"** for returning clients (sets to active and clears termination data).
+  - Offers **"Create New Anyway"** for family members sharing an email.
+  - Restart flow automatically opens the profile for review.
+- **Termination — Session Handling**: Termination dialog now asks if pending sessions should be invoiced. If not, they are automatically marked as **Cancelled** to clean up the batch invoice generator.
+- **Client Details — Schedule Button**: Wired the "Schedule Session" button to navigate to the Sessions page and auto-open the scheduling dialog pre-filled for that client.
+- **Edit Profile — Currency Control**: Replaced static fee input in Edit Profile with a full **Fee Scheme selector**. Allows switching a client between INR and USD schemes.
+- **Terminated Badges**: Added high-visibility "Terminated" badges next to client names in the **Invoices** and **Payments Ledger** views for better financial context.
+- **Deep-linking**: Sessions page now supports `openNew=true` URL parameter to trigger the scheduling dialog on mount.
+
+### Fixed
+- **Sessions Filter Dropdowns**: Resolved the bug where raw UUIDs were displayed in the client filter and lowercase raw strings in the time filter after selection. Both now show human-readable labels.
+- **Fee Auto-population**: Selecting a client in the New Session dialog now automatically populates their **Default Fee Scheme** and estimated amount.
+
+---
+
 ## [2.4.0] - 2026-04-19 (Session 2)
 ### Added
 - **Client Status Filter**: Dropdown on the Clients page filters by **All / Active / Terminated** (defaults to Active). First letter capitalised in all dropdown labels; value and display label are always identical.

@@ -78,7 +78,32 @@ function SessionsPageInner() {
 
   useEffect(() => {
     fetchData();
+    // Handle deep-linking to "New Session" dialog
+    if (searchParams.get("openNew") === "true") {
+      setOpen(true);
+      const cid = searchParams.get("clientId");
+      if (cid) setSelectedClientId(cid);
+    }
   }, []);
+
+  // Auto-fill client name and fee scheme when selectedClientId changes (e.g. from deep-link or manual selection)
+  useEffect(() => {
+    if (selectedClientId && clients.length > 0 && !selectedClientName) {
+      const c = clients.find(cl => cl.id === selectedClientId);
+      if (c) {
+        setSelectedClientName(c.name);
+        // Only auto-populate fee if none selected yet
+        if (!selectedFeeSchemeId && c.defaultFeeSchemeId && feeSchemes.length > 0) {
+          const scheme = feeSchemes.find(f => f.id === c.defaultFeeSchemeId);
+          if (scheme) {
+            setSelectedFeeSchemeId(scheme.id);
+            setFeeCharged(scheme.amount);
+            setSelectedFeeSchemeLabel(`${scheme.name} (${scheme.currency === 'USD' ? '$' : '₹'}${scheme.amount})`);
+          }
+        }
+      }
+    }
+  }, [selectedClientId, clients, feeSchemes, selectedClientName, selectedFeeSchemeId]);
 
   // Duration Logic
   const calculatedDuration = useMemo(() => {
@@ -333,7 +358,11 @@ function SessionsPageInner() {
             <CalendarDays className="h-4 w-4 text-slate-400 ml-2" />
             <Select value={timeFilter} onValueChange={(v) => setTimeFilter(v || "ytd")}>
               <SelectTrigger className="w-[180px] border-0 h-8 bg-transparent shadow-none font-semibold focus:ring-0">
-                <SelectValue />
+                <SelectValue>
+                  {timeFilter === "all" ? "All Time" : 
+                   timeFilter === "ytd" ? "YTD (Apr-Mar)" : 
+                   timeFilter === "month" ? "This Month" : "All Time"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-white border-slate-200">
                 <SelectItem value="all">All Time</SelectItem>
@@ -349,7 +378,9 @@ function SessionsPageInner() {
             <Filter className="h-4 w-4 text-slate-400 ml-2" />
             <Select value={clientFilter} onValueChange={(v) => setClientFilter(v || "all")}>
               <SelectTrigger className="w-[180px] border-0 h-8 bg-transparent shadow-none font-semibold focus:ring-0">
-                <SelectValue placeholder="All Clients" />
+                <SelectValue>
+                  {clientFilter === "all" ? "All Clients" : clients.find(c => c.id === clientFilter)?.name ?? "All Clients"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-white border-slate-200">
                 <SelectItem value="all">All Clients</SelectItem>
@@ -380,7 +411,18 @@ function SessionsPageInner() {
                     onValueChange={(id) => {
                       const val = id || "";
                       setSelectedClientId(val);
-                      setSelectedClientName(clients.find(c => c.id === val)?.name || "");
+                      const c = clients.find(cl => cl.id === val);
+                      setSelectedClientName(c?.name || "");
+                      
+                      // Auto-populate default fee scheme
+                      if (c?.defaultFeeSchemeId) {
+                        const scheme = feeSchemes.find(f => f.id === c.defaultFeeSchemeId);
+                        if (scheme) {
+                          setSelectedFeeSchemeId(scheme.id);
+                          setFeeCharged(scheme.amount);
+                          setSelectedFeeSchemeLabel(`${scheme.name} (${scheme.currency === 'USD' ? '$' : '₹'}${scheme.amount})`);
+                        }
+                      }
                     }}
                   >
                     <SelectTrigger className="w-full bg-slate-50 border-slate-200 h-12">

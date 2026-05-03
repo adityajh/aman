@@ -12,7 +12,32 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   try {
     const body = await req.json();
-    const { name, email, phone, defaultFee, intakeNotes, defaultFeeSchemeId, isActive, terminationReason, terminationType } = body;
+    const { name, email, phone, defaultFee, intakeNotes, defaultFeeSchemeId, isActive, terminationReason, terminationType, cancelPendingSessions } = body;
+
+    // Reactivation logic
+    let terminationFields = {};
+    if (isActive === true) {
+      terminationFields = {
+        terminationReason: null,
+        terminationType: null,
+        terminatedAt: null,
+      };
+    } else if (isActive === false) {
+      terminationFields = {
+        terminationReason: terminationReason || undefined,
+        terminationType: terminationType || undefined,
+        terminatedAt: new Date(),
+      };
+
+      // Issue 5: Cancel uninvoiced sessions if requested
+      if (cancelPendingSessions) {
+        const { sessions } = await import("@/lib/db/schema");
+        const { and, isNull } = await import("drizzle-orm");
+        await db.update(sessions)
+          .set({ status: 'cancelled', cancellationReason: 'Client Terminated' })
+          .where(and(eq(sessions.clientId, id), isNull(sessions.invoiceId)));
+      }
+    }
 
     const [updated] = await db
       .update(clients)
@@ -24,9 +49,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         intakeNotes: intakeNotes || undefined,
         defaultFeeSchemeId: defaultFeeSchemeId || undefined,
         isActive: isActive !== undefined ? isActive : undefined,
-        terminationReason: terminationReason !== undefined ? terminationReason : undefined,
-        terminationType: terminationType !== undefined ? terminationType : undefined,
-        terminatedAt: isActive === false ? new Date() : undefined,
+        ...terminationFields,
         updatedAt: new Date(),
       })
       .where(eq(clients.id, id))

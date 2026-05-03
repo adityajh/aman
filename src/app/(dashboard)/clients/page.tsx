@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Plus, User, Mail, Phone, IndianRupee, Pencil, X, Check, Loader2, UserMinus, LineChart, ListFilter, Calendar } from "lucide-react";
+import { Plus, User, Mail, Phone, IndianRupee, Pencil, X, Check, Loader2, UserMinus, LineChart, ListFilter, Calendar, AlertTriangle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { ClientProgressChart } from "@/components/client-progress-chart";
@@ -31,6 +31,9 @@ export default function ClientsPage() {
   const [chartsOpen, setChartsOpen] = useState(false);
   const [chartsClient, setChartsClient] = useState<any>(null);
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "terminated">("active");
+  const [conflictOpen, setConflictOpen] = useState(false);
+  const [conflictClient, setConflictClient] = useState<any>(null);
+  const [cancelSessionsOnTerminate, setCancelSessionsOnTerminate] = useState(false);
   const router = useRouter();
 
   const fetchClients = async () => {
@@ -56,10 +59,12 @@ export default function ClientsPage() {
     fetch("/api/fee-schemes").then(r => r.json()).then(setFeeSchemes).catch(() => {});
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const payload = Object.fromEntries(formData);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement> | null, force = false) => {
+    if (e) e.preventDefault();
+    const form = document.getElementById("add-client-form") as HTMLFormElement;
+    const formData = new FormData(form);
+    const payload: any = Object.fromEntries(formData);
+    if (force) payload.forceCreate = true;
 
     try {
       const res = await fetch("/api/clients", {
@@ -72,11 +77,38 @@ export default function ClientsPage() {
         toast.success("Client added successfully");
         setOpen(false);
         fetchClients();
+      } else if (res.status === 409) {
+        const data = await res.json();
+        setConflictClient(data.client);
+        setConflictOpen(true);
       } else {
         toast.error("Failed to add client");
       }
     } catch (err) {
       toast.error("An error occurred");
+    }
+  };
+
+  const handleRestart = async () => {
+    if (!conflictClient) return;
+    try {
+      const res = await fetch(`/api/clients/${conflictClient.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ isActive: true }),
+        headers: { "Content-Type": "application/json" },
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setClients(prev => prev.map(c => c.id === updated.id ? updated : c));
+        setSelectedClient(updated);
+        setEditMode(true);
+        setDetailsOpen(true);
+        setConflictOpen(false);
+        setOpen(false);
+        toast.success("Client reactivated. Please review profile.");
+      }
+    } catch {
+      toast.error("Failed to reactivate client.");
     }
   };
 
@@ -121,6 +153,7 @@ export default function ClientsPage() {
           isActive: false,
           terminationReason,
           terminationType,
+          cancelPendingSessions: cancelSessionsOnTerminate,
         }),
         headers: { "Content-Type": "application/json" },
       });
@@ -170,11 +203,11 @@ export default function ClientsPage() {
               </Button>
             }
           />
-          <DialogContent>
+          <DialogContent className="bg-white border-slate-200">
             <DialogHeader>
-              <DialogTitle>Add New Client</DialogTitle>
+              <DialogTitle className="text-xl font-bold text-slate-900">Add New Client</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4 py-4">
+            <form id="add-client-form" onSubmit={(e) => handleSubmit(e)} className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
                 <Input id="name" name="name" placeholder="John Doe" required />
@@ -349,8 +382,33 @@ export default function ClientsPage() {
                     <Input id="edit-phone" name="phone" defaultValue={selectedClient.phone || ""} />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-defaultFee">Default Fee (INR)</Label>
-                    <Input id="edit-defaultFee" name="defaultFee" type="number" defaultValue={selectedClient.defaultFee || ""} />
+                    <Label>Default Fee Scheme (INR/USD)</Label>
+                    <Select
+                      value={selectedFeeSchemeId}
+                      onValueChange={(id) => {
+                        const val = id || "";
+                        setSelectedFeeSchemeId(val);
+                        const scheme = feeSchemes.find(f => f.id === val);
+                        if (scheme) {
+                          setSelectedFeeSchemeLabel(`${scheme.name} (${scheme.currency === 'USD' ? '$' : '₹'}${scheme.amount})`);
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="border-slate-200 bg-white h-10">
+                        <span className={selectedFeeSchemeLabel ? "text-slate-900" : "text-slate-400"}>
+                          {selectedFeeSchemeLabel || "Pick a fee scheme..."}
+                        </span>
+                      </SelectTrigger>
+                      <SelectContent className="bg-white border-slate-200 shadow-2xl">
+                        {feeSchemes.map(f => (
+                          <SelectItem key={f.id} value={f.id} label={f.name}>
+                            {f.name} ({f.currency === 'USD' ? '$' : '₹'}{f.amount})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <input type="hidden" name="defaultFeeSchemeId" value={selectedFeeSchemeId} />
+                    <input type="hidden" name="defaultFee" value={feeSchemes.find(f => f.id === selectedFeeSchemeId)?.amount || ""} />
                   </div>
                   <div className="space-y-2 col-span-2">
                     <Label htmlFor="edit-notes">Notes / Background</Label>
@@ -387,8 +445,11 @@ export default function ClientsPage() {
                       <p className="text-sm text-slate-600">{selectedClient.phone || "No phone provided"}</p>
                     </div>
                     <div>
-                      <Label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Default Fee (INR)</Label>
-                      <p className="text-sm font-semibold text-slate-900">₹{selectedClient.defaultFee || "0"}</p>
+                      <Label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Default Fee</Label>
+                      <p className="text-sm font-semibold text-slate-900">
+                        {feeSchemes.find(f => f.id === selectedClient.defaultFeeSchemeId)?.currency === 'USD' ? '$' : '₹'}
+                        {selectedClient.defaultFee || "0"}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -423,10 +484,22 @@ export default function ClientsPage() {
                       <UserMinus className="h-4 w-4" /> Terminate Client
                     </Button>
                   )}
-                  <Button variant="outline" onClick={() => setEditMode(true)} className="gap-2 text-slate-600 border-slate-200">
+                   <Button variant="outline" onClick={() => {
+                    setEditMode(true);
+                    setSelectedFeeSchemeId(selectedClient.defaultFeeSchemeId || "");
+                    const scheme = feeSchemes.find(f => f.id === selectedClient.defaultFeeSchemeId);
+                    setSelectedFeeSchemeLabel(scheme ? `${scheme.name} (${scheme.currency === 'USD' ? '$' : '₹'}${scheme.amount})` : "Pick a fee scheme...");
+                  }} className="gap-2 text-slate-600 border-slate-200">
                     <Pencil className="h-4 w-4" /> Edit Profile
                   </Button>
-                  {selectedClient.isActive && <Button className="bg-primary text-primary-foreground">Schedule Session</Button>}
+                   {selectedClient.isActive && (
+                    <Button 
+                      className="bg-primary text-primary-foreground"
+                      onClick={() => router.push(`/sessions?clientId=${selectedClient.id}&openNew=true`)}
+                    >
+                      Schedule Session
+                    </Button>
+                  )}
                 </div>
               </div>
             )
@@ -470,6 +543,18 @@ export default function ClientsPage() {
                 required 
               />
             </div>
+            <div className="flex items-center gap-2 bg-slate-50 p-3 rounded-lg border border-slate-100">
+              <input 
+                type="checkbox" 
+                id="cancel-sessions" 
+                checked={!cancelSessionsOnTerminate} 
+                onChange={(e) => setCancelSessionsOnTerminate(!e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300"
+              />
+              <Label htmlFor="cancel-sessions" className="text-sm cursor-pointer font-medium">
+                Invoice pending sessions? <span className="text-slate-400 font-normal block text-xs">If unchecked, all unbilled sessions will be marked as cancelled.</span>
+              </Label>
+            </div>
             <div className="flex justify-end gap-3 pt-4">
               <Button type="button" variant="outline" onClick={() => setTerminateOpen(false)}>Cancel</Button>
               <Button type="submit" disabled={editSaving} className="bg-rose-500 hover:bg-rose-600 text-white font-bold gap-2">
@@ -477,6 +562,34 @@ export default function ClientsPage() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+      {/* Conflict Dialog */}
+      <Dialog open={conflictOpen} onOpenChange={setConflictOpen}>
+        <DialogContent className="max-w-md bg-white border-slate-200 shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-orange-600 flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5" /> Client Already Exists
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <p className="text-sm text-slate-600">
+              A client with this email already exists: <span className="font-bold text-slate-900">{conflictClient?.name}</span>
+              {conflictClient?.isActive === false && <span className="ml-2 text-rose-500 font-bold">(Terminated)</span>}
+            </p>
+            <p className="text-xs text-slate-400 italic">
+              You can reactivate the existing client or create a new profile if this is a different person sharing the same email.
+            </p>
+            <div className="flex flex-col gap-2 pt-2">
+              <Button onClick={handleRestart} className="bg-lime-500 hover:bg-lime-600 text-slate-950 font-bold">
+                Restart / Reactivate Existing Client
+              </Button>
+              <Button variant="outline" onClick={() => { handleSubmit(null, true); setConflictOpen(false); }}>
+                Create New Client Anyway
+              </Button>
+              <Button variant="ghost" onClick={() => setConflictOpen(false)}>Cancel</Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 
