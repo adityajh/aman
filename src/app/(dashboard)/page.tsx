@@ -70,8 +70,8 @@ export default function DashboardPage() {
                     </div>
                   )) : (
                     <div className="flex flex-col gap-0.5">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">INR</span>
-                      <div className="text-2xl font-bold">₹0.00</div>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">—</span>
+                      <div className="text-2xl font-bold">0.00</div>
                     </div>
                   )}
                 </div>

@@ -291,8 +291,8 @@ export default function PaymentsPage() {
                 </div>
               )) : (
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">INR</span>
-                  <h3 className="text-3xl font-bold text-slate-900">₹0.00</h3>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">—</span>
+                  <h3 className="text-3xl font-bold text-slate-900">0.00</h3>
                 </div>
               )}
             </div>
@@ -318,8 +318,8 @@ export default function PaymentsPage() {
                 </div>
               )) : (
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">INR</span>
-                  <h3 className="text-3xl font-bold text-slate-900">₹0.00</h3>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">—</span>
+                  <h3 className="text-3xl font-bold text-slate-900">0.00</h3>
                 </div>
               )}
             </div>
@@ -345,8 +345,8 @@ export default function PaymentsPage() {
                 </div>
               )) : (
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">INR</span>
-                  <h3 className="text-3xl font-bold text-slate-900">₹0.00</h3>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">—</span>
+                  <h3 className="text-3xl font-bold text-slate-900">0.00</h3>
                 </div>
               )}
             </div>
