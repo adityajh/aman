@@ -259,7 +259,14 @@ function SessionsPageInner() {
           {session.invoicedDurationMin ? <span className="font-bold text-slate-700">{session.invoicedDurationMin}m</span> : "—"}
         </TableCell>
         <TableCell className="font-semibold text-slate-700">
-          {session.feeScheme?.currency === 'USD' ? '$' : '₹'}{parseFloat(session.feeCharged || "0").toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+          {(() => {
+            let cur = session.feeScheme?.currency;
+            if (!cur && session.client?.defaultFeeSchemeId) {
+              const fallbackScheme = feeSchemes.find(f => f.id === session.client.defaultFeeSchemeId);
+              if (fallbackScheme) cur = fallbackScheme.currency;
+            }
+            return cur === 'USD' ? '$' : '₹';
+          })()}{parseFloat(session.feeCharged || "0").toLocaleString('en-IN', { minimumFractionDigits: 2 })}
         </TableCell>
         <TableCell>
           {getStatusBadge(session)}
