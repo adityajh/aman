@@ -134,7 +134,8 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
         const res = await fetch(`/api/sessions/${sessionId}/note`);
         const data = await res.json();
         if (data) {
-          setNote({
+          setNote(prev => ({
+            ...prev,
             updates: data.updates || "",
             subjective: data.subjective || "",
             clientActions: data.clientActions || "",
@@ -152,7 +153,7 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
             srsOverall: data.srsOverall || 0,
             srsTotal: data.srsTotal || 0,
             riskFlag: data.riskFlag || "none",
-          });
+          }));
         }
       } catch (err) {
         toast.error("Failed to fetch existing note");
