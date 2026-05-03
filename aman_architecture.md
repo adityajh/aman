@@ -105,6 +105,9 @@ All tables use UUID primary keys and include `created_at` / `updated_at` timesta
 | `client_id` | UUID FK | References `clients(id)` |
 | `scheduled_at` | TIMESTAMPTZ | Session date + time |
 | `duration_min` | INTEGER | Default `60` |
+| `actual_start_time` | TIMESTAMPTZ | Capture clock-in time |
+| `actual_end_time` | TIMESTAMPTZ | Capture clock-out time |
+| `invoiced_duration_min` | INTEGER | Billed minutes based on logic |
 | `session_type` | TEXT | `individual \| couples \| group \| intake \| followup` |
 | `status` | TEXT | `scheduled \| completed \| no_show \| cancelled \| rescheduled` |
 | `cancellation_reason` | TEXT | Required when status is `cancelled` or `no_show` |
@@ -115,7 +118,7 @@ All tables use UUID primary keys and include `created_at` / `updated_at` timesta
 | `invoice_id` | UUID FK NULL | Set once billed; `NULL` = unbilled |
 | `created_at` | TIMESTAMPTZ | |
 
-### 4.3 `session_notes` (SOAP)
+### 4.3 `session_notes` (SOAP & Clinical)
 
 | Column | Type | Notes |
 |---|---|---|
@@ -125,9 +128,11 @@ All tables use UUID primary keys and include `created_at` / `updated_at` timesta
 | `objective` | TEXT | O: Counselor's observations |
 | `assessment` | TEXT | A: Clinical interpretation, patterns |
 | `plan` | TEXT | P: Next steps, homework, goals |
-| `mood_score` | INTEGER | 1–10 client self-reported mood *(Phase 2)* |
+| `ors_score` | NUMERIC(3,1) | Outcome Rating Scale (0.0-10.0) |
+| `srs_score` | NUMERIC(3,1) | Session Rating Scale (0.0-10.0) |
+| `ors_status` | TEXT | `CSC Achieved \| RCI Achieved \| Stable \| Deteriorating` |
+| `srs_status` | TEXT | `Satisfied \| Attention Required` |
 | `goal_progress` | TEXT | Free text on progress toward treatment goals |
-| `risk_flag` | TEXT | `none \| low \| medium \| high` — surfaces on dashboard |
 | `note_type` | TEXT | `SOAP` (default) \| `DAP \| BIRP \| free` |
 | `ai_drafted` | BOOLEAN | `true` if AI generated the draft *(Phase 2)* |
 | `completed_at` | TIMESTAMPTZ | `NULL` = draft in progress |

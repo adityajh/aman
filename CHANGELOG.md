@@ -12,12 +12,17 @@ All notable changes to the Aman project will be documented in this file.
 - **Session Time Tracking**: Captures `Actual Start Time` and `Actual End Time` within the clinical note editor (defaults to scheduled times).
 - **Payment Ledger Filters**: Added Client-wise and Period-wise (Month/Year) filtering to the Payments page.
 - **Payment Auto-Currency**: Recording a new payment now automatically sets the currency (USD/INR) to match the selected client's default fee scheme.
+- **Sessions Ledger Duration Columns**: Replaced standard duration with three detailed columns: Scheduled, Actual (with exact clock times), and Invoiced duration.
 
 ### Changed
-- **System-wide Dropdown Fix**: Standardized all `<Select>` components across Clients, Sessions, and Payments pages to use built-in `<SelectValue />`. This resolves the bug where initial selection labels appeared out of sync or as raw UUIDs.
+- **System-wide Dropdown Sync**: Completely resolved the "raw UUID gibberish" issue across all dialogs and pre-filled dropdowns. Enforced explicit manual children overrides in `<SelectValue>` to bypass `@base-ui/react`'s lazy mounting limitations.
+- **Clinical Note Default State**: "Blind Mode" is now universally enforced as the default view when opening the note editor. 
+- **Risk Assessment UI**: Removed Total Score badges from Blind Mode entirely, and stripped the Risk Status column out of the main Sessions ledger for a cleaner operational view.
 - **Dialog Architecture**: Restored proper `DialogTrigger` registration using the `@base-ui/react` `render=` pattern, fixing the "View Note" dialog error.
 
 ### Fixed
+- **Payment Ledger Filtering**: Wired up the visual client/period filters on the payments page to correctly apply to the local payments array.
+- **Session Legacy Dates Crash**: Created fallback safe date strings in the note editor to prevent rendering crashes caused by malformed/missing legacy database timestamps.
 - **Mary Lennon $ Display**: Standardized currency symbol fallback on the Clients page. Profiles without an assigned fee scheme now display fee amounts neutrally rather than defaulting incorrectly to INR.
 - **Database Schema**: Added `actual_start_time`, `actual_end_time`, and `invoiced_duration_min` to the `sessions` table.
 
