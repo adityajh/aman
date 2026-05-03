@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { sessions, invoices, invoiceLineItems } from "@/lib/db/schema";
+import { sessions, invoices, invoiceLineItems, clients, feeSchemes } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
 import { eq, isNull, and, sql } from "drizzle-orm";
 import { getServerSession } from "next-auth";
@@ -37,7 +37,17 @@ export async function POST(req: Request) {
         if (unbilledSessions.length === 0) continue;
 
         // 2. Determine currency (default to INR if no scheme found)
-        const currency = (unbilledSessions[0] as any).feeScheme?.currency || 'INR';
+        const client = await db.query.clients.findFirst({
+          where: eq(clients.id, clientId)
+        });
+        
+        let currency = 'INR';
+        if (client?.defaultFeeSchemeId) {
+          const scheme = await db.query.feeSchemes.findFirst({
+            where: eq(feeSchemes.id, client.defaultFeeSchemeId)
+          });
+          if (scheme) currency = scheme.currency;
+        }
 
         // 3. Generate invoice number (simple count-based)
         const result = await db.select({ count: sql<number>`count(*)` }).from(invoices);

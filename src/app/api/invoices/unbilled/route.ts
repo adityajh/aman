@@ -21,7 +21,7 @@ export async function GET() {
       })
       .from(clients)
       .innerJoin(sessions, eq(sessions.clientId, clients.id))
-      .leftJoin(feeSchemes, eq(sessions.feeSchemeId, feeSchemes.id))
+      .leftJoin(feeSchemes, eq(clients.defaultFeeSchemeId, feeSchemes.id))
       .where(
         and(
           eq(sessions.status, 'completed'),

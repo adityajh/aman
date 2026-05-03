@@ -311,7 +311,13 @@ export default function ClientsPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
-                        <IndianRupee className="h-3 w-3" />
+                        {(() => {
+                          const scheme = feeSchemes.find(f => f.id === client.defaultFeeSchemeId);
+                          if (scheme) {
+                            return scheme.currency === 'USD' ? <DollarSign className="h-3 w-3" /> : <IndianRupee className="h-3 w-3" />;
+                          }
+                          return "";
+                        })()}
                         {client.defaultFee || "0.00"}
                       </div>
                     </TableCell>
