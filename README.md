@@ -4,21 +4,23 @@ Aman is a modern, lightweight practice management system designed for solo couns
 
 ## ✨ Core Features
 
-- **Practice Dashboard**: High-level metrics for unbilled sessions, revenue, upcoming appointments, and risk flags.
-- **Client Management**: Secure database for client records, default fees, and intake details.
-- **Sessions Dashboard**: Fast scheduling with modality tracking (In-person, Video, Phone).
-- **SOAP Note Editor**: Professional clinical editor with integrated risk flagging. Completing a note automatically marks the session as billable.
-- **Invoicing Engine**: One-click batch generation of monthly invoices for all clients.
+- **Practice Dashboard**: High-level metrics for unbilled sessions, revenue, upcoming appointments, clinical risk flags, and client progress summaries.
+- **Client Management**: Secure database for client records, default fee schemes (INR & USD), termination workflow with invoicing options, and duplicate email detection with reactivation flow.
+- **Sessions Dashboard**: Fast scheduling with modality tracking. Filter by Active Clients (default), All Clients, or by individual client and time period. Cancel scheduled sessions with a reason.
+- **Clinical Note Editor**: Professional structured note editor (SOAP / Custom) with ORS & SRS rating scales (0–10, 0.1 precision sliders). Completing a note auto-marks the session as billable.
+- **Progress Charts**: Per-client ORS & SRS trend charts with RCI/CSC detection, colour-banded benchmarks, and regression trend projection.
+- **Invoicing Engine**: One-click batch generation of monthly invoices. Fully currency-aware — INR and USD clients are handled separately in batch totals and all display symbols.
+- **Payments Ledger**: Multi-currency payment recording with FIFO allocation across outstanding invoices.
 - **Resend Integration**: Automated delivery of branded HTML invoices directly to client emails.
 
 ## 🛠 Tech Stack
 
-- **Framework**: [Next.js 14+](https://nextjs.org/) (App Router, Turbopack)
+- **Framework**: [Next.js 16+](https://nextjs.org/) (App Router, Turbopack)
 - **Database**: [Neon](https://neon.tech/) (Serverless Postgres)
 - **ORM**: [Drizzle ORM](https://orm.drizzle.team/)
 - **Authentication**: [NextAuth.js](https://next-auth.js.org/)
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/) & [shadcn/ui](https://ui.shadcn.com/)
-- **Email**: [Resend](https://resend.com/)
+- **Email**: [Resend](https://resend.com/) + [Nodemailer](https://nodemailer.com/) (Gmail SMTP fallback)
 
 ## 🚀 Getting Started
 
@@ -46,9 +48,11 @@ RESEND_API_KEY=re_...
 NEXTAUTH_SECRET=your_32_char_secret
 NEXTAUTH_URL=http://localhost:3000
 
-# Optional: Default Admin Credentials
-ADMIN_EMAIL=counselor@aman.com
-ADMIN_PASSWORD=password123
+# Gmail SMTP (for invoice sending)
+SMTP_USER=you@gmail.com
+SMTP_PASS=your_app_password
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
 ```
 
 ### 4. Database Setup
@@ -65,11 +69,15 @@ npm run dev
 
 ## 🛤 Roadmap
 
-- [x] **Phase 1**: MVP (Invoicing, Clients, Sessions, SOAP Notes)
-- [ ] **Phase 2**: AI Assistance (SOAP Note drafting via Claude API)
-- [ ] **Phase 3**: Client Portal (Token-gated payment history view)
-- [ ] **Phase 4**: Advanced Analytics (Mood tracking & progress charts)
+- [x] **Phase 1**: MVP (Invoicing, Clients, Sessions, Clinical Notes)
+- [x] **Phase 1.5**: Clinical Analytics (ORS/SRS sliders, progress charts, risk tracking)
+- [x] **Phase 2**: UX Hardening (Multi-currency, session cancellation, duplicate client detection, reactivation flow, invoicing integrity)
+- [ ] **Phase 3**: AI Assistance (SOAP Note drafting via Claude API)
+- [ ] **Phase 4**: Client Portal (Token-gated payment history view)
+- [ ] **Phase 5**: Calendar View (Scheduling, recurring sessions, reminders)
 
 ## 📄 License
 
 MIT
+
+
