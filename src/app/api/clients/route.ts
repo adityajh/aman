@@ -26,7 +26,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { name, email, phone, defaultFee, defaultFeeSchemeId, forceCreate } = body;
+    const { name, email, phone, defaultFee, defaultFeeSchemeId, timezone, forceCreate } = body;
 
     // Duplicate Check
     if (email && !forceCreate) {
@@ -51,6 +51,7 @@ export async function POST(req: Request) {
       phone,
       defaultFee: defaultFee?.toString(),
       defaultFeeSchemeId: defaultFeeSchemeId || undefined,
+      timezone: timezone || undefined,
     }).returning();
 
     return NextResponse.json(newClient[0]);

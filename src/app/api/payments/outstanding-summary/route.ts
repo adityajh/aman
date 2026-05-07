@@ -1,24 +1,19 @@
 import { db } from "@/lib/db";
 import { payments, invoices } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
-import { desc, eq, and, sql, gte } from "drizzle-orm";
+import { sql, gte } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { startOfMonth, format } from "date-fns";
+import { formatIST, istStartOfMonthUTC, istStartOfFYUTC } from "@/lib/tz";
 
 export async function GET() {
   const sessionUser = await getServerSession(authOptions);
   if (!sessionUser) return new NextResponse("Unauthorized", { status: 401 });
 
   try {
-    const now = new Date();
-    const firstOfOfMonth = format(startOfMonth(now), "yyyy-MM-dd");
-
-    // Calculate start of Financial Year (April 1st)
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth(); // 0-indexed (0 is Jan, 3 is April)
-    const fyStartDate = new Date(currentMonth >= 3 ? currentYear : currentYear - 1, 3, 1);
-    const firstOfFY = format(fyStartDate, "yyyy-MM-dd");
+    // payment_date is a DATE column — compare against IST calendar dates.
+    const firstOfOfMonth = formatIST(istStartOfMonthUTC(), "yyyy-MM-dd");
+    const firstOfFY = formatIST(istStartOfFYUTC(), "yyyy-MM-dd");
 
     // 1. Total outstanding (grouped by currency with explicit casting)
     const outstandingRes = await db.select({

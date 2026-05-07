@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { eq, isNull, and, sql } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { format } from "date-fns";
+import { formatIST, istNowParts, istFirstOfMonthStr } from "@/lib/tz";
 
 export async function POST(req: Request) {
   const sessionUser = await getServerSession(authOptions);
@@ -49,9 +49,9 @@ export async function POST(req: Request) {
           if (scheme) currency = scheme.currency;
         }
 
-        // 3. Generate invoice number (simple count-based)
+        // 3. Generate invoice number (simple count-based) — year is the IST year
         const result = await db.select({ count: sql<number>`count(*)` }).from(invoices);
-        const invoiceNumber = `INV-${new Date().getFullYear()}-${(result[0].count + 1).toString().padStart(4, '0')}`;
+        const invoiceNumber = `INV-${istNowParts().year}-${(result[0].count + 1).toString().padStart(4, '0')}`;
 
         // 4. Calculate totals
         let subtotal = 0;
@@ -63,7 +63,7 @@ export async function POST(req: Request) {
         const [newInvoice] = await db.insert(invoices).values({
           clientId,
           invoiceNumber,
-          billingMonth: billingMonth || format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), "yyyy-MM-dd"),
+          billingMonth: billingMonth || istFirstOfMonthStr(),
           subtotal: subtotal.toString(),
           total: subtotal.toString(),
           currency,
@@ -72,7 +72,7 @@ export async function POST(req: Request) {
 
         // 5. Create line items and update sessions
         for (const session of unbilledSessions) {
-          const description = `Session - ${format(new Date(session.scheduledAt), "d MMM yyyy")} (${session.durationMin} min)`;
+          const description = `Session - ${formatIST(session.scheduledAt, "d MMM yyyy")} (${session.durationMin} min)`;
           
           await db.insert(invoiceLineItems).values({
             invoiceId: newInvoice.id,

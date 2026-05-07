@@ -28,7 +28,7 @@ import {
   Calendar as CalendarIcon, 
   Check 
 } from "lucide-react";
-import { format } from "date-fns";
+import { formatIST, istFirstOfMonthStr } from "@/lib/tz";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 
@@ -47,7 +47,7 @@ export default function InvoicesPage() {
 
   // Batch Selection State
   const [selectedClients, setSelectedClients] = useState<Set<string>>(new Set());
-  const [billingMonth, setBillingMonth] = useState(format(new Date(), "yyyy-MM-01"));
+  const [billingMonth, setBillingMonth] = useState(istFirstOfMonthStr());
 
   const fetchData = async () => {
     try {
@@ -202,7 +202,7 @@ export default function InvoicesPage() {
               <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200">
                 <div className="space-y-1">
                   <Label className="text-xs font-bold text-slate-500 uppercase">Billing Month</Label>
-                  <p className="text-sm font-medium text-slate-900">{format(new Date(billingMonth), "MMMM yyyy")}</p>
+                  <p className="text-sm font-medium text-slate-900">{formatIST(new Date(billingMonth), "MMMM yyyy")}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-slate-500 mb-1">Total Selected Amount</p>
@@ -383,7 +383,7 @@ export default function InvoicesPage() {
                             <TableCell className="pl-6">
                               <div className="flex flex-col">
                                 <span className="font-medium text-slate-900">{invoice.invoiceNumber}</span>
-                                <span className="text-[10px] text-slate-500 uppercase">{format(new Date(invoice.billingMonth), "MMM yyyy")}</span>
+                                <span className="text-[10px] text-slate-500 uppercase">{formatIST(new Date(invoice.billingMonth), "MMM yyyy")}</span>
                               </div>
                             </TableCell>
                             <TableCell>
@@ -444,7 +444,7 @@ export default function InvoicesPage() {
                                 ) : (
                                   <div className="flex items-center gap-2 text-xs text-lime-700 font-bold whitespace-nowrap">
                                     <CheckCircle2 className="h-4 w-4 text-lime-600" />
-                                    {invoice.sentAt ? format(new Date(invoice.sentAt), "d MMM") : 'Sent'}
+                                    {invoice.sentAt ? formatIST(new Date(invoice.sentAt), "d MMM") : 'Sent'}
                                   </div>
                                 )}
                               </div>

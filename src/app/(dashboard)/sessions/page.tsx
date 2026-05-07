@@ -25,9 +25,10 @@ import {
   Loader2,
   XCircle
 } from "lucide-react";
-import { format, isWithinInterval, startOfMonth, startOfHour, addHours, differenceInMinutes } from "date-fns";
+import { startOfHour, addHours, differenceInMinutes } from "date-fns";
 import { ClinicalNoteEditor } from "@/components/clinical-note-editor";
 import { cn } from "@/lib/utils";
+import { formatIST, formatTz, IST, tzShortLabel, istToUTC, istStartOfMonthUTC, istStartOfFYUTC } from "@/lib/tz";
 
 function SessionsPageInner() {
   const [sessions, setSessions] = useState<any[]>([]);
@@ -43,10 +44,11 @@ function SessionsPageInner() {
   const [selectedFeeSchemeLabel, setSelectedFeeSchemeLabel] = useState<string>("Pick a scheme...");
   const [feeCharged, setFeeCharged] = useState<string>("");
   
-  // Date/Time Form State
-  const [startDate, setStartDate] = useState(format(new Date(), "yyyy-MM-dd"));
-  const [startTime, setStartTime] = useState(format(startOfHour(new Date()), "HH:mm"));
-  const [endTime, setEndTime] = useState(format(addHours(startOfHour(new Date()), 1), "HH:mm"));
+  // Date/Time Form State — defaults expressed as IST wall-clock so the form is
+  // stable across browser timezones.
+  const [startDate, setStartDate] = useState(formatIST(new Date(), "yyyy-MM-dd"));
+  const [startTime, setStartTime] = useState(formatIST(startOfHour(new Date()), "HH:mm"));
+  const [endTime, setEndTime] = useState(formatIST(addHours(startOfHour(new Date()), 1), "HH:mm"));
 
   // Filters — initialised from URL params if present
   const searchParams = useSearchParams();
@@ -128,10 +130,13 @@ function SessionsPageInner() {
       return;
     }
 
+    // Form times are entered as IST wall-clock — convert to absolute UTC
+    // instants so the server stores the correct moment regardless of where it
+    // runs.
     const payload = {
       clientId: selectedClientId,
-      scheduledAt: `${startDate}T${startTime}:00`,
-      endedAt: `${startDate}T${endTime}:00`,
+      scheduledAt: istToUTC(startDate, startTime).toISOString(),
+      endedAt: istToUTC(startDate, endTime).toISOString(),
       sessionType: "individual", // Default or add back to form if needed
       modality: "video", // Default or add back to form if needed
       feeSchemeId: selectedFeeSchemeId && selectedFeeSchemeId !== "custom" ? selectedFeeSchemeId : undefined,
@@ -165,9 +170,9 @@ function SessionsPageInner() {
     setSelectedFeeSchemeId("");
     setSelectedFeeSchemeLabel("Pick a scheme...");
     setFeeCharged("");
-    setStartDate(format(new Date(), "yyyy-MM-dd"));
-    setStartTime(format(startOfHour(new Date()), "HH:mm"));
-    setEndTime(format(addHours(startOfHour(new Date()), 1), "HH:mm"));
+    setStartDate(formatIST(new Date(), "yyyy-MM-dd"));
+    setStartTime(formatIST(startOfHour(new Date()), "HH:mm"));
+    setEndTime(formatIST(addHours(startOfHour(new Date()), 1), "HH:mm"));
   };
 
   const getStatusBadge = (session: any) => {
@@ -222,10 +227,14 @@ function SessionsPageInner() {
       }
     };
 
+    const clientTz = session.client?.timezone || IST;
+    const showClientTz = clientTz && clientTz !== IST;
+    const clientTzLabel = tzShortLabel(clientTz);
+
     return (
       <TableRow className="hover:bg-slate-50/50 transition-colors">
         <TableCell className="font-medium text-slate-900">
-          {format(start, "EEE, d MMM yyyy")}
+          {formatIST(start, "EEE, d MMM yyyy")}
         </TableCell>
         <TableCell>
           <div className="flex items-center gap-2">
@@ -237,10 +246,22 @@ function SessionsPageInner() {
           </div>
         </TableCell>
         <TableCell className="text-slate-600 font-medium">
-          {format(start, "h:mm a")}
+          <div className="flex flex-col">
+            <span>{formatIST(start, "h:mm a")} <span className="text-[9px] text-slate-400 font-bold">IST</span></span>
+            {showClientTz && (
+              <span className="text-[10px] text-slate-400">{formatTz(start, clientTz, "h:mm a")} {clientTzLabel}</span>
+            )}
+          </div>
         </TableCell>
         <TableCell className="text-slate-600 font-medium">
-          {end ? format(end, "h:mm a") : "—"}
+          {end ? (
+            <div className="flex flex-col">
+              <span>{formatIST(end, "h:mm a")} <span className="text-[9px] text-slate-400 font-bold">IST</span></span>
+              {showClientTz && (
+                <span className="text-[10px] text-slate-400">{formatTz(end, clientTz, "h:mm a")} {clientTzLabel}</span>
+              )}
+            </div>
+          ) : "—"}
         </TableCell>
         <TableCell>
           <Badge variant="secondary" className="bg-slate-100 text-slate-700 hover:bg-slate-100 font-bold">
@@ -251,7 +272,10 @@ function SessionsPageInner() {
           {actualStart && actualEnd ? (
             <div className="flex flex-col">
               <span className="font-bold text-slate-700">{Math.round((actualEnd.getTime() - actualStart.getTime()) / 60000)}m</span>
-              <span className="text-[10px] text-slate-400">{format(actualStart, "h:mm a")} - {format(actualEnd, "h:mm a")}</span>
+              <span className="text-[10px] text-slate-400">{formatIST(actualStart, "h:mm a")} - {formatIST(actualEnd, "h:mm a")} IST</span>
+              {showClientTz && (
+                <span className="text-[10px] text-slate-400">{formatTz(actualStart, clientTz, "h:mm a")} - {formatTz(actualEnd, clientTz, "h:mm a")} {clientTzLabel}</span>
+              )}
             </div>
           ) : "—"}
         </TableCell>
@@ -336,7 +360,7 @@ function SessionsPageInner() {
                       <FileText className="h-6 w-6 text-lime-500" />
                       Clinical Note: {session.client?.name}
                       <span className="text-sm font-normal text-slate-400 ml-2">
-                        {format(start, "d MMM yyyy")}
+                        {formatIST(start, "d MMM yyyy")}
                       </span>
                     </DialogTitle>
                   </DialogHeader>
@@ -365,18 +389,14 @@ function SessionsPageInner() {
         return false;
       }
       
-      // Time Filter (Financial Year logic included)
-      const now = new Date();
+      // Time Filter — anchored to IST so the boundary is the same regardless
+      // of where the browser thinks "now" is.
       const sessionDate = new Date(s.scheduledAt);
-      
+
       if (timeFilter === "month") {
-        const start = startOfMonth(now);
-        if (sessionDate < start) return false;
+        if (sessionDate < istStartOfMonthUTC()) return false;
       } else if (timeFilter === "ytd") {
-        const currentYear = now.getFullYear();
-        const currentMonth = now.getMonth(); // 0-indexed, 3 is April
-        const fyStart = new Date(currentMonth >= 3 ? currentYear : currentYear - 1, 3, 1);
-        if (sessionDate < fyStart) return false;
+        if (sessionDate < istStartOfFYUTC()) return false;
       }
       
       // Status Filter logic

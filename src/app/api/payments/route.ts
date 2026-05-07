@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { desc, asc, eq, and, or, inArray } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { istTodayStr } from "@/lib/tz";
 
 export async function GET() {
   const sessionUser = await getServerSession(authOptions);
@@ -86,7 +87,7 @@ export async function POST(req: Request) {
         clientId,
         invoiceId: inv.id,
         amount: allocation.toFixed(2),
-        paymentDate: paymentDate || new Date().toISOString().split("T")[0],
+        paymentDate: paymentDate || istTodayStr(),
         currency,
         method,
         referenceId,
@@ -100,7 +101,7 @@ export async function POST(req: Request) {
         clientId,
         invoiceId: null,
         amount: remainingPayment.toFixed(2),
-        paymentDate: paymentDate || new Date().toISOString().split("T")[0],
+        paymentDate: paymentDate || istTodayStr(),
         currency,
         method,
         referenceId,

@@ -60,6 +60,7 @@ export const clients = pgTable(
     terminationType: text("termination_type").$type<"planned" | "unplanned">(),
     terminatedAt: timestamp("terminated_at", { withTimezone: true }),
     intakeNotes: text("intake_notes"),
+    timezone: text("timezone").notNull().default("Asia/Kolkata"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .default(sql`now()`),

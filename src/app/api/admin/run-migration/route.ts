@@ -59,6 +59,10 @@ export async function GET() {
       name: "clients.terminated_at add column",
       query: `ALTER TABLE clients ADD COLUMN IF NOT EXISTS terminated_at timestamptz`
     },
+    {
+      name: "clients.timezone add column",
+      query: `ALTER TABLE clients ADD COLUMN IF NOT EXISTS timezone text NOT NULL DEFAULT 'Asia/Kolkata'`
+    },
   ];
 
   for (const step of steps) {

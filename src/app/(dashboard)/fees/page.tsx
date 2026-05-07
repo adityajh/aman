@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, IndianRupee, DollarSign, Globe } from "lucide-react";
-import { format } from "date-fns";
+import { formatIST } from "@/lib/tz";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function FeesPage() {
@@ -185,7 +185,7 @@ export default function FeesPage() {
                       </span>
                     </TableCell>
                     <TableCell className="text-slate-400 text-xs">
-                      {format(new Date(scheme.updatedAt), "d MMM yyyy")}
+                      {formatIST(new Date(scheme.updatedAt), "d MMM yyyy")}
                     </TableCell>
                     <TableCell className="text-right space-x-2">
                       <Button 

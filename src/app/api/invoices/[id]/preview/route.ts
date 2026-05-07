@@ -4,8 +4,6 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { format } from "date-fns";
-
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }

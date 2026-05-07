@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Save, Loader2, AlertCircle, BarChart3, ClipboardList, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { formatIST, istDateTimeToUTC } from "@/lib/tz";
 
 interface ClinicalNoteEditorProps {
   session: any; // Full session object for initial times
@@ -20,13 +20,16 @@ interface ClinicalNoteEditorProps {
 // ── Stable module-level component ──────────────────────────────────────────
 // Must live OUTSIDE ClinicalNoteEditor so React never remounts it mid-drag.
 function ScoreSelector({ value, onChange, label, showNumbers }: {
-  value: number;
+  value: number | string;
   onChange: (v: number) => void;
   label: string;
   showNumbers: boolean;
 }) {
-  const pct = (value / 10) * 100;
-  const trackColor = !showNumbers ? "#e2e8f0" : (value <= 3 ? "#ef4444" : value <= 6 ? "#f59e0b" : "#84cc16");
+  // Drizzle returns numeric(5,1) columns as strings — coerce defensively.
+  const num = typeof value === "number" ? value : parseFloat(value as string);
+  const safe = Number.isFinite(num) ? num : 0;
+  const pct = (safe / 10) * 100;
+  const trackColor = !showNumbers ? "#e2e8f0" : (safe <= 3 ? "#ef4444" : safe <= 6 ? "#f59e0b" : "#84cc16");
 
   const handleSlider = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(Math.round(parseFloat(e.target.value) * 10) / 10);
@@ -50,7 +53,7 @@ function ScoreSelector({ value, onChange, label, showNumbers }: {
             min={0}
             max={10}
             step={0.1}
-            value={value}
+            value={safe}
             onChange={handleSlider}
             className="w-full h-2 rounded-full appearance-none cursor-pointer"
             style={{
@@ -66,14 +69,14 @@ function ScoreSelector({ value, onChange, label, showNumbers }: {
               min={0}
               max={10}
               step={0.1}
-              value={value === 0 ? "" : value}
+              value={safe === 0 ? "" : safe}
               onChange={handleInput}
               placeholder="0"
               className="w-16 h-8 text-center font-bold text-sm border-slate-200 bg-white p-1"
             />
             {/* Coloured readout */}
             <span className="text-xs font-bold w-10 text-right" style={{ color: trackColor }}>
-              {value > 0 ? value.toFixed(1) : "—"}
+              {safe > 0 ? safe.toFixed(1) : "—"}
             </span>
           </>
         )}
@@ -103,11 +106,13 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
   const scheduledStart = new Date(session.scheduledAt);
   const scheduledEnd = new Date(scheduledStart.getTime() + (session.durationMin || 60) * 60000);
   
+  // Time inputs are interpreted as IST so the wall-clock the counselor sees
+  // matches the wall-clock the system stores, regardless of browser TZ.
   const getSafeTimeStr = (dateVal: any, fallbackDate: Date) => {
-    if (!dateVal) return format(fallbackDate, "HH:mm");
+    if (!dateVal) return formatIST(fallbackDate, "HH:mm");
     const d = new Date(dateVal);
-    if (isNaN(d.getTime())) return format(fallbackDate, "HH:mm");
-    return format(d, "HH:mm");
+    if (isNaN(d.getTime())) return formatIST(fallbackDate, "HH:mm");
+    return formatIST(d, "HH:mm");
   };
 
   const [note, setNote] = useState({
@@ -141,6 +146,11 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
         const res = await fetch(`/api/sessions/${sessionId}/note`);
         const data = await res.json();
         if (data) {
+          // Drizzle returns numeric(5,1) as string — coerce to number on the way in.
+          const n = (v: unknown) => {
+            const x = typeof v === "number" ? v : parseFloat(v as string);
+            return Number.isFinite(x) ? x : 0;
+          };
           setNote(prev => ({
             ...prev,
             updates: data.updates || "",
@@ -149,16 +159,16 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
             myActions: data.myActions || "",
             agenda: data.agenda || "",
             feedback: data.feedback || "",
-            orsIndividual: data.orsIndividual || 0,
-            orsInterpersonal: data.orsInterpersonal || 0,
-            orsSocial: data.orsSocial || 0,
-            orsOverall: data.orsOverall || 0,
-            orsTotal: data.orsTotal || 0,
-            srsRelationship: data.srsRelationship || 0,
-            srsGoals: data.srsGoals || 0,
-            srsApproach: data.srsApproach || 0,
-            srsOverall: data.srsOverall || 0,
-            srsTotal: data.srsTotal || 0,
+            orsIndividual: n(data.orsIndividual),
+            orsInterpersonal: n(data.orsInterpersonal),
+            orsSocial: n(data.orsSocial),
+            orsOverall: n(data.orsOverall),
+            orsTotal: n(data.orsTotal),
+            srsRelationship: n(data.srsRelationship),
+            srsGoals: n(data.srsGoals),
+            srsApproach: n(data.srsApproach),
+            srsOverall: n(data.srsOverall),
+            srsTotal: n(data.srsTotal),
             riskFlag: data.riskFlag || "none",
           }));
         }
@@ -171,10 +181,15 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
     fetchNote();
   }, [sessionId]);
 
+  const num = (v: unknown) => {
+    const x = typeof v === "number" ? v : parseFloat(v as string);
+    return Number.isFinite(x) ? x : 0;
+  };
+
   const updateOrs = (key: string, val: number) => {
     setNote(prev => {
       const newNote = { ...prev, [key]: val };
-      newNote.orsTotal = (newNote.orsIndividual || 0) + (newNote.orsInterpersonal || 0) + (newNote.orsSocial || 0) + (newNote.orsOverall || 0);
+      newNote.orsTotal = num(newNote.orsIndividual) + num(newNote.orsInterpersonal) + num(newNote.orsSocial) + num(newNote.orsOverall);
       return newNote;
     });
   };
@@ -182,7 +197,7 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
   const updateSrs = (key: string, val: number) => {
     setNote(prev => {
       const newNote = { ...prev, [key]: val };
-      newNote.srsTotal = (newNote.srsRelationship || 0) + (newNote.srsGoals || 0) + (newNote.srsApproach || 0) + (newNote.srsOverall || 0);
+      newNote.srsTotal = num(newNote.srsRelationship) + num(newNote.srsGoals) + num(newNote.srsApproach) + num(newNote.srsOverall);
       return newNote;
     });
   };
@@ -192,15 +207,15 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
     setLoading(true);
 
     try {
-      const actStart = new Date(scheduledStart);
-      const [sh, sm] = note.actualStartTime.split(":").map(Number);
-      actStart.setHours(sh, sm, 0, 0);
+      // Wall-clock entries in the form are IST. Anchor them to the session's
+      // IST calendar date so saving never drifts when the browser TZ differs.
+      const actStart = istDateTimeToUTC(scheduledStart, note.actualStartTime);
+      let actEnd = istDateTimeToUTC(scheduledStart, note.actualEndTime);
 
-      const actEnd = new Date(scheduledStart);
-      const [eh, em] = note.actualEndTime.split(":").map(Number);
-      actEnd.setHours(eh, em, 0, 0);
-
-      if (actEnd < actStart) actEnd.setDate(actEnd.getDate() + 1);
+      if (actEnd < actStart) {
+        // Session crosses midnight (IST) — push end to the next day.
+        actEnd = new Date(actEnd.getTime() + 24 * 60 * 60 * 1000);
+      }
 
       const payload = {
         ...note,

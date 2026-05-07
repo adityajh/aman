@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { format } from "date-fns";
+import { formatIST } from "@/lib/tz";
 
 export async function POST(
   req: Request,
@@ -118,7 +118,7 @@ export async function POST(
 
         <div style="margin-top: 40px; border-top: 2px solid #bef264; padding-top: 20px; text-align: center;">
           <p style="font-size: 12px; color: #a0aec0; margin: 0; text-transform: uppercase; font-weight: 600; letter-spacing: 0.1em;">
-            Billing Month: ${format(new Date(invoice.billingMonth), "MMMM yyyy")}
+            Billing Month: ${formatIST(new Date(invoice.billingMonth), "MMMM yyyy")}
           </p>
           <p style="font-size: 11px; color: #cbd5e0; margin: 8px 0 0;">
             Aman Clinical Practice Management System

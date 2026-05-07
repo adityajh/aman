@@ -1,7 +1,28 @@
 # Changelog
 
 All notable changes to the Aman project will be documented in this file.
- 
+
+## [2.9.0] - 2026-05-07
+### Added
+- **IST as System-Wide Source of Truth**: All wall-clock times the counselor enters and views are now interpreted as IST regardless of where the browser or server runs. Introduced `src/lib/tz.ts` (`formatIST`, `formatTz`, `istToUTC`, `istDateTimeToUTC`, `istStartOfMonthUTC`, `istStartOfFYUTC`, etc.) built on `date-fns-tz`.
+- **Per-Client Timezone**: New `clients.timezone` column (defaults to `Asia/Kolkata`). Add/Edit Client dialogs now expose a curated dropdown (IST, US ET/CT/MT/PT, UK, CET, Gulf, Singapore, Sydney). Existing clients are seeded to IST and stay there until the counselor changes them.
+- **Dual-Time Sessions Ledger**: For non-IST clients, the Start, End, and Actual columns show the IST instant on the primary line and the client's local time as a secondary `7:30 AM ET`-style line.
+
+### Changed
+- **Clinical Note Editor — IST Times**: Actual Start / End fields are formatted and parsed strictly in IST and converted to absolute UTC instants on save, eliminating drift from the previous browser-local `setHours` path.
+- **Sessions Form**: New-session form's date/time defaults and submit conversion now use IST helpers; the FY / month filter and `resetForm` defaults switched to IST anchors.
+- **Server-Side Date Math**: Dashboard, payments outstanding summary, and invoice batch endpoints now compute month-start, FY-start, "next 7 days", default `billingMonth`, invoice-number year, and default `paymentDate` against IST instead of the runtime's local TZ (Vercel runs in UTC).
+- **Display Formatting**: Payments, Invoices, Fees, and Clients pages, the invoice email body, and the per-client progress chart axis labels all render dates/times via `formatIST`.
+
+### Fixed
+- **ORS Toggle Crash on Older Notes**: `ScoreSelector` was calling `value.toFixed(1)` on values that came back from Drizzle as strings (numeric columns are returned as strings), throwing on render and showing the dialog's error overlay. The component now coerces incoming `value` to a `number` once and the fetch path + total calculations route through a `num()` helper so accumulators no longer string-concatenate.
+- **Appearance That "Editing Actual Time Messed Up the Appointment Time"**: Root cause was browser-vs-server TZ drift in the editor's wall-clock parsing. Now both the displayed scheduled time and the stored actual time are anchored to IST, so the original appointment time stays put.
+
+### Database
+- Added `clients.timezone text NOT NULL DEFAULT 'Asia/Kolkata'`. Migration step added to `/api/admin/run-migration`.
+
+---
+
 ## [2.8.0] - 2026-05-03
 ### Added
 - **Automated Billing Formula**: Sessions now follow a strict duration-based billing logic.

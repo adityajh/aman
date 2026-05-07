@@ -28,7 +28,7 @@ import {
   Trash2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { formatIST, istNowParts, istTodayStr } from "@/lib/tz";
 
 export default function PaymentsPage() {
   const [payments, setPayments] = useState<any[]>([]);
@@ -167,15 +167,21 @@ export default function PaymentsPage() {
     if (clientFilter !== "all" && pay.clientId !== clientFilter) return false;
     
     if (periodFilter !== "all") {
-      const d = new Date(pay.paymentDate);
-      const now = new Date();
+      // Compare in IST so this/last month and "this year" line up with the
+      // rest of the system regardless of browser timezone.
+      const payYm = formatIST(new Date(pay.paymentDate), "yyyy-MM");
+      const payY = formatIST(new Date(pay.paymentDate), "yyyy");
+      const { year: nowY, month: nowM } = istNowParts();
+      const nowYm = `${nowY}-${String(nowM).padStart(2, "0")}`;
+      const prevY = nowM === 1 ? nowY - 1 : nowY;
+      const prevM = nowM === 1 ? 12 : nowM - 1;
+      const prevYm = `${prevY}-${String(prevM).padStart(2, "0")}`;
       if (periodFilter === "this_month") {
-        if (d.getMonth() !== now.getMonth() || d.getFullYear() !== now.getFullYear()) return false;
+        if (payYm !== nowYm) return false;
       } else if (periodFilter === "last_month") {
-        const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-        if (d.getMonth() !== lastMonth.getMonth() || d.getFullYear() !== lastMonth.getFullYear()) return false;
+        if (payYm !== prevYm) return false;
       } else if (periodFilter === "this_year") {
-        if (d.getFullYear() !== now.getFullYear()) return false;
+        if (payY !== String(nowY)) return false;
       }
     }
     
@@ -298,7 +304,7 @@ export default function PaymentsPage() {
               </div>
               <div className="space-y-2">
                   <Label htmlFor="paymentDate">Payment Date</Label>
-                  <Input id="paymentDate" name="paymentDate" type="date" defaultValue={format(new Date(), "yyyy-MM-dd")} className="border-slate-200" required />
+                  <Input id="paymentDate" name="paymentDate" type="date" defaultValue={istTodayStr()} className="border-slate-200" required />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -360,7 +366,7 @@ export default function PaymentsPage() {
               <div className="p-2 bg-lime-50 rounded-lg group-hover:bg-lime-100 transition-colors">
                 <TrendingUp className="h-5 w-5 text-lime-600" />
               </div>
-              <Badge className="bg-lime-100 text-lime-700 hover:bg-lime-100 border-0 font-bold">{format(new Date(), "MMMM")}</Badge>
+              <Badge className="bg-lime-100 text-lime-700 hover:bg-lime-100 border-0 font-bold">{formatIST(new Date(), "MMMM")}</Badge>
             </div>
             <p className="text-sm font-medium text-slate-500 mb-1">Received This Month</p>
             <div className="flex flex-col gap-3">
@@ -472,7 +478,7 @@ export default function PaymentsPage() {
                   <TableRow key={pay.id} className="group hover:bg-slate-50/50 transition-colors">
                     <TableCell>
                       <span className="text-sm font-medium text-slate-600">
-                        {format(new Date(pay.paymentDate), "d MMM yyyy")}
+                        {formatIST(new Date(pay.paymentDate), "d MMM yyyy")}
                       </span>
                     </TableCell>
                     <TableCell>
@@ -488,7 +494,7 @@ export default function PaymentsPage() {
                       {pay.invoice ? (
                         <div className="flex flex-col">
                           <span className="text-sm font-medium text-slate-900">{pay.invoice.invoiceNumber}</span>
-                          <span className="text-[10px] text-slate-500 uppercase">{format(new Date(pay.invoice.billingMonth), "MMM yyyy")}</span>
+                          <span className="text-[10px] text-slate-500 uppercase">{formatIST(new Date(pay.invoice.billingMonth), "MMM yyyy")}</span>
                         </div>
                       ) : (
                         <span className="text-xs text-slate-400 font-medium italic">Unlinked / Credit</span>

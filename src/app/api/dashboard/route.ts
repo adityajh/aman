@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { eq, or, sql } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { istStartOfFYUTC, istStartOfMonthUTC, istAddDaysUTC } from "@/lib/tz";
 
 export async function GET() {
   const sessionUser = await getServerSession(authOptions);
@@ -11,11 +12,10 @@ export async function GET() {
 
   try {
     const now = new Date();
-    // Indian Financial Year: Starts April 1st
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth();
-    const fyStart = new Date(currentMonth >= 3 ? currentYear : currentYear - 1, 3, 1);
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    // Month / FY boundaries are anchored to IST so the dashboard is consistent
+    // regardless of where the runtime executes (Vercel runs in UTC).
+    const fyStart = istStartOfFYUTC();
+    const monthStart = istStartOfMonthUTC();
 
     const settingsData = await db.select().from(practiceSettings).limit(1);
     const settings = settingsData[0];
@@ -40,7 +40,7 @@ export async function GET() {
     let unbilledSessions = 0;
     let upcomingSessions = 0;
 
-    const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const sevenDaysFromNow = istAddDaysUTC(now, 7);
 
     let totalPast = 0;
     let noShows = 0;

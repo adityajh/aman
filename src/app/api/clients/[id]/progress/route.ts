@@ -4,7 +4,8 @@ import { NextResponse } from "next/server";
 import { eq, desc } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { format, addWeeks } from "date-fns";
+import { addWeeks } from "date-fns";
+import { formatIST } from "@/lib/tz";
 
 export async function GET(
   req: Request,
@@ -37,7 +38,7 @@ export async function GET(
     const orsPoints = chronological
       .filter(s => s.note?.orsTotal != null)
       .map(s => ({
-        date: format(new Date(s.scheduledAt), "d MMM"),
+        date: formatIST(new Date(s.scheduledAt), "d MMM"),
         ors: s.note!.orsTotal,
         sessionId: s.id,
       }));
@@ -45,7 +46,7 @@ export async function GET(
     const srsPoints = chronological
       .filter(s => s.note?.srsTotal != null)
       .map(s => ({
-        date: format(new Date(s.scheduledAt), "d MMM"),
+        date: formatIST(new Date(s.scheduledAt), "d MMM"),
         srs: s.note!.srsTotal,
         sessionId: s.id,
       }));
@@ -63,7 +64,7 @@ export async function GET(
       const lastDate = new Date(chronological.filter(s => s.note?.orsTotal != null).at(-1)!.scheduledAt);
       const lastVal = Number(orsPoints.at(-1)!.ors ?? 0);
       orsTrend = Array.from({ length: 5 }, (_, i) => ({
-        date: format(addWeeks(lastDate, (i + 1) * 2), "d MMM"),
+        date: formatIST(addWeeks(lastDate, (i + 1) * 2), "d MMM"),
         trend: Math.min(40, Math.max(0, Math.round((lastVal + slope * (i + 1)) * 10) / 10)),
       }));
     }

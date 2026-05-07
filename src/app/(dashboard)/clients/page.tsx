@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { ClientProgressChart } from "@/components/client-progress-chart";
 import { useRouter } from "next/navigation";
+import { TZ_OPTIONS, IST, formatIST } from "@/lib/tz";
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<any[]>([]);
@@ -25,6 +26,7 @@ export default function ClientsPage() {
   const [feeSchemes, setFeeSchemes] = useState<any[]>([]);
   const [defaultFeeSchemeId, setSelectedFeeSchemeId] = useState("");
   const [selectedFeeSchemeLabel, setSelectedFeeSchemeLabel] = useState("");
+  const [timezone, setTimezone] = useState<string>(IST);
   const [terminateOpen, setTerminateOpen] = useState(false);
   const [terminationReason, setTerminationReason] = useState("");
   const [terminationType, setTerminationType] = useState("planned");
@@ -258,6 +260,25 @@ export default function ClientsPage() {
                 <input type="hidden" name="defaultFeeSchemeId" value={defaultFeeSchemeId} />
                 <input type="hidden" name="defaultFee" value={feeSchemes.find(f => f.id === defaultFeeSchemeId)?.amount || ""} />
               </div>
+              <div className="space-y-2">
+                <Label>Timezone</Label>
+                <Select value={timezone} onValueChange={(v) => setTimezone(v || IST)}>
+                  <SelectTrigger className="border-slate-200 bg-white h-10">
+                    <SelectValue>
+                      {TZ_OPTIONS.find(o => o.value === timezone)?.label ?? "India (IST)"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-slate-200 shadow-2xl">
+                    {TZ_OPTIONS.map(o => (
+                      <SelectItem key={o.value} value={o.value} label={o.label}>{o.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <input type="hidden" name="timezone" value={timezone} />
+                <p className="text-[11px] text-slate-400">
+                  All scheduling stays in IST. The client&apos;s local time is shown alongside in the sessions list.
+                </p>
+              </div>
               <Button type="submit" className="w-full">Save Client</Button>
             </form>
           </DialogContent>
@@ -294,7 +315,7 @@ export default function ClientsPage() {
                           {client.name}
                           {!client.isActive && <Badge variant="outline" className="bg-rose-50 text-rose-600 border-rose-200 uppercase text-[10px]">Terminated</Badge>}
                         </div>
-                        <span className="text-xs text-slate-500">Since {new Date(client.createdAt).toLocaleDateString()}</span>
+                        <span className="text-xs text-slate-500">Since {formatIST(client.createdAt, "d MMM yyyy")}</span>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -425,6 +446,22 @@ export default function ClientsPage() {
                     <input type="hidden" name="defaultFeeSchemeId" value={defaultFeeSchemeId} />
                     <input type="hidden" name="defaultFee" value={feeSchemes.find(f => f.id === defaultFeeSchemeId)?.amount || ""} />
                   </div>
+                  <div className="space-y-2">
+                    <Label>Timezone</Label>
+                    <Select value={timezone} onValueChange={(v) => setTimezone(v || IST)}>
+                      <SelectTrigger className="border-slate-200 bg-white h-10">
+                        <SelectValue>
+                          {TZ_OPTIONS.find(o => o.value === timezone)?.label ?? "India (IST)"}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent className="bg-white border-slate-200 shadow-2xl">
+                        {TZ_OPTIONS.map(o => (
+                          <SelectItem key={o.value} value={o.value} label={o.label}>{o.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <input type="hidden" name="timezone" value={timezone} />
+                  </div>
                   <div className="space-y-2 col-span-2">
                     <Label htmlFor="edit-notes">Notes / Background</Label>
                     <Input id="edit-notes" name="intakeNotes" defaultValue={selectedClient.intakeNotes || ""} placeholder="Any relevant background..." />
@@ -468,6 +505,12 @@ export default function ClientsPage() {
                           return ""; // Neutral display if no scheme
                         })()}
                         {selectedClient.defaultFee || "0"}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Timezone</Label>
+                      <p className="text-sm text-slate-600">
+                        {TZ_OPTIONS.find(o => o.value === (selectedClient.timezone || IST))?.label ?? selectedClient.timezone}
                       </p>
                     </div>
                   </div>
@@ -514,6 +557,7 @@ export default function ClientsPage() {
                     setSelectedFeeSchemeId(selectedClient.defaultFeeSchemeId || "");
                     const scheme = feeSchemes.find(f => f.id === selectedClient.defaultFeeSchemeId);
                     setSelectedFeeSchemeLabel(scheme ? `${scheme.name} (${scheme.currency === 'USD' ? '$' : '₹'}${scheme.amount})` : "Pick a fee scheme...");
+                    setTimezone(selectedClient.timezone || IST);
                   }} className="gap-2 text-slate-600 border-slate-200">
                     <Pencil className="h-4 w-4" /> Edit Profile
                   </Button>
