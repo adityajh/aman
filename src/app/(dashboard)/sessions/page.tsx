@@ -23,7 +23,8 @@ import {
   CalendarDays,
   Filter,
   Loader2,
-  XCircle
+  XCircle,
+  Trash2
 } from "lucide-react";
 import { startOfHour, addHours, differenceInMinutes } from "date-fns";
 import { ClinicalNoteEditor } from "@/components/clinical-note-editor";
@@ -204,6 +205,8 @@ function SessionsPageInner() {
     const [cancelling, setCancelling] = useState(false);
     const [cancelReason, setCancelReason] = useState("");
     const [cancelOpen, setCancelOpen] = useState(false);
+    const [deleteOpen, setDeleteOpen] = useState(false);
+    const [deleting, setDeleting] = useState(false);
 
     const handleCancel = async () => {
       setCancelling(true);
@@ -224,6 +227,25 @@ function SessionsPageInner() {
         toast.error("Error cancelling session");
       } finally {
         setCancelling(false);
+      }
+    };
+
+    const handleDelete = async () => {
+      setDeleting(true);
+      try {
+        const res = await fetch(`/api/sessions/${session.id}`, { method: "DELETE" });
+        if (res.ok) {
+          toast.success("Session deleted");
+          setDeleteOpen(false);
+          onRefresh();
+        } else {
+          const msg = await res.text();
+          toast.error(msg || "Failed to delete session");
+        }
+      } catch (err) {
+        toast.error("Error deleting session");
+      } finally {
+        setDeleting(false);
       }
     };
 
@@ -341,12 +363,56 @@ function SessionsPageInner() {
               </Dialog>
             )}
             
+            {!session.invoiceId && (
+              <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+                <DialogTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-rose-500 hover:text-rose-600 hover:bg-rose-50"
+                      title="Delete session"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  }
+                />
+                <DialogContent className="bg-white border-slate-200 max-w-sm">
+                  <DialogHeader>
+                    <DialogTitle className="text-rose-600">Delete Session</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <p className="text-sm text-slate-600">
+                      Permanently delete this session for <strong>{session.client?.name}</strong>?
+                      {session.status === 'completed' && (
+                        <span className="block mt-2 text-rose-600 font-medium">
+                          This will also remove the clinical note attached to this session.
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-xs text-slate-500">This cannot be undone.</p>
+                    <div className="flex justify-end gap-3 pt-2">
+                      <Button variant="outline" onClick={() => setDeleteOpen(false)}>Back</Button>
+                      <Button
+                        onClick={handleDelete}
+                        disabled={deleting}
+                        className="bg-rose-500 hover:bg-rose-600 text-white font-bold gap-2"
+                      >
+                        {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
+
             <Dialog open={noteOpen} onOpenChange={setNoteOpen}>
               <DialogTrigger
                 render={
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="gap-2 text-lime-600 hover:text-lime-700 font-bold"
                   >
                     {session.status === 'completed' ? 'View Note' : 'Write Note'}

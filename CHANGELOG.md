@@ -2,6 +2,15 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [2.9.1] - 2026-05-07
+### Added
+- **Hard Delete for Sessions**: Trash icon on every Sessions Ledger row that hasn't been invoiced. Confirm dialog warns when an attached clinical note will be removed alongside the session. Deletion is blocked at the API layer for any session whose `invoiceId` is set, preserving invoice integrity.
+
+### Changed
+- **Clients List Ordering**: The Clients page now lists clients alphabetically by name (case-insensitive) instead of by creation date.
+
+---
+
 ## [2.9.0] - 2026-05-07
 ### Added
 - **IST as System-Wide Source of Truth**: All wall-clock times the counselor enters and views are now interpreted as IST regardless of where the browser or server runs. Introduced `src/lib/tz.ts` (`formatIST`, `formatTz`, `istToUTC`, `istDateTimeToUTC`, `istStartOfMonthUTC`, `istStartOfFYUTC`, etc.) built on `date-fns-tz`.

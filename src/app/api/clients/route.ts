@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { clients } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
-import { desc, eq } from "drizzle-orm";
+import { asc, eq, sql } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -10,8 +10,9 @@ export async function GET() {
   if (!session) return new NextResponse("Unauthorized", { status: 401 });
 
   try {
+    // Alphabetical by name (case-insensitive).
     const allClients = await db.query.clients.findMany({
-      orderBy: [desc(clients.createdAt)],
+      orderBy: [asc(sql`LOWER(${clients.name})`)],
     });
     return NextResponse.json(allClients);
   } catch (error) {
