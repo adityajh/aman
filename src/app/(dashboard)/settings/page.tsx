@@ -27,6 +27,7 @@ export default function SettingsPage() {
     orsRciThreshold: 5,
     orsAmberLow: 26,
     orsGreenLow: 32,
+    emailOverride: false,
   });
 
   useEffect(() => {
@@ -49,6 +50,7 @@ export default function SettingsPage() {
             orsRciThreshold: data.orsRciThreshold ?? 5,
             orsAmberLow: data.orsAmberLow ?? 26,
             orsGreenLow: data.orsGreenLow ?? 32,
+            emailOverride: data.emailOverride ?? false,
           });
         }
         setLoading(false);
@@ -182,6 +184,35 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
         </div>
+
+        <Card className={settings.emailOverride ? "border-amber-300 bg-amber-50" : ""}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5 text-primary" /> Invoice Test Mode
+              {settings.emailOverride && (
+                <span className="ml-2 text-[10px] font-bold uppercase tracking-widest bg-amber-200 text-amber-900 px-2 py-0.5 rounded">On</span>
+              )}
+            </CardTitle>
+            <CardDescription>
+              When ON, every invoice email is rerouted to <strong>{settings.email || "your address above"}</strong> instead of the client. The subject line and a banner inside the email mark it as a test, and the invoice stays in <code>draft</code> so you can re-send it for real once you turn this off.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <label className="flex items-center gap-3 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={settings.emailOverride}
+                onChange={(e) => setSettings({ ...settings, emailOverride: e.target.checked })}
+                className="h-5 w-5 accent-amber-500"
+              />
+              <span className="text-sm font-medium">
+                {settings.emailOverride
+                  ? "Test mode is ON — invoices will NOT reach clients."
+                  : "Test mode is OFF — invoices go to clients."}
+              </span>
+            </label>
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>

@@ -117,14 +117,21 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { 
-      clientId, 
-      scheduledAt, 
+    const {
+      clientId,
+      scheduledAt,
       endedAt,
-      sessionType, 
-      modality, 
-      feeCharged, 
-      feeSchemeId 
+      sessionType,
+      modality,
+      feeCharged,
+      feeSchemeId,
+      // Optional recurrence:
+      //   repeat: { intervalDays: number, count: number }
+      // The dialog computes intervalDays (7 = weekly, 14 = fortnightly, etc.)
+      // and count is the TOTAL number of sessions to create (including the
+      // first). All sessions share the same time-of-day; only the date
+      // advances by intervalDays.
+      repeat,
     } = body;
 
     let durationMin = 60; // Default
@@ -138,18 +145,28 @@ export async function POST(req: Request) {
       durationMin = Math.max(15, Math.round(rawMin / 15) * 15);
     }
 
-    const [newSession] = await db.insert(sessions).values({
-      clientId,
-      scheduledAt: start,
-      endedAt: end,
-      durationMin: durationMin,
-      sessionType,
-      modality,
-      feeCharged: (feeCharged && feeCharged !== "") ? feeCharged.toString() : undefined,
-      feeSchemeId: (feeSchemeId && feeSchemeId !== "") ? feeSchemeId : undefined,
-    }).returning();
+    const intervalDays = Number(repeat?.intervalDays) || 0;
+    const totalCount = Math.max(1, Math.min(52, Number(repeat?.count) || 1));
 
-    return NextResponse.json(newSession);
+    const rows = Array.from({ length: totalCount }, (_, i) => {
+      const offsetMs = i * intervalDays * 24 * 60 * 60 * 1000;
+      return {
+        clientId,
+        scheduledAt: new Date(start.getTime() + offsetMs),
+        endedAt: end ? new Date(end.getTime() + offsetMs) : null,
+        durationMin,
+        sessionType,
+        modality,
+        feeCharged: (feeCharged && feeCharged !== "") ? feeCharged.toString() : undefined,
+        feeSchemeId: (feeSchemeId && feeSchemeId !== "") ? feeSchemeId : undefined,
+      };
+    });
+
+    const inserted = await db.insert(sessions).values(rows).returning();
+
+    // Backward-compat: when no recurrence, return a single object so existing
+    // callers don't break. Recurring calls always get the array.
+    return NextResponse.json(totalCount === 1 ? inserted[0] : inserted);
   } catch (error) {
     console.error(error);
     return new NextResponse("Internal Server Error", { status: 500 });

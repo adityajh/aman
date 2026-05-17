@@ -51,6 +51,11 @@ function SessionsPageInner() {
   const [startTime, setStartTime] = useState(formatIST(startOfHour(new Date()), "HH:mm"));
   const [endTime, setEndTime] = useState(formatIST(addHours(startOfHour(new Date()), 1), "HH:mm"));
 
+  // Recurrence state for the New Session dialog.
+  const [repeatEnabled, setRepeatEnabled] = useState(false);
+  const [repeatInterval, setRepeatInterval] = useState<string>("7"); // days
+  const [repeatCount, setRepeatCount] = useState<string>("4"); // total sessions
+
   // Filters — initialised from URL params if present
   const searchParams = useSearchParams();
   const [timeFilter, setTimeFilter] = useState<string>(searchParams.get("timeFilter") ?? "ytd");
@@ -134,6 +139,8 @@ function SessionsPageInner() {
     // Form times are entered as IST wall-clock — convert to absolute UTC
     // instants so the server stores the correct moment regardless of where it
     // runs.
+    const intervalDays = parseInt(repeatInterval, 10) || 7;
+    const count = Math.max(1, Math.min(52, parseInt(repeatCount, 10) || 1));
     const payload = {
       clientId: selectedClientId,
       scheduledAt: istToUTC(startDate, startTime).toISOString(),
@@ -142,6 +149,7 @@ function SessionsPageInner() {
       modality: "video", // Default or add back to form if needed
       feeSchemeId: selectedFeeSchemeId && selectedFeeSchemeId !== "custom" ? selectedFeeSchemeId : undefined,
       feeCharged: feeCharged || undefined,
+      repeat: repeatEnabled ? { intervalDays, count } : undefined,
     };
 
     try {
@@ -152,7 +160,10 @@ function SessionsPageInner() {
       });
 
       if (res.ok) {
-        toast.success("Session scheduled");
+        const created = repeatEnabled && count > 1
+          ? `${count} sessions scheduled`
+          : "Session scheduled";
+        toast.success(created);
         setOpen(false);
         resetForm();
         fetchData();
@@ -174,25 +185,38 @@ function SessionsPageInner() {
     setStartDate(formatIST(new Date(), "yyyy-MM-dd"));
     setStartTime(formatIST(startOfHour(new Date()), "HH:mm"));
     setEndTime(formatIST(addHours(startOfHour(new Date()), 1), "HH:mm"));
+    setRepeatEnabled(false);
+    setRepeatInterval("7");
+    setRepeatCount("4");
   };
 
   const getStatusBadge = (session: any) => {
     const { status, invoiceId, invoice } = session;
-    
-    if (status === "cancelled" || status === "no_show") return <Badge variant="outline" className="bg-slate-100 text-slate-500 border-slate-200">{status === "no_show" ? "No Show" : "Cancelled"}</Badge>;
-    
+
     if (status === "scheduled") return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">Scheduled</Badge>;
-    
-    // Billing aware statuses
+
+    // Cancellation / no-show: show whether it carries a billed fee.
+    if (status === "cancelled" || status === "no_show") {
+      const label = status === "no_show" ? "No Show" : "Cancelled";
+      if (invoiceId) {
+        const isPaid = invoice && parseFloat(invoice.amountPaid || "0") >= parseFloat(invoice.total || "0");
+        const cls = isPaid
+          ? "bg-green-50 text-green-700 border-green-200"
+          : "bg-rose-50 text-rose-600 border-rose-200";
+        return <Badge variant="outline" className={cls}>{label} • {isPaid ? "Paid" : "Billed"}</Badge>;
+      }
+      return <Badge variant="outline" className="bg-slate-100 text-slate-500 border-slate-200">{label}</Badge>;
+    }
+
+    // Billing aware statuses for completed sessions
     if (invoiceId) {
       const isPaid = invoice && parseFloat(invoice.amountPaid || "0") >= parseFloat(invoice.total || "0");
       if (isPaid) return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Received</Badge>;
       return <Badge variant="outline" className="bg-slate-800 text-slate-100 border-slate-700">Invoiced</Badge>;
     }
-    
+
     if (status === "completed") return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Completed</Badge>;
 
-    
     return null;
   };
 
@@ -205,6 +229,10 @@ function SessionsPageInner() {
     const [cancelling, setCancelling] = useState(false);
     const [cancelReason, setCancelReason] = useState("");
     const [cancelOpen, setCancelOpen] = useState(false);
+    const [cancelType, setCancelType] = useState<"cancelled" | "no_show">("cancelled");
+    // Default fee = full session fee (100% policy). Counselor can override.
+    const defaultFee = session.feeCharged || "0";
+    const [cancelFee, setCancelFee] = useState<string>(defaultFee);
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [deleting, setDeleting] = useState(false);
 
@@ -213,18 +241,22 @@ function SessionsPageInner() {
       try {
         const res = await fetch(`/api/sessions/${session.id}`, {
           method: "PATCH",
-          body: JSON.stringify({ status: "cancelled", cancellationReason: cancelReason }),
+          body: JSON.stringify({
+            status: cancelType,
+            cancellationReason: cancelReason,
+            cancellationFee: cancelFee || "0",
+          }),
           headers: { "Content-Type": "application/json" },
         });
         if (res.ok) {
-          toast.success("Session cancelled");
+          toast.success(cancelType === "no_show" ? "Marked as no-show" : "Session cancelled");
           setCancelOpen(false);
           onRefresh();
         } else {
-          toast.error("Failed to cancel session");
+          toast.error("Failed to update session");
         }
       } catch (err) {
-        toast.error("Error cancelling session");
+        toast.error("Error updating session");
       } finally {
         setCancelling(false);
       }
@@ -253,10 +285,14 @@ function SessionsPageInner() {
     const showClientTz = clientTz && clientTz !== IST;
     const clientTzLabel = tzShortLabel(clientTz);
 
+    const actualDurationMin = actualStart && actualEnd
+      ? Math.round((actualEnd.getTime() - actualStart.getTime()) / 60000)
+      : null;
+
     return (
       <TableRow className="hover:bg-slate-50/50 transition-colors">
         <TableCell className="font-medium text-slate-900">
-          {formatIST(start, "EEE, d MMM yyyy")}
+          {formatIST(start, "EEE, d MMM")}
         </TableCell>
         <TableCell>
           <div className="flex items-center gap-2">
@@ -269,40 +305,25 @@ function SessionsPageInner() {
         </TableCell>
         <TableCell className="text-slate-600 font-medium">
           <div className="flex flex-col">
-            <span>{formatIST(start, "h:mm a")} <span className="text-[9px] text-slate-400 font-bold">IST</span></span>
+            <span>
+              {formatIST(start, "h:mm a")}{end ? ` – ${formatIST(end, "h:mm a")}` : ""}
+            </span>
             {showClientTz && (
-              <span className="text-[10px] text-slate-400">{formatTz(start, clientTz, "h:mm a")} {clientTzLabel}</span>
+              <span className="text-[10px] text-slate-400">
+                {formatTz(start, clientTz, "h:mm a")}{end ? ` – ${formatTz(end, clientTz, "h:mm a")}` : ""} {clientTzLabel}
+              </span>
             )}
           </div>
         </TableCell>
         <TableCell className="text-slate-600 font-medium">
-          {end ? (
-            <div className="flex flex-col">
-              <span>{formatIST(end, "h:mm a")} <span className="text-[9px] text-slate-400 font-bold">IST</span></span>
-              {showClientTz && (
-                <span className="text-[10px] text-slate-400">{formatTz(end, clientTz, "h:mm a")} {clientTzLabel}</span>
-              )}
-            </div>
-          ) : "—"}
-        </TableCell>
-        <TableCell>
-          <Badge variant="secondary" className="bg-slate-100 text-slate-700 hover:bg-slate-100 font-bold">
-            {session.durationMin}m
-          </Badge>
-        </TableCell>
-        <TableCell className="text-slate-600 font-medium">
-          {actualStart && actualEnd ? (
-            <div className="flex flex-col">
-              <span className="font-bold text-slate-700">{Math.round((actualEnd.getTime() - actualStart.getTime()) / 60000)}m</span>
-              <span className="text-[10px] text-slate-400">{formatIST(actualStart, "h:mm a")} - {formatIST(actualEnd, "h:mm a")} IST</span>
-              {showClientTz && (
-                <span className="text-[10px] text-slate-400">{formatTz(actualStart, clientTz, "h:mm a")} - {formatTz(actualEnd, clientTz, "h:mm a")} {clientTzLabel}</span>
-              )}
-            </div>
-          ) : "—"}
-        </TableCell>
-        <TableCell className="text-slate-600 font-medium">
-          {session.invoicedDurationMin ? <span className="font-bold text-slate-700">{session.invoicedDurationMin}m</span> : "—"}
+          <div className="flex flex-col">
+            <span className="font-bold text-slate-700">
+              {session.invoicedDurationMin ?? session.durationMin}m
+            </span>
+            {actualDurationMin != null && actualDurationMin !== (session.invoicedDurationMin ?? session.durationMin) && (
+              <span className="text-[10px] text-slate-400">actual {actualDurationMin}m</span>
+            )}
+          </div>
         </TableCell>
         <TableCell className="font-semibold text-slate-700">
           {(() => {
@@ -323,39 +344,83 @@ function SessionsPageInner() {
               <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
                 <DialogTrigger
                   render={
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-rose-500 hover:text-rose-600 hover:bg-rose-50 gap-1"
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-rose-500 hover:text-rose-600 hover:bg-rose-50"
+                      title="Cancel session / mark as no-show"
                     >
-                      <XCircle className="h-4 w-4" /> Cancel
+                      <XCircle className="h-4 w-4" />
                     </Button>
                   }
                 />
-                <DialogContent className="bg-white border-slate-200 max-w-sm">
+                <DialogContent className="bg-white border-slate-200 max-w-md">
                   <DialogHeader>
-                    <DialogTitle className="text-rose-600">Cancel Session</DialogTitle>
+                    <DialogTitle className="text-rose-600">Cancel / No-Show</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
-                    <p className="text-sm text-slate-600">Are you sure you want to cancel this session for <strong>{session.client?.name}</strong>?</p>
+                    <p className="text-sm text-slate-600">
+                      Mark this session for <strong>{session.client?.name}</strong> as cancelled or no-show.
+                    </p>
+
                     <div className="space-y-2">
-                      <Label className="text-xs font-bold uppercase text-slate-400">Cancellation Reason (Optional)</Label>
-                      <Input 
-                        placeholder="e.g. Client requested, Emergency..." 
+                      <Label className="text-xs font-bold uppercase text-slate-400">Type</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          type="button"
+                          variant={cancelType === "cancelled" ? "default" : "outline"}
+                          onClick={() => setCancelType("cancelled")}
+                          className={cancelType === "cancelled" ? "bg-rose-500 hover:bg-rose-600 text-white" : ""}
+                        >
+                          Cancellation
+                        </Button>
+                        <Button
+                          type="button"
+                          variant={cancelType === "no_show" ? "default" : "outline"}
+                          onClick={() => setCancelType("no_show")}
+                          className={cancelType === "no_show" ? "bg-rose-500 hover:bg-rose-600 text-white" : ""}
+                        >
+                          No-Show
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs font-bold uppercase text-slate-400">
+                        Fee to Bill (defaults to 100% of session fee)
+                      </Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        value={cancelFee}
+                        onChange={(e) => setCancelFee(e.target.value)}
+                        className="bg-slate-50"
+                      />
+                      <p className="text-[11px] text-slate-400">
+                        Set to <strong>0</strong> if you don&apos;t want to bill the client. Otherwise this amount is added to their next batch invoice.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs font-bold uppercase text-slate-400">Reason (Optional)</Label>
+                      <Input
+                        placeholder="e.g. Client requested, traffic, emergency…"
                         value={cancelReason}
                         onChange={(e) => setCancelReason(e.target.value)}
                         className="bg-slate-50"
                       />
                     </div>
+
                     <div className="flex justify-end gap-3 pt-2">
                       <Button variant="outline" onClick={() => setCancelOpen(false)}>Back</Button>
-                      <Button 
-                        onClick={handleCancel} 
+                      <Button
+                        onClick={handleCancel}
                         disabled={cancelling}
                         className="bg-rose-500 hover:bg-rose-600 text-white font-bold"
                       >
                         {cancelling ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                        Cancel Session
+                        {cancelType === "no_show" ? "Mark No-Show" : "Cancel Session"}
                       </Button>
                     </div>
                   </div>
@@ -413,9 +478,10 @@ function SessionsPageInner() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="gap-2 text-lime-600 hover:text-lime-700 font-bold"
+                    className="text-lime-600 hover:text-lime-700 hover:bg-lime-50"
+                    title={session.status === 'completed' ? 'View clinical note' : 'Write clinical note'}
                   >
-                    {session.status === 'completed' ? 'View Note' : 'Write Note'}
+                    <FileText className="h-4 w-4" />
                   </Button>
                 }
               />
@@ -680,8 +746,59 @@ function SessionsPageInner() {
                   </div>
                 </div>
 
+                {/* Recurrence ─────────────────────────────────────────── */}
+                <div className="border border-slate-200 rounded-xl p-4 bg-slate-50/50 space-y-3">
+                  <label className="flex items-center gap-3 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={repeatEnabled}
+                      onChange={(e) => setRepeatEnabled(e.target.checked)}
+                      className="h-4 w-4 accent-lime-500"
+                    />
+                    <span className="text-sm font-bold text-slate-700">Repeat this session</span>
+                  </label>
+
+                  {repeatEnabled && (
+                    <div className="grid grid-cols-2 gap-3 pl-7">
+                      <div className="space-y-1">
+                        <Label className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Every</Label>
+                        <Select value={repeatInterval} onValueChange={(v) => setRepeatInterval(v || "7")}>
+                          <SelectTrigger className="h-9 bg-white border-slate-200">
+                            <SelectValue>
+                              {repeatInterval === "7" && "Week"}
+                              {repeatInterval === "14" && "Fortnight"}
+                              {repeatInterval === "21" && "3 Weeks"}
+                              {repeatInterval === "28" && "4 Weeks"}
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent className="bg-white border-slate-200">
+                            <SelectItem value="7" label="Week">Week</SelectItem>
+                            <SelectItem value="14" label="Fortnight">Fortnight (2 weeks)</SelectItem>
+                            <SelectItem value="21" label="3 Weeks">3 Weeks</SelectItem>
+                            <SelectItem value="28" label="4 Weeks">4 Weeks</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">For (Total Sessions)</Label>
+                        <Input
+                          type="number"
+                          min={2}
+                          max={52}
+                          value={repeatCount}
+                          onChange={(e) => setRepeatCount(e.target.value)}
+                          className="h-9 bg-white border-slate-200"
+                        />
+                      </div>
+                      <p className="col-span-2 text-[11px] text-slate-500 pl-1">
+                        Creates {Math.max(1, Math.min(52, parseInt(repeatCount, 10) || 1))} scheduled sessions starting <strong>{startDate}</strong>, repeating every {repeatInterval} days. All share the same time and fee.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
                 <Button type="submit" className="w-full bg-lime-400 text-slate-950 hover:bg-lime-500 font-bold h-14 text-lg shadow-lg active:scale-95 transition-all">
-                  Schedule Session
+                  {repeatEnabled ? `Schedule ${Math.max(1, Math.min(52, parseInt(repeatCount, 10) || 1))} Sessions` : "Schedule Session"}
                 </Button>
               </form>
             </DialogContent>
@@ -703,16 +820,13 @@ function SessionsPageInner() {
           <Table>
             <TableHeader className="bg-slate-50 items-center">
               <TableRow className="hover:bg-transparent border-slate-200">
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-32">Date</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-48">Client</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-20">Start</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-20">End</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-20">Sch.</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-20">Act.</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-20">Inv.</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-28">Fees</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-28">Status</TableHead>
-                <TableHead className="text-right py-4 font-bold text-slate-400 uppercase text-xs tracking-widest px-6 w-32">Actions</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-28">Date</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-44">Client</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-32">Time (IST)</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-24">Duration</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-24">Fees</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-24">Status</TableHead>
+                <TableHead className="text-right py-4 font-bold text-slate-400 uppercase text-xs tracking-widest px-4 w-28">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

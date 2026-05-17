@@ -25,10 +25,12 @@ import {
   CheckCircle2, 
   Eye, 
   ExternalLink, 
-  Calendar as CalendarIcon, 
-  Check 
+  Calendar as CalendarIcon,
+  Check,
+  BadgeCheck
 } from "lucide-react";
-import { formatIST, istFirstOfMonthStr } from "@/lib/tz";
+import { Input } from "@/components/ui/input";
+import { formatIST, istFirstOfMonthStr, istTodayStr } from "@/lib/tz";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 
@@ -40,6 +42,65 @@ export default function InvoicesPage() {
   const [isSending, setIsSending] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [previewId, setPreviewId] = useState<string | null>(null);
+
+  // Confirm-payment dialog state. Holds a snapshot of the invoice being paid
+  // so the dialog can prefill amount / currency / client name.
+  const [confirmInvoice, setConfirmInvoice] = useState<any | null>(null);
+  const [confirmAmount, setConfirmAmount] = useState<string>("");
+  const [confirmDate, setConfirmDate] = useState<string>(istTodayStr());
+  const [confirmMethod, setConfirmMethod] = useState<string>("upi");
+  const [confirmRef, setConfirmRef] = useState<string>("");
+  const [confirmEmail, setConfirmEmail] = useState<boolean>(true);
+  const [confirmSubmitting, setConfirmSubmitting] = useState(false);
+
+  const openConfirm = (inv: any) => {
+    const total = parseFloat(inv.total || "0");
+    const paid = parseFloat(inv.amountPaid || "0");
+    const balance = Math.max(0, total - paid);
+    setConfirmInvoice(inv);
+    setConfirmAmount(balance.toFixed(2));
+    setConfirmDate(istTodayStr());
+    setConfirmMethod("upi");
+    setConfirmRef("");
+    setConfirmEmail(true);
+  };
+
+  const handleConfirmReceipt = async () => {
+    if (!confirmInvoice) return;
+    setConfirmSubmitting(true);
+    try {
+      const res = await fetch(`/api/invoices/${confirmInvoice.id}/receipt`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: confirmAmount,
+          paymentDate: confirmDate,
+          method: confirmMethod,
+          referenceId: confirmRef || undefined,
+          sendEmail: confirmEmail,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        toast.success(
+          data.emailedTo
+            ? data.testMode
+              ? `Payment recorded · receipt sent to YOU (test mode)`
+              : `Payment recorded · receipt emailed to client`
+            : `Payment recorded`,
+        );
+        setConfirmInvoice(null);
+        fetchData();
+      } else {
+        const err = await res.text();
+        toast.error(`Failed: ${err}`);
+      }
+    } catch (err) {
+      toast.error("An error occurred");
+    } finally {
+      setConfirmSubmitting(false);
+    }
+  };
   const [filterGenerated, setFilterGenerated] = useState(true);
   const [filterSent, setFilterSent] = useState(true);
   const [filterPaid, setFilterPaid] = useState(true);
@@ -431,9 +492,9 @@ export default function InvoicesPage() {
                                   <Eye className="h-4 w-4" />
                                 </Button>
                                 {invoice.status === 'draft' ? (
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
                                     className="gap-2 text-lime-900 border-lime-300 bg-lime-50 hover:bg-lime-100 font-bold shadow-sm"
                                     onClick={() => handleSendInvoice(invoice.id)}
                                     disabled={!!isSending || !invoice.client?.email}
@@ -446,6 +507,17 @@ export default function InvoicesPage() {
                                     <CheckCircle2 className="h-4 w-4 text-lime-600" />
                                     {invoice.sentAt ? formatIST(new Date(invoice.sentAt), "d MMM") : 'Sent'}
                                   </div>
+                                )}
+                                {invoice.status !== 'draft' && invoice.status !== 'paid' && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="gap-2 text-emerald-900 border-emerald-300 bg-emerald-50 hover:bg-emerald-100 font-bold shadow-sm"
+                                    onClick={() => openConfirm(invoice)}
+                                    title="Record payment and email receipt"
+                                  >
+                                    <BadgeCheck className="h-4 w-4" /> Confirm Payment
+                                  </Button>
                                 )}
                               </div>
                             </TableCell>
@@ -496,6 +568,76 @@ export default function InvoicesPage() {
           <div className="bg-white rounded-lg p-1">
              {previewId && <iframe src={`/api/invoices/${previewId}/preview`} className="w-full h-[70vh] border-0" />}
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!confirmInvoice} onOpenChange={(v) => !v && setConfirmInvoice(null)}>
+        <DialogContent className="bg-white border-slate-200 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-emerald-700">
+              <BadgeCheck className="h-5 w-5" /> Confirm Payment
+            </DialogTitle>
+          </DialogHeader>
+          {confirmInvoice && (
+            <div className="space-y-4 py-2">
+              <div className="text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-1">
+                <div>Invoice <strong>{confirmInvoice.invoiceNumber}</strong> for <strong>{confirmInvoice.client?.name}</strong></div>
+                <div className="text-xs text-slate-500">
+                  Outstanding: {confirmInvoice.currency === 'USD' ? '$' : '₹'}
+                  {Math.max(0, parseFloat(confirmInvoice.total || '0') - parseFloat(confirmInvoice.amountPaid || '0')).toFixed(2)}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Amount Received</Label>
+                  <Input type="number" step="0.01" min={0} value={confirmAmount} onChange={(e) => setConfirmAmount(e.target.value)} className="h-10 bg-slate-50" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Payment Date (IST)</Label>
+                  <Input type="date" value={confirmDate} onChange={(e) => setConfirmDate(e.target.value)} className="h-10 bg-slate-50" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Method</Label>
+                  <select
+                    value={confirmMethod}
+                    onChange={(e) => setConfirmMethod(e.target.value)}
+                    className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm"
+                  >
+                    <option value="upi">UPI</option>
+                    <option value="bank_transfer">Bank Transfer</option>
+                    <option value="cash">Cash</option>
+                    <option value="card">Card</option>
+                    <option value="online">Online</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Reference (Optional)</Label>
+                  <Input value={confirmRef} onChange={(e) => setConfirmRef(e.target.value)} placeholder="UPI ref / cheque no." className="h-10 bg-slate-50" />
+                </div>
+              </div>
+
+              <label className="flex items-center gap-3 cursor-pointer select-none border border-slate-200 rounded-lg p-3 bg-slate-50/60">
+                <input type="checkbox" checked={confirmEmail} onChange={(e) => setConfirmEmail(e.target.checked)} className="h-4 w-4 accent-emerald-500" />
+                <span className="text-sm text-slate-700">
+                  Email receipt to <strong>{confirmInvoice.client?.email || "(no email on file)"}</strong>
+                </span>
+              </label>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <Button variant="outline" onClick={() => setConfirmInvoice(null)}>Back</Button>
+                <Button
+                  onClick={handleConfirmReceipt}
+                  disabled={confirmSubmitting || !confirmAmount || parseFloat(confirmAmount) <= 0}
+                  className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold gap-2"
+                >
+                  {confirmSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <BadgeCheck className="h-4 w-4" />}
+                  Confirm Receipt
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

@@ -15,16 +15,16 @@ export async function PATCH(
 
   try {
     const body = await req.json();
-    const { status, cancellationReason } = body;
+    const { status, cancellationReason, cancellationFee } = body;
 
-    // Guard: Prevent cancelling if already invoiced
-    if (status === "cancelled") {
+    // Guard: Prevent cancelling / marking no-show on an invoiced session.
+    if (status === "cancelled" || status === "no_show") {
       const session = await db.query.sessions.findFirst({
         where: eq(sessions.id, id),
       });
 
       if (session?.invoiceId) {
-        return new NextResponse("Cannot cancel an invoiced session", { status: 400 });
+        return new NextResponse("Cannot change status of an invoiced session", { status: 400 });
       }
     }
 
@@ -33,6 +33,7 @@ export async function PATCH(
       .set({
         status: status || undefined,
         cancellationReason: cancellationReason || undefined,
+        cancellationFee: cancellationFee != null ? cancellationFee.toString() : undefined,
         updatedAt: new Date(),
       })
       .where(eq(sessions.id, id))

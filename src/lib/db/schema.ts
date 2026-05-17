@@ -320,6 +320,10 @@ export const practiceSettings = pgTable(
     orsRciThreshold: integer("ors_rci_threshold").notNull().default(5),
     orsAmberLow: integer("ors_amber_low").notNull().default(26),
     orsGreenLow: integer("ors_green_low").notNull().default(32),
+    // When true, every outgoing invoice email is rerouted to the counselor's
+    // own address (`email` column above) instead of the client's. Used for
+    // dry-runs against real data before going live with a batch.
+    emailOverride: boolean("email_override").notNull().default(false),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
       .default(sql`now()`),

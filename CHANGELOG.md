@@ -2,6 +2,24 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [3.0.0] - 2026-05-07
+### Added
+- **Sessions Ledger Compacted**: Merged Start + End into a single "Time (IST)" column, merged Sch./Act./Inv. into one "Duration" column (shows invoiced minutes primary, actual minutes secondary only when they differ), trimmed Date to `EEE, d MMM`, and iconified the Actions column (XCircle = cancel/no-show, Trash = delete, FileText = view/write note). The table now fits comfortably under 1100 px without horizontal scrolling.
+- **Cancel / No-Show Dialog with Fee**: Cancel button on Scheduled sessions opens a unified dialog with a Cancellation / No-Show type toggle, a fee field (defaults to 100% of the session fee), and the existing optional reason. Setting the fee to `0` skips billing.
+- **Cancelled / No-Show Sessions Now Invoiced**: Batch invoice generation and the "unbilled" picker on the Invoices page now include cancelled and no-show sessions when their `cancellationFee > 0`. Line-item descriptions read "Late cancellation — 5 May 2026 (reason)" or "No-show — 5 May 2026" so they're distinct from regular session lines.
+- **Invoice Test Mode**: New toggle in Settings → Invoice Test Mode. When ON, every invoice and receipt email is rerouted to the counselor's own address with a `[TEST → client@…]` subject prefix and a yellow banner inside the body. Invoices stay in `draft` while test mode is on, so the counselor can flip the toggle off and re-send for real. Backed by a new `practice_settings.email_override boolean` column.
+- **Recurring Sessions**: New Session dialog gained a "Repeat this session" toggle with frequency (Week / Fortnight / 3 Weeks / 4 Weeks) and total session count (capped at 52). On submit, the API inserts the whole batch in one shot, each row sharing the same time-of-day and fee, with only the date advancing.
+- **One-Click Confirm Payment + Auto-Receipt**: Every non-draft, non-paid invoice row on the Invoices page now has a green "Confirm Payment" button. It opens a pre-filled dialog (amount = outstanding, date = today in IST, method = UPI, currency = invoice currency) with a "Email receipt to client" toggle on by default. Recording the payment updates the invoice's `amountPaid` + status and emails a green-branded receipt PDF/HTML to the client. Receipt emails also honor Test Mode.
+
+### Changed
+- **Status Badge for Billed Cancellations**: A cancelled or no-show session that has been added to an invoice now shows "Cancelled • Billed" (rose) or "Cancelled • Paid" (green) — visually distinct from uncharged cancellations (slate).
+- **Sessions Status PATCH**: `PATCH /api/sessions/[id]` now accepts `cancellationFee` and applies the invoiced-session guard to both `cancelled` and `no_show` transitions.
+
+### Database
+- Added `practice_settings.email_override boolean NOT NULL DEFAULT false`. Migration ran via `/api/admin/run-migration` (and a one-shot script for the working DB).
+
+---
+
 ## [2.9.1] - 2026-05-07
 ### Added
 - **Hard Delete for Sessions**: Trash icon on every Sessions Ledger row that hasn't been invoiced. Confirm dialog warns when an attached clinical note will be removed alongside the session. Deletion is blocked at the API layer for any session whose `invoiceId` is set, preserving invoice integrity.

@@ -127,21 +127,39 @@ export async function POST(
       </div>
     `;
 
-    // Send email using Nodemailer
+    // Email override (test mode): when enabled in Settings, the invoice still
+    // sends — but to the counselor's own address instead of the client's.
+    // Subject is prefixed so it's obvious in the inbox.
+    const overrideOn = (settings as any)?.emailOverride === true;
+    const counselorEmail = (settings as any)?.email;
+    const sendTo = overrideOn && counselorEmail ? counselorEmail : invoice.client.email;
+    const subject = overrideOn
+      ? `[TEST → ${invoice.client.email}] Invoice ${invoice.invoiceNumber} for therapy sessions`
+      : `Invoice ${invoice.invoiceNumber} for therapy sessions`;
+
+    const testBanner = overrideOn
+      ? `<div style="background:#fef3c7;border:1px solid #f59e0b;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:13px;color:#78350f;">
+           <strong>TEST MODE</strong> — In live mode this email would have been sent to <strong>${invoice.client.email}</strong>. Email override is currently <strong>ON</strong> in Settings.
+         </div>`
+      : "";
+
     await transporter.sendMail({
       from: `"${practiceProfile.practiceName}" <${process.env.SMTP_USER}>`,
-      to: invoice.client.email,
-      subject: `Invoice ${invoice.invoiceNumber} for therapy sessions`,
-      html: htmlContent,
+      to: sendTo,
+      subject,
+      html: testBanner + htmlContent,
     });
 
-    // Update status to 'sent'
-    await db.update(invoices).set({
-      status: 'sent',
-      sentAt: new Date(),
-    }).where(eq(invoices.id, id));
+    // In live mode, mark the invoice as sent. In test mode, leave it as draft
+    // so the counselor can flip the toggle off and re-send for real.
+    if (!overrideOn) {
+      await db.update(invoices).set({
+        status: 'sent',
+        sentAt: new Date(),
+      }).where(eq(invoices.id, id));
+    }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, testMode: overrideOn });
   } catch (error: any) {
     console.error("Nodemailer Error:", error);
     return new NextResponse(`Email delivery failed: ${error.message || 'Unknown error'}`, { status: 500 });

@@ -22,25 +22,42 @@ export async function POST(req: Request) {
 
     for (const clientId of clientIds) {
       try {
-        // 1. Fetch unbilled completed sessions for this client (with fee scheme to get currency)
-        const unbilledSessions = await db.query.sessions.findMany({
+        // 1. Fetch unbilled sessions for this client:
+        //    - all `completed` sessions, billed at their `feeCharged`
+        //    - `cancelled` / `no_show` sessions, billed at `cancellationFee`
+        //      (only if it's > 0 — fee=0 means it was a free cancellation).
+        const candidateSessions = await db.query.sessions.findMany({
           where: and(
             eq(sessions.clientId, clientId),
-            eq(sessions.status, 'completed'),
-            isNull(sessions.invoiceId)
+            isNull(sessions.invoiceId),
+            sql`(
+              ${sessions.status} = 'completed'
+              OR (${sessions.status} IN ('cancelled', 'no_show') AND COALESCE(${sessions.cancellationFee}, '0')::numeric > 0)
+            )`
           ),
           with: {
             feeScheme: true
           }
         });
 
-        if (unbilledSessions.length === 0) continue;
+        if (candidateSessions.length === 0) continue;
+
+        // Compute the billable amount per session in one place so the totals
+        // and line items can't disagree.
+        const billable = candidateSessions.map(s => {
+          const amount = s.status === 'completed'
+            ? parseFloat(s.feeCharged || '0')
+            : parseFloat(s.cancellationFee || '0');
+          return { session: s, amount };
+        }).filter(b => b.amount > 0);
+
+        if (billable.length === 0) continue;
 
         // 2. Determine currency (default to INR if no scheme found)
         const client = await db.query.clients.findFirst({
           where: eq(clients.id, clientId)
         });
-        
+
         let currency = 'INR';
         if (client?.defaultFeeSchemeId) {
           const scheme = await db.query.feeSchemes.findFirst({
@@ -53,11 +70,8 @@ export async function POST(req: Request) {
         const result = await db.select({ count: sql<number>`count(*)` }).from(invoices);
         const invoiceNumber = `INV-${istNowParts().year}-${(result[0].count + 1).toString().padStart(4, '0')}`;
 
-        // 4. Calculate totals
-        let subtotal = 0;
-        unbilledSessions.forEach(s => {
-          subtotal += parseFloat(s.feeCharged || '0');
-        });
+        // 4. Totals
+        const subtotal = billable.reduce((sum, b) => sum + b.amount, 0);
 
         // 5. Create invoice with correct currency
         const [newInvoice] = await db.insert(invoices).values({
@@ -70,16 +84,25 @@ export async function POST(req: Request) {
           status: 'draft',
         }).returning();
 
-        // 5. Create line items and update sessions
-        for (const session of unbilledSessions) {
-          const description = `Session - ${formatIST(session.scheduledAt, "d MMM yyyy")} (${session.durationMin} min)`;
-          
+        // 6. Create line items and update sessions
+        for (const { session, amount } of billable) {
+          const dateStr = formatIST(session.scheduledAt, "d MMM yyyy");
+          let description: string;
+          if (session.status === 'completed') {
+            description = `Session - ${dateStr} (${session.invoicedDurationMin ?? session.durationMin} min)`;
+          } else if (session.status === 'no_show') {
+            description = `No-show - ${dateStr}${session.cancellationReason ? ` (${session.cancellationReason})` : ''}`;
+          } else {
+            description = `Late cancellation - ${dateStr}${session.cancellationReason ? ` (${session.cancellationReason})` : ''}`;
+          }
+          const amountStr = amount.toFixed(2);
+
           await db.insert(invoiceLineItems).values({
             invoiceId: newInvoice.id,
             sessionId: session.id,
             description,
-            unitPrice: session.feeCharged || '0',
-            amount: session.feeCharged || '0',
+            unitPrice: amountStr,
+            amount: amountStr,
           });
 
           await db.update(sessions).set({

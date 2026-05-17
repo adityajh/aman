@@ -63,6 +63,10 @@ export async function GET() {
       name: "clients.timezone add column",
       query: `ALTER TABLE clients ADD COLUMN IF NOT EXISTS timezone text NOT NULL DEFAULT 'Asia/Kolkata'`
     },
+    {
+      name: "practice_settings.email_override add column",
+      query: `ALTER TABLE practice_settings ADD COLUMN IF NOT EXISTS email_override boolean NOT NULL DEFAULT false`
+    },
   ];
 
   for (const step of steps) {
