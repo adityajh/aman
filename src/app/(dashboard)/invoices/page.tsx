@@ -53,6 +53,30 @@ export default function InvoicesPage() {
   const [confirmEmail, setConfirmEmail] = useState<boolean>(true);
   const [confirmSubmitting, setConfirmSubmitting] = useState(false);
 
+  // Void-invoice dialog state.
+  const [voidInvoice, setVoidInvoice] = useState<any | null>(null);
+  const [voidSubmitting, setVoidSubmitting] = useState(false);
+
+  const handleVoid = async () => {
+    if (!voidInvoice) return;
+    setVoidSubmitting(true);
+    try {
+      const res = await fetch(`/api/invoices/${voidInvoice.id}/void`, { method: "POST" });
+      if (res.ok) {
+        toast.success("Invoice voided — its sessions are back to unbilled");
+        setVoidInvoice(null);
+        fetchData();
+      } else {
+        const msg = await res.text();
+        toast.error(msg || "Failed to void invoice");
+      }
+    } catch (err) {
+      toast.error("Error voiding invoice");
+    } finally {
+      setVoidSubmitting(false);
+    }
+  };
+
   const openConfirm = (inv: any) => {
     const total = parseFloat(inv.total || "0");
     const paid = parseFloat(inv.amountPaid || "0");
@@ -209,6 +233,7 @@ export default function InvoicesPage() {
       case "paid": return <Badge variant="outline" className="bg-lime-100 text-lime-900 border-lime-300 font-bold uppercase text-[10px] tracking-wider">Paid</Badge>;
       case "partial": return <Badge variant="outline" className="bg-amber-100 text-amber-900 border-amber-300 font-bold uppercase text-[10px] tracking-wider">Partial</Badge>;
       case "overdue": return <Badge variant="outline" className="bg-red-100 text-red-900 border-red-300 font-bold uppercase text-[10px] tracking-wider">Overdue</Badge>;
+      case "void": return <Badge variant="outline" className="bg-slate-200 text-slate-500 border-slate-300 font-bold uppercase text-[10px] tracking-wider line-through">Void</Badge>;
       default: return <Badge variant="outline" className="font-bold uppercase text-[10px] tracking-wider">{status}</Badge>;
     }
   };
@@ -508,7 +533,7 @@ export default function InvoicesPage() {
                                     {invoice.sentAt ? formatIST(new Date(invoice.sentAt), "d MMM") : 'Sent'}
                                   </div>
                                 )}
-                                {invoice.status !== 'draft' && invoice.status !== 'paid' && (
+                                {invoice.status !== 'draft' && invoice.status !== 'paid' && invoice.status !== 'void' && (
                                   <Button
                                     variant="outline"
                                     size="sm"
@@ -517,6 +542,17 @@ export default function InvoicesPage() {
                                     title="Record payment and email receipt"
                                   >
                                     <BadgeCheck className="h-4 w-4" /> Confirm Payment
+                                  </Button>
+                                )}
+                                {invoice.status !== 'paid' && invoice.status !== 'void' && parseFloat(invoice.amountPaid || '0') === 0 && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-rose-500 hover:text-rose-600 hover:bg-rose-50"
+                                    onClick={() => setVoidInvoice(invoice)}
+                                    title="Void this invoice (sessions return to unbilled)"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
                                   </Button>
                                 )}
                               </div>
@@ -568,6 +604,48 @@ export default function InvoicesPage() {
           <div className="bg-white rounded-lg p-1">
              {previewId && <iframe src={`/api/invoices/${previewId}/preview`} className="w-full h-[70vh] border-0" />}
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!voidInvoice} onOpenChange={(v) => !v && setVoidInvoice(null)}>
+        <DialogContent className="bg-white border-slate-200 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-rose-600">
+              <Trash2 className="h-5 w-5" /> Void Invoice
+            </DialogTitle>
+          </DialogHeader>
+          {voidInvoice && (
+            <div className="space-y-4 py-2">
+              <div className="text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-1">
+                <div>Invoice <strong>{voidInvoice.invoiceNumber}</strong> for <strong>{voidInvoice.client?.name}</strong></div>
+                <div className="text-xs text-slate-500">
+                  Amount: {voidInvoice.currency === 'USD' ? '$' : '₹'}{parseFloat(voidInvoice.total || '0').toFixed(2)}
+                </div>
+              </div>
+              <p className="text-sm text-slate-700">
+                Voiding will:
+              </p>
+              <ul className="text-sm text-slate-600 list-disc pl-5 space-y-1">
+                <li>Set this invoice&apos;s status to <strong>Void</strong> (it stays visible for audit).</li>
+                <li>Remove its line items.</li>
+                <li>Release every linked session back to <strong>unbilled</strong>, so you can include them in a new batch.</li>
+              </ul>
+              <p className="text-xs text-slate-500">
+                Blocked if any payment has been recorded against this invoice. Voids cannot be undone — but you can always re-generate a fresh batch from the freed sessions.
+              </p>
+              <div className="flex justify-end gap-3 pt-2">
+                <Button variant="outline" onClick={() => setVoidInvoice(null)}>Back</Button>
+                <Button
+                  onClick={handleVoid}
+                  disabled={voidSubmitting}
+                  className="bg-rose-500 hover:bg-rose-600 text-white font-bold gap-2"
+                >
+                  {voidSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                  Void Invoice
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 

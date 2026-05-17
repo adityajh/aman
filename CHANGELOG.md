@@ -2,6 +2,19 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [3.1.0] - 2026-05-07
+### Added
+- **Void Invoice**: Each invoice row that isn't paid, already void, or has any payment recorded against it now has a Trash button. Clicking it opens a confirm dialog ("voiding will release N sessions back to unbilled"). On confirm, the invoice is marked `void`, its line items are deleted, and every linked session's `invoice_id` is reset to `NULL` — so those sessions reappear in the unbilled picker and can be batched again. Available in both Test Mode and live mode (the safety is the payment / status guard, not the mode).
+- **Void Status Pill**: New grey strike-through `Void` badge so voided invoices remain visible in the ledger for audit. They're filtered the same as other statuses.
+
+### Changed
+- **Confirm Payment Button**: Now hidden on `void` invoices (in addition to `draft` and `paid`).
+
+### API
+- New `POST /api/invoices/[id]/void`. Returns 400 if the invoice is already void/paid or carries any recorded payment.
+
+---
+
 ## [3.0.0] - 2026-05-07
 ### Added
 - **Sessions Ledger Compacted**: Merged Start + End into a single "Time (IST)" column, merged Sch./Act./Inv. into one "Duration" column (shows invoiced minutes primary, actual minutes secondary only when they differ), trimmed Date to `EEE, d MMM`, and iconified the Actions column (XCircle = cancel/no-show, Trash = delete, FileText = view/write note). The table now fits comfortably under 1100 px without horizontal scrolling.
