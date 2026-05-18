@@ -289,6 +289,20 @@ function SessionsPageInner() {
       ? Math.round((actualEnd.getTime() - actualStart.getTime()) / 60000)
       : null;
 
+    // For completed sessions, if the counselor captured different actual
+    // times in the clinical note, show those in the Time column instead of
+    // the scheduled times — the actual session is what the row represents
+    // now. Scheduled / cancelled / no-show rows fall back to scheduled.
+    const useActualForDisplay = !!(
+      actualStart && actualEnd && (
+        actualStart.getTime() !== start.getTime() ||
+        !end ||
+        actualEnd.getTime() !== end.getTime()
+      )
+    );
+    const displayStart = useActualForDisplay ? actualStart! : start;
+    const displayEnd = useActualForDisplay ? actualEnd! : end;
+
     return (
       <TableRow className="hover:bg-slate-50/50 transition-colors">
         <TableCell className="font-medium text-slate-900">
@@ -306,11 +320,14 @@ function SessionsPageInner() {
         <TableCell className="text-slate-600 font-medium">
           <div className="flex flex-col">
             <span>
-              {formatIST(start, "h:mm a")}{end ? ` – ${formatIST(end, "h:mm a")}` : ""}
+              {formatIST(displayStart, "h:mm a")}{displayEnd ? ` – ${formatIST(displayEnd, "h:mm a")}` : ""}
+              {useActualForDisplay && (
+                <span className="ml-1 text-[9px] text-slate-400 font-medium">actual</span>
+              )}
             </span>
             {showClientTz && (
               <span className="text-[10px] text-slate-400">
-                {formatTz(start, clientTz, "h:mm a")}{end ? ` – ${formatTz(end, clientTz, "h:mm a")}` : ""} {clientTzLabel}
+                {formatTz(displayStart, clientTz, "h:mm a")}{displayEnd ? ` – ${formatTz(displayEnd, clientTz, "h:mm a")}` : ""} {clientTzLabel}
               </span>
             )}
           </div>

@@ -2,6 +2,12 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [3.1.1] - 2026-05-18
+### Changed
+- **Sessions Ledger — Time column reflects reality**: For completed sessions where the clinical note captured an actual start/end different from the scheduled time, the Time column now displays the **actual** times (with a small "actual" tag) instead of the scheduled times. Scheduled, cancelled, and no-show rows still show the scheduled times. Helps when the counselor logs a session retroactively with default times — the row stops misrepresenting when the session actually happened.
+
+---
+
 ## [3.1.0] - 2026-05-07
 ### Added
 - **Void Invoice**: Each invoice row that isn't paid, already void, or has any payment recorded against it now has a Trash button. Clicking it opens a confirm dialog ("voiding will release N sessions back to unbilled"). On confirm, the invoice is marked `void`, its line items are deleted, and every linked session's `invoice_id` is reset to `NULL` — so those sessions reappear in the unbilled picker and can be batched again. Available in both Test Mode and live mode (the safety is the payment / status guard, not the mode).
