@@ -56,6 +56,11 @@ function SessionsPageInner() {
   const [repeatInterval, setRepeatInterval] = useState<string>("7"); // days
   const [repeatCount, setRepeatCount] = useState<string>("4"); // total sessions
 
+  // Guards the New Session form against double-submit (iPad touch latency
+  // was creating duplicate rows when the user tapped Schedule twice while
+  // the request was still in flight).
+  const [scheduling, setScheduling] = useState(false);
+
   // Filters — initialised from URL params if present
   const searchParams = useSearchParams();
   const [timeFilter, setTimeFilter] = useState<string>(searchParams.get("timeFilter") ?? "ytd");
@@ -131,10 +136,17 @@ function SessionsPageInner() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    // Hard guard: if a previous submit is still in flight, ignore the
+    // second one. Prevents the 1-2 sec double-tap from creating duplicate
+    // sessions.
+    if (scheduling) return;
+
     if (!selectedClientId) {
       toast.error("Please select a client.");
       return;
     }
+
+    setScheduling(true);
 
     // Form times are entered as IST wall-clock — convert to absolute UTC
     // instants so the server stores the correct moment regardless of where it
@@ -173,6 +185,8 @@ function SessionsPageInner() {
       }
     } catch (err) {
       toast.error("An error occurred");
+    } finally {
+      setScheduling(false);
     }
   };
 
@@ -622,7 +636,7 @@ function SessionsPageInner() {
             </Select>
           </div>
 
-          <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
+          <Dialog open={open} onOpenChange={(v) => { if (scheduling) return; setOpen(v); if (!v) resetForm(); }}>
             <DialogTrigger
               render={
                 <Button className="gap-2 bg-slate-900 text-white hover:bg-slate-800 shadow-md h-10 px-6 font-bold">
@@ -814,8 +828,17 @@ function SessionsPageInner() {
                   )}
                 </div>
 
-                <Button type="submit" className="w-full bg-lime-400 text-slate-950 hover:bg-lime-500 font-bold h-14 text-lg shadow-lg active:scale-95 transition-all">
-                  {repeatEnabled ? `Schedule ${Math.max(1, Math.min(52, parseInt(repeatCount, 10) || 1))} Sessions` : "Schedule Session"}
+                <Button
+                  type="submit"
+                  disabled={scheduling}
+                  className="w-full bg-lime-400 text-slate-950 hover:bg-lime-500 disabled:bg-lime-200 disabled:text-slate-500 font-bold h-14 text-lg shadow-lg active:scale-95 transition-all gap-2"
+                >
+                  {scheduling && <Loader2 className="h-5 w-5 animate-spin" />}
+                  {scheduling
+                    ? "Scheduling…"
+                    : repeatEnabled
+                      ? `Schedule ${Math.max(1, Math.min(52, parseInt(repeatCount, 10) || 1))} Sessions`
+                      : "Schedule Session"}
                 </Button>
               </form>
             </DialogContent>

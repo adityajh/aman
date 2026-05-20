@@ -2,6 +2,12 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [3.1.2] - 2026-05-20
+### Fixed
+- **New Session double-submit creating duplicate rows**: The Schedule button stayed clickable while the POST was in flight, so a quick second tap (iPad touch latency) produced two identical sessions seconds apart. Added a `scheduling` state guard: the handler returns early if already submitting, the button is disabled and shows a spinner ("Scheduling…"), and the dialog can't be closed mid-submit. A duplicate Ridhima Bahl row from this bug was cleaned up directly in the DB.
+
+---
+
 ## [3.1.1] - 2026-05-18
 ### Changed
 - **Sessions Ledger — Time column reflects reality**: For completed sessions where the clinical note captured an actual start/end different from the scheduled time, the Time column now displays the **actual** times (with a small "actual" tag) instead of the scheduled times. Scheduled, cancelled, and no-show rows still show the scheduled times. Helps when the counselor logs a session retroactively with default times — the row stops misrepresenting when the session actually happened.
