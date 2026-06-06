@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { sessions, clients, feeSchemes } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
-import { eq, isNull, and, sql } from "drizzle-orm";
+import { eq, isNull, and, sql, asc } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -44,7 +44,8 @@ export async function GET() {
           )`
         )
       )
-      .groupBy(clients.id);
+      .groupBy(clients.id)
+      .orderBy(asc(sql`lower(${clients.name})`));
 
     return NextResponse.json(unbilledClients);
   } catch (error) {

@@ -60,13 +60,19 @@ export async function POST(
       actualEnd = new Date(actualEndTimeISO);
 
       const actualDuration = Math.abs(Math.round((actualEnd.getTime() - actualStart.getTime()) / 60000));
-      
+
       // 3. Apply Billing Formula
-      // Upto 70 mins -> 60 mins. After 70 mins -> nearest quartile
+      //   - Round actual time to the nearest 15-min quartile (min 15).
+      //   - Sessions up to 70 mins keep the "standard hour" grace band: the
+      //     billed time is capped at 60, so a session that runs a few minutes
+      //     short or slightly over still bills a full hour (e.g. 53-70 -> 60),
+      //     while genuinely short sessions bill pro-rata (30 -> 30, 45 -> 45).
+      //   - Over 70 mins bills pro-rata upward (75, 90, 105, ...).
+      const rounded = Math.max(15, Math.round(actualDuration / 15) * 15);
       if (actualDuration <= 70) {
-        invoicedDurationMin = 60;
+        invoicedDurationMin = Math.min(rounded, 60);
       } else {
-        invoicedDurationMin = Math.round(actualDuration / 15) * 15;
+        invoicedDurationMin = rounded;
       }
     }
 

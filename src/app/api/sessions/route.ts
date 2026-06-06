@@ -21,7 +21,9 @@ export async function GET(req: Request) {
 
     const allSessions = await db.query.sessions.findMany({
       where: clientId ? eq(sessions.clientId, clientId) : undefined,
-      orderBy: [desc(sessions.scheduledAt)],
+      // Newest first. createdAt is a stable tie-breaker so sessions sharing the
+      // same scheduledAt (e.g. a recurring batch) keep a deterministic order.
+      orderBy: [desc(sessions.scheduledAt), desc(sessions.createdAt)],
       with: {
         client: true,
         feeScheme: true,

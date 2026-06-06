@@ -105,6 +105,22 @@ export function istTodayStr(): string {
   return formatInTimeZone(new Date(), IST, "yyyy-MM-dd");
 }
 
+// First instant of the IST calendar day containing `ref` (default: now).
+// Used for the "Today" session filter.
+export function istStartOfDayUTC(ref?: Date): Date {
+  const ymd = formatInTimeZone(ref ?? new Date(), IST, "yyyy-MM-dd");
+  return fromZonedTime(`${ymd}T00:00:00`, IST);
+}
+
+// First instant of the current IST week (Monday-anchored) relative to `ref`.
+// Used for the "This Week" session filter.
+export function istStartOfWeekUTC(ref?: Date): Date {
+  // IST day-of-week: 1 (Mon) .. 7 (Sun) via date-fns-tz formatting.
+  const dow = Number(formatInTimeZone(ref ?? new Date(), IST, "i")); // ISO day, 1=Mon
+  const startOfDay = istStartOfDayUTC(ref);
+  return new Date(startOfDay.getTime() - (dow - 1) * 24 * 60 * 60 * 1000);
+}
+
 // First instant of the IST calendar month containing `ref` (default: now).
 export function istStartOfMonthUTC(ref?: Date): Date {
   const ymd = formatInTimeZone(ref ?? new Date(), IST, "yyyy-MM-01");

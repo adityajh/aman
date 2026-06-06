@@ -29,7 +29,7 @@ import {
 import { startOfHour, addHours, differenceInMinutes } from "date-fns";
 import { ClinicalNoteEditor } from "@/components/clinical-note-editor";
 import { cn } from "@/lib/utils";
-import { formatIST, formatTz, IST, tzShortLabel, istToUTC, istStartOfMonthUTC, istStartOfFYUTC } from "@/lib/tz";
+import { formatIST, formatTz, IST, tzShortLabel, istToUTC, istStartOfDayUTC, istStartOfWeekUTC, istStartOfMonthUTC, istStartOfFYUTC } from "@/lib/tz";
 
 function SessionsPageInner() {
   const [sessions, setSessions] = useState<any[]>([]);
@@ -420,6 +420,29 @@ function SessionsPageInner() {
                       <Label className="text-xs font-bold uppercase text-slate-400">
                         Fee to Bill (defaults to 100% of session fee)
                       </Label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {([
+                          { label: "0%", pct: 0 },
+                          { label: "50%", pct: 0.5 },
+                          { label: "100%", pct: 1 },
+                        ] as const).map(({ label, pct }) => {
+                          const full = parseFloat(defaultFee) || 0;
+                          const value = (full * pct).toFixed(2);
+                          const active = parseFloat(cancelFee || "0").toFixed(2) === value;
+                          return (
+                            <Button
+                              key={label}
+                              type="button"
+                              variant={active ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setCancelFee(value)}
+                              className={active ? "bg-slate-800 text-white hover:bg-slate-900" : "text-slate-600"}
+                            >
+                              {label}
+                            </Button>
+                          );
+                        })}
+                      </div>
                       <Input
                         type="number"
                         min={0}
@@ -556,7 +579,11 @@ function SessionsPageInner() {
       // of where the browser thinks "now" is.
       const sessionDate = new Date(s.scheduledAt);
 
-      if (timeFilter === "month") {
+      if (timeFilter === "today") {
+        if (sessionDate < istStartOfDayUTC()) return false;
+      } else if (timeFilter === "week") {
+        if (sessionDate < istStartOfWeekUTC()) return false;
+      } else if (timeFilter === "month") {
         if (sessionDate < istStartOfMonthUTC()) return false;
       } else if (timeFilter === "ytd") {
         if (sessionDate < istStartOfFYUTC()) return false;
@@ -601,15 +628,19 @@ function SessionsPageInner() {
             <Select value={timeFilter} onValueChange={(v) => setTimeFilter(v || "ytd")}>
               <SelectTrigger className="w-[180px] border-0 h-8 bg-transparent shadow-none font-semibold focus:ring-0">
                 <SelectValue>
-                  {timeFilter === "all" ? "All Time" : 
-                   timeFilter === "ytd" ? "YTD (Apr-Mar)" : 
+                  {timeFilter === "all" ? "All Time" :
+                   timeFilter === "today" ? "Today" :
+                   timeFilter === "week" ? "This Week" :
+                   timeFilter === "ytd" ? "YTD (Apr-Mar)" :
                    timeFilter === "month" ? "This Month" : "All Time"}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-white border-slate-200">
                 <SelectItem value="all" label="All Time">All Time</SelectItem>
-                <SelectItem value="ytd" label="YTD (Apr-Mar)">YTD (Apr-Mar)</SelectItem>
+                <SelectItem value="today" label="Today">Today</SelectItem>
+                <SelectItem value="week" label="This Week">This Week</SelectItem>
                 <SelectItem value="month" label="This Month">This Month</SelectItem>
+                <SelectItem value="ytd" label="YTD (Apr-Mar)">YTD (Apr-Mar)</SelectItem>
                 <SelectItem value="custom" disabled label="Custom Range">Custom Range</SelectItem>
               </SelectContent>
             </Select>

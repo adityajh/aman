@@ -31,16 +31,34 @@ function ScoreSelector({ value, onChange, label, showNumbers }: {
   const pct = (safe / 10) * 100;
   const trackColor = !showNumbers ? "#e2e8f0" : (safe <= 3 ? "#ef4444" : safe <= 6 ? "#f59e0b" : "#84cc16");
 
+  // While the number box is being typed in, we hold the raw keystrokes in a
+  // local string buffer. A controlled numeric value would strip a trailing
+  // "." (parseFloat("7.") === 7), making decimals like "7.5" impossible to
+  // type. The canonical value pushed up via onChange stays a number, so the
+  // save payload remains numeric — the DB column is numeric(5,1).
+  const [draft, setDraft] = useState<string | null>(null);
+  const displayValue = draft !== null ? draft : (safe === 0 ? "" : String(safe));
+
   const handleSlider = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDraft(null); // dragging the slider takes over from any typed buffer
     onChange(Math.round(parseFloat(e.target.value) * 10) / 10);
   };
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const v = parseFloat(e.target.value);
+    const raw = e.target.value;
+    setDraft(raw);
+    if (raw === "" || raw === ".") {
+      onChange(0);
+      return;
+    }
+    const v = parseFloat(raw);
     if (!isNaN(v) && v >= 0 && v <= 10) {
       onChange(Math.round(v * 10) / 10);
     }
   };
+
+  // On blur, drop the buffer so the box re-syncs to the canonical 1-decimal value.
+  const handleBlur = () => setDraft(null);
 
   return (
     <div className="space-y-1.5">
@@ -69,8 +87,9 @@ function ScoreSelector({ value, onChange, label, showNumbers }: {
               min={0}
               max={10}
               step={0.1}
-              value={safe === 0 ? "" : safe}
+              value={displayValue}
               onChange={handleInput}
+              onBlur={handleBlur}
               placeholder="0"
               className="w-16 h-8 text-center font-bold text-sm border-slate-200 bg-white p-1"
             />
