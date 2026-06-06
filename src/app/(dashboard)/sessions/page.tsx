@@ -357,9 +357,7 @@ function SessionsPageInner() {
               return (
                 <div className="flex flex-col">
                   <span className="font-bold text-slate-900">{actualDurationMin}m</span>
-                  {billed !== actualDurationMin && (
-                    <span className="text-[10px] text-slate-400">billed {billed}m</span>
-                  )}
+                  <span className="text-[10px] text-slate-400">billed {billed}m</span>
                 </div>
               );
             }
