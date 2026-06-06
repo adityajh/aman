@@ -24,7 +24,10 @@ import {
   Filter,
   Loader2,
   XCircle,
-  Trash2
+  Trash2,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown
 } from "lucide-react";
 import { startOfHour, addHours, differenceInMinutes } from "date-fns";
 import { ClinicalNoteEditor } from "@/components/clinical-note-editor";
@@ -66,6 +69,11 @@ function SessionsPageInner() {
   const [timeFilter, setTimeFilter] = useState<string>(searchParams.get("timeFilter") ?? "month");
   const [clientFilter, setClientFilter] = useState<string>(searchParams.get("clientId") ?? "active");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  // Custom date range (IST yyyy-MM-dd); used when timeFilter === "custom".
+  const [customStart, setCustomStart] = useState<string>("");
+  const [customEnd, setCustomEnd] = useState<string>("");
+  // Optional client-name sort overlay on top of the default date ordering.
+  const [clientSort, setClientSort] = useState<null | "asc" | "desc">(null);
 
   const fetchData = async () => {
     try {
@@ -595,11 +603,7 @@ function SessionsPageInner() {
       const sessionDate = new Date(s.scheduledAt);
       const DAY = 24 * 60 * 60 * 1000;
 
-      if (timeFilter === "upcoming") {
-        // Today onward, unbounded into the future — for seeing scheduled
-        // sessions (incl. recurring bookings) that bounded windows hide.
-        if (sessionDate < istStartOfDayUTC()) return false;
-      } else if (timeFilter === "today") {
+      if (timeFilter === "today") {
         const start = istStartOfDayUTC();
         const end = new Date(start.getTime() + DAY);
         if (sessionDate < start || sessionDate >= end) return false;
@@ -617,6 +621,15 @@ function SessionsPageInner() {
         // A ref ~13 months ahead lands in the next FY.
         const end = istStartOfFYUTC(new Date(start.getTime() + 370 * DAY));
         if (sessionDate < start || sessionDate >= end) return false;
+      } else if (timeFilter === "custom") {
+        // Inclusive [customStart, customEnd] in IST. Either bound is optional.
+        if (customStart) {
+          if (sessionDate < istToUTC(customStart, "00:00")) return false;
+        }
+        if (customEnd) {
+          const end = new Date(istToUTC(customEnd, "00:00").getTime() + DAY);
+          if (sessionDate >= end) return false;
+        }
       }
       
       // Status Filter logic
@@ -641,7 +654,18 @@ function SessionsPageInner() {
       
       return true;
     });
-  }, [sessions, clientFilter, timeFilter, statusFilter]);
+  }, [sessions, clientFilter, timeFilter, statusFilter, customStart, customEnd]);
+
+  // Optional alphabetical-by-client overlay. When inactive, the default date
+  // ordering (newest first, from the API) is preserved.
+  const displayedSessions = useMemo(() => {
+    if (!clientSort) return filteredSessions;
+    return [...filteredSessions].sort((a, b) => {
+      const an = (a.client?.name || "").toLowerCase();
+      const bn = (b.client?.name || "").toLowerCase();
+      return clientSort === "asc" ? an.localeCompare(bn) : bn.localeCompare(an);
+    });
+  }, [filteredSessions, clientSort]);
 
   return (
     <div className="p-8 space-y-6">
@@ -661,8 +685,8 @@ function SessionsPageInner() {
                   {timeFilter === "all" ? "All Time" :
                    timeFilter === "today" ? "Today" :
                    timeFilter === "week" ? "This Week" :
-                   timeFilter === "upcoming" ? "Upcoming" :
                    timeFilter === "ytd" ? "YTD (Apr-Mar)" :
+                   timeFilter === "custom" ? "Custom Range" :
                    timeFilter === "month" ? "This Month" : "All Time"}
                 </SelectValue>
               </SelectTrigger>
@@ -671,12 +695,32 @@ function SessionsPageInner() {
                 <SelectItem value="today" label="Today">Today</SelectItem>
                 <SelectItem value="week" label="This Week">This Week</SelectItem>
                 <SelectItem value="month" label="This Month">This Month</SelectItem>
-                <SelectItem value="upcoming" label="Upcoming">Upcoming</SelectItem>
                 <SelectItem value="ytd" label="YTD (Apr-Mar)">YTD (Apr-Mar)</SelectItem>
-                <SelectItem value="custom" disabled label="Custom Range">Custom Range</SelectItem>
+                <SelectItem value="custom" label="Custom Range">Custom Range</SelectItem>
               </SelectContent>
             </Select>
           </div>
+
+          {/* Custom Range date inputs — only when Custom Range is selected */}
+          {timeFilter === "custom" && (
+            <div className="flex items-center gap-2 bg-slate-50 p-1 pl-3 rounded-lg border border-slate-200">
+              <Input
+                type="date"
+                value={customStart}
+                onChange={(e) => setCustomStart(e.target.value)}
+                className="h-8 w-[150px] bg-white border-slate-200"
+                aria-label="From date"
+              />
+              <span className="text-slate-400 text-sm">to</span>
+              <Input
+                type="date"
+                value={customEnd}
+                onChange={(e) => setCustomEnd(e.target.value)}
+                className="h-8 w-[150px] bg-white border-slate-200"
+                aria-label="To date"
+              />
+            </div>
+          )}
 
           {/* Client Filter */}
           <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-lg border border-slate-200">
@@ -924,7 +968,23 @@ function SessionsPageInner() {
             <TableHeader className="bg-slate-50 items-center">
               <TableRow className="hover:bg-transparent border-slate-200">
                 <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-28">Date</TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-44">Client</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-44">
+                  <button
+                    type="button"
+                    onClick={() => setClientSort((p) => (p === "asc" ? "desc" : p === "desc" ? null : "asc"))}
+                    className="flex items-center gap-1 uppercase tracking-widest hover:text-slate-700 transition-colors"
+                    title="Sort by client name"
+                  >
+                    Client
+                    {clientSort === "asc" ? (
+                      <ArrowUp className="h-3 w-3 text-slate-600" />
+                    ) : clientSort === "desc" ? (
+                      <ArrowDown className="h-3 w-3 text-slate-600" />
+                    ) : (
+                      <ArrowUpDown className="h-3 w-3 text-slate-300" />
+                    )}
+                  </button>
+                </TableHead>
                 <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-32">Time (IST)</TableHead>
                 <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-24">Duration</TableHead>
                 <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-24">Fees</TableHead>
@@ -940,14 +1000,14 @@ function SessionsPageInner() {
                     <p className="mt-4 text-slate-400 font-medium">Loading session history...</p>
                   </TableCell>
                 </TableRow>
-              ) : filteredSessions.length === 0 ? (
+              ) : displayedSessions.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center py-20 text-slate-400">
                     No sessions found matching your current filters.
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredSessions.map((session) => (
+                displayedSessions.map((session) => (
                   <SessionRow 
                     key={session.id} 
                     session={session} 

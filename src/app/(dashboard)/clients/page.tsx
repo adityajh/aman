@@ -387,7 +387,7 @@ export default function ClientsPage() {
       </Card>
 
       <Dialog open={detailsOpen} onOpenChange={(v) => { setDetailsOpen(v); setEditMode(false); }}>
-        <DialogContent className="max-w-2xl bg-white border-slate-200">
+        <DialogContent className="sm:max-w-3xl bg-white border-slate-200">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-slate-950">
               <User className="h-5 w-5 text-primary" />
