@@ -208,7 +208,7 @@ export default function ClientsPage() {
               </Button>
             }
           />
-          <DialogContent className="bg-white border-slate-200">
+          <DialogContent className="sm:max-w-2xl bg-white border-slate-200">
             <DialogHeader>
               <DialogTitle className="text-xl font-bold text-slate-900">Add New Client</DialogTitle>
             </DialogHeader>
