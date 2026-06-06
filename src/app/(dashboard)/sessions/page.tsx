@@ -593,7 +593,11 @@ function SessionsPageInner() {
       const sessionDate = new Date(s.scheduledAt);
       const DAY = 24 * 60 * 60 * 1000;
 
-      if (timeFilter === "today") {
+      if (timeFilter === "upcoming") {
+        // Today onward, unbounded into the future — for seeing scheduled
+        // sessions (incl. recurring bookings) that bounded windows hide.
+        if (sessionDate < istStartOfDayUTC()) return false;
+      } else if (timeFilter === "today") {
         const start = istStartOfDayUTC();
         const end = new Date(start.getTime() + DAY);
         if (sessionDate < start || sessionDate >= end) return false;
@@ -655,6 +659,7 @@ function SessionsPageInner() {
                   {timeFilter === "all" ? "All Time" :
                    timeFilter === "today" ? "Today" :
                    timeFilter === "week" ? "This Week" :
+                   timeFilter === "upcoming" ? "Upcoming" :
                    timeFilter === "ytd" ? "YTD (Apr-Mar)" :
                    timeFilter === "month" ? "This Month" : "All Time"}
                 </SelectValue>
@@ -664,6 +669,7 @@ function SessionsPageInner() {
                 <SelectItem value="today" label="Today">Today</SelectItem>
                 <SelectItem value="week" label="This Week">This Week</SelectItem>
                 <SelectItem value="month" label="This Month">This Month</SelectItem>
+                <SelectItem value="upcoming" label="Upcoming">Upcoming</SelectItem>
                 <SelectItem value="ytd" label="YTD (Apr-Mar)">YTD (Apr-Mar)</SelectItem>
                 <SelectItem value="custom" disabled label="Custom Range">Custom Range</SelectItem>
               </SelectContent>
