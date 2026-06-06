@@ -25,11 +25,17 @@ Standardize your billing by creating reusable fee structures.
 
 ## 🗓 3. Scheduling & Completing Sessions
 The core of your daily practice.
-- Go to the **Sessions** tab (defaults to **Active Clients** view).
-- Click **"New Session"**. The client's default fee scheme will be auto-populated.
-- **Cancelling a Session**: Click the ✕ icon on any **Scheduled** session row. You can optionally enter a reason.
+- Go to the **Sessions** tab (defaults to **This Month**, **Active Clients** view).
+- Click **"New Session"**. The client's default fee scheme will be auto-populated. You can also set up **recurring** sessions.
+- **Filtering**: Use the time dropdown — **Today, This Week, This Month, YTD,** or **Custom Range** (pick From/To dates). Each window is bounded, so future recurring sessions won't leak into the current period. Use **All Time** to see everything.
+- **Sorting by client**: Click the **Client** column header to sort the list alphabetically (click again to reverse, once more to return to date order).
+- **Duration column**: For completed sessions the **actual** clocked duration shows in black, with the **billed** minutes beneath it; scheduled sessions show their **planned** duration in blue.
+- **Cancelling / No-Show**: Click the ✕ icon on any **Scheduled** row. Choose Cancellation or No-Show, optionally enter a reason, and set the fee — use the **0% / 50% / 100%** quick-fill buttons or type a custom amount (set to 0 to skip billing).
 - **Writing Notes**: After a session ends, click **"Write Note"** to open the clinical editor.
 - **⚠️ Important**: Saving a clinical note automatically marks the session as **Completed**, making it ready for billing.
+
+### 💡 How session fees are calculated
+When you finalize a note with actual start/end times, the billed duration is rounded to the nearest 15 minutes and the fee scales accordingly (e.g. 30 min → 0.5×, 45 min → 0.75× of the hourly rate). Sessions running 53–70 minutes still bill a full hour. This **only** applies when the session is linked to a fee scheme and you haven't manually overridden the fee — a flat fee you type in is always kept as-is.
 
 ---
 
@@ -55,7 +61,7 @@ Your "Practice Overview" gives you a real-time pulse on your practice:
 
 ## 📈 6. Progress Tracking
 - Click the chart icon (📈) next to any client to see their **ORS and SRS progress charts** over time.
-- ORS and SRS scores are recorded in the clinical note editor using precision sliders (0–10, in 0.1 steps).
+- ORS and SRS scores are recorded in the clinical note editor (0–10). Drag the precision sliders, or toggle to numbers mode and **type the value directly** (decimals like `7.5` are supported).
 
 ---
 

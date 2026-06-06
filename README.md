@@ -6,8 +6,9 @@ Aman is a modern, lightweight practice management system designed for solo couns
 
 - **Practice Dashboard**: High-level metrics for unbilled sessions, revenue, upcoming appointments, clinical risk flags, and client progress summaries.
 - **Client Management**: Secure database for client records, default fee schemes (INR & USD), termination workflow with invoicing options, and duplicate email detection with reactivation flow.
-- **Sessions Dashboard**: Fast scheduling with modality tracking. Filter by Active Clients (default), All Clients, or by individual client and time period. Cancel scheduled sessions with a reason.
-- **Clinical Note Editor**: Professional structured note editor (SOAP / Custom) with ORS & SRS rating scales (0–10, 0.1 precision sliders). Completing a note auto-marks the session as billable.
+- **Sessions Dashboard**: Fast scheduling with modality tracking and recurring sessions. Filter by Active/All/individual clients and by time period (Today, This Week, This Month, YTD, or a custom date range); sort by client name. Duration shows actual clocked time for completed sessions and planned time for scheduled ones. Cancel/no-show with a reason and a 0/50/100% fee quick-fill.
+- **Pro-rata billing**: Session fees scale to the actual duration by 15-minute quartile (e.g. 45 min → 0.75×), with a standard-hour grace band for near-60-minute sessions.
+- **Clinical Note Editor**: Professional structured note editor (SOAP / Custom) with ORS & SRS rating scales (0–10) — set via precision sliders or typed directly to one decimal. Completing a note auto-marks the session as billable.
 - **Progress Charts**: Per-client ORS & SRS trend charts with RCI/CSC detection, colour-banded benchmarks, and regression trend projection.
 - **Invoicing Engine**: One-click batch generation of monthly invoices. Fully currency-aware — INR and USD clients are handled separately in batch totals and all display symbols.
 - **Payments Ledger**: Multi-currency payment recording with FIFO allocation across outstanding invoices.

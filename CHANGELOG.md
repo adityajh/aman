@@ -2,6 +2,32 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [3.2.0] - 2026-06-06
+### Added
+- **Pro-rata short-session billing**: Sessions are now billed by the nearest 15-minute quartile of actual time instead of a flat hour — e.g. 30 min → 0.5×, 45 min → 0.75×. The 53–70 min "standard hour" grace band is preserved (still bills 60), and >70 min continues to bill pro-rata upward. Applies on note finalize when a fee scheme is linked and the fee hasn't been manually overridden.
+- **Cancellation fee quick-fill**: The Cancel / No-Show dialog gained **0% / 50% / 100%** buttons that fill the fee field with that fraction of the session fee. Free-text entry still works.
+- **Session time filters — Today, This Week, Custom Range**: Added Today and This Week options, and activated the previously-disabled **Custom Range** (From/To IST date inputs). The default Sessions view is now **This Month**.
+- **Sortable Client column**: Clicking the **Client** header on the Sessions ledger toggles alphabetical sort (ascending → descending → off), overlaid on the default newest-first date order.
+- **ORS / SRS direct decimal entry**: The score number boxes now accept typed decimals (e.g. `7.5`) directly — a local typing buffer preserves the decimal point that a controlled numeric value used to strip. Canonical scores stay numeric, so the save payload is unchanged.
+
+### Changed
+- **Sessions Duration column**: Completed sessions show the **actual** clocked duration (black) with the **billed** minutes always shown beneath; scheduled sessions show their **planned** duration in blue. Cancelled / no-show rows stay neutral.
+- **Default Sessions filter** is now This Month (was YTD).
+- **Unbilled-client picker** on the Invoices page is ordered **alphabetically** (case-insensitive).
+- **Sessions list** keeps newest-first with a `created_at` tie-breaker for sessions sharing a scheduled time (e.g. recurring batches).
+- **Client Add & Edit dialogs widened**: the base `DialogContent` pins `sm:max-w-sm`, which a plain `max-w-*` couldn't override, clamping the dialogs to ~384px on desktop. Now `sm:max-w-2xl` (Add) / `sm:max-w-3xl` (Edit) for roomier fields.
+
+### Fixed
+- **Time filters leaked future-dated sessions**: the Sessions time filters were lower-bound only ("This Month" meant "this month and everything after"), so recurring sessions booked months ahead appeared under Today / This Week / This Month / YTD. Each filter is now a closed-open range `[start, end)` bounded on both sides.
+
+### Timezone helpers
+- `istStartOfFYUTC()` accepts an optional `ref` so the FY end boundary can be derived; added `istStartOfDayUTC()` and `istStartOfWeekUTC()` (Monday-anchored).
+
+### Data
+- **One-time pro-rata backfill**: recomputed invoiced duration + fee for 15 completed, **not-yet-invoiced** sessions under the new rule. Already-invoiced sessions were never touched. Sessions carrying a flat `feeCharged` with no fee-scheme link kept their fee by design (only the billed minutes were corrected). The temporary admin endpoint used for this was removed after the run.
+
+---
+
 ## [3.1.2] - 2026-05-20
 ### Fixed
 - **New Session double-submit creating duplicate rows**: The Schedule button stayed clickable while the POST was in flight, so a quick second tap (iPad touch latency) produced two identical sessions seconds apart. Added a `scheduling` state guard: the handler returns early if already submitting, the button is disabled and shows a spinner ("Scheduling…"), and the dialog can't be closed mid-submit. A duplicate Ridhima Bahl row from this bug was cleaned up directly in the DB.
