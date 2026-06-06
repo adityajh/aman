@@ -63,7 +63,7 @@ function SessionsPageInner() {
 
   // Filters — initialised from URL params if present
   const searchParams = useSearchParams();
-  const [timeFilter, setTimeFilter] = useState<string>(searchParams.get("timeFilter") ?? "ytd");
+  const [timeFilter, setTimeFilter] = useState<string>(searchParams.get("timeFilter") ?? "month");
   const [clientFilter, setClientFilter] = useState<string>(searchParams.get("clientId") ?? "active");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
@@ -347,14 +347,24 @@ function SessionsPageInner() {
           </div>
         </TableCell>
         <TableCell className="text-slate-600 font-medium">
-          <div className="flex flex-col">
-            <span className="font-bold text-slate-700">
-              {session.invoicedDurationMin ?? session.durationMin}m
-            </span>
-            {actualDurationMin != null && actualDurationMin !== (session.invoicedDurationMin ?? session.durationMin) && (
-              <span className="text-[10px] text-slate-400">actual {actualDurationMin}m</span>
-            )}
-          </div>
+          {(() => {
+            const billed = session.invoicedDurationMin ?? session.durationMin;
+            // For completed sessions we captured the real clocked duration —
+            // show that as the headline number, with the billed minutes as a
+            // secondary line when they differ. Scheduled / cancelled rows have
+            // no actual yet, so they just show the scheduled/billed duration.
+            if (actualDurationMin != null) {
+              return (
+                <div className="flex flex-col">
+                  <span className="font-bold text-slate-700">{actualDurationMin}m</span>
+                  {billed !== actualDurationMin && (
+                    <span className="text-[10px] text-slate-400">billed {billed}m</span>
+                  )}
+                </div>
+              );
+            }
+            return <span className="font-bold text-slate-700">{billed}m</span>;
+          })()}
         </TableCell>
         <TableCell className="font-semibold text-slate-700">
           {(() => {
@@ -576,17 +586,31 @@ function SessionsPageInner() {
       }
       
       // Time Filter — anchored to IST so the boundary is the same regardless
-      // of where the browser thinks "now" is.
+      // of where the browser thinks "now" is. Each window is a closed-open
+      // range [start, end): we bound on BOTH sides so future-dated sessions
+      // (e.g. recurring bookings months ahead) don't leak into "today" /
+      // "this week" / "this month" / "YTD".
       const sessionDate = new Date(s.scheduledAt);
+      const DAY = 24 * 60 * 60 * 1000;
 
       if (timeFilter === "today") {
-        if (sessionDate < istStartOfDayUTC()) return false;
+        const start = istStartOfDayUTC();
+        const end = new Date(start.getTime() + DAY);
+        if (sessionDate < start || sessionDate >= end) return false;
       } else if (timeFilter === "week") {
-        if (sessionDate < istStartOfWeekUTC()) return false;
+        const start = istStartOfWeekUTC();
+        const end = new Date(start.getTime() + 7 * DAY);
+        if (sessionDate < start || sessionDate >= end) return false;
       } else if (timeFilter === "month") {
-        if (sessionDate < istStartOfMonthUTC()) return false;
+        const start = istStartOfMonthUTC();
+        // A ref a few days into the next month yields that month's 1st.
+        const end = istStartOfMonthUTC(new Date(start.getTime() + 32 * DAY));
+        if (sessionDate < start || sessionDate >= end) return false;
       } else if (timeFilter === "ytd") {
-        if (sessionDate < istStartOfFYUTC()) return false;
+        const start = istStartOfFYUTC();
+        // A ref ~13 months ahead lands in the next FY.
+        const end = istStartOfFYUTC(new Date(start.getTime() + 370 * DAY));
+        if (sessionDate < start || sessionDate >= end) return false;
       }
       
       // Status Filter logic

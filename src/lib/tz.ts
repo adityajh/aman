@@ -139,9 +139,11 @@ export function istStartOfPrevMonthUTC(ref?: Date): Date {
   return fromZonedTime(`${prevYear}-${String(prevMonth).padStart(2, "0")}-01T00:00:00`, IST);
 }
 
-// First instant of the current Indian Financial Year (Apr 1) relative to now.
-export function istStartOfFYUTC(): Date {
-  const { year, month } = istNowParts();
+// First instant of the Indian Financial Year (Apr 1) containing `ref`
+// (default: now). Pass a ref inside the next FY to get the next FY boundary.
+export function istStartOfFYUTC(ref?: Date): Date {
+  const s = formatInTimeZone(ref ?? new Date(), IST, "yyyy-MM");
+  const [year, month] = s.split("-").map(Number);
   const fyStartYear = month >= 4 ? year : year - 1;
   return fromZonedTime(`${fyStartYear}-04-01T00:00:00`, IST);
 }
