@@ -349,21 +349,25 @@ function SessionsPageInner() {
         <TableCell className="text-slate-600 font-medium">
           {(() => {
             const billed = session.invoicedDurationMin ?? session.durationMin;
-            // For completed sessions we captured the real clocked duration —
-            // show that as the headline number, with the billed minutes as a
-            // secondary line when they differ. Scheduled / cancelled rows have
-            // no actual yet, so they just show the scheduled/billed duration.
+            // Completed sessions show the real clocked (actual) duration as the
+            // headline in BLACK, with billed minutes underneath only when they
+            // differ. Scheduled sessions have no actual yet, so they show the
+            // planned duration in BLUE. Other statuses keep the neutral tone.
             if (actualDurationMin != null) {
               return (
                 <div className="flex flex-col">
-                  <span className="font-bold text-slate-700">{actualDurationMin}m</span>
+                  <span className="font-bold text-slate-900">{actualDurationMin}m</span>
                   {billed !== actualDurationMin && (
                     <span className="text-[10px] text-slate-400">billed {billed}m</span>
                   )}
                 </div>
               );
             }
-            return <span className="font-bold text-slate-700">{billed}m</span>;
+            return (
+              <span className={cn("font-bold", session.status === "scheduled" ? "text-blue-600" : "text-slate-700")}>
+                {billed}m
+              </span>
+            );
           })()}
         </TableCell>
         <TableCell className="font-semibold text-slate-700">
