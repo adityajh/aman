@@ -475,28 +475,19 @@ export default function ClientsPage() {
                     <Select
                       value={defaultFeeSchemeId}
                       onValueChange={(id) => {
-                        const val = id || "";
-                        setSelectedFeeSchemeId(val);
-                        const scheme = feeSchemes.find(f => f.id === val);
-                        if (scheme) {
-                          setSelectedFeeSchemeLabel(`${scheme.name} (${scheme.currency === 'USD' ? '$' : '₹'}${scheme.amount})`);
-                        }
+                        setSelectedFeeSchemeId(id || "");
                       }}
                     >
                       <SelectTrigger className="border-slate-200 bg-white h-10">
-                        <SelectValue>
-                        {defaultFeeSchemeId === "none" ? "No fee schemes yet — add one in Fees" :
-                         defaultFeeSchemeId ? (
-                           (() => {
-                             const f = feeSchemes.find(f => f.id === defaultFeeSchemeId);
-                             return f ? f.name : "Select a default fee scheme";
-                           })()
-                         ) : "Select a default fee scheme"}
-                      </SelectValue>
+                        <SelectValue placeholder="Select a default fee scheme" />
                       </SelectTrigger>
                       <SelectContent className="bg-white border-slate-200 shadow-2xl">
                         {feeSchemes.map(f => (
-                          <SelectItem key={f.id} value={f.id} label={f.name}>
+                          <SelectItem
+                            key={f.id}
+                            value={f.id}
+                            label={`${f.name} (${f.currency === 'USD' ? '$' : '₹'}${f.amount})`}
+                          >
                             {f.name} ({f.currency === 'USD' ? '$' : '₹'}{f.amount})
                           </SelectItem>
                         ))}
