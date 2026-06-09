@@ -91,16 +91,20 @@ export default function ClientsPage() {
     if (!detailsOpen || !selectedClient) return;
     setClientStats(null);
     fetch(`/api/sessions?clientId=${selectedClient.id}`)
-      .then(r => r.json())
-      .then((data: any[]) => {
-        const completed = data.filter(s => s.status === "completed");
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
+      .then((data: any) => {
+        const rows = Array.isArray(data) ? data : [];
+        const completed = rows.filter((s: any) => s.status === "completed");
         const total = completed.length;
         const lastDate = completed.length > 0 ? completed[0].scheduledAt : null; // already desc
-        const billed = completed.reduce((sum, s) => sum + Number(s.feeCharged || 0), 0);
+        const billed = completed.reduce((sum: number, s: any) => sum + Number(s.feeCharged || 0), 0);
         const scheme = feeSchemes.find(f => f.id === selectedClient.defaultFeeSchemeId);
         setClientStats({ total, lastDate, billed, currency: scheme?.currency || "INR" });
       })
-      .catch(() => setClientStats(null));
+      .catch(() => {
+        const scheme = feeSchemes.find(f => f.id === selectedClient.defaultFeeSchemeId);
+        setClientStats({ total: 0, lastDate: null, billed: 0, currency: scheme?.currency || "INR" });
+      });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [detailsOpen, selectedClient?.id]);
 
