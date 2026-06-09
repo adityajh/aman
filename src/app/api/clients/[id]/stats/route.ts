@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { sessions } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -14,26 +14,17 @@ export async function GET(
   if (!session) return new NextResponse("Unauthorized", { status: 401 });
 
   try {
-    const rows = await db
-      .select({
-        total: sql<number>`count(*)::int`,
-        lastDate: sql<string | null>`max(${sessions.scheduledAt})`,
-        totalBilled: sql<string>`coalesce(sum(${sessions.feeCharged}::numeric), 0)`,
-      })
-      .from(sessions)
-      .where(
-        and(
-          eq(sessions.clientId, id),
-          eq(sessions.status, "completed")
-        )
-      );
-
-    const row = rows[0] ?? { total: 0, lastDate: null, totalBilled: "0" };
-    return NextResponse.json({
-      total: row.total,
-      lastDate: row.lastDate,
-      totalBilled: Number(row.totalBilled),
+    const completed = await db.query.sessions.findMany({
+      where: and(eq(sessions.clientId, id), eq(sessions.status, "completed")),
+      columns: { scheduledAt: true, feeCharged: true },
+      orderBy: [desc(sessions.scheduledAt)],
     });
+
+    const total = completed.length;
+    const lastDate = completed.length > 0 ? completed[0].scheduledAt : null;
+    const totalBilled = completed.reduce((sum, s) => sum + Number(s.feeCharged || 0), 0);
+
+    return NextResponse.json({ total, lastDate, totalBilled });
   } catch (error) {
     console.error(error);
     return new NextResponse("Internal Server Error", { status: 500 });
