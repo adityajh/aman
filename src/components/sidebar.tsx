@@ -3,16 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { 
-  BarChart3, 
-  Users, 
-  Calendar, 
-  FileText, 
-  Settings, 
-  ShieldCheck, 
+import {
+  BarChart3,
+  Users,
+  Calendar,
+  FileText,
+  Settings,
+  ShieldCheck,
   LogOut,
   CreditCard,
-  Wallet
+  Wallet,
+  ClipboardList,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
@@ -27,6 +28,12 @@ const routes = [
     label: "Clients",
     icon: Users,
     href: "/clients",
+    color: "text-lime-400",
+  },
+  {
+    label: "Reports",
+    icon: ClipboardList,
+    href: "/reports",
     color: "text-lime-400",
   },
   {

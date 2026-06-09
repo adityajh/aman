@@ -12,7 +12,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   try {
     const body = await req.json();
-    const { name, email, phone, defaultFee, intakeNotes, defaultFeeSchemeId, timezone, isActive, terminationReason, terminationType, cancelPendingSessions } = body;
+    const { name, email, phone, defaultFee, intakeNotes, defaultFeeSchemeId, timezone, isActive, terminationReason, terminationType, cancelPendingSessions, prematureTerminationManual } = body;
 
     // Reactivation logic
     let terminationFields = {};
@@ -50,6 +50,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         defaultFeeSchemeId: defaultFeeSchemeId || undefined,
         timezone: timezone || undefined,
         isActive: isActive !== undefined ? isActive : undefined,
+        prematureTerminationManual: prematureTerminationManual !== undefined ? prematureTerminationManual : undefined,
         ...terminationFields,
         updatedAt: new Date(),
       })

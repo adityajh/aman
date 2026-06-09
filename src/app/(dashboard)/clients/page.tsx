@@ -37,7 +37,31 @@ export default function ClientsPage() {
   const [conflictClient, setConflictClient] = useState<any>(null);
   const [cancelSessionsOnTerminate, setCancelSessionsOnTerminate] = useState(false);
   const [clientStats, setClientStats] = useState<{ total: number; lastDate: string | null; billed: number; currency: string } | null>(null);
+  const [ptrSaving, setPtrSaving] = useState(false);
   const router = useRouter();
+
+  const handleSetPTR = async (clientId: string, value: boolean | null) => {
+    setPtrSaving(true);
+    try {
+      const res = await fetch(`/api/clients/${clientId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ prematureTerminationManual: value }),
+        headers: { "Content-Type": "application/json" },
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setSelectedClient(updated);
+        setClients(prev => prev.map(c => c.id === updated.id ? updated : c));
+        toast.success("PTR-II assessment saved");
+      } else {
+        toast.error("Failed to save PTR-II");
+      }
+    } catch {
+      toast.error("An error occurred");
+    } finally {
+      setPtrSaving(false);
+    }
+  };
 
   const fetchClients = async () => {
     try {
@@ -575,6 +599,56 @@ export default function ClientsPage() {
                   </div>
                 </div>
                 
+                {/* PTR-II manual assessment — only for terminated clients */}
+                {!selectedClient.isActive && (
+                  <div className="space-y-2 pt-2 border-t border-slate-100">
+                    <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                      Premature Termination Assessment (PTR-II)
+                    </h4>
+                    <p className="text-xs text-slate-500">
+                      For clients whose initial ORS was above 25, mark whether this was a premature termination. Used in practice Reports.
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={ptrSaving}
+                        onClick={() => handleSetPTR(selectedClient.id, true)}
+                        className={selectedClient.prematureTerminationManual === true
+                          ? "bg-rose-100 border-rose-300 text-rose-700 font-bold"
+                          : "text-slate-600 border-slate-200"}
+                      >
+                        Yes — Premature
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={ptrSaving}
+                        onClick={() => handleSetPTR(selectedClient.id, false)}
+                        className={selectedClient.prematureTerminationManual === false
+                          ? "bg-emerald-100 border-emerald-300 text-emerald-700 font-bold"
+                          : "text-slate-600 border-slate-200"}
+                      >
+                        No — Natural End
+                      </Button>
+                      {selectedClient.prematureTerminationManual !== null && selectedClient.prematureTerminationManual !== undefined && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          disabled={ptrSaving}
+                          onClick={() => handleSetPTR(selectedClient.id, null)}
+                          className="text-slate-400 text-xs"
+                        >
+                          Clear
+                        </Button>
+                      )}
+                      {selectedClient.prematureTerminationManual == null && (
+                        <span className="text-xs text-slate-400 italic">Not yet assessed</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 <div className="pt-4 flex justify-end gap-3 flex-wrap">
                   {selectedClient.isActive && (
                     <Button variant="outline" onClick={() => setTerminateOpen(true)} className="gap-2 text-rose-600 border-rose-200 hover:bg-rose-50 mr-auto">
