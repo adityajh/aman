@@ -2,6 +2,22 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [3.3.0] - 2026-06-09
+### Added
+- **Reports page (clinical outcomes)**: New **Reports** entry in the sidebar (between Clients and Sessions) showing outcomes across **closed clients**. Overview cards (closed-client count, % who started in distress with initial ORS ≤ cutoff, median tenure in weeks, median completed sessions), **Outcome Ratios** for the distress cohort with both a first and last ORS (RCI improvement, deterioration, no-change, clinically significant change), an **Effectiveness** block (Cohen's *d* effect size and average SRS alliance), and **Pre-Mature Termination** (PTR-I auto, PTR-II manual, combined Final PTR). A separate **Live — At-Risk Clients** card is the one forward-looking metric: *active* clients whose latest completed-session note is flagged medium/high risk. Cutoffs (ORS cutoff, RCI threshold) read from practice settings.
+- **PTR-II manual flag**: Closed clients who started above the ORS cutoff (so PTR-I can't auto-classify them) can be manually flagged as premature terminations from the client view; the flag feeds PTR-II and the Final PTR rate.
+- **Predicted progress vs. cohort**: The client detail progress chart now overlays a prognosis band built from a cohort of clients whose **initial ORS started within ±5** of the current client. Requires ≥5 similar clients and ≥3 scored sessions for the current client before a band is drawn; falls back to an "insufficient data" state otherwise.
+
+### API
+- New `GET /api/reports` — computes all closed-client outcome metrics plus the live at-risk count.
+- New `GET /api/clients/[id]/predicted-progress` — returns the cohort-based trajectory band for one client.
+- `PATCH /api/clients/[id]` now accepts `prematureTerminationManual`.
+
+### Database
+- Added `clients.premature_termination_manual boolean` (nullable). Migration `drizzle/0002_add_ptr_manual.sql` (idempotent `ADD COLUMN IF NOT EXISTS`). The column was already live in the shared Neon DB via `drizzle-kit push`; note that this migration is not registered in the Drizzle journal.
+
+---
+
 ## [3.2.0] - 2026-06-06
 ### Added
 - **Pro-rata short-session billing**: Sessions are now billed by the nearest 15-minute quartile of actual time instead of a flat hour — e.g. 30 min → 0.5×, 45 min → 0.75×. The 53–70 min "standard hour" grace band is preserved (still bills 60), and >70 min continues to bill pro-rata upward. Applies on note finalize when a fee scheme is linked and the fee hasn't been manually overridden.
