@@ -86,23 +86,31 @@ export default function ClientsPage() {
     fetch("/api/fee-schemes").then(r => r.json()).then(setFeeSchemes).catch(() => {});
   }, []);
 
+  // Re-seed fee scheme state whenever edit mode opens (handles race where feeSchemes loads after click)
+  useEffect(() => {
+    if (!editMode || !selectedClient || feeSchemes.length === 0) return;
+    setSelectedFeeSchemeId(selectedClient.defaultFeeSchemeId || "");
+    setTimezone(selectedClient.timezone || IST);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editMode, feeSchemes.length]);
+
   // Fetch per-client stats whenever the details dialog opens
   useEffect(() => {
     if (!detailsOpen || !selectedClient) return;
     setClientStats(null);
-    fetch(`/api/sessions?clientId=${selectedClient.id}`)
+    fetch(`/api/clients/${selectedClient.id}/stats`)
       .then(r => r.ok ? r.json() : Promise.reject(r.status))
       .then((data: any) => {
-        const rows = Array.isArray(data) ? data : [];
-        const completed = rows.filter((s: any) => s.status === "completed");
-        const total = completed.length;
-        const lastDate = completed.length > 0 ? completed[0].scheduledAt : null; // already desc
-        const billed = completed.reduce((sum: number, s: any) => sum + Number(s.feeCharged || 0), 0);
-        const scheme = feeSchemes.find(f => f.id === selectedClient.defaultFeeSchemeId);
-        setClientStats({ total, lastDate, billed, currency: scheme?.currency || "INR" });
+        const scheme = feeSchemes.find((f: any) => f.id === selectedClient.defaultFeeSchemeId);
+        setClientStats({
+          total: data.total ?? 0,
+          lastDate: data.lastDate ?? null,
+          billed: Number(data.totalBilled ?? 0),
+          currency: scheme?.currency || "INR",
+        });
       })
       .catch(() => {
-        const scheme = feeSchemes.find(f => f.id === selectedClient.defaultFeeSchemeId);
+        const scheme = feeSchemes.find((f: any) => f.id === selectedClient.defaultFeeSchemeId);
         setClientStats({ total: 0, lastDate: null, billed: 0, currency: scheme?.currency || "INR" });
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -438,7 +446,7 @@ export default function ClientsPage() {
       </Card>
 
       <Dialog open={detailsOpen} onOpenChange={(v) => { setDetailsOpen(v); setEditMode(false); }}>
-        <DialogContent className="sm:max-w-3xl bg-white border-slate-200">
+        <DialogContent className="sm:max-w-4xl bg-white border-slate-200">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-slate-950">
               <User className="h-5 w-5 text-primary" />
