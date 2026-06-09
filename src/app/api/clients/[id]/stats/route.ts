@@ -7,8 +7,9 @@ import { authOptions } from "@/lib/auth";
 
 export async function GET(
   _req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
   if (!session) return new NextResponse("Unauthorized", { status: 401 });
 
@@ -22,7 +23,7 @@ export async function GET(
       .from(sessions)
       .where(
         and(
-          eq(sessions.clientId, params.id),
+          eq(sessions.clientId, id),
           eq(sessions.status, "completed")
         )
       );
