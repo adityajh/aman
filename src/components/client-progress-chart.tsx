@@ -13,13 +13,32 @@ import {
   ReferenceLine,
   ResponsiveContainer,
 } from "recharts";
-import { AlertTriangle, TrendingDown, Frown, CheckCircle2, TrendingUp } from "lucide-react";
+import { AlertTriangle, TrendingDown, Frown, CheckCircle2, TrendingUp, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface ProgressChartProps {
   clientId: string;
   clientName: string;
   compact?: boolean;
+}
+
+interface PredictedProgressData {
+  prognosis: "green" | "amber" | "red" | "insufficient_data";
+  reason?: string;
+  cohortSize: number;
+  currentInitialOrs?: number | null;
+  initialOrsBand?: [number, number];
+  margin: number;
+  evaluation?: { atSession: number; clientOrs: number; cohortAvg: number; delta: number };
+  trajectory: {
+    session: number;
+    date: string;
+    clientOrs: number;
+    cohortAvg: number | null;
+    lower: number | null;
+    upper: number | null;
+    cohortN: number;
+  }[];
 }
 
 interface ProgressData {
@@ -242,6 +261,137 @@ function OrsFullChart({
   );
 }
 
+const PROGNOSIS_META = {
+  green: { label: "Ahead of similar clients", cls: "bg-emerald-50 text-emerald-700 border-emerald-200", dot: "#10b981" },
+  amber: { label: "On track with similar clients", cls: "bg-amber-50 text-amber-700 border-amber-200", dot: "#f59e0b" },
+  red: { label: "Behind similar clients — review", cls: "bg-rose-50 text-rose-700 border-rose-200", dot: "#ef4444" },
+} as const;
+
+function PredictedProgressChart({ clientId }: { clientId: string }) {
+  const [data, setData] = useState<PredictedProgressData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    fetch(`/api/clients/${clientId}/predicted-progress`)
+      .then((r) => r.json())
+      .then((d) => active && setData(d))
+      .catch(() => {})
+      .finally(() => active && setLoading(false));
+    return () => {
+      active = false;
+    };
+  }, [clientId]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-32">
+        <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-violet-400" />
+      </div>
+    );
+  }
+
+  if (!data || data.prognosis === "insufficient_data") {
+    return (
+      <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50/50 px-4 py-6 text-center">
+        <Users className="h-5 w-5 text-slate-300 mx-auto mb-2" />
+        <p className="text-sm text-slate-400">
+          {data?.reason ?? "Not enough data to compare with similar clients yet."}
+        </p>
+      </div>
+    );
+  }
+
+  const meta = PROGNOSIS_META[data.prognosis];
+
+  // Build chart data: attach the cohort band as a [lower, upper] tuple for the ranged Area.
+  const chartData = data.trajectory.map((t) => ({
+    date: t.date,
+    clientOrs: t.clientOrs,
+    cohortAvg: t.cohortAvg,
+    band: t.lower != null && t.upper != null ? [t.lower, t.upper] : null,
+  }));
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <Badge variant="outline" className={`gap-1.5 ${meta.cls}`}>
+          <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: meta.dot }} />
+          {meta.label}
+        </Badge>
+        <span className="text-[11px] text-slate-400">
+          vs. {data.cohortSize} clients who started near ORS {data.currentInitialOrs}
+          {data.initialOrsBand && ` (${data.initialOrsBand[0]}–${data.initialOrsBand[1]})`}
+        </span>
+      </div>
+
+      <ResponsiveContainer width="100%" height={240}>
+        <ComposedChart data={chartData} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+          <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
+          <YAxis domain={[0, 40]} tick={{ fontSize: 11, fill: "#94a3b8" }} ticks={[0, 10, 20, 25, 30, 40]} width={28} />
+          <Tooltip
+            contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e2e8f0" }}
+            labelStyle={{ fontWeight: "bold" }}
+            formatter={(v: unknown, name) => {
+              const label = (name ?? "") as string;
+              if (label === "Expected range") {
+                const r = v as [number, number] | null;
+                return r ? [`${r[0]} – ${r[1]}`, label] : ["—", label];
+              }
+              return [`${v ?? "—"}`, label];
+            }}
+          />
+          <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
+
+          {/* Cohort expected band (lower–upper) */}
+          <Area
+            type="monotone"
+            dataKey="band"
+            stroke="transparent"
+            fill="#a78bfa"
+            fillOpacity={0.18}
+            name="Expected range"
+            connectNulls
+            isAnimationActive={false}
+          />
+          {/* Cohort average trajectory */}
+          <Line
+            type="monotone"
+            dataKey="cohortAvg"
+            stroke="#a78bfa"
+            strokeWidth={1.5}
+            strokeDasharray="6 3"
+            dot={false}
+            name="Similar clients (avg)"
+            connectNulls
+          />
+          {/* This client */}
+          <Line
+            type="monotone"
+            dataKey="clientOrs"
+            stroke="#3b82f6"
+            strokeWidth={2.5}
+            dot={{ r: 4, fill: "#3b82f6" }}
+            activeDot={{ r: 6 }}
+            name="This client"
+            connectNulls
+          />
+        </ComposedChart>
+      </ResponsiveContainer>
+
+      {data.evaluation && (
+        <p className="text-[11px] text-slate-400 text-right">
+          At session {data.evaluation.atSession}: ORS {data.evaluation.clientOrs} vs. cohort avg{" "}
+          {data.evaluation.cohortAvg} ({data.evaluation.delta >= 0 ? "+" : ""}
+          {data.evaluation.delta})
+        </p>
+      )}
+    </div>
+  );
+}
+
 export function ClientProgressChart({ clientId, clientName, compact = false }: ProgressChartProps) {
   const [data, setData] = useState<ProgressData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -345,6 +495,14 @@ export function ClientProgressChart({ clientId, clientName, compact = false }: P
           SRS — Session Rating Scale (Therapeutic Alliance / Satisfaction)
         </p>
         <SrsChart srsPoints={data.srsPoints} thresholds={data.thresholds} flags={data.flags} />
+      </div>
+
+      {/* Predicted Progress vs. similar clients */}
+      <div>
+        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">
+          Predicted Progress (vs. clients with a similar starting ORS)
+        </p>
+        <PredictedProgressChart clientId={clientId} />
       </div>
     </div>
   );
