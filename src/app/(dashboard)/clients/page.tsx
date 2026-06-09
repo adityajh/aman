@@ -36,6 +36,7 @@ export default function ClientsPage() {
   const [conflictOpen, setConflictOpen] = useState(false);
   const [conflictClient, setConflictClient] = useState<any>(null);
   const [cancelSessionsOnTerminate, setCancelSessionsOnTerminate] = useState(false);
+  const [clientStats, setClientStats] = useState<{ total: number; lastDate: string | null; billed: number; currency: string } | null>(null);
   const router = useRouter();
 
   const fetchClients = async () => {
@@ -60,6 +61,24 @@ export default function ClientsPage() {
     fetchClients();
     fetch("/api/fee-schemes").then(r => r.json()).then(setFeeSchemes).catch(() => {});
   }, []);
+
+  // Fetch per-client stats whenever the details dialog opens
+  useEffect(() => {
+    if (!detailsOpen || !selectedClient) return;
+    setClientStats(null);
+    fetch(`/api/sessions?clientId=${selectedClient.id}`)
+      .then(r => r.json())
+      .then((data: any[]) => {
+        const completed = data.filter(s => s.status === "completed");
+        const total = completed.length;
+        const lastDate = completed.length > 0 ? completed[0].scheduledAt : null; // already desc
+        const billed = completed.reduce((sum, s) => sum + Number(s.feeCharged || 0), 0);
+        const scheme = feeSchemes.find(f => f.id === selectedClient.defaultFeeSchemeId);
+        setClientStats({ total, lastDate, billed, currency: scheme?.currency || "INR" });
+      })
+      .catch(() => setClientStats(null));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [detailsOpen, selectedClient?.id]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement> | null, force = false) => {
     if (e) e.preventDefault();
@@ -103,6 +122,8 @@ export default function ClientsPage() {
         const updated = await res.json();
         setClients(prev => prev.map(c => c.id === updated.id ? updated : c));
         setSelectedClient(updated);
+        setSelectedFeeSchemeId(updated.defaultFeeSchemeId || "");
+        setTimezone(updated.timezone || IST);
         setEditMode(true);
         setDetailsOpen(true);
         setConflictOpen(false);
@@ -365,12 +386,14 @@ export default function ClientsPage() {
                         >
                           <LineChart className="h-3.5 w-3.5" /> Charts
                         </Button>
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="sm"
                           onClick={() => {
                             setSelectedClient(client);
                             setEditMode(false);
+                            setSelectedFeeSchemeId(client.defaultFeeSchemeId || "");
+                            setTimezone(client.timezone || IST);
                             setDetailsOpen(true);
                           }}
                         >
@@ -521,25 +544,31 @@ export default function ClientsPage() {
                   <div className="grid grid-cols-3 gap-4">
                     <Card className="bg-slate-50 border-slate-100 shadow-none">
                       <CardContent className="p-4">
-                        <p className="text-[10px] text-slate-500 font-bold uppercase">Total sessions</p>
-                        <p className="text-xl font-bold text-slate-900">-</p>
+                        <p className="text-[10px] text-slate-500 font-bold uppercase">Total Sessions</p>
+                        <p className="text-xl font-bold text-slate-900">
+                          {clientStats == null ? <span className="text-slate-400 text-base">…</span> : clientStats.total}
+                        </p>
                       </CardContent>
                     </Card>
                     <Card className="bg-slate-50 border-slate-100 shadow-none">
                       <CardContent className="p-4">
                         <p className="text-[10px] text-slate-500 font-bold uppercase">Last Session</p>
-                        <p className="text-xl font-bold text-slate-900">-</p>
+                        <p className="text-xl font-bold text-slate-900">
+                          {clientStats == null
+                            ? <span className="text-slate-400 text-base">…</span>
+                            : clientStats.lastDate
+                              ? formatIST(clientStats.lastDate, "d MMM yy")
+                              : <span className="text-slate-400 text-sm">None</span>}
+                        </p>
                       </CardContent>
                     </Card>
                     <Card className="bg-slate-50 border-slate-100 shadow-none">
                       <CardContent className="p-4">
                         <p className="text-[10px] text-slate-500 font-bold uppercase">Total Billed</p>
                         <p className="text-xl font-bold text-slate-900">
-                          {(() => {
-                            const scheme = feeSchemes.find(f => f.id === selectedClient.defaultFeeSchemeId);
-                            if (scheme) return scheme.currency === 'USD' ? '$' : '₹';
-                            return ""; 
-                          })()}0
+                          {clientStats == null
+                            ? <span className="text-slate-400 text-base">…</span>
+                            : `${clientStats.currency === "USD" ? "$" : "₹"}${clientStats.billed.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}
                         </p>
                       </CardContent>
                     </Card>
