@@ -2,6 +2,16 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [3.4.0] - 2026-06-09
+### Added
+- **Client search**: A search box on the **Clients** page filters the roster live by **name, email, or phone**, stacking on top of the existing Active / Terminated status filter.
+- **Session search**: A search box on the **Sessions** page filters the ledger live by **client name or email**, stacking on top of the existing time / client / status filters and the client-name sort.
+
+### Changed
+- **Sidebar order**: **Reports** moved from near the top (just under Clients) to the bottom group, **just above Settings**. New order: Dashboard · Clients · Sessions · Invoices · Payments · Fees · Reports · Settings.
+
+---
+
 ## [3.3.0] - 2026-06-09
 ### Added
 - **Reports page (clinical outcomes)**: New **Reports** entry in the sidebar (between Clients and Sessions) showing outcomes across **closed clients**. Overview cards (closed-client count, % who started in distress with initial ORS ≤ cutoff, median tenure in weeks, median completed sessions), **Outcome Ratios** for the distress cohort with both a first and last ORS (RCI improvement, deterioration, no-change, clinically significant change), an **Effectiveness** block (Cohen's *d* effect size and average SRS alliance), and **Pre-Mature Termination** (PTR-I auto, PTR-II manual, combined Final PTR). A separate **Live — At-Risk Clients** card is the one forward-looking metric: *active* clients whose latest completed-session note is flagged medium/high risk. Cutoffs (ORS cutoff, RCI threshold) read from practice settings.
