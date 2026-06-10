@@ -479,15 +479,18 @@ export default function ClientsPage() {
                       }}
                     >
                       <SelectTrigger className="border-slate-200 bg-white h-10">
-                        <SelectValue placeholder="Select a default fee scheme" />
+                        <SelectValue>
+                          {defaultFeeSchemeId
+                            ? (() => {
+                                const f = feeSchemes.find(f => f.id === defaultFeeSchemeId);
+                                return f ? `${f.name} (${f.currency === 'USD' ? '$' : '₹'}${f.amount})` : "Select a default fee scheme";
+                              })()
+                            : "Select a default fee scheme"}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent className="bg-white border-slate-200 shadow-2xl">
                         {feeSchemes.map(f => (
-                          <SelectItem
-                            key={f.id}
-                            value={f.id}
-                            label={`${f.name} (${f.currency === 'USD' ? '$' : '₹'}${f.amount})`}
-                          >
+                          <SelectItem key={f.id} value={f.id} label={f.name}>
                             {f.name} ({f.currency === 'USD' ? '$' : '₹'}{f.amount})
                           </SelectItem>
                         ))}
