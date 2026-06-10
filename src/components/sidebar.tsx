@@ -31,12 +31,6 @@ const routes = [
     color: "text-lime-400",
   },
   {
-    label: "Reports",
-    icon: ClipboardList,
-    href: "/reports",
-    color: "text-lime-400",
-  },
-  {
     label: "Sessions",
     icon: Calendar,
     href: "/sessions",
@@ -58,6 +52,12 @@ const routes = [
     label: "Fees",
     icon: CreditCard,
     href: "/fees",
+    color: "text-lime-400",
+  },
+  {
+    label: "Reports",
+    icon: ClipboardList,
+    href: "/reports",
     color: "text-lime-400",
   },
   {

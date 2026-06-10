@@ -27,7 +27,8 @@ import {
   Trash2,
   ArrowUp,
   ArrowDown,
-  ArrowUpDown
+  ArrowUpDown,
+  Search
 } from "lucide-react";
 import { startOfHour, addHours, differenceInMinutes } from "date-fns";
 import { ClinicalNoteEditor } from "@/components/clinical-note-editor";
@@ -74,6 +75,8 @@ function SessionsPageInner() {
   const [customEnd, setCustomEnd] = useState<string>("");
   // Optional client-name sort overlay on top of the default date ordering.
   const [clientSort, setClientSort] = useState<null | "asc" | "desc">(null);
+  // Free-text search across client name / email.
+  const [search, setSearch] = useState("");
 
   const fetchData = async () => {
     try {
@@ -632,6 +635,13 @@ function SessionsPageInner() {
         }
       }
       
+      // Free-text search — client name or email
+      const q = search.trim().toLowerCase();
+      if (q) {
+        const haystack = `${s.client?.name ?? ""} ${s.client?.email ?? ""}`.toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+
       // Status Filter logic
       if (statusFilter !== "all") {
         if (statusFilter === "exceptions") {
@@ -654,7 +664,7 @@ function SessionsPageInner() {
       
       return true;
     });
-  }, [sessions, clientFilter, timeFilter, statusFilter, customStart, customEnd]);
+  }, [sessions, clientFilter, timeFilter, statusFilter, customStart, customEnd, search]);
 
   // Optional alphabetical-by-client overlay. When inactive, the default date
   // ordering (newest first, from the API) is preserved.
@@ -676,6 +686,16 @@ function SessionsPageInner() {
         </div>
         
         <div className="flex flex-wrap items-center gap-3">
+          {/* Search */}
+          <div className="relative">
+            <Search className="h-4 w-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search client…"
+              className="pl-9 w-[220px] bg-slate-50 border-slate-200 h-10"
+            />
+          </div>
           {/* Time Filter */}
           <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-lg border border-slate-200">
             <CalendarDays className="h-4 w-4 text-slate-400 ml-2" />

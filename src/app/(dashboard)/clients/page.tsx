@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Plus, User, Mail, Phone, IndianRupee, DollarSign, Pencil, X, Check, Loader2, UserMinus, LineChart, ListFilter, Calendar, AlertTriangle } from "lucide-react";
+import { Plus, User, Mail, Phone, IndianRupee, DollarSign, Pencil, X, Check, Loader2, UserMinus, LineChart, ListFilter, Calendar, AlertTriangle, Search } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { ClientProgressChart } from "@/components/client-progress-chart";
@@ -33,6 +33,7 @@ export default function ClientsPage() {
   const [chartsOpen, setChartsOpen] = useState(false);
   const [chartsClient, setChartsClient] = useState<any>(null);
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "terminated">("active");
+  const [search, setSearch] = useState("");
   const [conflictOpen, setConflictOpen] = useState(false);
   const [conflictClient, setConflictClient] = useState<any>(null);
   const [cancelSessionsOnTerminate, setCancelSessionsOnTerminate] = useState(false);
@@ -76,8 +77,13 @@ export default function ClientsPage() {
   };
 
   const filteredClients = clients.filter(c => {
-    if (statusFilter === "active") return c.isActive;
-    if (statusFilter === "terminated") return !c.isActive;
+    if (statusFilter === "active" && !c.isActive) return false;
+    if (statusFilter === "terminated" && c.isActive) return false;
+    const q = search.trim().toLowerCase();
+    if (q) {
+      const haystack = `${c.name ?? ""} ${c.email ?? ""} ${c.phone ?? ""}`.toLowerCase();
+      if (!haystack.includes(q)) return false;
+    }
     return true;
   });
 
@@ -239,6 +245,16 @@ export default function ClientsPage() {
           <p className="text-slate-500">Manage your client roster.</p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
+          {/* Search */}
+          <div className="relative">
+            <Search className="h-4 w-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search name, email, phone…"
+              className="pl-9 w-[260px] bg-slate-50 border-slate-200"
+            />
+          </div>
           {/* Status Filter */}
           <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-lg border border-slate-200">
             <ListFilter className="h-4 w-4 text-slate-400 ml-2" />
