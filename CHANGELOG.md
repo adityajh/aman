@@ -2,13 +2,24 @@
 
 All notable changes to the Aman project will be documented in this file.
 
-## [3.4.0] - 2026-06-09
+## [3.4.0] - 2026-06-10
 ### Added
 - **Client search**: A search box on the **Clients** page filters the roster live by **name, email, or phone**, stacking on top of the existing Active / Terminated status filter.
 - **Session search**: A search box on the **Sessions** page filters the ledger live by **client name or email**, stacking on top of the existing time / client / status filters and the client-name sort.
 
 ### Changed
 - **Sidebar order**: **Reports** moved from near the top (just under Clients) to the bottom group, **just above Settings**. New order: Dashboard · Clients · Sessions · Invoices · Payments · Fees · Reports · Settings.
+- **Client details / edit dialog widened** to `sm:max-w-4xl`.
+
+### Fixed
+- **Client details — Practice Summary**: Total Sessions, Last Session, and Total Billed were hardcoded placeholders. A new lightweight `GET /api/clients/[id]/stats` endpoint (single `findMany` over completed sessions) now populates these live when the details dialog opens.
+- **Client edit — Default Fee Scheme preselection**: The fee scheme dropdown was blank on open due to a state timing race. State is now seeded when the details dialog opens and re-seeded when edit mode activates, and `SelectValue` continues to use the manual-render pattern required by this shadcn/ui build (the `label`-prop/native approach renders raw UUIDs in this version).
+- **Session fee & scheme corrections (one-time data fix)**: Five completed, uninvoiced sessions that were created with flat fees and no scheme link have been corrected:
+  - **Krithika Balaji 9 May** — scheme attached (Disc-INR-I ₹3,500/hr), fee corrected to ₹5,250 for 90 min billed.
+  - **Krithika Balaji 17 May** — scheme attached (Disc-INR-I ₹3,500/hr), fee unchanged at ₹3,500 for 60 min billed.
+  - **Salima Hooda 7 May** — scheme attached (Disc-INR-I ₹3,500/hr), fee corrected to ₹2,625 for 45 min billed.
+  - **Ayushi Walia 7 May** — scheme attached (Disc-INR-II ₹3,000/hr), fee corrected to ₹2,250 for 45 min billed.
+  - **Purnima Chaudhry 6 Jun** — billed duration corrected 60 → 45 min, fee corrected $72 → $54 (Indiv-USD $72/hr scheme was already linked).
 
 ---
 
