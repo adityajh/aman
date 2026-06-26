@@ -53,6 +53,12 @@ export async function POST(req: Request) {
 
         if (billable.length === 0) continue;
 
+        // Line items must read chronologically (oldest session first) on the
+        // invoice. The candidate query has no ordering guarantee, so sort here.
+        billable.sort((a, b) =>
+          new Date(a.session.scheduledAt).getTime() - new Date(b.session.scheduledAt).getTime()
+        );
+
         // 2. Determine currency (default to INR if no scheme found)
         const client = await db.query.clients.findFirst({
           where: eq(clients.id, clientId)
@@ -91,9 +97,11 @@ export async function POST(req: Request) {
           if (session.status === 'completed') {
             description = `Session - ${dateStr} (${session.invoicedDurationMin ?? session.durationMin} min)`;
           } else if (session.status === 'no_show') {
-            description = `No-show - ${dateStr}${session.cancellationReason ? ` (${session.cancellationReason})` : ''}`;
+            // No internal cancellation reason/notes on the client-facing invoice
+            // — just label the line as a no-show.
+            description = `No show - ${dateStr}`;
           } else {
-            description = `Late cancellation - ${dateStr}${session.cancellationReason ? ` (${session.cancellationReason})` : ''}`;
+            description = `Cancellation - ${dateStr}`;
           }
           const amountStr = amount.toFixed(2);
 

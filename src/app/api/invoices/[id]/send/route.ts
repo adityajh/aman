@@ -21,7 +21,7 @@ export async function POST(
         where: eq(invoices.id, id),
         with: {
           client: true,
-          lineItems: true,
+          lineItems: { with: { session: true } },
         },
       }),
       db.query.practiceSettings.findFirst()
@@ -30,6 +30,15 @@ export async function POST(
     if (!invoice || !invoice.client) {
       return new NextResponse("Invoice not found", { status: 404 });
     }
+
+    // Render line items in chronological session order. Nested relations have no
+    // ordering guarantee, so sort by the linked session's date (oldest first),
+    // falling back to the line item's own createdAt for any non-session lines.
+    invoice.lineItems.sort((a: any, b: any) => {
+      const ta = new Date(a.session?.scheduledAt ?? a.createdAt).getTime();
+      const tb = new Date(b.session?.scheduledAt ?? b.createdAt).getTime();
+      return ta - tb;
+    });
 
     if (!invoice.client.email) {
       return new NextResponse("Client email is required to send invoice", { status: 400 });
