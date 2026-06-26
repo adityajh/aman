@@ -42,6 +42,10 @@ yarn-error.log*
 # local verification artifacts (screenshots from manual QA)
 /verification-screenshots/
 
+# local Claude Code tooling (settings, worktrees) and scratch scripts
+/.claude/
+/scratch/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
