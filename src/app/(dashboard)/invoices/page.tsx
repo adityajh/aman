@@ -8,31 +8,125 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { 
-  Plus, 
-  Mail, 
-  FileText, 
-  User, 
-  IndianRupee, 
-  DollarSign, 
-  Send, 
-  Search, 
-  Trash2, 
-  Download, 
-  Clock, 
+import {
+  Plus,
+  Mail,
+  FileText,
+  User,
+  IndianRupee,
+  DollarSign,
+  Send,
+  Search,
+  Trash2,
+  Download,
+  Clock,
   AlertCircle,
-  Loader2, 
-  CheckCircle2, 
-  Eye, 
-  ExternalLink, 
+  Loader2,
+  CheckCircle2,
+  Eye,
+  ExternalLink,
   Calendar as CalendarIcon,
   Check,
-  BadgeCheck
+  BadgeCheck,
+  MoreHorizontal,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  Wallet,
+  TrendingUp,
+  Hourglass,
+  FileX
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { formatIST, istFirstOfMonthStr, istTodayStr } from "@/lib/tz";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
+
+// Currency-aware money helpers — invoices mix INR and USD, so totals are kept
+// per-currency and rendered as separate symbols rather than summed blindly.
+type CurrencyMap = Record<string, number>;
+const addCur = (m: CurrencyMap, cur: string | null | undefined, amt: number) => {
+  const k = cur || "INR";
+  m[k] = (m[k] || 0) + amt;
+  return m;
+};
+const curSymbol = (cur: string) => (cur === "USD" ? "$" : "₹");
+const renderMoney = (m: CurrencyMap, opts: { decimals?: boolean } = {}) => {
+  const entries = Object.entries(m).filter(([, v]) => v !== 0);
+  if (entries.length === 0) return "—";
+  return entries
+    .map(([cur, amt]) =>
+      `${curSymbol(cur)}${amt.toLocaleString("en-IN", {
+        minimumFractionDigits: opts.decimals ? 2 : 0,
+        maximumFractionDigits: opts.decimals ? 2 : 0,
+      })}`
+    )
+    .join("  ·  ");
+};
+
+// Softer, modern status pills.
+function StatusPill({ status }: { status: string }) {
+  const map: Record<string, { label: string; cls: string }> = {
+    draft: { label: "Generated", cls: "bg-slate-100 text-slate-600 ring-slate-200" },
+    sent: { label: "Sent", cls: "bg-sky-50 text-sky-700 ring-sky-200" },
+    paid: { label: "Paid", cls: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
+    partial: { label: "Partial", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
+    overdue: { label: "Overdue", cls: "bg-rose-50 text-rose-700 ring-rose-200" },
+    void: { label: "Void", cls: "bg-slate-50 text-slate-400 ring-slate-200 line-through" },
+  };
+  const m = map[status] ?? { label: status, cls: "bg-slate-100 text-slate-600 ring-slate-200" };
+  return (
+    <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1 ring-inset", m.cls)}>
+      {m.label}
+    </span>
+  );
+}
+
+// Per-row "…" actions menu (controlled so it closes after an action fires).
+function RowActions({
+  invoice,
+  onPreview,
+  onConfirm,
+  onVoid,
+}: {
+  invoice: any;
+  onPreview: () => void;
+  onConfirm: () => void;
+  onVoid: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const close = () => setOpen(false);
+  const canConfirm = invoice.status !== "draft" && invoice.status !== "paid" && invoice.status !== "void";
+  const canVoid = invoice.status !== "paid" && invoice.status !== "void" && parseFloat(invoice.amountPaid || "0") === 0;
+  const item = "flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors text-left";
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
+        render={
+          <Button variant="ghost" size="sm" className="text-slate-400 hover:text-slate-900 h-8 w-8 p-0" title="More actions">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        }
+      />
+      <PopoverContent align="end" className="w-44 p-1 gap-0">
+        <button className={item} onClick={() => { onPreview(); close(); }}>
+          <Eye className="h-4 w-4 text-slate-400" /> View
+        </button>
+        {canConfirm && (
+          <button className={item} onClick={() => { onConfirm(); close(); }}>
+            <BadgeCheck className="h-4 w-4 text-emerald-500" /> Confirm Payment
+          </button>
+        )}
+        {canVoid && (
+          <button className={cn(item, "text-rose-600 hover:bg-rose-50")} onClick={() => { onVoid(); close(); }}>
+            <Trash2 className="h-4 w-4" /> Void
+          </button>
+        )}
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<any[]>([]);
@@ -130,6 +224,15 @@ export default function InvoicesPage() {
   const [filterPaid, setFilterPaid] = useState(true);
   const [filterOverdue, setFilterOverdue] = useState(true);
 
+  // Flat-list sorting + free-text search.
+  const [sortKey, setSortKey] = useState<"date" | "client" | "total" | "status">("date");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [search, setSearch] = useState("");
+  const toggleSort = (key: "date" | "client" | "total" | "status") => {
+    if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else { setSortKey(key); setSortDir(key === "client" ? "asc" : "desc"); }
+  };
+
   // Batch Selection State
   const [selectedClients, setSelectedClients] = useState<Set<string>>(new Set());
   const [billingMonth, setBillingMonth] = useState(istFirstOfMonthStr());
@@ -226,42 +329,62 @@ export default function InvoicesPage() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "draft": return <Badge variant="outline" className="bg-slate-100 text-slate-900 border-slate-300 font-bold uppercase text-[10px] tracking-wider">Generated</Badge>;
-      case "sent": return <Badge variant="outline" className="bg-blue-100 text-blue-900 border-blue-200 font-bold uppercase text-[10px] tracking-wider">Sent</Badge>;
-      case "paid": return <Badge variant="outline" className="bg-lime-100 text-lime-900 border-lime-300 font-bold uppercase text-[10px] tracking-wider">Paid</Badge>;
-      case "partial": return <Badge variant="outline" className="bg-amber-100 text-amber-900 border-amber-300 font-bold uppercase text-[10px] tracking-wider">Partial</Badge>;
-      case "overdue": return <Badge variant="outline" className="bg-red-100 text-red-900 border-red-300 font-bold uppercase text-[10px] tracking-wider">Overdue</Badge>;
-      case "void": return <Badge variant="outline" className="bg-slate-200 text-slate-500 border-slate-300 font-bold uppercase text-[10px] tracking-wider line-through">Void</Badge>;
-      default: return <Badge variant="outline" className="font-bold uppercase text-[10px] tracking-wider">{status}</Badge>;
-    }
-  };
-
   const filteredInvoices = invoices.filter(inv => {
     if (!filterGenerated && inv.status === 'draft') return false;
     if (!filterSent && inv.status === 'sent') return false;
     if (!filterPaid && inv.status === 'paid') return false;
     if (!filterOverdue && (inv.status === 'overdue' || inv.status === 'partial')) return false;
+    const q = search.trim().toLowerCase();
+    if (q) {
+      const hay = `${inv.client?.name ?? ""} ${inv.client?.email ?? ""} ${inv.invoiceNumber ?? ""}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
     return true;
   });
 
-  const groupedInvoices = filteredInvoices.reduce((acc: any, inv) => {
-    const clientId = inv.clientId;
-    if (!acc[clientId]) {
-      acc[clientId] = {
-        client: inv.client,
-        items: [],
-        totalAmount: 0,
-      };
-    }
-    acc[clientId].items.push(inv);
-    acc[clientId].totalAmount += parseFloat(inv.total);
-    return acc;
-  }, {} as any);
+  // Flat, sortable list (replaces the old client-grouped view).
+  const sortedInvoices = [...filteredInvoices].sort((a, b) => {
+    let r = 0;
+    if (sortKey === "client") r = (a.client?.name || "").localeCompare(b.client?.name || "");
+    else if (sortKey === "total") r = parseFloat(a.total || "0") - parseFloat(b.total || "0");
+    else if (sortKey === "status") r = (a.status || "").localeCompare(b.status || "");
+    else r = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    return sortDir === "asc" ? r : -r;
+  });
 
-  const sortedClientIds = Object.keys(groupedInvoices).sort((a, b) => 
-    groupedInvoices[a].client?.name.localeCompare(groupedInvoices[b].client?.name)
+  // Status counts for the filter bar (from the full list, before filtering).
+  const counts = {
+    draft: invoices.filter(i => i.status === "draft").length,
+    sent: invoices.filter(i => i.status === "sent").length,
+    paid: invoices.filter(i => i.status === "paid").length,
+    overdue: invoices.filter(i => i.status === "overdue" || i.status === "partial").length,
+  };
+
+  // Currency-aware summary metrics.
+  const pending = unbilled.reduce((m, c) => addCur(m, c.currency, parseFloat(c.totalAmount || "0")), {} as CurrencyMap);
+  const pendingSessions = unbilled.reduce((s, c) => s + (Number(c.sessionCount) || 0), 0);
+  const liveInvoices = invoices.filter(i => i.status !== "void");
+  const outstanding = liveInvoices
+    .filter(i => i.status !== "paid")
+    .reduce((m, i) => addCur(m, i.currency, Math.max(0, parseFloat(i.total || "0") - parseFloat(i.amountPaid || "0"))), {} as CurrencyMap);
+  const outstandingCount = liveInvoices.filter(
+    i => i.status !== "paid" && parseFloat(i.total || "0") - parseFloat(i.amountPaid || "0") > 0
+  ).length;
+  const collected = liveInvoices.reduce((m, i) => addCur(m, i.currency, parseFloat(i.amountPaid || "0")), {} as CurrencyMap);
+
+  const SortHeader = ({ label, k, className }: { label: string; k: "date" | "client" | "total" | "status"; className?: string }) => (
+    <button
+      type="button"
+      onClick={() => toggleSort(k)}
+      className={cn("flex items-center gap-1 hover:text-slate-700 transition-colors", className)}
+    >
+      {label}
+      {sortKey === k ? (
+        sortDir === "asc" ? <ArrowUp className="h-3 w-3 text-slate-600" /> : <ArrowDown className="h-3 w-3 text-slate-600" />
+      ) : (
+        <ArrowUpDown className="h-3 w-3 text-slate-300" />
+      )}
+    </button>
   );
 
   return (
@@ -375,224 +498,182 @@ export default function InvoicesPage() {
         </Dialog>
       </div>
 
-      <div className="flex bg-slate-100/80 p-1 rounded-lg gap-1 border border-slate-200 shadow-sm mb-6 w-fit">
-        <button 
-          onClick={() => setFilterGenerated(!filterGenerated)}
-          className={cn(
-            "px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all",
-            filterGenerated ? "bg-white text-slate-500 shadow-sm" : "text-slate-400 hover:text-slate-600"
-          )}
-        >
-          Generated
-        </button>
-        <button 
-          onClick={() => setFilterSent(!filterSent)}
-          className={cn(
-            "px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all",
-            filterSent ? "bg-white text-blue-600 shadow-sm" : "text-slate-400 hover:text-slate-600"
-          )}
-        >
-          Sent
-        </button>
-        <button 
-          onClick={() => setFilterPaid(!filterPaid)}
-          className={cn(
-            "px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all",
-            filterPaid ? "bg-white text-lime-600 shadow-sm" : "text-slate-400 hover:text-slate-600"
-          )}
-        >
-          Paid
-        </button>
-        <button 
-          onClick={() => setFilterOverdue(!filterOverdue)}
-          className={cn(
-            "px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all",
-            filterOverdue ? "bg-white text-red-600 shadow-sm" : "text-slate-400 hover:text-slate-600"
-          )}
-        >
-          Overdue / Partial
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="md:col-span-2">
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader className="bg-slate-50/50">
-                <TableRow className="hover:bg-transparent">
-                  <TableHead>Invoice #</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Sessions</TableHead>
-                  <TableHead>Total</TableHead>
-                  <TableHead>Paid</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-10 text-slate-400 border-slate-800">Loading invoices...</TableCell>
-                  </TableRow>
-                ) : filteredInvoices.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-10 text-slate-400 border-slate-800">No invoices match your filters.</TableCell>
-                  </TableRow>
-                ) : (
-                  sortedClientIds.map((clientId) => {
-                    const group = groupedInvoices[clientId];
-                    return (
-                      <React.Fragment key={clientId}>
-                        <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
-                          <TableCell colSpan={7} className="py-2 px-4">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <User className="h-4 w-4 text-slate-400" />
-                                <span className="font-bold text-slate-900">{group.client?.name}</span>
-                                {group.client?.isActive === false && (
-                                  <Badge variant="outline" className="bg-rose-50 text-rose-600 border-rose-200 uppercase text-[10px] py-0">Terminated</Badge>
-                                )}
-                                <Badge variant="secondary" className="text-[10px] py-0">{group.items.length} Invoices</Badge>
-                              </div>
-                              <div className="text-xs font-semibold text-slate-500 flex items-center gap-1">
-                                Total Invoiced: 
-                                <span className="text-lime-700 flex items-center">
-                                  {group.items[0]?.currency === 'USD' ? <DollarSign className="h-3 w-3" /> : <IndianRupee className="h-3 w-3" />}
-                                  {group.totalAmount.toFixed(2)}
-                                </span>
-                              </div>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                        {group.items.map((invoice: any) => (
-                          <TableRow key={invoice.id} className="group">
-                            <TableCell className="pl-6">
-                              <div className="flex flex-col">
-                                <span className="font-medium text-slate-900">{invoice.invoiceNumber}</span>
-                                <span className="text-[10px] text-slate-500 uppercase">{formatIST(new Date(invoice.billingMonth), "MMM yyyy")}</span>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm text-slate-700 truncate max-w-[120px]">{group.client?.name}</span>
-                                {!group.client?.email && <Badge variant="outline" className="text-[8px] bg-red-50 text-red-600 border-red-200">MISSING EMAIL</Badge>}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="outline" className="bg-white text-slate-700 border-slate-200 font-medium">
-                                {invoice.sessionCount || 0} sessions
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-1 font-medium text-slate-900">
-                                {invoice.currency === 'USD' ? (
-                                  <DollarSign className="h-3 w-3 text-blue-600" />
-                                ) : (
-                                  <IndianRupee className="h-3 w-3 text-lime-600" />
-                                )}
-                                {invoice.total}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-1 font-medium text-slate-500">
-                                {invoice.currency === 'USD' ? (
-                                  <DollarSign className="h-3 w-3" />
-                                ) : (
-                                  <IndianRupee className="h-3 w-3" />
-                                )}
-                                {invoice.amountPaid || "0.00"}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              {getStatusBadge(invoice.status)}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex justify-end gap-2">
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="text-slate-400 hover:text-slate-900"
-                                  onClick={() => setPreviewId(invoice.id)}
-                                >
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                                {invoice.status === 'draft' ? (
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="gap-2 text-lime-900 border-lime-300 bg-lime-50 hover:bg-lime-100 font-bold shadow-sm"
-                                    onClick={() => handleSendInvoice(invoice.id)}
-                                    disabled={!!isSending || !invoice.client?.email}
-                                  >
-                                    {isSending === invoice.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                                    Send
-                                  </Button>
-                                ) : (
-                                  <div className="flex items-center gap-2 text-xs text-lime-700 font-bold whitespace-nowrap">
-                                    <CheckCircle2 className="h-4 w-4 text-lime-600" />
-                                    {invoice.sentAt ? formatIST(new Date(invoice.sentAt), "d MMM") : 'Sent'}
-                                  </div>
-                                )}
-                                {invoice.status !== 'draft' && invoice.status !== 'paid' && invoice.status !== 'void' && (
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="gap-2 text-emerald-900 border-emerald-300 bg-emerald-50 hover:bg-emerald-100 font-bold shadow-sm"
-                                    onClick={() => openConfirm(invoice)}
-                                    title="Record payment and email receipt"
-                                  >
-                                    <BadgeCheck className="h-4 w-4" /> Confirm Payment
-                                  </Button>
-                                )}
-                                {invoice.status !== 'paid' && invoice.status !== 'void' && parseFloat(invoice.amountPaid || '0') === 0 && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-rose-500 hover:text-rose-600 hover:bg-rose-50"
-                                    onClick={() => setVoidInvoice(invoice)}
-                                    title="Void this invoice (sessions return to unbilled)"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                )}
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </React.Fragment>
-                    );
-                  })
-                )}
-              </TableBody>
-            </Table>
+      {/* Summary metric cards — "Pending Billing" now lives here as context. */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="border-slate-200">
+          <CardContent className="p-4 space-y-1">
+            <div className="flex items-center gap-2 text-slate-400">
+              <Hourglass className="h-4 w-4" />
+              <span className="text-[11px] font-bold uppercase tracking-wider">Pending Billing</span>
+            </div>
+            <p className="text-2xl font-bold text-slate-900 tabular-nums">{renderMoney(pending)}</p>
+            <p className="text-[11px] text-slate-500">{unbilled.length} clients · {pendingSessions} sessions awaiting billing</p>
           </CardContent>
         </Card>
+        <Card className="border-slate-200">
+          <CardContent className="p-4 space-y-1">
+            <div className="flex items-center gap-2 text-slate-400">
+              <Wallet className="h-4 w-4" />
+              <span className="text-[11px] font-bold uppercase tracking-wider">Outstanding</span>
+            </div>
+            <p className="text-2xl font-bold text-slate-900 tabular-nums">{renderMoney(outstanding)}</p>
+            <p className="text-[11px] text-slate-500">{outstandingCount} unpaid invoice{outstandingCount === 1 ? "" : "s"}</p>
+          </CardContent>
+        </Card>
+        <Card className="border-slate-200">
+          <CardContent className="p-4 space-y-1">
+            <div className="flex items-center gap-2 text-slate-400">
+              <AlertCircle className="h-4 w-4" />
+              <span className="text-[11px] font-bold uppercase tracking-wider">Overdue / Partial</span>
+            </div>
+            <p className={cn("text-2xl font-bold tabular-nums", counts.overdue > 0 ? "text-rose-600" : "text-slate-900")}>{counts.overdue}</p>
+            <p className="text-[11px] text-slate-500">invoices needing follow-up</p>
+          </CardContent>
+        </Card>
+        <Card className="border-slate-200">
+          <CardContent className="p-4 space-y-1">
+            <div className="flex items-center gap-2 text-slate-400">
+              <TrendingUp className="h-4 w-4" />
+              <span className="text-[11px] font-bold uppercase tracking-wider">Collected</span>
+            </div>
+            <p className="text-2xl font-bold text-emerald-600 tabular-nums">{renderMoney(collected)}</p>
+            <p className="text-[11px] text-slate-500">{counts.paid} paid in full</p>
+          </CardContent>
+        </Card>
+      </div>
 
-        <div className="space-y-6">
-          <Card>
-            <CardContent className="p-4">
-              <h3 className="font-semibold text-slate-900 flex items-center gap-2 mb-4">
-                <Clock className="h-4 w-4 text-lime-600" /> Pending Billing
-              </h3>
-              <div className="space-y-3">
-                {unbilled.length === 0 ? (
-                  <p className="text-xs text-slate-500 text-center py-4">All sessions up to date.</p>
-                ) : (
-                  unbilled.map((item) => (
-                    <div key={item.id} className="p-3 bg-slate-50/50 border border-slate-200 rounded-md">
-                      <div className="flex justify-between items-start mb-1">
-                        <span className="text-sm font-medium text-slate-900">{item.name}</span>
-                        <span className="text-xs font-semibold text-lime-700">{item.currency === 'USD' ? '$' : '₹'}{item.totalAmount}</span>
-                      </div>
-                      <p className="text-[10px] text-slate-500 uppercase tracking-wider">{item.sessionCount} Unbilled Sessions</p>
-                    </div>
-                  ))
-                )}
-              </div>
-            </CardContent>
-          </Card>
+      {/* Filter bar (with counts) + search */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex bg-slate-100/80 p-1 rounded-lg gap-1 border border-slate-200 shadow-sm">
+          {([
+            { label: "Generated", on: filterGenerated, set: setFilterGenerated, count: counts.draft, active: "bg-white text-slate-600 shadow-sm" },
+            { label: "Sent", on: filterSent, set: setFilterSent, count: counts.sent, active: "bg-white text-sky-600 shadow-sm" },
+            { label: "Paid", on: filterPaid, set: setFilterPaid, count: counts.paid, active: "bg-white text-emerald-600 shadow-sm" },
+            { label: "Overdue / Partial", on: filterOverdue, set: setFilterOverdue, count: counts.overdue, active: "bg-white text-rose-600 shadow-sm" },
+          ] as const).map((f) => (
+            <button
+              key={f.label}
+              onClick={() => f.set(!f.on)}
+              className={cn(
+                "px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5",
+                f.on ? f.active : "text-slate-400 hover:text-slate-600"
+              )}
+            >
+              {f.label}
+              <span className={cn("rounded-full px-1.5 py-0.5 text-[10px] leading-none", f.on ? "bg-slate-100 text-slate-500" : "bg-slate-200/60 text-slate-400")}>{f.count}</span>
+            </button>
+          ))}
+        </div>
+        <div className="relative">
+          <Search className="h-4 w-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search invoice # or client…"
+            className="pl-9 w-[260px] bg-slate-50 border-slate-200 h-10"
+          />
         </div>
       </div>
+
+      {/* Full-width, flat, sortable invoices table */}
+      <Card className="border-slate-200 shadow-sm overflow-hidden">
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader className="bg-slate-50/70">
+              <TableRow className="hover:bg-transparent border-slate-200">
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest"><SortHeader label="Invoice #" k="date" /></TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest"><SortHeader label="Client" k="client" /></TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest">Sessions</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest"><SortHeader label="Total" k="total" /></TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest">Paid</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest"><SortHeader label="Status" k="status" /></TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest text-right pr-6">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-20">
+                    <Loader2 className="h-10 w-10 animate-spin mx-auto text-slate-200" />
+                    <p className="mt-4 text-slate-400 font-medium">Loading invoices…</p>
+                  </TableCell>
+                </TableRow>
+              ) : sortedInvoices.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-20">
+                    <FileX className="h-12 w-12 mx-auto text-slate-200" />
+                    <p className="mt-4 text-slate-500 font-semibold">No invoices to show</p>
+                    <p className="text-sm text-slate-400 mt-1">
+                      {invoices.length === 0
+                        ? "Generate your first batch to get started."
+                        : "No invoices match your current filters or search."}
+                    </p>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                sortedInvoices.map((invoice: any) => (
+                  <TableRow key={invoice.id} className="hover:bg-slate-50/50 transition-colors">
+                    <TableCell className="py-3">
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-slate-900">{invoice.invoiceNumber}</span>
+                        <span className="text-[10px] text-slate-400 uppercase tracking-wider">{formatIST(new Date(invoice.billingMonth), "MMM yyyy")}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-slate-300 shrink-0" />
+                        <span className="text-sm font-medium text-slate-700 truncate max-w-[180px]">{invoice.client?.name}</span>
+                        {invoice.client?.isActive === false && (
+                          <Badge variant="outline" className="text-[8px] bg-rose-50 text-rose-500 border-rose-100">Terminated</Badge>
+                        )}
+                        {!invoice.client?.email && (
+                          <Badge variant="outline" className="text-[8px] bg-amber-50 text-amber-600 border-amber-100">No email</Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-sm text-slate-500 tabular-nums">{invoice.sessionCount || 0}</TableCell>
+                    <TableCell className="font-semibold text-slate-900 tabular-nums">
+                      {curSymbol(invoice.currency)}{parseFloat(invoice.total || "0").toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                    </TableCell>
+                    <TableCell className="text-slate-500 tabular-nums">
+                      {curSymbol(invoice.currency)}{parseFloat(invoice.amountPaid || "0").toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                    </TableCell>
+                    <TableCell><StatusPill status={invoice.status} /></TableCell>
+                    <TableCell className="text-right pr-6">
+                      <div className="flex justify-end items-center gap-1.5">
+                        {invoice.status === "draft" ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1.5 text-slate-700 border-slate-200 hover:bg-slate-50 font-semibold h-8"
+                            onClick={() => handleSendInvoice(invoice.id)}
+                            disabled={!!isSending || !invoice.client?.email}
+                            title={!invoice.client?.email ? "Client has no email on file" : "Send invoice to client"}
+                          >
+                            {isSending === invoice.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                            Send
+                          </Button>
+                        ) : invoice.status !== "void" && (
+                          <span className="flex items-center gap-1 text-[11px] text-slate-400 font-medium whitespace-nowrap">
+                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                            {invoice.sentAt ? formatIST(new Date(invoice.sentAt), "d MMM") : "Sent"}
+                          </span>
+                        )}
+                        <RowActions
+                          invoice={invoice}
+                          onPreview={() => setPreviewId(invoice.id)}
+                          onConfirm={() => openConfirm(invoice)}
+                          onVoid={() => setVoidInvoice(invoice)}
+                        />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
       <Dialog open={!!previewId} onOpenChange={() => setPreviewId(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
