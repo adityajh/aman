@@ -35,12 +35,20 @@ export async function GET(
     const orsGreenLow = settings?.orsGreenLow ?? 32;
 
     // Build chart data points
+    // Short qualitative snippet for chart tooltips.
+    const snippet = (n: any) => {
+      const raw = (n?.subjective || n?.updates || "").trim();
+      return raw ? raw.slice(0, 160) : null;
+    };
+
     const orsPoints = chronological
       .filter(s => s.note?.orsTotal != null)
       .map(s => ({
         date: formatIST(new Date(s.scheduledAt), "d MMM"),
         ors: s.note!.orsTotal,
         sessionId: s.id,
+        note: snippet(s.note),
+        risk: s.note!.riskFlag || "none",
       }));
 
     const srsPoints = chronological
@@ -49,6 +57,8 @@ export async function GET(
         date: formatIST(new Date(s.scheduledAt), "d MMM"),
         srs: s.note!.srsTotal,
         sessionId: s.id,
+        note: snippet(s.note),
+        risk: s.note!.riskFlag || "none",
       }));
 
     // Compute linear trend for ORS (next 4 data points beyond last session)
