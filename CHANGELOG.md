@@ -2,6 +2,32 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [3.5.0] - 2026-06-27
+### Added
+- **Client dashboard (`/clients/[id]`)**: The **Charts** button now opens a dedicated full-page client view — key stats (completed sessions, last session, total billed) plus the ORS/SRS/Predicted progress charts at full width and height. Replaces the old cramped modal.
+- **Richer progress charts**: Soft gradient fills under the ORS/SRS lines, subtle coloured **zone bands** (Distress / At Risk / Functional) replacing the hard dashed lines, **summary stat tiles** above the charts (Latest ORS, ORS change from baseline, Latest SRS, sessions scored), and an enriched hover **tooltip** showing the score, clinical risk, and that session's note snippet.
+- **"Not recorded" scores**: The clinical note editor has a per-block toggle for ORS and SRS that saves the scale as `null` instead of `0`, so a skipped scale no longer plots a misleading zero — the chart bridges the gap. Reopening a note restores the toggle.
+- **Automatic risk flagging**: The note editor auto-suggests **High Risk** from the configurable practice-settings thresholds (ORS drop from baseline, SRS drop from last session or below cutoff) and shows the reason. It's overridable, respects a saved flag, and never auto-downgrades.
+- **Invoice summary cards**: The Invoices page gained currency-aware metric cards — Pending Billing (relocated from the old sidebar), Outstanding, Overdue / Partial, and Collected.
+
+### Changed
+- **Invoices page redesign**: Full-width, flat, **sortable** invoice table (by date, client, total, status) replacing the client-grouped table + sidebar. Secondary actions collapsed into a clean **"…" menu** (View / Confirm Payment / Void) with **Send** kept inline for drafts. Modern pill status badges, a filter bar with per-status **counts**, a search box (invoice # / client / email), and a polished empty state.
+- **Invoice line items are chronological**: Generated invoices list sessions oldest-first; the preview and email re-sort by session date at render time, so existing invoices read in order too.
+- **Sessions Fees column**: Cancelled / no-show rows show the **actual cancellation fee** (0 / 50 / 100%) instead of the full default fee, with a **"waived <amount>"** sub-line when less than the full fee.
+- **Sessions defaults**: The Sessions page now defaults to **Today** (time) and **All Clients** (was This Month / Active).
+- **Clinical note editor layout**: Actual Start/End time moved to the **bottom**, beside the ORS/SRS blocks, to avoid scrolling when finalizing. SRS questions reordered to **Goals → Approach → Relationship → Overall**.
+- **Dynamic overdue status**: Sent invoices past their due date are reported as **overdue** automatically, so the Overdue card / filter / badge reflect reality.
+
+### Fixed
+- **Cancellation notes leaked onto invoices**: The free-text cancellation/no-show reason was printed in the invoice line-item description. Lines now read just **"No show - <date>"** / **"Cancellation - <date>"**; the internal reason stays on the session only.
+- **Rupee symbol in invoice preview**: The preview endpoint now sends `charset=utf-8`, so `₹` renders correctly instead of as mojibake.
+
+### API
+- `GET /api/clients/[id]/progress` now returns a `note` snippet and `risk` flag per data point (for chart tooltips).
+- `GET /api/invoices` computes `overdue` status dynamically for past-due sent invoices.
+
+---
+
 ## [3.4.0] - 2026-06-09
 ### Added
 - **Client search**: A search box on the **Clients** page filters the roster live by **name, email, or phone**, stacking on top of the existing Active / Terminated status filter.
