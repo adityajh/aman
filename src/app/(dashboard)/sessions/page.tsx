@@ -67,8 +67,8 @@ function SessionsPageInner() {
 
   // Filters — initialised from URL params if present
   const searchParams = useSearchParams();
-  const [timeFilter, setTimeFilter] = useState<string>(searchParams.get("timeFilter") ?? "month");
-  const [clientFilter, setClientFilter] = useState<string>(searchParams.get("clientId") ?? "active");
+  const [timeFilter, setTimeFilter] = useState<string>(searchParams.get("timeFilter") ?? "today");
+  const [clientFilter, setClientFilter] = useState<string>(searchParams.get("clientId") ?? "all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   // Custom date range (IST yyyy-MM-dd); used when timeFilter === "custom".
   const [customStart, setCustomStart] = useState<string>("");
@@ -387,7 +387,15 @@ function SessionsPageInner() {
               if (fallbackScheme) cur = fallbackScheme.currency;
             }
             return cur === 'USD' ? '$' : '₹';
-          })()}{parseFloat(session.feeCharged || "0").toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+          })()}{(() => {
+            // Cancelled / no-show sessions are billed at the cancellation fee
+            // (which may be 0, 50%, or 100%), not the full session fee — so the
+            // Fees column must reflect what's actually invoiced, not the default.
+            const billedFee = (session.status === "cancelled" || session.status === "no_show")
+              ? session.cancellationFee
+              : session.feeCharged;
+            return parseFloat(billedFee || "0").toLocaleString('en-IN', { minimumFractionDigits: 2 });
+          })()}
         </TableCell>
         <TableCell>
           {getStatusBadge(session)}
