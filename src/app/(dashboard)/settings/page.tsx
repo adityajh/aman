@@ -27,6 +27,7 @@ export default function SettingsPage() {
     orsRciThreshold: 5,
     orsAmberLow: 26,
     orsGreenLow: 32,
+    invoiceDueDays: 15,
     emailOverride: false,
   });
 
@@ -50,6 +51,7 @@ export default function SettingsPage() {
             orsRciThreshold: data.orsRciThreshold ?? 5,
             orsAmberLow: data.orsAmberLow ?? 26,
             orsGreenLow: data.orsGreenLow ?? 32,
+            invoiceDueDays: data.invoiceDueDays ?? 15,
             emailOverride: data.emailOverride ?? false,
           });
         }
@@ -184,6 +186,29 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
         </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5 text-primary" /> Invoice Billing
+            </CardTitle>
+            <CardDescription>
+              Default payment term for new invoice batches. This pre-selects the &ldquo;Payment Due&rdquo; option in the New Batch dialog (you can still override per batch). An invoice becomes <strong>overdue</strong> once this many days pass after its issue date without full payment.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-3 max-w-xs">
+              <Label htmlFor="invoiceDueDays" className="whitespace-nowrap">Payment due (days)</Label>
+              <Input
+                id="invoiceDueDays"
+                type="number"
+                min={0}
+                value={settings.invoiceDueDays}
+                onChange={(e) => setSettings({ ...settings, invoiceDueDays: parseInt(e.target.value) || 0 })}
+              />
+            </div>
+          </CardContent>
+        </Card>
 
         <Card className={settings.emailOverride ? "border-amber-300 bg-amber-50" : ""}>
           <CardHeader>

@@ -4,6 +4,12 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { formatIST } from "@/lib/tz";
+
+// Format a date-only column (yyyy-MM-dd) without timezone drift.
+const fmtDate = (d: string | null | undefined) =>
+  d ? formatIST(new Date(`${d}T00:00:00Z`), "d MMM yyyy") : null;
+
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -64,8 +70,13 @@ export async function GET(
         </div>
 
         <h2 style="color: #1e3a8a; font-size: 18px;">Session Invoice (PREVIEW)</h2>
+        <p style="margin: 0 0 12px; color: #64748b; font-size: 13px;">
+          <strong>${invoice.invoiceNumber}</strong>
+          &nbsp;·&nbsp; Issued: ${fmtDate(invoice.issuedDate) || "—"}
+          ${invoice.dueDate ? `&nbsp;·&nbsp; <span style="color:#b91c1c;">Due: ${fmtDate(invoice.dueDate)}</span>` : ""}
+        </p>
         <p>Dear ${invoice.client?.name},</p>
-        
+
         <div style="background-color: #f8fafc; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #e2e8f0;">
           <table style="width: 100%; border-collapse: collapse;">
             <thead>

@@ -83,6 +83,7 @@ export async function POST(
         </div>
 
         <h2 style="color: #2b6cb0; font-size: 20px; font-weight: 700; margin-bottom: 16px;">Invoice: #${invoice.invoiceNumber}</h2>
+        ${invoice.dueDate ? `<p style="font-size: 14px; color: #b91c1c; font-weight: 600; margin: 0 0 16px;">Payment due by ${formatIST(new Date(`${invoice.dueDate}T00:00:00Z`), "d MMM yyyy")}</p>` : ""}
         <p style="font-size: 16px; margin-bottom: 24px;">Dear <strong>${invoice.client.name}</strong>,</p>
         <p style="font-size: 15px; color: #4a5568; line-height: 1.6; margin-bottom: 24px;">Please find the billing details for your recent therapy sessions. Thank you for your continued trust in the therapeutic process.</p>
         

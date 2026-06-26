@@ -321,6 +321,10 @@ export const practiceSettings = pgTable(
     orsRciThreshold: integer("ors_rci_threshold").notNull().default(5),
     orsAmberLow: integer("ors_amber_low").notNull().default(26),
     orsGreenLow: integer("ors_green_low").notNull().default(32),
+    // Default number of days after the issue date that a generated invoice is
+    // due. Surfaced as the default selection in the New Batch dialog's
+    // "Payment due" pulldown (7 / 15 / custom).
+    invoiceDueDays: integer("invoice_due_days").notNull().default(15),
     // When true, every outgoing invoice email is rerouted to the counselor's
     // own address (`email` column above) instead of the client's. Used for
     // dry-runs against real data before going live with a batch.

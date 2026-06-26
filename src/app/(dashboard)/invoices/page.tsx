@@ -237,18 +237,32 @@ export default function InvoicesPage() {
   const [selectedClients, setSelectedClients] = useState<Set<string>>(new Set());
   const [billingMonth, setBillingMonth] = useState(istFirstOfMonthStr());
 
+  // Payment-due selection for the New Batch dialog. "7" / "15" map directly;
+  // "custom" reveals a free days input. Default comes from practice settings.
+  const [dueOption, setDueOption] = useState<"7" | "15" | "custom">("15");
+  const [customDueDays, setCustomDueDays] = useState<string>("30");
+  const effectiveDueDays = dueOption === "custom" ? (parseInt(customDueDays, 10) || 0) : parseInt(dueOption, 10);
+
   const fetchData = async () => {
     try {
-      const [invRes, unbRes] = await Promise.all([
+      const [invRes, unbRes, setRes] = await Promise.all([
         fetch("/api/invoices"),
         fetch("/api/invoices/unbilled"),
+        fetch("/api/settings"),
       ]);
-      const [invData, unbData] = await Promise.all([
+      const [invData, unbData, setData] = await Promise.all([
         invRes.json(),
         unbRes.json(),
+        setRes.ok ? setRes.json() : null,
       ]);
       setInvoices(invData);
       setUnbilled(unbData);
+      // Seed the due-date default from practice settings.
+      const d = setData?.invoiceDueDays;
+      if (d != null) {
+        if (d === 7 || d === 15) setDueOption(String(d) as "7" | "15");
+        else { setDueOption("custom"); setCustomDueDays(String(d)); }
+      }
     } catch (err) {
       toast.error("Failed to fetch data");
     } finally {
@@ -285,9 +299,10 @@ export default function InvoicesPage() {
     try {
       const res = await fetch("/api/invoices/batch", {
         method: "POST",
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           clientIds: Array.from(selectedClients),
-          billingMonth 
+          billingMonth,
+          dueDays: effectiveDueDays,
         }),
         headers: { "Content-Type": "application/json" },
       });
@@ -434,6 +449,40 @@ export default function InvoicesPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Payment due selector */}
+              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200">
+                <div className="space-y-1">
+                  <Label className="text-xs font-bold text-slate-500 uppercase">Payment Due</Label>
+                  <p className="text-[11px] text-slate-400">Sets each invoice&apos;s due date from today.</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <select
+                    value={dueOption}
+                    onChange={(e) => setDueOption(e.target.value as "7" | "15" | "custom")}
+                    className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium"
+                  >
+                    <option value="7">Net 7 days</option>
+                    <option value="15">Net 15 days</option>
+                    <option value="custom">Custom…</option>
+                  </select>
+                  {dueOption === "custom" && (
+                    <div className="flex items-center gap-1">
+                      <Input
+                        type="number"
+                        min={0}
+                        value={customDueDays}
+                        onChange={(e) => setCustomDueDays(e.target.value)}
+                        className="h-10 w-20 bg-white text-right"
+                      />
+                      <span className="text-sm text-slate-500">days</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <p className="text-xs text-slate-500 text-right -mt-3">
+                Due <strong>{formatIST(new Date(Date.now() + effectiveDueDays * 864e5), "d MMM yyyy")}</strong> ({effectiveDueDays} days)
+              </p>
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between px-2">

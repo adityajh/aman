@@ -9,6 +9,7 @@ All notable changes to the Aman project will be documented in this file.
 - **"Not recorded" scores**: The clinical note editor has a per-block toggle for ORS and SRS that saves the scale as `null` instead of `0`, so a skipped scale no longer plots a misleading zero — the chart bridges the gap. Reopening a note restores the toggle.
 - **Automatic risk flagging**: The note editor auto-suggests **High Risk** from the configurable practice-settings thresholds (ORS drop from baseline, SRS drop from last session or below cutoff) and shows the reason. It's overridable, respects a saved flag, and never auto-downgrades.
 - **Invoice summary cards**: The Invoices page gained currency-aware metric cards — Pending Billing (relocated from the old sidebar), Outstanding, Overdue / Partial, and Collected.
+- **Invoice due dates**: The New Batch dialog now has a **Payment Due** pulldown (**Net 7 / Net 15 / Custom days**) with a live due-date preview, defaulting from a new configurable practice setting (**Settings → Invoice Billing → Payment due**). Generated invoices store an issue and due date, both shown on the invoice preview and email. This is what makes the **Overdue** card / filter / badge meaningful.
 
 ### Changed
 - **Invoices page redesign**: Full-width, flat, **sortable** invoice table (by date, client, total, status) replacing the client-grouped table + sidebar. Secondary actions collapsed into a clean **"…" menu** (View / Confirm Payment / Void) with **Send** kept inline for drafts. Modern pill status badges, a filter bar with per-status **counts**, a search box (invoice # / client / email), and a polished empty state.
@@ -25,6 +26,10 @@ All notable changes to the Aman project will be documented in this file.
 ### API
 - `GET /api/clients/[id]/progress` now returns a `note` snippet and `risk` flag per data point (for chart tooltips).
 - `GET /api/invoices` computes `overdue` status dynamically for past-due sent invoices.
+- `POST /api/invoices/batch` accepts `dueDays` and sets each invoice's `issuedDate` + `dueDate` (IST-anchored); `GET`/`POST /api/settings` read/write `invoiceDueDays`.
+
+### Database
+- Added `practice_settings.invoice_due_days integer NOT NULL DEFAULT 15`. Migration `drizzle/0003_add_invoice_due_days.sql` (idempotent `ADD COLUMN IF NOT EXISTS`), applied to the shared Neon DB via direct push. Existing **unpaid** invoices were backfilled with `due_date = issued_date + invoice_due_days`.
 
 ---
 
