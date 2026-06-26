@@ -11,6 +11,7 @@ import {
   Tooltip,
   Legend,
   ReferenceLine,
+  ReferenceArea,
   ResponsiveContainer,
 } from "recharts";
 import { AlertTriangle, TrendingDown, Frown, CheckCircle2, TrendingUp, Users } from "lucide-react";
@@ -20,6 +21,7 @@ interface ProgressChartProps {
   clientId: string;
   clientName: string;
   compact?: boolean;
+  variant?: "modal" | "page";
 }
 
 interface PredictedProgressData {
@@ -42,8 +44,8 @@ interface PredictedProgressData {
 }
 
 interface ProgressData {
-  orsPoints: { date: string; ors: number; sessionId: string }[];
-  srsPoints: { date: string; srs: number; sessionId: string }[];
+  orsPoints: { date: string; ors: number; sessionId: string; note?: string | null; risk?: string }[];
+  srsPoints: { date: string; srs: number; sessionId: string; note?: string | null; risk?: string }[];
   orsTrend: { date: string; trend: number }[];
   flags: { isDeterioriating: boolean; isDissatisfied: boolean; isRci: boolean; isCsc: boolean };
   thresholds: { orsCutoff: number; srsCutoff: number; orsRciThreshold: number; orsAmberLow: number; orsGreenLow: number };
@@ -54,14 +56,49 @@ function buildOrsChartData(
   orsPoints: ProgressData["orsPoints"],
   orsTrend: ProgressData["orsTrend"]
 ) {
-  const all: Record<string, { date: string; ors?: number; trend?: number }> = {};
+  const all: Record<string, { date: string; ors?: number; trend?: number; note?: string | null; risk?: string }> = {};
   for (const p of orsPoints) {
-    all[p.date] = { date: p.date, ors: p.ors };
+    all[p.date] = { date: p.date, ors: p.ors, note: p.note, risk: p.risk };
   }
   for (const t of orsTrend) {
     all[t.date] = { ...(all[t.date] ?? { date: t.date }), trend: t.trend };
   }
   return Object.values(all);
+}
+
+// Shared rich tooltip — shows the score, clinical risk, and any session note.
+function ChartTooltip({ active, payload, label, unit }: any) {
+  if (!active || !payload || payload.length === 0) return null;
+  const row = payload.find((p: any) => p.dataKey === "ors" || p.dataKey === "srs" || p.dataKey === "clientOrs") ?? payload[0];
+  const datum = row?.payload ?? {};
+  const score = datum.ors ?? datum.srs ?? datum.clientOrs;
+  if (score == null) return null;
+  const risk: string = datum.risk ?? "none";
+  const riskCls = risk === "high" ? "text-rose-600" : risk === "medium" ? "text-amber-600" : risk === "low" ? "text-yellow-600" : "text-slate-400";
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white/95 px-3 py-2 shadow-lg backdrop-blur-sm max-w-[240px]">
+      <p className="text-[11px] font-semibold text-slate-400">{label}</p>
+      <p className="text-lg font-bold text-slate-900 leading-tight">{score}<span className="text-xs font-normal text-slate-400">/40 {unit}</span></p>
+      {risk && risk !== "none" && (
+        <p className={`text-[11px] font-bold uppercase tracking-wide ${riskCls}`}>{risk} risk</p>
+      )}
+      {datum.note && <p className="mt-1 text-[11px] text-slate-500 leading-snug border-t border-slate-100 pt-1">{datum.note}</p>}
+    </div>
+  );
+}
+
+// Compact summary metric above a chart.
+function StatTile({ label, value, sub, tone = "slate" }: { label: string; value: React.ReactNode; sub?: string; tone?: "slate" | "emerald" | "rose" | "amber" | "blue" }) {
+  const toneCls: Record<string, string> = {
+    slate: "text-slate-900", emerald: "text-emerald-600", rose: "text-rose-600", amber: "text-amber-600", blue: "text-blue-600",
+  };
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{label}</p>
+      <p className={`text-2xl font-bold tabular-nums ${toneCls[tone]}`}>{value}</p>
+      {sub && <p className="text-[11px] text-slate-400">{sub}</p>}
+    </div>
+  );
 }
 
 function OrsSparkline({
@@ -142,27 +179,33 @@ function SrsChart({
   srsPoints,
   thresholds,
   flags,
+  height = 220,
 }: {
   srsPoints: ProgressData["srsPoints"];
   thresholds: ProgressData["thresholds"];
   flags: ProgressData["flags"];
+  height?: number;
 }) {
   if (srsPoints.length === 0) {
     return <div className="text-slate-300 text-xs text-center py-8">No SRS data yet</div>;
   }
   return (
-    <ResponsiveContainer width="100%" height={220}>
+    <ResponsiveContainer width="100%" height={height}>
       <ComposedChart data={srsPoints} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+        <defs>
+          <linearGradient id="srsArea" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.28} />
+            <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.02} />
+          </linearGradient>
+        </defs>
+        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
         <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
         <YAxis domain={[0, 40]} tick={{ fontSize: 11, fill: "#94a3b8" }} ticks={[0, 10, 20, 30, 36, 40]} width={28} />
-        <ReferenceLine y={thresholds.srsCutoff} stroke="#f59e0b" strokeDasharray="4 4" strokeWidth={2}
-          label={{ value: `Cutoff ${thresholds.srsCutoff}`, position: "insideTopRight", fill: "#f59e0b", fontSize: 11 }}
-        />
-        <Tooltip
-          contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e2e8f0" }}
-          formatter={(v: unknown) => [`${v ?? "-"}`, "SRS"]}
-        />
+        {/* Soft "below cutoff" zone */}
+        <ReferenceArea y1={0} y2={thresholds.srsCutoff} fill="#f59e0b" fillOpacity={0.05}
+          label={{ value: `Below cutoff ${thresholds.srsCutoff}`, position: "insideBottomRight", fill: "#d97706", fontSize: 10 }} />
+        <Tooltip content={<ChartTooltip unit="SRS" />} />
+        <Area type="monotone" dataKey="srs" stroke="transparent" fill="url(#srsArea)" connectNulls isAnimationActive={false} legendType="none" />
         <Line
           type="monotone"
           dataKey="srs"
@@ -189,44 +232,38 @@ function OrsFullChart({
   data,
   thresholds,
   flags,
+  height = 260,
 }: {
   data: ReturnType<typeof buildOrsChartData>;
   thresholds: ProgressData["thresholds"];
   flags: ProgressData["flags"];
+  height?: number;
 }) {
   return (
-    <ResponsiveContainer width="100%" height={260}>
+    <ResponsiveContainer width="100%" height={height}>
       <ComposedChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+        <defs>
+          <linearGradient id="orsArea" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.28} />
+            <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.02} />
+          </linearGradient>
+        </defs>
+        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
         <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
         <YAxis domain={[0, 40]} tick={{ fontSize: 11, fill: "#94a3b8" }} ticks={[0, 10, 20, 25, 30, 40]} width={28} />
 
-        {/* Colour band reference areas using gradient-like stacked areas */}
-        <ReferenceLine y={thresholds.orsAmberLow - 1} stroke="#fca5a5" strokeDasharray="4 3" strokeWidth={1} />
-        <ReferenceLine y={thresholds.orsGreenLow - 1} stroke="#86efac" strokeDasharray="4 3" strokeWidth={1} />
-        {/* Labels for bands */}
-        <ReferenceLine
-          y={Math.round((thresholds.orsAmberLow - 1) / 2)}
-          stroke="transparent"
-          label={{ value: "🔴 Distress", position: "insideLeft", fill: "#ef4444", fontSize: 10 }}
-        />
-        <ReferenceLine
-          y={Math.round((thresholds.orsAmberLow + thresholds.orsGreenLow - 2) / 2)}
-          stroke="transparent"
-          label={{ value: "🟡 At Risk", position: "insideLeft", fill: "#d97706", fontSize: 10 }}
-        />
-        <ReferenceLine
-          y={Math.round((thresholds.orsGreenLow - 1 + 40) / 2)}
-          stroke="transparent"
-          label={{ value: "🟢 Functional", position: "insideLeft", fill: "#16a34a", fontSize: 10 }}
-        />
+        {/* Soft background zones instead of hard dashed lines */}
+        <ReferenceArea y1={0} y2={thresholds.orsAmberLow - 1} fill="#ef4444" fillOpacity={0.05}
+          label={{ value: "Distress", position: "insideLeft", fill: "#ef4444", fontSize: 10 }} />
+        <ReferenceArea y1={thresholds.orsAmberLow - 1} y2={thresholds.orsGreenLow - 1} fill="#f59e0b" fillOpacity={0.05}
+          label={{ value: "At Risk", position: "insideLeft", fill: "#d97706", fontSize: 10 }} />
+        <ReferenceArea y1={thresholds.orsGreenLow - 1} y2={40} fill="#22c55e" fillOpacity={0.05}
+          label={{ value: "Functional", position: "insideLeft", fill: "#16a34a", fontSize: 10 }} />
 
-        <Tooltip
-          contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e2e8f0" }}
-          labelStyle={{ fontWeight: "bold" }}
-        />
+        <Tooltip content={<ChartTooltip unit="ORS" />} />
         <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
 
+        <Area type="monotone" dataKey="ors" stroke="transparent" fill="url(#orsArea)" connectNulls isAnimationActive={false} legendType="none" />
         <Line
           type="monotone"
           dataKey="ors"
@@ -392,7 +429,7 @@ function PredictedProgressChart({ clientId }: { clientId: string }) {
   );
 }
 
-export function ClientProgressChart({ clientId, clientName, compact = false }: ProgressChartProps) {
+export function ClientProgressChart({ clientId, clientName, compact = false, variant = "modal" }: ProgressChartProps) {
   const [data, setData] = useState<ProgressData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -441,8 +478,43 @@ export function ClientProgressChart({ clientId, clientName, compact = false }: P
 
   const orsChartData = buildOrsChartData(data.orsPoints, data.orsTrend);
 
+  const page = variant === "page";
+  const latestOrs = data.orsPoints.at(-1)?.ors ?? null;
+  const initialOrs = data.orsPoints[0]?.ors ?? null;
+  const orsDelta = latestOrs != null && initialOrs != null ? Number(latestOrs) - Number(initialOrs) : null;
+  const latestSrs = data.srsPoints.at(-1)?.srs ?? null;
+
   return (
     <div className="space-y-6">
+      {/* Summary stat tiles (page variant only) */}
+      {page && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <StatTile
+            label="Latest ORS"
+            value={latestOrs != null ? String(latestOrs) : "—"}
+            sub={latestOrs != null ? (Number(latestOrs) >= data.thresholds.orsGreenLow ? "Functional" : Number(latestOrs) >= data.thresholds.orsAmberLow ? "At risk" : "Distress") : "no data"}
+            tone={latestOrs == null ? "slate" : Number(latestOrs) >= data.thresholds.orsGreenLow ? "emerald" : Number(latestOrs) >= data.thresholds.orsAmberLow ? "amber" : "rose"}
+          />
+          <StatTile
+            label="ORS Change"
+            value={orsDelta != null ? `${orsDelta >= 0 ? "+" : ""}${Math.round(orsDelta * 10) / 10}` : "—"}
+            sub="from baseline"
+            tone={orsDelta == null ? "slate" : orsDelta >= data.thresholds.orsRciThreshold ? "emerald" : orsDelta <= -1 ? "rose" : "slate"}
+          />
+          <StatTile
+            label="Latest SRS"
+            value={latestSrs != null ? String(latestSrs) : "—"}
+            sub={latestSrs != null ? (Number(latestSrs) < data.thresholds.srsCutoff ? "Below cutoff" : "Healthy alliance") : "no data"}
+            tone={latestSrs == null ? "slate" : Number(latestSrs) < data.thresholds.srsCutoff ? "amber" : "blue"}
+          />
+          <StatTile
+            label="Sessions Scored"
+            value={String(data.orsPoints.length)}
+            sub="with ORS recorded"
+          />
+        </div>
+      )}
+
       {/* Flags row */}
       <div className="flex flex-wrap gap-2">
         {data.flags.isCsc && (
@@ -478,7 +550,7 @@ export function ClientProgressChart({ clientId, clientName, compact = false }: P
           ORS — Outcome Rating Scale (Well-being / Progress)
         </p>
         {data.orsPoints.length > 0 ? (
-          <OrsFullChart data={orsChartData} thresholds={data.thresholds} flags={data.flags} />
+          <OrsFullChart data={orsChartData} thresholds={data.thresholds} flags={data.flags} height={page ? 400 : 260} />
         ) : (
           <div className="text-center py-8 text-slate-400 text-sm">No ORS data recorded</div>
         )}
@@ -494,7 +566,7 @@ export function ClientProgressChart({ clientId, clientName, compact = false }: P
         <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">
           SRS — Session Rating Scale (Therapeutic Alliance / Satisfaction)
         </p>
-        <SrsChart srsPoints={data.srsPoints} thresholds={data.thresholds} flags={data.flags} />
+        <SrsChart srsPoints={data.srsPoints} thresholds={data.thresholds} flags={data.flags} height={page ? 320 : 220} />
       </div>
 
       {/* Predicted Progress vs. similar clients */}

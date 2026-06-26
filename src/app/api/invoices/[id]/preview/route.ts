@@ -4,6 +4,12 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { formatIST } from "@/lib/tz";
+
+// Format a date-only column (yyyy-MM-dd) without timezone drift.
+const fmtDate = (d: string | null | undefined) =>
+  d ? formatIST(new Date(`${d}T00:00:00Z`), "d MMM yyyy") : null;
+
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -18,13 +24,22 @@ export async function GET(
         where: eq(invoices.id, id),
         with: {
           client: true,
-          lineItems: true,
+          lineItems: { with: { session: true } },
         },
       }),
       db.query.practiceSettings.findFirst()
     ]);
 
     if (!invoice) return new NextResponse("Invoice not found", { status: 404 });
+
+    // Render line items in chronological session order. Nested relations have no
+    // ordering guarantee, so sort by the linked session's date (oldest first),
+    // falling back to the line item's own createdAt for any non-session lines.
+    invoice.lineItems.sort((a: any, b: any) => {
+      const ta = new Date(a.session?.scheduledAt ?? a.createdAt).getTime();
+      const tb = new Date(b.session?.scheduledAt ?? b.createdAt).getTime();
+      return ta - tb;
+    });
 
     const profile = settings || {
       practiceName: "Aman Counseling",
@@ -55,8 +70,13 @@ export async function GET(
         </div>
 
         <h2 style="color: #1e3a8a; font-size: 18px;">Session Invoice (PREVIEW)</h2>
+        <p style="margin: 0 0 12px; color: #64748b; font-size: 13px;">
+          <strong>${invoice.invoiceNumber}</strong>
+          &nbsp;·&nbsp; Issued: ${fmtDate(invoice.issuedDate) || "—"}
+          ${invoice.dueDate ? `&nbsp;·&nbsp; <span style="color:#b91c1c;">Due: ${fmtDate(invoice.dueDate)}</span>` : ""}
+        </p>
         <p>Dear ${invoice.client?.name},</p>
-        
+
         <div style="background-color: #f8fafc; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #e2e8f0;">
           <table style="width: 100%; border-collapse: collapse;">
             <thead>
@@ -98,7 +118,7 @@ export async function GET(
     `;
 
     return new NextResponse(html, {
-      headers: { "Content-Type": "text/html" },
+      headers: { "Content-Type": "text/html; charset=utf-8" },
     });
   } catch (error: any) {
     console.error("Preview Error:", error);

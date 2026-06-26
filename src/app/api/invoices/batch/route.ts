@@ -1,21 +1,32 @@
 import { db } from "@/lib/db";
-import { sessions, invoices, invoiceLineItems, clients, feeSchemes } from "@/lib/db/schema";
+import { sessions, invoices, invoiceLineItems, clients, feeSchemes, practiceSettings } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
 import { eq, isNull, and, sql } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { formatIST, istNowParts, istFirstOfMonthStr } from "@/lib/tz";
+import { formatIST, istNowParts, istFirstOfMonthStr, istTodayStr } from "@/lib/tz";
 
 export async function POST(req: Request) {
   const sessionUser = await getServerSession(authOptions);
   if (!sessionUser) return new NextResponse("Unauthorized", { status: 401 });
 
   try {
-    const { clientIds, billingMonth } = await req.json();
+    const { clientIds, billingMonth, dueDays } = await req.json();
 
     if (!clientIds || !Array.isArray(clientIds) || clientIds.length === 0) {
       return new NextResponse("Invalid client IDs provided", { status: 400 });
     }
+
+    // Resolve the payment term: explicit dueDays from the dialog, else the
+    // practice default, else 15. Compute issue + due once for the whole batch
+    // (IST-anchored, tz-safe via UTC date arithmetic).
+    const settingsRow = await db.query.practiceSettings.findFirst();
+    const defaultDueDays = settingsRow?.invoiceDueDays ?? 15;
+    const nDays = Number.isFinite(Number(dueDays)) && Number(dueDays) >= 0 ? Number(dueDays) : defaultDueDays;
+    const issuedStr = istTodayStr();
+    const dueObj = new Date(`${issuedStr}T00:00:00Z`);
+    dueObj.setUTCDate(dueObj.getUTCDate() + nDays);
+    const dueStr = dueObj.toISOString().slice(0, 10);
 
     const results = [];
     const errors = [];
@@ -53,6 +64,12 @@ export async function POST(req: Request) {
 
         if (billable.length === 0) continue;
 
+        // Line items must read chronologically (oldest session first) on the
+        // invoice. The candidate query has no ordering guarantee, so sort here.
+        billable.sort((a, b) =>
+          new Date(a.session.scheduledAt).getTime() - new Date(b.session.scheduledAt).getTime()
+        );
+
         // 2. Determine currency (default to INR if no scheme found)
         const client = await db.query.clients.findFirst({
           where: eq(clients.id, clientId)
@@ -78,6 +95,8 @@ export async function POST(req: Request) {
           clientId,
           invoiceNumber,
           billingMonth: billingMonth || istFirstOfMonthStr(),
+          issuedDate: issuedStr,
+          dueDate: dueStr,
           subtotal: subtotal.toString(),
           total: subtotal.toString(),
           currency,
@@ -91,9 +110,11 @@ export async function POST(req: Request) {
           if (session.status === 'completed') {
             description = `Session - ${dateStr} (${session.invoicedDurationMin ?? session.durationMin} min)`;
           } else if (session.status === 'no_show') {
-            description = `No-show - ${dateStr}${session.cancellationReason ? ` (${session.cancellationReason})` : ''}`;
+            // No internal cancellation reason/notes on the client-facing invoice
+            // — just label the line as a no-show.
+            description = `No show - ${dateStr}`;
           } else {
-            description = `Late cancellation - ${dateStr}${session.cancellationReason ? ` (${session.cancellationReason})` : ''}`;
+            description = `Cancellation - ${dateStr}`;
           }
           const amountStr = amount.toFixed(2);
 

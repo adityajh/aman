@@ -30,8 +30,6 @@ export default function ClientsPage() {
   const [terminateOpen, setTerminateOpen] = useState(false);
   const [terminationReason, setTerminationReason] = useState("");
   const [terminationType, setTerminationType] = useState("planned");
-  const [chartsOpen, setChartsOpen] = useState(false);
-  const [chartsClient, setChartsClient] = useState<any>(null);
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "terminated">("active");
   const [search, setSearch] = useState("");
   const [conflictOpen, setConflictOpen] = useState(false);
@@ -434,7 +432,7 @@ export default function ClientsPage() {
                           variant="ghost"
                           size="sm"
                           className="gap-1 text-violet-600 hover:text-violet-700"
-                          onClick={() => { setChartsClient(client); setChartsOpen(true); }}
+                          onClick={() => router.push(`/clients/${client.id}`)}
                         >
                           <LineChart className="h-3.5 w-3.5" /> Charts
                         </Button>
@@ -790,22 +788,6 @@ export default function ClientsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Client Progress Charts Dialog */}
-      <Dialog open={chartsOpen} onOpenChange={setChartsOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-white border-slate-200">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-slate-900">
-              <LineChart className="h-5 w-5 text-violet-600" />
-              Progress Charts — {chartsClient?.name}
-            </DialogTitle>
-          </DialogHeader>
-          {chartsClient && (
-            <div className="pt-2">
-              <ClientProgressChart clientId={chartsClient.id} clientName={chartsClient.name} />
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

@@ -21,7 +21,7 @@ export async function POST(
         where: eq(invoices.id, id),
         with: {
           client: true,
-          lineItems: true,
+          lineItems: { with: { session: true } },
         },
       }),
       db.query.practiceSettings.findFirst()
@@ -30,6 +30,15 @@ export async function POST(
     if (!invoice || !invoice.client) {
       return new NextResponse("Invoice not found", { status: 404 });
     }
+
+    // Render line items in chronological session order. Nested relations have no
+    // ordering guarantee, so sort by the linked session's date (oldest first),
+    // falling back to the line item's own createdAt for any non-session lines.
+    invoice.lineItems.sort((a: any, b: any) => {
+      const ta = new Date(a.session?.scheduledAt ?? a.createdAt).getTime();
+      const tb = new Date(b.session?.scheduledAt ?? b.createdAt).getTime();
+      return ta - tb;
+    });
 
     if (!invoice.client.email) {
       return new NextResponse("Client email is required to send invoice", { status: 400 });
@@ -74,6 +83,7 @@ export async function POST(
         </div>
 
         <h2 style="color: #2b6cb0; font-size: 20px; font-weight: 700; margin-bottom: 16px;">Invoice: #${invoice.invoiceNumber}</h2>
+        ${invoice.dueDate ? `<p style="font-size: 14px; color: #b91c1c; font-weight: 600; margin: 0 0 16px;">Payment due by ${formatIST(new Date(`${invoice.dueDate}T00:00:00Z`), "d MMM yyyy")}</p>` : ""}
         <p style="font-size: 16px; margin-bottom: 24px;">Dear <strong>${invoice.client.name}</strong>,</p>
         <p style="font-size: 15px; color: #4a5568; line-height: 1.6; margin-bottom: 24px;">Please find the billing details for your recent therapy sessions. Thank you for your continued trust in the therapeutic process.</p>
         

@@ -24,7 +24,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { counselorName, practiceName, address, phone, email, monthlyQuote, upiId, orsCutoff, srsCutoff, orsDeteriorationThreshold, srsDeclineThreshold, orsRciThreshold, orsAmberLow, orsGreenLow, emailOverride } = body;
+    const { counselorName, practiceName, address, phone, email, monthlyQuote, upiId, orsCutoff, srsCutoff, orsDeteriorationThreshold, srsDeclineThreshold, orsRciThreshold, orsAmberLow, orsGreenLow, emailOverride, invoiceDueDays } = body;
 
     const existing = await db.query.practiceSettings.findFirst();
 
@@ -46,6 +46,7 @@ export async function POST(req: Request) {
           orsRciThreshold,
           orsAmberLow,
           orsGreenLow,
+          invoiceDueDays,
           emailOverride: emailOverride === undefined ? undefined : !!emailOverride,
           updatedAt: new Date(),
         })
@@ -70,6 +71,7 @@ export async function POST(req: Request) {
           orsRciThreshold,
           orsAmberLow,
           orsGreenLow,
+          invoiceDueDays,
           emailOverride: !!emailOverride,
         })
         .returning();

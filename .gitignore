@@ -36,6 +36,16 @@ yarn-error.log*
 # vercel
 .vercel
 
+# graphify (generated knowledge graph)
+/graphify-out/
+
+# local verification artifacts (screenshots from manual QA)
+/verification-screenshots/
+
+# local Claude Code tooling (settings, worktrees) and scratch scripts
+/.claude/
+/scratch/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

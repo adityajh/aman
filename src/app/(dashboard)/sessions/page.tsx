@@ -67,8 +67,8 @@ function SessionsPageInner() {
 
   // Filters — initialised from URL params if present
   const searchParams = useSearchParams();
-  const [timeFilter, setTimeFilter] = useState<string>(searchParams.get("timeFilter") ?? "month");
-  const [clientFilter, setClientFilter] = useState<string>(searchParams.get("clientId") ?? "active");
+  const [timeFilter, setTimeFilter] = useState<string>(searchParams.get("timeFilter") ?? "today");
+  const [clientFilter, setClientFilter] = useState<string>(searchParams.get("clientId") ?? "all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   // Custom date range (IST yyyy-MM-dd); used when timeFilter === "custom".
   const [customStart, setCustomStart] = useState<string>("");
@@ -380,14 +380,47 @@ function SessionsPageInner() {
           })()}
         </TableCell>
         <TableCell className="font-semibold text-slate-700">
-          {(() => {
-            let cur = session.feeScheme?.currency;
-            if (!cur && session.client?.defaultFeeSchemeId) {
-              const fallbackScheme = feeSchemes.find(f => f.id === session.client.defaultFeeSchemeId);
-              if (fallbackScheme) cur = fallbackScheme.currency;
-            }
-            return cur === 'USD' ? '$' : '₹';
-          })()}{parseFloat(session.feeCharged || "0").toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+          <div className="flex flex-col">
+            <span>
+              {(() => {
+                let cur = session.feeScheme?.currency;
+                if (!cur && session.client?.defaultFeeSchemeId) {
+                  const fallbackScheme = feeSchemes.find(f => f.id === session.client.defaultFeeSchemeId);
+                  if (fallbackScheme) cur = fallbackScheme.currency;
+                }
+                return cur === 'USD' ? '$' : '₹';
+              })()}{(() => {
+                // Cancelled / no-show sessions are billed at the cancellation fee
+                // (which may be 0, 50%, or 100%), not the full session fee — so the
+                // Fees column must reflect what's actually invoiced, not the default.
+                const billedFee = (session.status === "cancelled" || session.status === "no_show")
+                  ? session.cancellationFee
+                  : session.feeCharged;
+                return parseFloat(billedFee || "0").toLocaleString('en-IN', { minimumFractionDigits: 2 });
+              })()}
+            </span>
+            {(() => {
+              if (session.status === "cancelled" || session.status === "no_show") {
+                const fullFee = parseFloat(session.feeCharged || "0");
+                const billedFee = parseFloat(session.cancellationFee || "0");
+                const waived = fullFee - billedFee;
+                if (waived > 0) {
+                  let cur = session.feeScheme?.currency;
+                  if (!cur && session.client?.defaultFeeSchemeId) {
+                    const fallbackScheme = feeSchemes.find(f => f.id === session.client.defaultFeeSchemeId);
+                    if (fallbackScheme) cur = fallbackScheme.currency;
+                  }
+                  const currencySymbol = cur === 'USD' ? '$' : '₹';
+                  return (
+                    <span className="text-[10px] text-slate-400 font-medium">
+                      waived {currencySymbol}{waived.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    </span>
+                  );
+                }
+              }
+              return null;
+            })()}
+          </div>
         </TableCell>
         <TableCell>
           {getStatusBadge(session)}
