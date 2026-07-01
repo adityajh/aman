@@ -5,6 +5,7 @@ import { eq, isNull, and, sql } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { formatIST, istNowParts, istFirstOfMonthStr, istTodayStr } from "@/lib/tz";
+import { applyClientCredit } from "@/lib/credit";
 
 export async function POST(req: Request) {
   const sessionUser = await getServerSession(authOptions);
@@ -140,6 +141,10 @@ export async function POST(req: Request) {
             invoiceId: newInvoice.id,
           }).where(eq(sessions.id, session.id));
         }
+
+        // 7. Auto-apply any advance credit the client is holding in this
+        //    currency (overpayments) against the invoice just created.
+        await applyClientCredit(clientId, currency, newInvoice);
 
         results.push(newInvoice);
       } catch (err: any) {
