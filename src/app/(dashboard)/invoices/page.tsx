@@ -309,10 +309,22 @@ export default function InvoicesPage() {
 
       if (res.ok) {
         const data = await res.json();
-        toast.success(`Generated ${data.count} invoices`);
-        fetchData();
-        setOpen(false);
-        setSelectedClients(new Set());
+        const errCount = data.errors?.length ?? 0;
+        if (data.count > 0) {
+          toast.success(
+            errCount > 0
+              ? `Generated ${data.count} · ${errCount} failed`
+              : `Generated ${data.count} invoices`,
+          );
+          fetchData();
+          setOpen(false);
+          setSelectedClients(new Set());
+        } else {
+          // count 0 with errors means the generation threw (e.g. a duplicate
+          // invoice number) — surface it instead of a silent "Generated 0".
+          const first = data.errors?.[0]?.error;
+          toast.error(first ? `Could not generate: ${first}` : "No billable sessions to invoice");
+        }
       } else {
         toast.error("Failed to generate invoices");
       }

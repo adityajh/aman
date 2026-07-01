@@ -2,6 +2,13 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [3.5.1] - 2026-07-01
+### Fixed
+- **Batch generation failed with "0 invoices generated"**: Invoice numbers were built from `count(*)`, which Postgres returns as a **string** — so `count + 1` string-concatenated (55 → `INV-2026-0551`) and, because deletions return the count to earlier values, regenerated an **already-used** number, hitting the unique constraint. Numbers are now computed from `MAX(suffix) + 1` for the year (robust to deletions/gaps).
+- **Silent failure**: the New Batch dialog reported "Generated 0 invoices" even when the batch errored. It now surfaces the actual reason (and flags partial failures).
+
+---
+
 ## [3.5.0] - 2026-06-27
 ### Added
 - **Client dashboard (`/clients/[id]`)**: The **Charts** button now opens a dedicated full-page client view — key stats (completed sessions, last session, total billed) plus the ORS/SRS/Predicted progress charts at full width and height. Replaces the old cramped modal.

@@ -83,9 +83,19 @@ export async function POST(req: Request) {
           if (scheme) currency = scheme.currency;
         }
 
-        // 3. Generate invoice number (simple count-based) — year is the IST year
-        const result = await db.select({ count: sql<number>`count(*)` }).from(invoices);
-        const invoiceNumber = `INV-${istNowParts().year}-${(result[0].count + 1).toString().padStart(4, '0')}`;
+        // 3. Generate invoice number from the highest existing suffix for the
+        //    IST year + 1. Robust to deletions/gaps — a count-based scheme
+        //    regenerates already-used numbers once any invoice is deleted (and
+        //    count(*) returns as a string, so `count + 1` string-concatenated).
+        const year = istNowParts().year;
+        const maxRow = await db
+          .select({
+            max: sql<number>`COALESCE(MAX(CAST(split_part(${invoices.invoiceNumber}, '-', 3) AS integer)), 0)`,
+          })
+          .from(invoices)
+          .where(sql`${invoices.invoiceNumber} LIKE ${`INV-${year}-%`}`);
+        const nextNum = Number(maxRow[0].max) + 1;
+        const invoiceNumber = `INV-${year}-${nextNum.toString().padStart(4, '0')}`;
 
         // 4. Totals
         const subtotal = billable.reduce((sum, b) => sum + b.amount, 0);
