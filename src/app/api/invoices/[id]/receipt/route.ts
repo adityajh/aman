@@ -1,11 +1,12 @@
 import nodemailer from "nodemailer";
 import { db } from "@/lib/db";
-import { invoices, payments, practiceSettings } from "@/lib/db/schema";
+import { invoices, payments, receipts, practiceSettings } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { formatIST, istTodayStr } from "@/lib/tz";
+import { nextReceiptNumber } from "@/lib/receipts";
 
 // POST /api/invoices/[id]/receipt
 // Body: { amount, paymentDate?, method?, referenceId?, notes?, sendEmail? }
@@ -54,11 +55,28 @@ export async function POST(
       if (newStatus === "draft") newStatus = "partial";
     }
 
+    const payDate = body.paymentDate || istTodayStr();
+
+    // Create the receipt (payment event), then the allocation against this invoice.
+    const rcptYear = parseInt(payDate.slice(0, 4), 10) || new Date().getUTCFullYear();
+    const receiptNumber = await nextReceiptNumber(rcptYear);
+    const [receipt] = await db.insert(receipts).values({
+      receiptNumber,
+      clientId: invoice.clientId,
+      amount: amountNum.toFixed(2),
+      currency: invoice.currency,
+      paymentDate: payDate,
+      method: body.method || "upi",
+      referenceId: body.referenceId || null,
+      notes: body.notes || null,
+    }).returning();
+
     await db.insert(payments).values({
+      receiptId: receipt.id,
       clientId: invoice.clientId,
       invoiceId: invoice.id,
       amount: amountNum.toFixed(2),
-      paymentDate: body.paymentDate || istTodayStr(),
+      paymentDate: payDate,
       currency: invoice.currency,
       method: body.method || "upi",
       referenceId: body.referenceId || null,
@@ -113,7 +131,7 @@ export async function POST(
           </div>
 
           <h2 style="color: #047857; font-size: 20px; font-weight: 700; margin-bottom: 8px;">Payment Receipt</h2>
-          <p style="font-size: 15px; color: #4a5568; margin-bottom: 24px;">For invoice <strong>${invoice.invoiceNumber}</strong></p>
+          <p style="font-size: 15px; color: #4a5568; margin-bottom: 24px;">Receipt <strong>${receiptNumber}</strong> · for invoice <strong>${invoice.invoiceNumber}</strong></p>
           <p style="font-size: 16px; margin-bottom: 24px;">Dear <strong>${invoice.client.name}</strong>,</p>
           <p style="font-size: 15px; color: #4a5568; line-height: 1.6; margin-bottom: 24px;">Thank you. We have received your payment. Details below for your records.</p>
 
@@ -150,10 +168,13 @@ export async function POST(
         html,
       });
       emailedTo = sendTo;
+      // Stamp when the receipt was sent (for tracking).
+      await db.update(receipts).set({ sentAt: new Date() }).where(eq(receipts.id, receipt.id));
     }
 
     return NextResponse.json({
       success: true,
+      receiptNumber,
       newStatus,
       amountPaid: newPaid.toFixed(2),
       balance: Math.max(0, total - newPaid).toFixed(2),

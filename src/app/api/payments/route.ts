@@ -1,10 +1,11 @@
 import { db } from "@/lib/db";
-import { payments, invoices, clients } from "@/lib/db/schema";
+import { payments, invoices, receipts } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
-import { desc, asc, eq, and, or, inArray } from "drizzle-orm";
+import { desc, asc, eq, and, inArray } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { istTodayStr } from "@/lib/tz";
+import { nextReceiptNumber } from "@/lib/receipts";
 
 export async function GET() {
   const sessionUser = await getServerSession(authOptions);
@@ -37,6 +38,23 @@ export async function POST(req: Request) {
     if (isNaN(remainingPayment) || remainingPayment <= 0) {
       return new NextResponse("Invalid amount", { status: 400 });
     }
+
+    const payDate = paymentDate || istTodayStr();
+
+    // 0. Create the receipt (the client-facing payment event). Allocation rows
+    //    below all reference this receipt.
+    const rcptYear = parseInt(payDate.slice(0, 4), 10) || new Date().getUTCFullYear();
+    const receiptNumber = await nextReceiptNumber(rcptYear);
+    const [receipt] = await db.insert(receipts).values({
+      receiptNumber,
+      clientId,
+      amount: remainingPayment.toFixed(2),
+      currency,
+      paymentDate: payDate,
+      method,
+      referenceId,
+      notes,
+    }).returning();
 
     // 1. Fetch outstanding invoices of the SAME CURRENCY (FIFO)
     const outstandingInvoices = await db.query.invoices.findMany({
@@ -82,12 +100,13 @@ export async function POST(req: Request) {
         })
         .where(eq(invoices.id, inv.id));
 
-      // Prepare payment record
+      // Prepare payment record (allocation of this receipt to the invoice)
       paymentRecords.push({
+        receiptId: receipt.id,
         clientId,
         invoiceId: inv.id,
         amount: allocation.toFixed(2),
-        paymentDate: paymentDate || istTodayStr(),
+        paymentDate: payDate,
         currency,
         method,
         referenceId,
@@ -98,10 +117,11 @@ export async function POST(req: Request) {
     // 3. Handle leftover (Credit / Overpayment in that currency)
     if (remainingPayment > 0) {
       paymentRecords.push({
+        receiptId: receipt.id,
         clientId,
         invoiceId: null,
         amount: remainingPayment.toFixed(2),
-        paymentDate: paymentDate || istTodayStr(),
+        paymentDate: payDate,
         currency,
         method,
         referenceId,
@@ -114,8 +134,9 @@ export async function POST(req: Request) {
       await db.insert(payments).values(paymentRecords);
     }
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
+      receiptNumber,
       allocated: paymentRecords.length,
       excess: remainingPayment > 0 ? remainingPayment.toFixed(2) : "0",
       currency

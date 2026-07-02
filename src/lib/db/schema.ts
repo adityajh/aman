@@ -255,6 +255,9 @@ export const payments = pgTable(
   "payments",
   {
     id: uuid("id").primaryKey().defaultRandom(),
+    // Allocation of a receipt to an invoice. receiptId groups all allocation
+    // rows that came from one payment event (the client-facing receipt).
+    receiptId: uuid("receipt_id").references(() => receipts.id, { onDelete: "cascade" }),
     invoiceId: uuid("invoice_id")
       .references(() => invoices.id, { onDelete: "restrict" }),
     clientId: uuid("client_id")
@@ -274,6 +277,40 @@ export const payments = pgTable(
   },
   (t) => ({
     invoiceIdx: index("idx_payments_invoice").on(t.invoiceId),
+    receiptIdx: index("idx_payments_receipt").on(t.receiptId),
+  })
+);
+
+// ─────────────────────────────────────────────
+// RECEIPTS
+// ─────────────────────────────────────────────
+// One row per payment EVENT the client makes (the client-facing, numbered
+// receipt). The money is then split across one or more `payments` allocation
+// rows (which invoice each slice covers, or excess when invoiceId is null).
+export const receipts = pgTable(
+  "receipts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    receiptNumber: text("receipt_number").notNull().unique(),
+    clientId: uuid("client_id")
+      .notNull()
+      .references(() => clients.id, { onDelete: "restrict" }),
+    amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+    currency: text("currency").notNull().default("INR"),
+    paymentDate: date("payment_date").notNull().default(sql`CURRENT_DATE`),
+    method: text("method")
+      .$type<"cash" | "upi" | "bank_transfer" | "card" | "online" | "other">()
+      .notNull(),
+    referenceId: text("reference_id"),
+    notes: text("notes"),
+    // When a receipt PDF/email was sent to the client (null = not sent).
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (t) => ({
+    clientIdx: index("idx_receipts_client").on(t.clientId),
   })
 );
 
@@ -416,6 +453,18 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
     fields: [payments.invoiceId],
     references: [invoices.id],
   }),
+  receipt: one(receipts, {
+    fields: [payments.receiptId],
+    references: [receipts.id],
+  }),
+}));
+
+export const receiptsRelations = relations(receipts, ({ one, many }) => ({
+  client: one(clients, {
+    fields: [receipts.clientId],
+    references: [clients.id],
+  }),
+  allocations: many(payments),
 }));
 
 // ─────────────────────────────────────────────
@@ -433,6 +482,8 @@ export type NewInvoice = typeof invoices.$inferInsert;
 export type InvoiceLineItem = typeof invoiceLineItems.$inferSelect;
 export type Payment = typeof payments.$inferSelect;
 export type NewPayment = typeof payments.$inferInsert;
+export type Receipt = typeof receipts.$inferSelect;
+export type NewReceipt = typeof receipts.$inferInsert;
 export type FeeScheme = typeof feeSchemes.$inferSelect;
 export type NewFeeScheme = typeof feeSchemes.$inferInsert;
 export type AuditLog = typeof auditLog.$inferSelect;

@@ -2,6 +2,20 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [3.6.0] - 2026-07-02
+### Added
+- **Receipts as first-class records**: Every payment now creates a numbered **receipt** (`RCP-2026-NNNN`, its own sequence). A receipt is the money the client actually paid; the existing `payments` rows became **allocations** of that receipt across invoices (or excess credit). Recording a payment, or Confirm-Payment on an invoice, both create a receipt; emailing a receipt records when it was **sent**.
+- **Client statement**: Clicking a client in the Payments ledger now opens a running **statement of account** — a single chronological list with **Invoiced** and **Received** columns and a running **Balance**, each row referencing its `INV-…` or `RCP-…` number (with an "emailed" marker on sent receipts). Replaces the old two-table drill-in.
+
+### Changed
+- **Credit re-application keeps its receipt**: When advance credit is auto-applied to a newly generated invoice, the allocation stays under the **original** receipt (the money was receipted once), so a client's receipt count reflects real payments.
+- **Deleting a payment** now deletes the whole **receipt** (all its allocations) and recalculates every invoice it touched.
+
+### Database
+- New `receipts` table + `payments.receipt_id` (FK, cascade). Migration `drizzle/0004_add_receipts.sql`. Existing payments were **backfilled** into receipts (grouped by payment event; totals reconcile exactly per client/currency).
+
+---
+
 ## [3.5.2] - 2026-07-01
 ### Added
 - **Payments page — client ledger & invoice views**: The Payments page is now two tabs. **By Client** shows a per-client ledger (Invoiced / Received / Balance, alphabetical; credit balances shown in green) — click any client to drill into their invoices and payments. **By Invoice** lists every invoice sorted by number with its received amount and balance. The raw per-transaction list is replaced by these two views.

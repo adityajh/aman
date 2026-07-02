@@ -36,9 +36,11 @@ export async function applyClientCredit(
     if (exAmt <= 0) continue;
     const take = Math.min(exAmt, remaining);
 
-    // Allocation row linked to the invoice (preserve original method/date/ref
-    // so the receipt history stays accurate about when the money came in).
+    // Allocation row linked to the invoice. Keep the ORIGINAL receiptId (and
+    // method/date/ref) — the money was receipted once; we're only re-pointing
+    // which invoice it covers, so it must stay under the same receipt.
     await db.insert(payments).values({
+      receiptId: ex.receiptId,
       clientId,
       invoiceId: invoice.id,
       amount: take.toFixed(2),

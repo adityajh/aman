@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import {
   Plus, User, CheckCircle2, Loader2, TrendingUp, History, AlertCircle,
-  Trash2, ArrowLeft, ChevronRight, Search,
+  Trash2, ArrowLeft, ChevronRight, Search, FileText, Receipt as ReceiptIcon, MailCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatIST, istTodayStr } from "@/lib/tz";
@@ -29,9 +29,7 @@ function Money({ map, tone }: { map: CurrencyMap; tone?: "owed" | "credit" | "pl
   return (
     <div className="flex flex-col items-end tabular-nums">
       {entries.map(([c, v]) => (
-        <span key={c} className={cn(
-          tone === "owed" ? "text-rose-600" : tone === "credit" ? "text-emerald-600" : "text-slate-900",
-        )}>
+        <span key={c} className={cn(tone === "owed" ? "text-rose-600" : tone === "credit" ? "text-emerald-600" : "text-slate-900")}>
           {v < 0 ? "-" : ""}{curSym(c)}{fmt(v)}
         </span>
       ))}
@@ -40,7 +38,7 @@ function Money({ map, tone }: { map: CurrencyMap; tone?: "owed" | "credit" | "pl
 }
 
 export default function PaymentsPage() {
-  const [payments, setPayments] = useState<any[]>([]);
+  const [receipts, setReceipts] = useState<any[]>([]);
   const [invoices, setInvoices] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]);
   const [summary, setSummary] = useState<any>({});
@@ -61,17 +59,17 @@ export default function PaymentsPage() {
 
   const fetchData = async () => {
     try {
-      const [payRes, invRes, summaryRes, clientsRes, feeRes] = await Promise.all([
-        fetch("/api/payments"),
+      const [recRes, invRes, summaryRes, clientsRes, feeRes] = await Promise.all([
+        fetch("/api/receipts"),
         fetch("/api/invoices"),
         fetch("/api/payments/outstanding-summary"),
         fetch("/api/clients"),
         fetch("/api/fee-schemes"),
       ]);
-      const [payData, invData, summaryData, clientsData, feeData] = await Promise.all([
-        payRes.json(), invRes.json(), summaryRes.json(), clientsRes.json(), feeRes.json(),
+      const [recData, invData, summaryData, clientsData, feeData] = await Promise.all([
+        recRes.json(), invRes.json(), summaryRes.json(), clientsRes.json(), feeRes.json(),
       ]);
-      setPayments(payData);
+      setReceipts(recData);
       setInvoices(invData);
       setSummary(summaryData);
       setClients(clientsData);
@@ -84,12 +82,12 @@ export default function PaymentsPage() {
   };
   useEffect(() => { fetchData(); }, []);
 
-  const handleDeletePayment = async (id: string) => {
+  const handleDeleteReceipt = async (id: string) => {
     setDeletingId(id);
     try {
-      const res = await fetch(`/api/payments/${id}`, { method: "DELETE" });
-      if (res.ok) { toast.success("Payment deleted; invoice balance recalculated."); setConfirmDeleteId(null); fetchData(); }
-      else toast.error("Failed to delete payment.");
+      const res = await fetch(`/api/receipts/${id}`, { method: "DELETE" });
+      if (res.ok) { toast.success("Receipt deleted; invoice balances recalculated."); setConfirmDeleteId(null); fetchData(); }
+      else toast.error("Failed to delete receipt.");
     } catch { toast.error("An error occurred."); }
     finally { setDeletingId(null); }
   };
@@ -111,7 +109,7 @@ export default function PaymentsPage() {
       const res = await fetch("/api/payments", { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } });
       if (res.ok) {
         const result = await res.json();
-        toast.success(`Payment recorded! Distributed across ${result.allocated} invoice(s).`);
+        toast.success(`Payment recorded — ${result.receiptNumber} (across ${result.allocated} invoice(s)).`);
         setOpen(false); setSelectedClientId(""); fetchData();
       } else {
         let errMsg = "Unknown error";
@@ -128,47 +126,8 @@ export default function PaymentsPage() {
       bank_transfer: "bg-slate-50 text-slate-700 ring-slate-200", card: "bg-purple-50 text-purple-700 ring-purple-200",
       online: "bg-teal-50 text-teal-700 ring-teal-200", other: "bg-amber-50 text-amber-700 ring-amber-200",
     };
-    return <span className={cn("inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ring-1 ring-inset", styles[method] || styles.other)}>{method.replace("_", " ")}</span>;
+    return <span className={cn("inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ring-1 ring-inset", styles[method] || styles.other)}>{(method || "other").replace("_", " ")}</span>;
   };
-
-  // ── Per-client ledger aggregation ─────────────────────────────────
-  const ledger = useMemo(() => {
-    const map: Record<string, { id: string; name: string; isActive: boolean; invoiced: CurrencyMap; received: CurrencyMap }> = {};
-    const ensure = (id: string, name: string, isActive: boolean) => (map[id] ??= { id, name: name || "—", isActive, invoiced: {}, received: {} });
-    for (const inv of invoices) {
-      if (inv.status === "void") continue;
-      const c = ensure(inv.clientId, inv.client?.name, inv.client?.isActive !== false);
-      addCur(c.invoiced, inv.currency, parseFloat(inv.total || "0"));
-    }
-    for (const pay of payments) {
-      const c = ensure(pay.clientId, pay.client?.name, pay.client?.isActive !== false);
-      addCur(c.received, pay.currency, parseFloat(pay.amount || "0"));
-    }
-    const rows = Object.values(map).map((c) => {
-      const balance: CurrencyMap = {};
-      for (const cur of new Set([...Object.keys(c.invoiced), ...Object.keys(c.received)])) {
-        balance[cur] = (c.invoiced[cur] || 0) - (c.received[cur] || 0);
-      }
-      return { ...c, balance };
-    });
-    const q = search.trim().toLowerCase();
-    return rows
-      .filter((r) => !q || r.name.toLowerCase().includes(q))
-      .sort((a, b) => a.name.localeCompare(b.name));
-  }, [invoices, payments, search]);
-
-  // ── By-invoice rows (sorted by invoice number) ────────────────────
-  const invoiceRows = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return invoices
-      .filter((i) => i.status !== "void")
-      .filter((i) => !q || i.invoiceNumber?.toLowerCase().includes(q) || i.client?.name?.toLowerCase().includes(q))
-      .sort((a, b) => (b.invoiceNumber || "").localeCompare(a.invoiceNumber || ""));
-  }, [invoices, search]);
-
-  const drillClient = drillClientId ? ledger.find((l) => l.id === drillClientId) : null;
-  const drillInvoices = drillClientId ? invoices.filter((i) => i.clientId === drillClientId && i.status !== "void").sort((a, b) => (b.invoiceNumber || "").localeCompare(a.invoiceNumber || "")) : [];
-  const drillPayments = drillClientId ? payments.filter((p) => p.clientId === drillClientId) : [];
 
   const StatusPill = ({ status }: { status: string }) => {
     const m: Record<string, string> = {
@@ -179,12 +138,61 @@ export default function PaymentsPage() {
     return <span className={cn("inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset", m[status] ?? m.draft)}>{status === "draft" ? "Generated" : status[0].toUpperCase() + status.slice(1)}</span>;
   };
 
+  // ── Per-client ledger (Invoiced from invoices, Received from receipts) ──
+  const ledger = useMemo(() => {
+    const map: Record<string, { id: string; name: string; isActive: boolean; invoiced: CurrencyMap; received: CurrencyMap }> = {};
+    const ensure = (id: string, name: string, isActive: boolean) => (map[id] ??= { id, name: name || "—", isActive, invoiced: {}, received: {} });
+    for (const inv of invoices) {
+      if (inv.status === "void") continue;
+      const c = ensure(inv.clientId, inv.client?.name, inv.client?.isActive !== false);
+      addCur(c.invoiced, inv.currency, parseFloat(inv.total || "0"));
+    }
+    for (const r of receipts) {
+      const c = ensure(r.clientId, r.client?.name, r.client?.isActive !== false);
+      addCur(c.received, r.currency, parseFloat(r.amount || "0"));
+    }
+    const rows = Object.values(map).map((c) => {
+      const balance: CurrencyMap = {};
+      for (const cur of new Set([...Object.keys(c.invoiced), ...Object.keys(c.received)])) balance[cur] = (c.invoiced[cur] || 0) - (c.received[cur] || 0);
+      return { ...c, balance };
+    });
+    const q = search.trim().toLowerCase();
+    return rows.filter((r) => !q || r.name.toLowerCase().includes(q)).sort((a, b) => a.name.localeCompare(b.name));
+  }, [invoices, receipts, search]);
+
+  const invoiceRows = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return invoices
+      .filter((i) => i.status !== "void")
+      .filter((i) => !q || i.invoiceNumber?.toLowerCase().includes(q) || i.client?.name?.toLowerCase().includes(q))
+      .sort((a, b) => (b.invoiceNumber || "").localeCompare(a.invoiceNumber || ""));
+  }, [invoices, search]);
+
+  const drillClient = drillClientId ? ledger.find((l) => l.id === drillClientId) : null;
+
+  // Unified statement (oldest first, running balance per currency).
+  const statement = useMemo(() => {
+    if (!drillClientId) return [];
+    type Row = { date: string; created: string; ref: string; kind: "invoice" | "receipt"; desc: string; currency: string; invoiced: number; received: number; id?: string; sentAt?: string | null; balance?: number };
+    const rows: Row[] = [];
+    for (const i of invoices.filter((x) => x.clientId === drillClientId && x.status !== "void")) {
+      rows.push({ date: i.issuedDate || i.billingMonth, created: i.createdAt, ref: i.invoiceNumber, kind: "invoice", desc: `Invoice · ${formatIST(new Date(i.billingMonth), "MMM yyyy")}`, currency: i.currency, invoiced: parseFloat(i.total || "0"), received: 0 });
+    }
+    for (const r of receipts.filter((x) => x.clientId === drillClientId)) {
+      rows.push({ date: r.paymentDate, created: r.createdAt, ref: r.receiptNumber, kind: "receipt", desc: `Payment · ${(r.method || "").replace("_", " ")}`, currency: r.currency, invoiced: 0, received: parseFloat(r.amount || "0"), id: r.id, sentAt: r.sentAt });
+    }
+    rows.sort((a, b) => a.date.localeCompare(b.date) || new Date(a.created).getTime() - new Date(b.created).getTime());
+    const running: CurrencyMap = {};
+    for (const r of rows) { running[r.currency] = (running[r.currency] || 0) + r.invoiced - r.received; r.balance = running[r.currency]; }
+    return rows;
+  }, [drillClientId, invoices, receipts]);
+
   return (
     <div className="p-8 space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Payments Ledger</h1>
-          <p className="text-slate-500">Client balances, invoice receivables, and collections.</p>
+          <p className="text-slate-500">Client balances, invoice receivables, and receipts.</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger render={<Button className="gap-2 bg-lime-400 text-slate-950 hover:bg-lime-500 font-bold shadow-sm"><Plus className="h-4 w-4" /> Record Payment</Button>} />
@@ -199,9 +207,7 @@ export default function PaymentsPage() {
                     const client = clients.find(c => c.id === cid);
                     if (client?.defaultFeeSchemeId) { const s = feeSchemes.find(f => f.id === client.defaultFeeSchemeId); if (s) setPaymentCurrency(s.currency); }
                   }}>
-                    <SelectTrigger className="w-full border-slate-200 h-10 bg-white shadow-sm">
-                      <SelectValue>{selectedClientId ? (clients.find(c => c.id === selectedClientId)?.name || "Pick a client...") : "Pick a client..."}</SelectValue>
-                    </SelectTrigger>
+                    <SelectTrigger className="w-full border-slate-200 h-10 bg-white shadow-sm"><SelectValue>{selectedClientId ? (clients.find(c => c.id === selectedClientId)?.name || "Pick a client...") : "Pick a client..."}</SelectValue></SelectTrigger>
                     <SelectContent className="bg-white border-slate-200 max-h-[250px] overflow-y-auto shadow-2xl">
                       {[...clients].sort((a,b)=>a.name.localeCompare(b.name)).map(c => <SelectItem key={c.id} value={c.id} label={c.name}>{c.name}</SelectItem>)}
                     </SelectContent>
@@ -214,10 +220,7 @@ export default function PaymentsPage() {
                     <SelectContent className="bg-white border-slate-200"><SelectItem value="INR" label="INR (₹)">INR (₹)</SelectItem><SelectItem value="USD" label="USD ($)">USD ($)</SelectItem></SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="amount">Amount Received</Label>
-                  <Input id="amount" name="amount" type="number" step="0.01" className="border-slate-200" placeholder="0.00" required />
-                </div>
+                <div className="space-y-2"><Label htmlFor="amount">Amount Received</Label><Input id="amount" name="amount" type="number" step="0.01" className="border-slate-200" placeholder="0.00" required /></div>
               </div>
               <div className="space-y-2"><Label htmlFor="paymentDate">Payment Date</Label><Input id="paymentDate" name="paymentDate" type="date" defaultValue={istTodayStr()} className="border-slate-200" required /></div>
               <div className="grid grid-cols-2 gap-4">
@@ -265,10 +268,10 @@ export default function PaymentsPage() {
         ))}
       </div>
 
-      {/* Drill-in view for a single client */}
+      {/* Client statement (drill-in) */}
       {drillClient ? (
         <Card className="border-slate-200 shadow-sm">
-          <CardContent className="p-6 space-y-6">
+          <CardContent className="p-6 space-y-5">
             <div className="flex items-center gap-3">
               <Button variant="ghost" size="sm" onClick={() => setDrillClientId(null)} className="gap-1 text-slate-500 hover:text-slate-900"><ArrowLeft className="h-4 w-4" /> Back</Button>
               <h2 className="text-xl font-bold text-slate-900">{drillClient.name}</h2>
@@ -282,59 +285,44 @@ export default function PaymentsPage() {
               </div>
             </div>
 
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Invoices</p>
-              <Table>
-                <TableHeader className="bg-slate-50/70"><TableRow className="hover:bg-transparent"><TableHead>Invoice #</TableHead><TableHead>Month</TableHead><TableHead className="text-right">Total</TableHead><TableHead className="text-right">Paid</TableHead><TableHead className="text-right">Balance</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
-                <TableBody>
-                  {drillInvoices.length === 0 ? <TableRow><TableCell colSpan={6} className="text-center py-6 text-slate-400">No invoices.</TableCell></TableRow> :
-                  drillInvoices.map((i) => {
-                    const bal = parseFloat(i.total) - parseFloat(i.amountPaid || "0");
-                    return (
-                      <TableRow key={i.id} className="hover:bg-slate-50/50">
-                        <TableCell className="font-semibold text-slate-900">{i.invoiceNumber}</TableCell>
-                        <TableCell className="text-slate-500 text-xs uppercase">{formatIST(new Date(i.billingMonth), "MMM yyyy")}</TableCell>
-                        <TableCell className="text-right tabular-nums">{curSym(i.currency)}{fmt(parseFloat(i.total))}</TableCell>
-                        <TableCell className="text-right tabular-nums text-slate-500">{curSym(i.currency)}{fmt(parseFloat(i.amountPaid || "0"))}</TableCell>
-                        <TableCell className={cn("text-right tabular-nums font-semibold", bal > 0.005 ? "text-rose-600" : "text-slate-400")}>{curSym(i.currency)}{fmt(bal)}</TableCell>
-                        <TableCell><StatusPill status={i.status} /></TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Payments</p>
-              <Table>
-                <TableHeader className="bg-slate-50/70"><TableRow className="hover:bg-transparent"><TableHead>Date</TableHead><TableHead>Applied to</TableHead><TableHead>Method</TableHead><TableHead>Notes</TableHead><TableHead className="text-right">Amount</TableHead><TableHead className="w-10"></TableHead></TableRow></TableHeader>
-                <TableBody>
-                  {drillPayments.length === 0 ? <TableRow><TableCell colSpan={6} className="text-center py-6 text-slate-400">No payments.</TableCell></TableRow> :
-                  drillPayments.map((p) => (
-                    <TableRow key={p.id} className="group hover:bg-slate-50/50">
-                      <TableCell className="text-sm text-slate-600">{formatIST(new Date(p.paymentDate), "d MMM yyyy")}</TableCell>
-                      <TableCell>{p.invoice ? <span className="text-sm font-medium text-slate-900">{p.invoice.invoiceNumber}</span> : <span className="text-xs italic text-slate-400">Unallocated credit</span>}</TableCell>
-                      <TableCell>{methodBadge(p.method)}</TableCell>
-                      <TableCell className="text-[11px] text-slate-500 max-w-[220px] truncate">{p.notes || "—"}</TableCell>
-                      <TableCell className="text-right font-semibold tabular-nums">{curSym(p.currency)}{fmt(parseFloat(p.amount))}</TableCell>
-                      <TableCell>
-                        {confirmDeleteId === p.id ? (
-                          <div className="flex gap-1"><Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => setConfirmDeleteId(null)}>Cancel</Button><Button size="sm" className="h-7 px-2 text-xs bg-rose-500 text-white" disabled={deletingId === p.id} onClick={() => handleDeletePayment(p.id)}>{deletingId === p.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Confirm"}</Button></div>
-                        ) : (
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-slate-300 hover:text-rose-500 opacity-0 group-hover:opacity-100" onClick={() => setConfirmDeleteId(p.id)} title="Delete payment"><Trash2 className="h-4 w-4" /></Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <Table>
+              <TableHeader className="bg-slate-50/70"><TableRow className="hover:bg-transparent">
+                <TableHead>Date</TableHead><TableHead>Reference</TableHead><TableHead>Description</TableHead>
+                <TableHead className="text-right">Invoiced</TableHead><TableHead className="text-right">Received</TableHead><TableHead className="text-right">Balance</TableHead><TableHead className="w-10"></TableHead>
+              </TableRow></TableHeader>
+              <TableBody>
+                {statement.length === 0 ? <TableRow><TableCell colSpan={7} className="text-center py-8 text-slate-400">No activity.</TableCell></TableRow> :
+                statement.map((r, idx) => (
+                  <TableRow key={r.kind + (r.id || r.ref) + idx} className="group hover:bg-slate-50/50">
+                    <TableCell className="text-sm text-slate-600 whitespace-nowrap">{formatIST(new Date(r.date), "d MMM yyyy")}</TableCell>
+                    <TableCell>
+                      <span className={cn("inline-flex items-center gap-1.5 text-sm font-medium", r.kind === "invoice" ? "text-slate-900" : "text-emerald-700")}>
+                        {r.kind === "invoice" ? <FileText className="h-3.5 w-3.5 text-slate-400" /> : <ReceiptIcon className="h-3.5 w-3.5 text-emerald-500" />}
+                        {r.ref}
+                        {r.kind === "receipt" && r.sentAt && <MailCheck className="h-3.5 w-3.5 text-emerald-400" aria-label="Receipt emailed" />}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-sm text-slate-500 capitalize">{r.desc}</TableCell>
+                    <TableCell className="text-right tabular-nums text-slate-700">{r.invoiced ? `${curSym(r.currency)}${fmt(r.invoiced)}` : "—"}</TableCell>
+                    <TableCell className="text-right tabular-nums text-emerald-600">{r.received ? `${curSym(r.currency)}${fmt(r.received)}` : "—"}</TableCell>
+                    <TableCell className={cn("text-right tabular-nums font-semibold", (r.balance ?? 0) > 0.005 ? "text-rose-600" : (r.balance ?? 0) < -0.005 ? "text-emerald-600" : "text-slate-400")}>
+                      {(r.balance ?? 0) < 0 ? "-" : ""}{curSym(r.currency)}{fmt(r.balance ?? 0)}
+                    </TableCell>
+                    <TableCell>
+                      {r.kind === "receipt" && (confirmDeleteId === r.id ? (
+                        <div className="flex gap-1"><Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => setConfirmDeleteId(null)}>Cancel</Button><Button size="sm" className="h-7 px-2 text-xs bg-rose-500 text-white" disabled={deletingId === r.id} onClick={() => handleDeleteReceipt(r.id!)}>{deletingId === r.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Confirm"}</Button></div>
+                      ) : (
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-slate-300 hover:text-rose-500 opacity-0 group-hover:opacity-100" onClick={() => setConfirmDeleteId(r.id!)} title="Delete receipt"><Trash2 className="h-4 w-4" /></Button>
+                      ))}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
       ) : (
         <>
-          {/* Tabs + search */}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex bg-slate-100/80 p-1 rounded-lg gap-1 border border-slate-200 shadow-sm">
               {(["clients", "invoices"] as const).map((v) => (
@@ -367,14 +355,8 @@ export default function PaymentsPage() {
                       const owes = Object.values(c.balance).some(v => v > 0.005);
                       const credit = !owes && Object.values(c.balance).some(v => v < -0.005);
                       return (
-                        <TableRow key={c.id} className="hover:bg-slate-50/60 transition-colors cursor-pointer" onClick={() => setDrillClientId(c.id)}>
-                          <TableCell className="py-3">
-                            <div className="flex items-center gap-2">
-                              <User className="h-4 w-4 text-slate-300 shrink-0" />
-                              <span className="font-medium text-slate-800">{c.name}</span>
-                              {!c.isActive && <Badge variant="outline" className="bg-rose-50 text-rose-500 border-rose-100 text-[8px]">Terminated</Badge>}
-                            </div>
-                          </TableCell>
+                        <TableRow key={c.id} className="hover:bg-slate-50/60 transition-colors cursor-pointer" onClick={() => { setConfirmDeleteId(null); setDrillClientId(c.id); }}>
+                          <TableCell className="py-3"><div className="flex items-center gap-2"><User className="h-4 w-4 text-slate-300 shrink-0" /><span className="font-medium text-slate-800">{c.name}</span>{!c.isActive && <Badge variant="outline" className="bg-rose-50 text-rose-500 border-rose-100 text-[8px]">Terminated</Badge>}</div></TableCell>
                           <TableCell className="text-right"><Money map={c.invoiced} /></TableCell>
                           <TableCell className="text-right"><Money map={c.received} /></TableCell>
                           <TableCell className="text-right"><Money map={c.balance} tone={owes ? "owed" : credit ? "credit" : "plain"} /></TableCell>
