@@ -71,7 +71,7 @@ export async function POST(
       html: testBanner + htmlContent,
       attachments: [
         {
-          filename: `progress-chart-${client.name.replace(/\\s+/g, '-').toLowerCase()}.pdf`,
+          filename: `progress-chart-${client.name.replace(/\s+/g, '-').toLowerCase()}.pdf`,
           content: pdfBuffer,
           contentType: 'application/pdf',
         },
@@ -81,6 +81,6 @@ export async function POST(
     return NextResponse.json({ success: true, testMode: overrideOn });
   } catch (error: any) {
     console.error("Mail Error:", error);
-    return new NextResponse(\`Email delivery failed: \${error.message || 'Unknown error'}\`, { status: 500 });
+    return new NextResponse(`Email delivery failed: ${error.message || 'Unknown error'}`, { status: 500 });
   }
 }
