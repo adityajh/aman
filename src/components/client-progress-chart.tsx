@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   ComposedChart,
   Line,
@@ -14,8 +14,12 @@ import {
   ReferenceArea,
   ResponsiveContainer,
 } from "recharts";
-import { AlertTriangle, TrendingDown, Frown, CheckCircle2, TrendingUp, Users } from "lucide-react";
+import { AlertTriangle, TrendingDown, Frown, CheckCircle2, TrendingUp, Users, Mail, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 interface ProgressChartProps {
   clientId: string;
@@ -66,23 +70,17 @@ function buildOrsChartData(
   return Object.values(all);
 }
 
-// Shared rich tooltip — shows the score, clinical risk, and any session note.
+// Shared rich tooltip — shows the score and date only.
 function ChartTooltip({ active, payload, label, unit }: any) {
   if (!active || !payload || payload.length === 0) return null;
   const row = payload.find((p: any) => p.dataKey === "ors" || p.dataKey === "srs" || p.dataKey === "clientOrs") ?? payload[0];
   const datum = row?.payload ?? {};
   const score = datum.ors ?? datum.srs ?? datum.clientOrs;
   if (score == null) return null;
-  const risk: string = datum.risk ?? "none";
-  const riskCls = risk === "high" ? "text-rose-600" : risk === "medium" ? "text-amber-600" : risk === "low" ? "text-yellow-600" : "text-slate-400";
   return (
     <div className="rounded-lg border border-slate-200 bg-white/95 px-3 py-2 shadow-lg backdrop-blur-sm max-w-[240px]">
       <p className="text-[11px] font-semibold text-slate-400">{label}</p>
       <p className="text-lg font-bold text-slate-900 leading-tight">{score}<span className="text-xs font-normal text-slate-400">/40 {unit}</span></p>
-      {risk && risk !== "none" && (
-        <p className={`text-[11px] font-bold uppercase tracking-wide ${riskCls}`}>{risk} risk</p>
-      )}
-      {datum.note && <p className="mt-1 text-[11px] text-slate-500 leading-snug border-t border-slate-100 pt-1">{datum.note}</p>}
     </div>
   );
 }
@@ -101,79 +99,7 @@ function StatTile({ label, value, sub, tone = "slate" }: { label: string; value:
   );
 }
 
-function OrsSparkline({
-  orsPoints,
-  compact,
-  thresholds,
-  flags,
-}: {
-  orsPoints: ProgressData["orsPoints"];
-  compact?: boolean;
-  thresholds: ProgressData["thresholds"];
-  flags: ProgressData["flags"];
-}) {
-  if (orsPoints.length === 0) {
-    return <div className="text-slate-300 text-xs text-center">No ORS data</div>;
-  }
-  const h = compact ? 50 : 220;
-  return (
-    <ResponsiveContainer width="100%" height={h}>
-      <ComposedChart data={orsPoints} margin={{ top: 4, right: 4, bottom: 0, left: compact ? -28 : 0 }}>
-        {!compact && (
-          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-        )}
-        {/* Colour bands as reference areas */}
-        <Area
-          type="monotone"
-          dataKey={() => thresholds.orsAmberLow - 1}
-          fill="#fee2e2"
-          stroke="transparent"
-          fillOpacity={0.35}
-          name="_red"
-          legendType="none"
-          isAnimationActive={false}
-        />
-        {!compact && (
-          <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-        )}
-        <YAxis
-          domain={[0, 40]}
-          hide={compact}
-          tick={{ fontSize: 11, fill: "#94a3b8" }}
-          ticks={[0, 10, 20, 25, 30, 40]}
-          width={28}
-        />
-        {/* Band lines */}
-        <ReferenceLine y={thresholds.orsAmberLow - 1} stroke="#fca5a5" strokeDasharray="4 4" strokeWidth={1} />
-        <ReferenceLine y={thresholds.orsGreenLow - 1} stroke="#86efac" strokeDasharray="4 4" strokeWidth={1} />
-        {!compact && (
-          <Tooltip
-            contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e2e8f0" }}
-            formatter={(v: unknown) => [`${v ?? "-"}`, "ORS"]}
-          />
-        )}
-        <Line
-          type="monotone"
-          dataKey="ors"
-          stroke="#3b82f6"
-          strokeWidth={compact ? 1.5 : 2.5}
-          dot={compact ? false : { r: 4, fill: "#3b82f6" }}
-          activeDot={compact ? false : { r: 6 }}
-          name="ORS Score"
-        />
-        {/* Alarm dot */}
-        {flags.isDeterioriating && !compact && (
-          <ReferenceLine
-            x={orsPoints.at(-1)?.date}
-            stroke="#ef4444"
-            strokeDasharray="4 4"
-            label={{ value: "⚠ Deteriorating", position: "insideTopRight", fill: "#ef4444", fontSize: 11 }}
-          />
-        )}
-      </ComposedChart>
-    </ResponsiveContainer>
-  );
-}
+
 
 function SrsChart({
   srsPoints,
@@ -194,8 +120,8 @@ function SrsChart({
       <ComposedChart data={srsPoints} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
         <defs>
           <linearGradient id="srsArea" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.28} />
-            <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.02} />
+            <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.65} />
+            <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.05} />
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
@@ -215,14 +141,7 @@ function SrsChart({
           activeDot={{ r: 6 }}
           name="SRS (Alliance)"
         />
-        {flags.isDissatisfied && (
-          <ReferenceLine
-            x={srsPoints.at(-1)?.date}
-            stroke="#f59e0b"
-            strokeDasharray="4 4"
-            label={{ value: "⚠ Dissatisfied", position: "insideTopRight", fill: "#f59e0b", fontSize: 11 }}
-          />
-        )}
+
       </ComposedChart>
     </ResponsiveContainer>
   );
@@ -244,8 +163,8 @@ function OrsFullChart({
       <ComposedChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
         <defs>
           <linearGradient id="orsArea" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.28} />
-            <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.02} />
+            <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.65} />
+            <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.05} />
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
@@ -285,14 +204,7 @@ function OrsFullChart({
           connectNulls
         />
 
-        {flags.isDeterioriating && (
-          <ReferenceLine
-            x={data.filter(d => d.ors != null).at(-1)?.date}
-            stroke="#ef4444"
-            strokeDasharray="4 4"
-            label={{ value: "⚠ Deteriorating", position: "insideTopRight", fill: "#ef4444", fontSize: 11 }}
-          />
-        )}
+
       </ComposedChart>
     </ResponsiveContainer>
   );
@@ -432,6 +344,8 @@ function PredictedProgressChart({ clientId }: { clientId: string }) {
 export function ClientProgressChart({ clientId, clientName, compact = false, variant = "modal" }: ProgressChartProps) {
   const [data, setData] = useState<ProgressData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [emailingPdf, setEmailingPdf] = useState(false);
+  const chartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetch(`/api/clients/${clientId}/progress`)
@@ -459,21 +373,7 @@ export function ClientProgressChart({ clientId, clientName, compact = false, var
   }
 
   if (compact) {
-    return (
-      <div className="relative w-full">
-        {(data.flags.isDeterioriating || data.flags.isDissatisfied) && (
-          <span className="absolute -top-1 -right-1 z-10">
-            <AlertTriangle className="h-3 w-3 text-rose-500 fill-rose-100" />
-          </span>
-        )}
-        <OrsSparkline
-          orsPoints={data.orsPoints}
-          compact
-          thresholds={data.thresholds}
-          flags={data.flags}
-        />
-      </div>
-    );
+    return null;
   }
 
   const orsChartData = buildOrsChartData(data.orsPoints, data.orsTrend);
@@ -484,8 +384,53 @@ export function ClientProgressChart({ clientId, clientName, compact = false, var
   const orsDelta = latestOrs != null && initialOrs != null ? Number(latestOrs) - Number(initialOrs) : null;
   const latestSrs = data.srsPoints.at(-1)?.srs ?? null;
 
+  const handleEmailPdf = async () => {
+    if (!chartRef.current) return;
+    try {
+      setEmailingPdf(true);
+      toast.loading("Generating chart PDF...", { id: "pdf-toast" });
+      
+      const canvas = await html2canvas(chartRef.current, { scale: 2 });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      const pdfBase64 = pdf.output('datauristring').split(',')[1];
+      
+      toast.loading("Emailing PDF...", { id: "pdf-toast" });
+      
+      const res = await fetch(`/api/clients/${clientId}/progress/mail`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pdfBase64, clientName }),
+      });
+      
+      if (!res.ok) throw new Error(await res.text());
+      toast.success("Charts emailed successfully!", { id: "pdf-toast" });
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to email PDF", { id: "pdf-toast" });
+    } finally {
+      setEmailingPdf(false);
+    }
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" ref={chartRef}>
+      {!compact && (
+        <div className="flex justify-end pt-2">
+          <Button variant="outline" size="sm" onClick={handleEmailPdf} disabled={emailingPdf}>
+            {emailingPdf ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Mail className="w-4 h-4 mr-2" />}
+            Email Chart as PDF
+          </Button>
+        </div>
+      )}
       {/* Summary stat tiles (page variant only) */}
       {page && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

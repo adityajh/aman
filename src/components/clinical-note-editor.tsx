@@ -171,11 +171,11 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
     orsOverall: 0,
     orsTotal: 0,
     // SRS
-    srsRelationship: 0,
-    srsGoals: 0,
-    srsApproach: 0,
-    srsOverall: 0,
-    srsTotal: 0,
+    srsRelationship: 9,
+    srsGoals: 9,
+    srsApproach: 9,
+    srsOverall: 9,
+    srsTotal: 36,
     riskFlag: "none",
   });
 

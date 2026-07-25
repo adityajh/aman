@@ -75,6 +75,7 @@ function SessionsPageInner() {
   const [customEnd, setCustomEnd] = useState<string>("");
   // Optional client-name sort overlay on top of the default date ordering.
   const [clientSort, setClientSort] = useState<null | "asc" | "desc">(null);
+  const [timeSort, setTimeSort] = useState<"asc" | "desc">("desc");
   // Free-text search across client name / email.
   const [search, setSearch] = useState("");
 
@@ -699,16 +700,28 @@ function SessionsPageInner() {
     });
   }, [sessions, clientFilter, timeFilter, statusFilter, customStart, customEnd, search]);
 
-  // Optional alphabetical-by-client overlay. When inactive, the default date
-  // ordering (newest first, from the API) is preserved.
+  // Sorting overlay. Primary sort is clientSort (if active), fallback is timeSort (default desc).
   const displayedSessions = useMemo(() => {
-    if (!clientSort) return filteredSessions;
-    return [...filteredSessions].sort((a, b) => {
-      const an = (a.client?.name || "").toLowerCase();
-      const bn = (b.client?.name || "").toLowerCase();
-      return clientSort === "asc" ? an.localeCompare(bn) : bn.localeCompare(an);
+    let result = [...filteredSessions];
+
+    // 1. Sort by time
+    result.sort((a, b) => {
+      const ta = new Date(a.scheduledAt).getTime();
+      const tb = new Date(b.scheduledAt).getTime();
+      return timeSort === "asc" ? ta - tb : tb - ta;
     });
-  }, [filteredSessions, clientSort]);
+
+    // 2. Overlay client sort if active
+    if (clientSort) {
+      result.sort((a, b) => {
+        const an = (a.client?.name || "").toLowerCase();
+        const bn = (b.client?.name || "").toLowerCase();
+        return clientSort === "asc" ? an.localeCompare(bn) : bn.localeCompare(an);
+      });
+    }
+
+    return result;
+  }, [filteredSessions, clientSort, timeSort]);
 
   return (
     <div className="p-8 space-y-6">
@@ -1020,7 +1033,21 @@ function SessionsPageInner() {
           <Table>
             <TableHeader className="bg-slate-50 items-center">
               <TableRow className="hover:bg-transparent border-slate-200">
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-28">Date</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-28">
+                  <button
+                    type="button"
+                    onClick={() => setTimeSort((p) => (p === "asc" ? "desc" : "asc"))}
+                    className="flex items-center gap-1 uppercase tracking-widest hover:text-slate-700 transition-colors"
+                    title="Sort by date and time"
+                  >
+                    Date
+                    {timeSort === "asc" ? (
+                      <ArrowUp className="h-3 w-3 text-slate-600" />
+                    ) : (
+                      <ArrowDown className="h-3 w-3 text-slate-600" />
+                    )}
+                  </button>
+                </TableHead>
                 <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-44">
                   <button
                     type="button"
