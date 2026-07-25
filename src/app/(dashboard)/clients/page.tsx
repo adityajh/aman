@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { Plus, User, Mail, Phone, IndianRupee, DollarSign, Pencil, X, Check, Loader2, UserMinus, LineChart, ListFilter, Calendar, AlertTriangle, Search } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { ClientProgressChart } from "@/components/client-progress-chart";
+import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { TZ_OPTIONS, IST, formatIST } from "@/lib/tz";
 
@@ -364,7 +364,8 @@ export default function ClientsPage() {
                 <TableHead>Name</TableHead>
                 <TableHead>Contact</TableHead>
                 <TableHead>Default Fee</TableHead>
-                <TableHead className="w-[120px]">ORS Trend</TableHead>
+                <TableHead className="w-16 text-center">ORS</TableHead>
+                <TableHead className="w-16 text-center">SRS</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -415,9 +416,18 @@ export default function ClientsPage() {
                         {client.defaultFee || "0.00"}
                       </div>
                     </TableCell>
-                    <TableCell className="w-[120px] py-2">
-                      <ClientProgressChart clientId={client.id} clientName={client.name} compact />
-                    </TableCell>
+                    {([client.latestOrsFlag, client.latestSrsFlag] as const).map((flag, i) => (
+                      <TableCell key={i} className="text-center py-2">
+                        <span className={cn(
+                          "inline-flex items-center justify-center rounded-full px-2 py-0.5 text-[10px] font-bold ring-1 ring-inset",
+                          flag === true ? "bg-rose-50 text-rose-600 ring-rose-200"
+                            : flag === false ? "bg-emerald-50 text-emerald-600 ring-emerald-200"
+                            : "bg-slate-50 text-slate-300 ring-slate-200",
+                        )}>
+                          {flag === true ? "YES" : flag === false ? "NO" : "—"}
+                        </span>
+                      </TableCell>
+                    ))}
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
                         <Button

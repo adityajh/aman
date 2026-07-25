@@ -14,7 +14,26 @@ export async function GET() {
     const allClients = await db.query.clients.findMany({
       orderBy: [asc(sql`LOWER(${clients.name})`)],
     });
-    return NextResponse.json(allClients);
+
+    // Each client's LATEST completed-session note flags (for the ORS/SRS
+    // columns on the Clients page).
+    const flagRes: any = await db.execute(sql`
+      SELECT DISTINCT ON (s.client_id) s.client_id AS cid, n.ors_flag AS o, n.srs_flag AS sr
+      FROM sessions s JOIN session_notes n ON n.session_id = s.id
+      WHERE s.status = 'completed'
+      ORDER BY s.client_id, s.scheduled_at DESC, n.created_at DESC
+    `);
+    const flagRows = Array.isArray(flagRes) ? flagRes : (flagRes.rows ?? []);
+    const flagMap = new Map<string, { o: boolean | null; sr: boolean | null }>(
+      flagRows.map((r: any) => [r.cid, { o: r.o, sr: r.sr }])
+    );
+
+    const enriched = allClients.map((c) => ({
+      ...c,
+      latestOrsFlag: flagMap.get(c.id)?.o ?? null,
+      latestSrsFlag: flagMap.get(c.id)?.sr ?? null,
+    }));
+    return NextResponse.json(enriched);
   } catch (error) {
     console.error(error);
     return new NextResponse("Internal Server Error", { status: 500 });

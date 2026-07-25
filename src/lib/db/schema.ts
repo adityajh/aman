@@ -204,6 +204,11 @@ export const sessionNotes = pgTable(
       .$type<"none" | "low" | "medium" | "high">()
       .notNull()
       .default("none"),
+    // Auto outcome flags derived from the scores (null = scale not recorded /
+    // N/A). ORS flag = ORS dropped >= threshold from baseline. SRS flag = SRS
+    // below cutoff OR dropped >= threshold from last session.
+    orsFlag: boolean("ors_flag"),
+    srsFlag: boolean("srs_flag"),
     noteType: text("note_type")
       .$type<"SOAP" | "DAP" | "BIRP" | "free" | "CUSTOM">()
       .notNull()

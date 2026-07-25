@@ -2,6 +2,20 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [3.6.1] - 2026-07-02
+### Changed
+- **Risk flag → two automatic ORS/SRS flags**: The single none/low/medium/high risk dropdown is replaced by two independent **YES / NO** flags derived from the scores, shown in the note editor as you enter scores:
+  - **ORS flag** — YES when ORS dropped ≥ the deterioration threshold from the client's baseline.
+  - **SRS flag** — YES when SRS is below the cutoff **or** dropped ≥ the decline threshold from the previous session.
+  - A scale that isn't recorded shows "—" (N/A). Thresholds remain configurable in Settings. The rule lives in one shared place (`@/lib/riskFlags`) used by the editor, save, backfill, reports, and dashboard.
+- **Clients page**: the small ORS trend sparkline is replaced by two compact **ORS** and **SRS** flag columns (each client's latest completed-session note).
+- **Reports / Dashboard "at-risk"** now count active clients whose latest note has the ORS or SRS flag set (was medium/high risk).
+
+### Database
+- Added `session_notes.ors_flag` / `session_notes.srs_flag` (boolean, nullable). Migration `drizzle/0005_add_note_flags.sql`; existing notes were backfilled from their scores.
+
+---
+
 ## [3.6.0] - 2026-07-02
 ### Added
 - **Receipts as first-class records**: Every payment now creates a numbered **receipt** (`RCP-2026-NNNN`, its own sequence). A receipt is the money the client actually paid; the existing `payments` rows became **allocations** of that receipt across invoices (or excess credit). Recording a payment, or Confirm-Payment on an invoice, both create a receipt; emailing a receipt records when it was **sent**.

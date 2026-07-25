@@ -39,7 +39,8 @@ export async function POST(
       updates, clientActions, myActions, agenda, feedback,
       actualStartTimeISO, actualEndTimeISO, // ISO strings
       orsIndividual, orsInterpersonal, orsSocial, orsOverall, orsTotal,
-      srsRelationship, srsGoals, srsApproach, srsOverall, srsTotal
+      srsRelationship, srsGoals, srsApproach, srsOverall, srsTotal,
+      orsFlag, srsFlag // auto outcome flags computed in the editor
     } = body;
 
     // 1. Fetch the session to get scheduledAt date
@@ -109,6 +110,8 @@ export async function POST(
       srsApproach,
       srsOverall,
       srsTotal,
+      orsFlag: orsFlag === undefined ? null : orsFlag,
+      srsFlag: srsFlag === undefined ? null : srsFlag,
       completedAt: new Date(),
     };
 

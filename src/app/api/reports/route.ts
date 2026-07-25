@@ -54,7 +54,7 @@ export async function GET() {
       }
     }
     const atRiskClients = [...activeLatestNote.values()].filter(
-      (n) => n.riskFlag === "medium" || n.riskFlag === "high"
+      (n) => n.orsFlag === true || n.srsFlag === true
     ).length;
 
     // Per-client derived values

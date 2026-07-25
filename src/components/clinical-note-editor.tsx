@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { computeNoteFlags } from "@/lib/riskFlags";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -135,8 +136,6 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
   // touches the flag themselves (then we stop overriding). We never
   // auto-downgrade — auto only ever raises to high.
   const [settings, setSettings] = useState<any>(null);
-  const [riskManual, setRiskManual] = useState(false);
-  const [autoRiskReason, setAutoRiskReason] = useState<string | null>(null);
 
   // Clinical context for this session (initial ORS baseline, previous SRS),
   // enriched by the sessions API onto the session object.
@@ -214,8 +213,6 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
           // A null total means the scale was deliberately "not recorded".
           setOrsNotRecorded(data.orsTotal == null);
           setSrsNotRecorded(data.srsTotal == null);
-          // Respect a previously-saved non-default flag — don't auto-override it.
-          if (data.riskFlag && data.riskFlag !== "none") setRiskManual(true);
         }
       } catch (err) {
         toast.error("Failed to fetch existing note");
@@ -234,38 +231,21 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
       .catch(() => {});
   }, []);
 
-  // §7 — auto-suggest "High Risk" from configurable thresholds. Runs as scores
-  // change; stops once the counselor sets the flag manually; only ever raises.
-  useEffect(() => {
-    if (riskManual || !settings) return;
-
-    const orsDeterThreshold = settings.orsDeteriorationThreshold ?? 5;
-    const srsDeclineThreshold = settings.srsDeclineThreshold ?? 2;
-    const srsCutoff = settings.srsCutoff ?? 36;
-
-    const initialOrs = clinical.initialOrs != null ? Number(clinical.initialOrs) : null;
-    const prevSrs = clinical.prevSrs != null ? Number(clinical.prevSrs) : null;
-
-    const reasons: string[] = [];
-    if (!orsNotRecorded && note.orsTotal > 0 && initialOrs != null
-        && initialOrs - note.orsTotal >= orsDeterThreshold) {
-      reasons.push(`ORS down ${Math.round(initialOrs - note.orsTotal)}+ from baseline (${initialOrs})`);
-    }
-    if (!srsNotRecorded && note.srsTotal > 0) {
-      if (note.srsTotal < srsCutoff) {
-        reasons.push(`SRS ${note.srsTotal} below cutoff ${srsCutoff}`);
-      } else if (prevSrs != null && prevSrs - note.srsTotal >= srsDeclineThreshold) {
-        reasons.push(`SRS down ${Math.round(prevSrs - note.srsTotal)}+ from last session`);
-      }
-    }
-
-    if (reasons.length > 0) {
-      setAutoRiskReason(reasons.join(" · "));
-      if (note.riskFlag !== "high") setNote((prev) => ({ ...prev, riskFlag: "high" }));
-    } else {
-      setAutoRiskReason(null);
-    }
-  }, [note.orsTotal, note.srsTotal, orsNotRecorded, srsNotRecorded, settings, riskManual, note.riskFlag, clinical.initialOrs, clinical.prevSrs]);
+  // Two automatic outcome flags derived from the scores (single source of
+  // truth in @/lib/riskFlags). ORS flag = ORS dropped from baseline; SRS flag
+  // = SRS below cutoff or dropped from last session. Recomputed live as the
+  // counselor enters scores; also sent on save.
+  const flags = useMemo(() => computeNoteFlags({
+    orsRecorded: !orsNotRecorded,
+    orsTotal: note.orsTotal,
+    initialOrs: clinical.initialOrs != null ? Number(clinical.initialOrs) : null,
+    srsRecorded: !srsNotRecorded,
+    srsTotal: note.srsTotal,
+    prevSrs: clinical.prevSrs != null ? Number(clinical.prevSrs) : null,
+    orsDeterThreshold: settings?.orsDeteriorationThreshold ?? 5,
+    srsDeclineThreshold: settings?.srsDeclineThreshold ?? 2,
+    srsCutoff: settings?.srsCutoff ?? 36,
+  }), [note.orsTotal, note.srsTotal, orsNotRecorded, srsNotRecorded, settings, clinical.initialOrs, clinical.prevSrs]);
 
   const num = (v: unknown) => {
     const x = typeof v === "number" ? v : parseFloat(v as string);
@@ -322,6 +302,8 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
         ...note,
         ...orsFields,
         ...srsFields,
+        orsFlag: flags.orsFlag,
+        srsFlag: flags.srsFlag,
         actualStartTimeISO: actStart.toISOString(),
         actualEndTimeISO: actEnd.toISOString()
       };
@@ -514,37 +496,26 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
       </div>
 
       <div className="flex items-center justify-between pt-6 border-t border-slate-200">
-        <div className="flex items-center gap-4">
-          <Label className="text-sm font-medium text-slate-600">Risk Flag:</Label>
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-3">
-              <Select
-                value={note.riskFlag}
-                onValueChange={(val: any) => {
-                  // Manual change disables further auto-suggestion.
-                  setRiskManual(true);
-                  setAutoRiskReason(null);
-                  setNote({ ...note, riskFlag: val });
-                }}
-              >
-                <SelectTrigger className="w-[160px] bg-white border-slate-200 text-slate-900">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-white border-slate-200 text-slate-900">
-                  <SelectItem value="none" label="None">None</SelectItem>
-                  <SelectItem value="low" label="Low Risk">Low Risk</SelectItem>
-                  <SelectItem value="medium" label="Medium Risk">Medium Risk</SelectItem>
-                  <SelectItem value="high" label="High Risk">High Risk</SelectItem>
-                </SelectContent>
-              </Select>
-              {note.riskFlag !== "none" && (
-                <AlertCircle className={cn("h-5 w-5", note.riskFlag === 'high' ? 'text-red-500' : 'text-orange-500')} />
-              )}
+        <div className="flex items-center gap-6">
+          {([
+            { label: "ORS", flag: flags.orsFlag, reason: flags.orsReason },
+            { label: "SRS", flag: flags.srsFlag, reason: flags.srsReason },
+          ] as const).map(({ label, flag, reason }) => (
+            <div key={label} className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">{label} flag</span>
+                <span className={cn(
+                  "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold ring-1 ring-inset",
+                  flag === true ? "bg-rose-50 text-rose-600 ring-rose-200"
+                    : flag === false ? "bg-emerald-50 text-emerald-600 ring-emerald-200"
+                    : "bg-slate-50 text-slate-400 ring-slate-200",
+                )}>
+                  {flag === true ? <><AlertCircle className="h-3 w-3" /> YES</> : flag === false ? "NO" : "—"}
+                </span>
+              </div>
+              {flag === true && reason && <span className="text-[10px] text-rose-500 font-medium">{reason}</span>}
             </div>
-            {autoRiskReason && !riskManual && (
-              <span className="text-[10px] text-red-500 font-medium">Auto-flagged: {autoRiskReason}</span>
-            )}
-          </div>
+          ))}
         </div>
 
         <Button type="submit" disabled={loading} className="gap-2 bg-lime-500 text-slate-950 hover:bg-lime-600 font-bold px-8 h-12">

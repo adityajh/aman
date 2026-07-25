@@ -144,15 +144,24 @@ export async function GET() {
       ))
       .groupBy(sql`COALESCE(${invoices.currency}, 'INR')`);
 
-    // Risk Flags (Medium/High)
-    const [riskFlags] = await db
-        .select({ count: sql<number>`count(*)` })
-        .from(sessionNotes)
-        .where(or(eq(sessionNotes.riskFlag, 'medium'), eq(sessionNotes.riskFlag, 'high')));
+    // At-risk = active clients whose LATEST completed-session note has an
+    // ORS or SRS flag.
+    const riskRes: any = await db.execute(sql`
+      SELECT count(*)::int AS count FROM (
+        SELECT DISTINCT ON (s.client_id) n.ors_flag AS o, n.srs_flag AS sr, c.is_active AS active
+        FROM sessions s
+        JOIN session_notes n ON n.session_id = s.id
+        JOIN clients c ON c.id = s.client_id
+        WHERE s.status = 'completed'
+        ORDER BY s.client_id, s.scheduled_at DESC, n.created_at DESC
+      ) t WHERE t.active AND (t.o OR t.sr)
+    `);
+    const riskRows = Array.isArray(riskRes) ? riskRes : (riskRes.rows ?? []);
+    const activeRiskFlags = Number(riskRows[0]?.count ?? 0);
 
     return NextResponse.json({
       outstanding: outstandingRevenue,
-      activeRiskFlags: riskFlags.count || 0,
+      activeRiskFlags,
       unbilledSessions,
       upcomingSessions,
       scheduledMonth,
