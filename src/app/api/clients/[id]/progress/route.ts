@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { sessions, practiceSettings } from "@/lib/db/schema";
+import { sessions, practiceSettings, clients } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
 import { eq, desc } from "drizzle-orm";
 import { getServerSession } from "next-auth";
@@ -23,6 +23,10 @@ export async function GET(
       where: eq(sessions.clientId, id),
       orderBy: [desc(sessions.scheduledAt)],
       with: { note: true },
+    });
+    
+    const clientRecord = await db.query.clients.findFirst({
+      where: eq(clients.id, id),
     });
 
     // Sort ascending for chart (oldest first)
@@ -100,6 +104,7 @@ export async function GET(
       orsTrend,
       flags: { isDeterioriating, isDissatisfied, isRci, isCsc },
       thresholds: { orsCutoff, srsCutoff, orsRciThreshold, orsAmberLow, orsGreenLow },
+      clientEmail: clientRecord?.email || "",
     });
   } catch (error) {
     console.error(error);

@@ -1065,7 +1065,21 @@ function SessionsPageInner() {
                     )}
                   </button>
                 </TableHead>
-                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-32">Time (IST)</TableHead>
+                <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-32">
+                  <button
+                    type="button"
+                    onClick={() => setTimeSort((p) => (p === "asc" ? "desc" : "asc"))}
+                    className="flex items-center gap-1 uppercase tracking-widest hover:text-slate-700 transition-colors"
+                    title="Sort by time"
+                  >
+                    Time (IST)
+                    {timeSort === "asc" ? (
+                      <ArrowUp className="h-3 w-3 text-slate-600" />
+                    ) : (
+                      <ArrowDown className="h-3 w-3 text-slate-600" />
+                    )}
+                  </button>
+                </TableHead>
                 <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-24">Duration</TableHead>
                 <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-24">Fees</TableHead>
                 <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest w-24">Status</TableHead>

@@ -17,6 +17,9 @@ import {
 import { AlertTriangle, TrendingDown, Frown, CheckCircle2, TrendingUp, Users, Mail, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -128,8 +131,7 @@ function SrsChart({
         <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
         <YAxis domain={[0, 40]} tick={{ fontSize: 11, fill: "#94a3b8" }} ticks={[0, 10, 20, 30, 36, 40]} width={28} />
         {/* Soft "below cutoff" zone */}
-        <ReferenceArea y1={0} y2={thresholds.srsCutoff} fill="#f59e0b" fillOpacity={0.05}
-          label={{ value: `Below cutoff ${thresholds.srsCutoff}`, position: "insideBottomRight", fill: "#d97706", fontSize: 10 }} />
+        <ReferenceArea y1={0} y2={thresholds.srsCutoff} fill="#f59e0b" fillOpacity={0.15} />
         <Tooltip content={<ChartTooltip unit="SRS" />} />
         <Area type="monotone" dataKey="srs" stroke="transparent" fill="url(#srsArea)" connectNulls isAnimationActive={false} legendType="none" />
         <Line
@@ -172,12 +174,9 @@ function OrsFullChart({
         <YAxis domain={[0, 40]} tick={{ fontSize: 11, fill: "#94a3b8" }} ticks={[0, 10, 20, 25, 30, 40]} width={28} />
 
         {/* Soft background zones instead of hard dashed lines */}
-        <ReferenceArea y1={0} y2={thresholds.orsAmberLow - 1} fill="#ef4444" fillOpacity={0.05}
-          label={{ value: "Distress", position: "insideLeft", fill: "#ef4444", fontSize: 10 }} />
-        <ReferenceArea y1={thresholds.orsAmberLow - 1} y2={thresholds.orsGreenLow - 1} fill="#f59e0b" fillOpacity={0.05}
-          label={{ value: "At Risk", position: "insideLeft", fill: "#d97706", fontSize: 10 }} />
-        <ReferenceArea y1={thresholds.orsGreenLow - 1} y2={40} fill="#22c55e" fillOpacity={0.05}
-          label={{ value: "Functional", position: "insideLeft", fill: "#16a34a", fontSize: 10 }} />
+        <ReferenceArea y1={0} y2={thresholds.orsAmberLow - 1} fill="#ef4444" fillOpacity={0.15} />
+        <ReferenceArea y1={thresholds.orsAmberLow - 1} y2={thresholds.orsGreenLow - 1} fill="#f59e0b" fillOpacity={0.15} />
+        <ReferenceArea y1={thresholds.orsGreenLow - 1} y2={40} fill="#22c55e" fillOpacity={0.15} />
 
         <Tooltip content={<ChartTooltip unit="ORS" />} />
         <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
@@ -265,10 +264,6 @@ function PredictedProgressChart({ clientId }: { clientId: string }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <Badge variant="outline" className={`gap-1.5 ${meta.cls}`}>
-          <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: meta.dot }} />
-          {meta.label}
-        </Badge>
         <span className="text-[11px] text-slate-400">
           vs. {data.cohortSize} clients who started near ORS {data.currentInitialOrs}
           {data.initialOrsBand && ` (${data.initialOrsBand[0]}–${data.initialOrsBand[1]})`}
@@ -345,6 +340,8 @@ export function ClientProgressChart({ clientId, clientName, compact = false, var
   const [data, setData] = useState<ProgressData | null>(null);
   const [loading, setLoading] = useState(true);
   const [emailingPdf, setEmailingPdf] = useState(false);
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [ccEmail, setCcEmail] = useState("counselor@aman.com");
   const chartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -390,7 +387,7 @@ export function ClientProgressChart({ clientId, clientName, compact = false, var
       setEmailingPdf(true);
       toast.loading("Generating chart PDF...", { id: "pdf-toast" });
       
-      const canvas = await html2canvas(chartRef.current, { scale: 2 });
+      const canvas = await html2canvas(chartRef.current, { scale: 1 });
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF({
         orientation: "portrait",
@@ -408,14 +405,15 @@ export function ClientProgressChart({ clientId, clientName, compact = false, var
       const res = await fetch(`/api/clients/${clientId}/progress/mail`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pdfBase64, clientName }),
+        body: JSON.stringify({ pdfBase64, ccEmail, clientName }),
       });
       
       if (!res.ok) throw new Error(await res.text());
       toast.success("Charts emailed successfully!", { id: "pdf-toast" });
-    } catch (error) {
+      setEmailDialogOpen(false);
+    } catch (error: any) {
       console.error(error);
-      toast.error("Failed to email PDF", { id: "pdf-toast" });
+      toast.error(`Failed to email PDF: ${error.message || "Unknown error"}`, { id: "pdf-toast" });
     } finally {
       setEmailingPdf(false);
     }
@@ -425,12 +423,37 @@ export function ClientProgressChart({ clientId, clientName, compact = false, var
     <div className="space-y-6" ref={chartRef}>
       {!compact && (
         <div className="flex justify-end pt-2">
-          <Button variant="outline" size="sm" onClick={handleEmailPdf} disabled={emailingPdf}>
-            {emailingPdf ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Mail className="w-4 h-4 mr-2" />}
+          <Button variant="outline" size="sm" onClick={() => setEmailDialogOpen(true)}>
+            <Mail className="w-4 h-4 mr-2" />
             Email Chart as PDF
           </Button>
         </div>
       )}
+      
+      <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Email Chart as PDF</DialogTitle>
+            <DialogDescription>
+              This will send the progress charts to the client's registered email{(data as any).clientEmail ? ` (${(data as any).clientEmail})` : ""}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>CC Email (Optional)</Label>
+              <Input value={ccEmail} onChange={e => setCcEmail(e.target.value)} placeholder="Email to CC" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEmailDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleEmailPdf} disabled={emailingPdf}>
+              {emailingPdf ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Mail className="w-4 h-4 mr-2" />}
+              Send Email
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
       {/* Summary stat tiles (page variant only) */}
       {page && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -459,35 +482,6 @@ export function ClientProgressChart({ clientId, clientName, compact = false, var
           />
         </div>
       )}
-
-      {/* Flags row */}
-      <div className="flex flex-wrap gap-2">
-        {data.flags.isCsc && (
-          <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 gap-1">
-            <CheckCircle2 className="h-3 w-3" /> CSC Achieved
-          </Badge>
-        )}
-        {data.flags.isRci && !data.flags.isCsc && (
-          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 gap-1">
-            <TrendingUp className="h-3 w-3" /> RCI Achieved
-          </Badge>
-        )}
-        {data.flags.isDeterioriating && (
-          <Badge variant="outline" className="bg-rose-50 text-rose-700 border-rose-200 gap-1">
-            <TrendingDown className="h-3 w-3" /> Deteriorating
-          </Badge>
-        )}
-        {data.flags.isDissatisfied && (
-          <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200 gap-1">
-            <Frown className="h-3 w-3" /> Dissatisfied with Alliance
-          </Badge>
-        )}
-        {!data.flags.isDeterioriating && !data.flags.isDissatisfied && data.orsPoints.length > 0 && (
-          <Badge variant="outline" className="bg-slate-50 text-slate-500 border-slate-200 gap-1">
-            <CheckCircle2 className="h-3 w-3" /> On Track
-          </Badge>
-        )}
-      </div>
 
       {/* ORS Chart */}
       <div>

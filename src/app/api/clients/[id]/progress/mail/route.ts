@@ -15,7 +15,7 @@ export async function POST(
   if (!sessionUser) return new NextResponse("Unauthorized", { status: 401 });
 
   try {
-    const { pdfBase64 } = await req.json();
+    const { pdfBase64, ccEmail } = await req.json();
     if (!pdfBase64) return new NextResponse("PDF content required", { status: 400 });
 
     const [client, settings] = await Promise.all([
@@ -67,6 +67,7 @@ export async function POST(
     await transporter.sendMail({
       from: `"${practiceProfile.practiceName}" <${process.env.SMTP_USER}>`,
       to: sendTo,
+      cc: ccEmail || undefined,
       subject,
       html: testBanner + htmlContent,
       attachments: [
