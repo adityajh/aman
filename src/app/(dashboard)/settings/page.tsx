@@ -7,11 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Save, Loader2, User, Building, MapPin, Phone, Mail, Quote, Activity } from "lucide-react";
+import { Save, Loader2, User, Building, MapPin, Phone, Mail, Quote, Activity, Lock } from "lucide-react";
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [updatingPassword, setUpdatingPassword] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({ newPassword: "", confirmPassword: "" });
   const [settings, setSettings] = useState({
     counselorName: "",
     practiceName: "",
@@ -83,6 +85,39 @@ export default function SettingsPage() {
       toast.error("An error occurred");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+    if (passwordForm.newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters long");
+      return;
+    }
+
+    setUpdatingPassword(true);
+    try {
+      const res = await fetch("/api/settings/password", {
+        method: "POST",
+        body: JSON.stringify({ newPassword: passwordForm.newPassword }),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (res.ok) {
+        toast.success("Password updated successfully");
+        setPasswordForm({ newPassword: "", confirmPassword: "" });
+      } else {
+        const error = await res.text();
+        toast.error(error || "Failed to update password");
+      }
+    } catch (err) {
+      toast.error("An error occurred while updating password");
+    } finally {
+      setUpdatingPassword(false);
     }
   };
 
@@ -369,12 +404,55 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        <div className="flex justify-end pt-4">
+        <div className="flex justify-end pt-4 pb-12">
           <Button type="submit" disabled={saving} size="lg" className="min-w-[200px] gap-2">
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             Save Settings
           </Button>
         </div>
+      </form>
+
+      <form onSubmit={handlePasswordSubmit} className="space-y-6 pt-8 border-t border-slate-200">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Lock className="h-5 w-5 text-primary" /> Security
+            </CardTitle>
+            <CardDescription>Update your account password.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">New Password</Label>
+                <Input
+                  id="newPassword"
+                  type="password"
+                  value={passwordForm.newPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+            </div>
+            <div className="flex justify-start pt-2">
+              <Button type="submit" disabled={updatingPassword} variant="secondary" className="gap-2">
+                {updatingPassword ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                Update Password
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </form>
     </div>
   );
