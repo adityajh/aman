@@ -20,12 +20,38 @@ import {
 import { sql, relations } from "drizzle-orm";
 
 // ─────────────────────────────────────────────
+// TENANTS & USERS
+// ─────────────────────────────────────────────
+export const tenants = pgTable("tenants", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+  email: text("email").notNull(),
+  phone: text("phone"),
+  planTier: text("plan_tier").$type<"basic" | "pro">().notNull().default("basic"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
+});
+
+export const users = pgTable("users", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  tenantId: uuid("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
+});
+
+// ─────────────────────────────────────────────
 // FEE SCHEMES
 // ─────────────────────────────────────────────
 export const feeSchemes = pgTable(
   "fee_schemes",
   {
     id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     description: text("description"),
     amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
@@ -46,6 +72,7 @@ export const clients = pgTable(
   "clients",
   {
     id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     email: text("email"),
     phone: text("phone"),
@@ -72,6 +99,7 @@ export const clients = pgTable(
   },
   (t) => ({
     activeIdx: index("idx_clients_active").on(t.isActive),
+    tenantActiveIdx: index("idx_clients_tenant_active").on(t.tenantId, t.isActive),
   })
 );
 
@@ -82,10 +110,11 @@ export const invoices = pgTable(
   "invoices",
   {
     id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
     clientId: uuid("client_id")
       .notNull()
       .references(() => clients.id, { onDelete: "restrict" }),
-    invoiceNumber: text("invoice_number").notNull().unique(),
+    invoiceNumber: text("invoice_number").notNull(),
     billingMonth: date("billing_month").notNull(),
     issuedDate: date("issued_date").notNull().default(sql`CURRENT_DATE`),
     dueDate: date("due_date"),
@@ -114,6 +143,7 @@ export const invoices = pgTable(
     clientIdx: index("idx_invoices_client").on(t.clientId),
     statusIdx: index("idx_invoices_status").on(t.status),
     monthIdx: index("idx_invoices_month").on(t.billingMonth),
+    uniqueInvoiceNum: uniqueIndex("idx_invoices_tenant_num").on(t.tenantId, t.invoiceNumber),
   })
 );
 
@@ -124,6 +154,7 @@ export const sessions = pgTable(
   "sessions",
   {
     id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
     clientId: uuid("client_id")
       .notNull()
       .references(() => clients.id, { onDelete: "restrict" }),
@@ -162,6 +193,7 @@ export const sessions = pgTable(
     clientIdx: index("idx_sessions_client").on(t.clientId),
     statusIdx: index("idx_sessions_status").on(t.status),
     scheduledIdx: index("idx_sessions_scheduled").on(t.scheduledAt),
+    tenantScheduledIdx: index("idx_sessions_tenant_scheduled").on(t.tenantId, t.scheduledAt),
     invoiceIdx: index("idx_sessions_invoice").on(t.invoiceId),
   })
 );
@@ -173,6 +205,7 @@ export const sessionNotes = pgTable(
   "session_notes",
   {
     id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
     sessionId: uuid("session_id")
       .notNull()
       .unique()
@@ -235,6 +268,7 @@ export const invoiceLineItems = pgTable(
   "invoice_line_items",
   {
     id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
     invoiceId: uuid("invoice_id")
       .notNull()
       .references(() => invoices.id, { onDelete: "cascade" }),
@@ -260,6 +294,7 @@ export const payments = pgTable(
   "payments",
   {
     id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
     // Allocation of a receipt to an invoice. receiptId groups all allocation
     // rows that came from one payment event (the client-facing receipt).
     receiptId: uuid("receipt_id").references(() => receipts.id, { onDelete: "cascade" }),
@@ -296,7 +331,8 @@ export const receipts = pgTable(
   "receipts",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    receiptNumber: text("receipt_number").notNull().unique(),
+    tenantId: uuid("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
+    receiptNumber: text("receipt_number").notNull(),
     clientId: uuid("client_id")
       .notNull()
       .references(() => clients.id, { onDelete: "restrict" }),
@@ -316,6 +352,7 @@ export const receipts = pgTable(
   },
   (t) => ({
     clientIdx: index("idx_receipts_client").on(t.clientId),
+    uniqueReceiptNum: uniqueIndex("idx_receipts_tenant_num").on(t.tenantId, t.receiptNumber),
   })
 );
 
@@ -326,6 +363,7 @@ export const portalTokens = pgTable(
   "portal_tokens",
   {
     id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
     clientId: uuid("client_id")
       .notNull()
       .references(() => clients.id, { onDelete: "cascade" }),
@@ -349,6 +387,7 @@ export const practiceSettings = pgTable(
   "practice_settings",
   {
     id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
     counselorName: text("counselor_name").notNull().default("Vijay Gopal Sreenivasan"),
     practiceName: text("practice_name").notNull().default("Aman Counseling"),
     address: text("address").default("Noida, Uttar Pradesh"),
@@ -384,6 +423,7 @@ export const auditLog = pgTable(
   "audit_log",
   {
     id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
     tableName: text("table_name").notNull(),
     recordId: uuid("record_id").notNull(),
     action: text("action").$type<"INSERT" | "UPDATE" | "DELETE">().notNull(),
@@ -404,7 +444,26 @@ export const auditLog = pgTable(
 // RELATIONSHIPS
 // ─────────────────────────────────────────────
 
-export const clientsRelations = relations(clients, ({ many }) => ({
+export const tenantsRelations = relations(tenants, ({ many }) => ({
+  users: many(users),
+  clients: many(clients),
+  sessions: many(sessions),
+  invoices: many(invoices),
+  receipts: many(receipts),
+}));
+
+export const usersRelations = relations(users, ({ one }) => ({
+  tenant: one(tenants, {
+    fields: [users.tenantId],
+    references: [tenants.id],
+  }),
+}));
+
+export const clientsRelations = relations(clients, ({ one, many }) => ({
+  tenant: one(tenants, {
+    fields: [clients.tenantId],
+    references: [tenants.id],
+  }),
   sessions: many(sessions),
   invoices: many(invoices),
   payments: many(payments),
@@ -476,6 +535,10 @@ export const receiptsRelations = relations(receipts, ({ one, many }) => ({
 // TYPE EXPORTS
 // ─────────────────────────────────────────────
 
+export type Tenant = typeof tenants.$inferSelect;
+export type NewTenant = typeof tenants.$inferInsert;
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
 export type Client = typeof clients.$inferSelect;
 export type NewClient = typeof clients.$inferInsert;
 export type Session = typeof sessions.$inferSelect;

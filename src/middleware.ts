@@ -35,9 +35,11 @@ export const config = {
     /*
      * Protect all routes EXCEPT:
      * - /login (sign-in page)
+     * - /signup (registration page)
+     * - /portal (client facing routes)
      * - /api/auth (NextAuth endpoints)
      * - Static files (_next, favicons, etc.)
      */
-    "/((?!login|api/auth|_next/static|_next/image|favicon.ico).*)",
+    "/((?!login|signup|portal|api/auth|_next/static|_next/image|favicon.ico).*)",
   ],
 };

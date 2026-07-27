@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Save, Loader2, AlertCircle, BarChart3, ClipboardList, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatIST, istDateTimeToUTC } from "@/lib/tz";
+import { useSession } from "next-auth/react";
 
 interface ClinicalNoteEditorProps {
   session: any; // Full session object for initial times
@@ -124,6 +125,9 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [showNumbers, setShowNumbers] = useState(false);
+  const { data: sessionData } = useSession();
+  const planTier = (sessionData?.user as any)?.planTier || "basic";
+  const hasClinicalMeasurement = planTier === "pro";
 
   // §7 — "Not Recorded" toggles (per ORS/SRS block). When on, that scale is
   // saved as null for this session rather than 0, so the chart bridges the gap
@@ -403,74 +407,78 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* ORS Section */}
-        <div className="space-y-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
-          <div className="flex justify-between items-center border-b border-slate-200 pb-2">
-            <div className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-lime-600" />
-              <h3 className="text-sm font-bold text-slate-900">ORS (Outcome Rating Scale)</h3>
-            </div>
-            <div className="flex items-center gap-3">
-              {showNumbers && !orsNotRecorded && (
-                <div className="px-2 py-0.5 rounded bg-lime-500/10 border border-lime-500/20">
-                  <span className="text-xs font-bold text-lime-600">Total: {note.orsTotal}/40</span>
+      {hasClinicalMeasurement && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* ORS Section */}
+            <div className="space-y-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
+              <div className="flex justify-between items-center border-b border-slate-200 pb-2">
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4 text-lime-600" />
+                  <h3 className="text-sm font-bold text-slate-900">ORS (Outcome Rating Scale)</h3>
                 </div>
-              )}
-              <label className="flex items-center gap-1.5 cursor-pointer select-none" title="Save this scale as 'not recorded' (null) for this session">
-                <input type="checkbox" checked={orsNotRecorded} onChange={(e) => setOrsNotRecorded(e.target.checked)} className="h-3.5 w-3.5 accent-slate-400" />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Not recorded</span>
-              </label>
-            </div>
-          </div>
-          <div className="space-y-4">
-            <ScoreSelector label="Individually (Personal well-being)" value={note.orsIndividual} onChange={(v) => updateOrs('orsIndividual', v)} showNumbers={showNumbers} disabled={orsNotRecorded} />
-            <ScoreSelector label="Interpersonally (Family, close relationships)" value={note.orsInterpersonal} onChange={(v) => updateOrs('orsInterpersonal', v)} showNumbers={showNumbers} disabled={orsNotRecorded} />
-            <ScoreSelector label="Socially (Work, school, friendships)" value={note.orsSocial} onChange={(v) => updateOrs('orsSocial', v)} showNumbers={showNumbers} disabled={orsNotRecorded} />
-            <ScoreSelector label="Overall (General sense of well-being)" value={note.orsOverall} onChange={(v) => updateOrs('orsOverall', v)} showNumbers={showNumbers} disabled={orsNotRecorded} />
-          </div>
-        </div>
-
-        {/* SRS Section */}
-        <div className="space-y-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
-          <div className="flex justify-between items-center border-b border-slate-200 pb-2">
-            <div className="flex items-center gap-2">
-              <ClipboardList className="h-4 w-4 text-lime-600" />
-              <h3 className="text-sm font-bold text-slate-900">SRS (Session Rating Scale)</h3>
-            </div>
-            <div className="flex items-center gap-3">
-              {showNumbers && !srsNotRecorded && (
-                <div className="px-2 py-0.5 rounded bg-lime-500/10 border border-lime-500/20">
-                  <span className="text-xs font-bold text-lime-600">Total: {note.srsTotal}/40</span>
+                <div className="flex items-center gap-3">
+                  {showNumbers && !orsNotRecorded && (
+                    <div className="px-2 py-0.5 rounded bg-lime-500/10 border border-lime-500/20">
+                      <span className="text-xs font-bold text-lime-600">Total: {note.orsTotal}/40</span>
+                    </div>
+                  )}
+                  <label className="flex items-center gap-1.5 cursor-pointer select-none" title="Save this scale as 'not recorded' (null) for this session">
+                    <input type="checkbox" checked={orsNotRecorded} onChange={(e) => setOrsNotRecorded(e.target.checked)} className="h-3.5 w-3.5 accent-slate-400" />
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Not recorded</span>
+                  </label>
                 </div>
-              )}
-              <label className="flex items-center gap-1.5 cursor-pointer select-none" title="Save this scale as 'not recorded' (null) for this session">
-                <input type="checkbox" checked={srsNotRecorded} onChange={(e) => setSrsNotRecorded(e.target.checked)} className="h-3.5 w-3.5 accent-slate-400" />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Not recorded</span>
-              </label>
+              </div>
+              <div className="space-y-4">
+                <ScoreSelector label="Individually (Personal well-being)" value={note.orsIndividual} onChange={(v) => updateOrs('orsIndividual', v)} showNumbers={showNumbers} disabled={orsNotRecorded} />
+                <ScoreSelector label="Interpersonally (Family, close relationships)" value={note.orsInterpersonal} onChange={(v) => updateOrs('orsInterpersonal', v)} showNumbers={showNumbers} disabled={orsNotRecorded} />
+                <ScoreSelector label="Socially (Work, school, friendships)" value={note.orsSocial} onChange={(v) => updateOrs('orsSocial', v)} showNumbers={showNumbers} disabled={orsNotRecorded} />
+                <ScoreSelector label="Overall (General sense of well-being)" value={note.orsOverall} onChange={(v) => updateOrs('orsOverall', v)} showNumbers={showNumbers} disabled={orsNotRecorded} />
+              </div>
+            </div>
+
+            {/* SRS Section */}
+            <div className="space-y-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
+              <div className="flex justify-between items-center border-b border-slate-200 pb-2">
+                <div className="flex items-center gap-2">
+                  <ClipboardList className="h-4 w-4 text-lime-600" />
+                  <h3 className="text-sm font-bold text-slate-900">SRS (Session Rating Scale)</h3>
+                </div>
+                <div className="flex items-center gap-3">
+                  {showNumbers && !srsNotRecorded && (
+                    <div className="px-2 py-0.5 rounded bg-lime-500/10 border border-lime-500/20">
+                      <span className="text-xs font-bold text-lime-600">Total: {note.srsTotal}/40</span>
+                    </div>
+                  )}
+                  <label className="flex items-center gap-1.5 cursor-pointer select-none" title="Save this scale as 'not recorded' (null) for this session">
+                    <input type="checkbox" checked={srsNotRecorded} onChange={(e) => setSrsNotRecorded(e.target.checked)} className="h-3.5 w-3.5 accent-slate-400" />
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Not recorded</span>
+                  </label>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <ScoreSelector label="Goals and Topics (We worked on what I wanted)" value={note.srsGoals} onChange={(v) => updateSrs('srsGoals', v)} showNumbers={showNumbers} disabled={srsNotRecorded} />
+                <ScoreSelector label="Approach or Method (Fit with therapist's approach)" value={note.srsApproach} onChange={(v) => updateSrs('srsApproach', v)} showNumbers={showNumbers} disabled={srsNotRecorded} />
+                <ScoreSelector label="Relationship (I felt heard, understood, and respected)" value={note.srsRelationship} onChange={(v) => updateSrs('srsRelationship', v)} showNumbers={showNumbers} disabled={srsNotRecorded} />
+                <ScoreSelector label="Overall (Today's session was right for me)" value={note.srsOverall} onChange={(v) => updateSrs('srsOverall', v)} showNumbers={showNumbers} disabled={srsNotRecorded} />
+              </div>
             </div>
           </div>
-          <div className="space-y-4">
-            <ScoreSelector label="Goals and Topics (We worked on what I wanted)" value={note.srsGoals} onChange={(v) => updateSrs('srsGoals', v)} showNumbers={showNumbers} disabled={srsNotRecorded} />
-            <ScoreSelector label="Approach or Method (Fit with therapist's approach)" value={note.srsApproach} onChange={(v) => updateSrs('srsApproach', v)} showNumbers={showNumbers} disabled={srsNotRecorded} />
-            <ScoreSelector label="Relationship (I felt heard, understood, and respected)" value={note.srsRelationship} onChange={(v) => updateSrs('srsRelationship', v)} showNumbers={showNumbers} disabled={srsNotRecorded} />
-            <ScoreSelector label="Overall (Today's session was right for me)" value={note.srsOverall} onChange={(v) => updateSrs('srsOverall', v)} showNumbers={showNumbers} disabled={srsNotRecorded} />
-          </div>
-        </div>
-      </div>
 
-      <div className="flex justify-center -my-4 relative z-10">
-        <Button 
-          type="button"
-          variant="outline" 
-          size="icon" 
-          onClick={() => setShowNumbers(!showNumbers)}
-          className="rounded-full bg-white shadow-sm border-slate-200 text-slate-500 hover:text-slate-900 h-10 w-10"
-          title={showNumbers ? "Hide Scores (Blind Mode)" : "Show Scores (Precise Mode)"}
-        >
-          {showNumbers ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-        </Button>
-      </div>
+          <div className="flex justify-center -my-4 relative z-10">
+            <Button 
+              type="button"
+              variant="outline" 
+              size="icon" 
+              onClick={() => setShowNumbers(!showNumbers)}
+              className="rounded-full bg-white shadow-sm border-slate-200 text-slate-500 hover:text-slate-900 h-10 w-10"
+              title={showNumbers ? "Hide Scores (Blind Mode)" : "Show Scores (Precise Mode)"}
+            >
+              {showNumbers ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </Button>
+          </div>
+        </>
+      )}
 
       {/* Time Tracking — kept at the bottom, next to ORS/SRS, so finalizing a
           note doesn't require scrolling back to the top. */}
@@ -497,25 +505,27 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
 
       <div className="flex items-center justify-between pt-6 border-t border-slate-200">
         <div className="flex items-center gap-6">
-          {([
-            { label: "ORS", flag: flags.orsFlag, reason: flags.orsReason },
-            { label: "SRS", flag: flags.srsFlag, reason: flags.srsReason },
-          ] as const).map(({ label, flag, reason }) => (
-            <div key={label} className="flex flex-col gap-0.5">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">{label} flag</span>
-                <span className={cn(
-                  "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold ring-1 ring-inset",
-                  flag === true ? "bg-rose-50 text-rose-600 ring-rose-200"
-                    : flag === false ? "bg-emerald-50 text-emerald-600 ring-emerald-200"
-                    : "bg-slate-50 text-slate-400 ring-slate-200",
-                )}>
-                  {flag === true ? <><AlertCircle className="h-3 w-3" /> YES</> : flag === false ? "NO" : "—"}
-                </span>
+          {hasClinicalMeasurement && (
+            ([
+              { label: "ORS", flag: flags.orsFlag, reason: flags.orsReason },
+              { label: "SRS", flag: flags.srsFlag, reason: flags.srsReason },
+            ] as const).map(({ label, flag, reason }) => (
+              <div key={label} className="flex flex-col gap-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400">{label} flag</span>
+                  <span className={cn(
+                    "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold ring-1 ring-inset",
+                    flag === true ? "bg-rose-50 text-rose-600 ring-rose-200"
+                      : flag === false ? "bg-emerald-50 text-emerald-600 ring-emerald-200"
+                      : "bg-slate-50 text-slate-400 ring-slate-200",
+                  )}>
+                    {flag === true ? <><AlertCircle className="h-3 w-3" /> YES</> : flag === false ? "NO" : "—"}
+                  </span>
+                </div>
+                {flag === true && reason && <span className="text-[10px] text-rose-500 font-medium">{reason}</span>}
               </div>
-              {flag === true && reason && <span className="text-[10px] text-rose-500 font-medium">{reason}</span>}
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
         <Button type="submit" disabled={loading} className="gap-2 bg-lime-500 text-slate-950 hover:bg-lime-600 font-bold px-8 h-12">

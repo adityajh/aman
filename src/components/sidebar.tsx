@@ -68,7 +68,7 @@ const routes = [
   },
 ];
 
-export function Sidebar() {
+export function Sidebar({ planTier = "basic", tenantSlug = "aman" }: { planTier?: string, tenantSlug?: string }) {
   const pathname = usePathname();
 
   return (
@@ -77,9 +77,14 @@ export function Sidebar() {
         <div className="h-8 w-8 bg-sidebar-primary rounded-lg flex items-center justify-center">
           <ShieldCheck className="h-5 w-5 text-sidebar-primary-foreground" />
         </div>
-        <h1 className="text-xl font-bold tracking-tight text-white">Aman</h1>
+        <div className="flex flex-col">
+          <h1 className="text-xl font-bold tracking-tight text-white capitalize">{tenantSlug}</h1>
+          {planTier === "pro" && (
+            <span className="text-[10px] font-bold tracking-wider text-sidebar-primary uppercase mt-[-2px]">Pro Tier</span>
+          )}
+        </div>
       </div>
-      <div className="flex-1 px-3">
+      <div className="flex-1 px-3 mt-4">
         {routes.map((route) => (
           <Link
             key={route.href}

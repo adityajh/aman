@@ -2,8 +2,7 @@ import { db } from "@/lib/db";
 import { invoices, invoiceLineItems, sessions } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getTenantContext, withTenantContext } from "@/lib/tenant";
 
 // POST /api/invoices/[id]/void
 //
@@ -22,62 +21,67 @@ import { authOptions } from "@/lib/auth";
 // amountPaid guard passed.
 export async function POST(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const sessionUser = await getServerSession(authOptions);
-  if (!sessionUser) return new NextResponse("Unauthorized", { status: 401 });
+  const { tenantId, planTier } = await getTenantContext();
+  return await withTenantContext(tenantId, async (tx) => {
+    try {
+      const invoice = await tx.query.invoices.findFirst({
+        where: eq(invoices.id, id),
+      });
 
-  try {
-    const invoice = await db.query.invoices.findFirst({
-      where: eq(invoices.id, id),
-    });
+      if (!invoice)
+        return new NextResponse("Invoice not found", { status: 404 });
 
-    if (!invoice) return new NextResponse("Invoice not found", { status: 404 });
+      if (invoice.status === "void") {
+        return new NextResponse("Invoice is already voided", { status: 400 });
+      }
 
-    if (invoice.status === "void") {
-      return new NextResponse("Invoice is already voided", { status: 400 });
+      if (invoice.status === "paid") {
+        return new NextResponse(
+          "This invoice has been marked paid. Voiding it would break the audit trail.",
+          { status: 400 },
+        );
+      }
+
+      if (parseFloat(invoice.amountPaid || "0") > 0) {
+        return new NextResponse(
+          "This invoice has at least one payment recorded against it. Voiding it would break the audit trail. Delete the payment first if it was recorded in error.",
+          { status: 400 },
+        );
+      }
+
+      // 1. Unlink sessions back to unbilled.
+      await db
+        .update(sessions)
+        .set({ invoiceId: null, updatedAt: new Date() })
+        .where(eq(sessions.invoiceId, id));
+
+      // 2. Remove the line items so the invoice carries no false detail.
+      await db
+        .delete(invoiceLineItems)
+        .where(eq(invoiceLineItems.invoiceId, id));
+
+      // 3. Mark the invoice itself as voided.
+      await db
+        .update(invoices)
+        .set({
+          status: "void",
+          // Zero out totals so it can't be confused with a live obligation.
+          subtotal: "0",
+          total: "0",
+          amountPaid: "0",
+          updatedAt: new Date(),
+        })
+        .where(eq(invoices.id, id));
+
+      return NextResponse.json({ success: true, voidedInvoiceId: id });
+    } catch (error: any) {
+      console.error("[POST /api/invoices/:id/void]", error);
+      return new NextResponse(error.message || "Internal Server Error", {
+        status: 500,
+      });
     }
-
-    if (invoice.status === "paid") {
-      return new NextResponse(
-        "This invoice has been marked paid. Voiding it would break the audit trail.",
-        { status: 400 },
-      );
-    }
-
-    if (parseFloat(invoice.amountPaid || "0") > 0) {
-      return new NextResponse(
-        "This invoice has at least one payment recorded against it. Voiding it would break the audit trail. Delete the payment first if it was recorded in error.",
-        { status: 400 },
-      );
-    }
-
-    // 1. Unlink sessions back to unbilled.
-    await db
-      .update(sessions)
-      .set({ invoiceId: null, updatedAt: new Date() })
-      .where(eq(sessions.invoiceId, id));
-
-    // 2. Remove the line items so the invoice carries no false detail.
-    await db.delete(invoiceLineItems).where(eq(invoiceLineItems.invoiceId, id));
-
-    // 3. Mark the invoice itself as voided.
-    await db
-      .update(invoices)
-      .set({
-        status: "void",
-        // Zero out totals so it can't be confused with a live obligation.
-        subtotal: "0",
-        total: "0",
-        amountPaid: "0",
-        updatedAt: new Date(),
-      })
-      .where(eq(invoices.id, id));
-
-    return NextResponse.json({ success: true, voidedInvoiceId: id });
-  } catch (error: any) {
-    console.error("[POST /api/invoices/:id/void]", error);
-    return new NextResponse(error.message || "Internal Server Error", { status: 500 });
-  }
+  });
 }

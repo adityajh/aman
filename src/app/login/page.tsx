@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -82,6 +83,13 @@ export default function LoginPage() {
                   "Sign In"
                 )}
               </Button>
+              
+              <p className="text-center text-sm text-slate-500 pt-2">
+                Don't have a practice yet?{" "}
+                <Link href="/signup" className="text-primary hover:underline font-medium">
+                  Create one
+                </Link>
+              </p>
             </form>
           </CardContent>
         </Card>

@@ -14,7 +14,7 @@ import {
   ReferenceArea,
   ResponsiveContainer,
 } from "recharts";
-import { AlertTriangle, TrendingDown, Frown, CheckCircle2, TrendingUp, Users, Mail, Loader2 } from "lucide-react";
+import { AlertTriangle, TrendingDown, Frown, CheckCircle2, TrendingUp, Users, Mail, Loader2, BarChart3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -23,6 +23,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { useSession } from "next-auth/react";
 
 interface ProgressChartProps {
   clientId: string;
@@ -343,6 +344,9 @@ export function ClientProgressChart({ clientId, clientName, compact = false, var
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [ccEmail, setCcEmail] = useState("counselor@aman.com");
   const chartRef = useRef<HTMLDivElement>(null);
+  const { data: sessionData } = useSession();
+  const planTier = (sessionData?.user as any)?.planTier || "basic";
+  const hasClinicalMeasurement = planTier === "pro";
 
   useEffect(() => {
     fetch(`/api/clients/${clientId}/progress`)
@@ -356,6 +360,21 @@ export function ClientProgressChart({ clientId, clientName, compact = false, var
     return (
       <div className={`flex items-center justify-center ${compact ? "h-12" : "h-40"}`}>
         <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-blue-400" />
+      </div>
+    );
+  }
+
+  if (!hasClinicalMeasurement) {
+    if (compact) return null;
+    return (
+      <div className="flex flex-col items-center justify-center py-16 px-4 bg-slate-50 border border-slate-200 border-dashed rounded-xl space-y-4">
+        <div className="h-12 w-12 bg-lime-100 text-lime-600 rounded-full flex items-center justify-center">
+          <BarChart3 className="h-6 w-6" />
+        </div>
+        <h3 className="text-lg font-bold text-slate-900">Unlock Clinical Measurements</h3>
+        <p className="text-sm text-slate-500 text-center max-w-sm">
+          Track client progress, detect deterioration risks early, and compare outcomes against similar cohorts. Upgrade to Pro to access ORS/SRS measurement tracking.
+        </p>
       </div>
     );
   }

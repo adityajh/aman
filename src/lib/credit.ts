@@ -10,6 +10,8 @@ import { eq, and, isNull, asc } from "drizzle-orm";
 // equals the total they've actually paid — then updates the invoice's
 // amountPaid + status. Returns the amount applied.
 export async function applyClientCredit(
+  tx: any,
+  tenantId: string,
   clientId: string,
   currency: string,
   invoice: { id: string; total: string; amountPaid: string | null; invoiceNumber: string },
@@ -18,7 +20,7 @@ export async function applyClientCredit(
   if (owed <= 0) return 0;
 
   // Oldest credit first (FIFO), same currency only.
-  const excessRows = await db.query.payments.findMany({
+  const excessRows = await tx.query.payments.findMany({
     where: and(
       eq(payments.clientId, clientId),
       isNull(payments.invoiceId),
@@ -39,7 +41,8 @@ export async function applyClientCredit(
     // Allocation row linked to the invoice. Keep the ORIGINAL receiptId (and
     // method/date/ref) — the money was receipted once; we're only re-pointing
     // which invoice it covers, so it must stay under the same receipt.
-    await db.insert(payments).values({
+    await tx.insert(payments).values({
+      tenantId,
       receiptId: ex.receiptId,
       clientId,
       invoiceId: invoice.id,
@@ -53,9 +56,9 @@ export async function applyClientCredit(
 
     // Draw down the excess row (delete when fully consumed).
     if (take >= exAmt) {
-      await db.delete(payments).where(eq(payments.id, ex.id));
+      await tx.delete(payments).where(eq(payments.id, ex.id));
     } else {
-      await db
+      await tx
         .update(payments)
         .set({ amount: (exAmt - take).toFixed(2) })
         .where(eq(payments.id, ex.id));
@@ -69,7 +72,7 @@ export async function applyClientCredit(
     const newPaid = parseFloat(invoice.amountPaid || "0") + applied;
     const total = parseFloat(invoice.total);
     const status: "paid" | "partial" = newPaid >= total ? "paid" : "partial";
-    await db
+    await tx
       .update(invoices)
       .set({ amountPaid: newPaid.toFixed(2), status, updatedAt: new Date() })
       .where(eq(invoices.id, invoice.id));

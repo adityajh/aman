@@ -9,7 +9,7 @@ export async function GET() {
   const steps = [
     {
       name: "payments.invoice_id DROP NOT NULL",
-      query: `ALTER TABLE payments ALTER COLUMN invoice_id DROP NOT NULL`
+      query: `ALTER TABLE payments ALTER COLUMN invoice_id DROP NOT NULL`,
     },
     {
       name: "fee_schemes table create",
@@ -21,51 +21,51 @@ export async function GET() {
         currency text NOT NULL DEFAULT 'INR',
         created_at timestamptz NOT NULL DEFAULT now(),
         updated_at timestamptz NOT NULL DEFAULT now()
-      )`
+      )`,
     },
     {
       name: "practice_settings.upi_id add column",
-      query: `ALTER TABLE practice_settings ADD COLUMN IF NOT EXISTS upi_id text`
+      query: `ALTER TABLE practice_settings ADD COLUMN IF NOT EXISTS upi_id text`,
     },
     {
       name: "sessions.ended_at add column",
-      query: `ALTER TABLE sessions ADD COLUMN IF NOT EXISTS ended_at timestamptz`
+      query: `ALTER TABLE sessions ADD COLUMN IF NOT EXISTS ended_at timestamptz`,
     },
     {
       name: "practice_settings.ors_cutoff add column",
-      query: `ALTER TABLE practice_settings ADD COLUMN IF NOT EXISTS ors_cutoff integer NOT NULL DEFAULT 25`
+      query: `ALTER TABLE practice_settings ADD COLUMN IF NOT EXISTS ors_cutoff integer NOT NULL DEFAULT 25`,
     },
     {
       name: "practice_settings.srs_cutoff add column",
-      query: `ALTER TABLE practice_settings ADD COLUMN IF NOT EXISTS srs_cutoff integer NOT NULL DEFAULT 36`
+      query: `ALTER TABLE practice_settings ADD COLUMN IF NOT EXISTS srs_cutoff integer NOT NULL DEFAULT 36`,
     },
     {
       name: "practice_settings.ors_deterioration_threshold add column",
-      query: `ALTER TABLE practice_settings ADD COLUMN IF NOT EXISTS ors_deterioration_threshold integer NOT NULL DEFAULT 5`
+      query: `ALTER TABLE practice_settings ADD COLUMN IF NOT EXISTS ors_deterioration_threshold integer NOT NULL DEFAULT 5`,
     },
     {
       name: "practice_settings.srs_decline_threshold add column",
-      query: `ALTER TABLE practice_settings ADD COLUMN IF NOT EXISTS srs_decline_threshold integer NOT NULL DEFAULT 2`
+      query: `ALTER TABLE practice_settings ADD COLUMN IF NOT EXISTS srs_decline_threshold integer NOT NULL DEFAULT 2`,
     },
     {
       name: "clients.termination_reason add column",
-      query: `ALTER TABLE clients ADD COLUMN IF NOT EXISTS termination_reason text`
+      query: `ALTER TABLE clients ADD COLUMN IF NOT EXISTS termination_reason text`,
     },
     {
       name: "clients.termination_type add column",
-      query: `ALTER TABLE clients ADD COLUMN IF NOT EXISTS termination_type text`
+      query: `ALTER TABLE clients ADD COLUMN IF NOT EXISTS termination_type text`,
     },
     {
       name: "clients.terminated_at add column",
-      query: `ALTER TABLE clients ADD COLUMN IF NOT EXISTS terminated_at timestamptz`
+      query: `ALTER TABLE clients ADD COLUMN IF NOT EXISTS terminated_at timestamptz`,
     },
     {
       name: "clients.timezone add column",
-      query: `ALTER TABLE clients ADD COLUMN IF NOT EXISTS timezone text NOT NULL DEFAULT 'Asia/Kolkata'`
+      query: `ALTER TABLE clients ADD COLUMN IF NOT EXISTS timezone text NOT NULL DEFAULT 'Asia/Kolkata'`,
     },
     {
       name: "practice_settings.email_override add column",
-      query: `ALTER TABLE practice_settings ADD COLUMN IF NOT EXISTS email_override boolean NOT NULL DEFAULT false`
+      query: `ALTER TABLE practice_settings ADD COLUMN IF NOT EXISTS email_override boolean NOT NULL DEFAULT false`,
     },
   ];
 

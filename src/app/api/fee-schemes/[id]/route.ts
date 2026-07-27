@@ -2,16 +2,13 @@ import { db } from "@/lib/db";
 import { feeSchemes } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getTenantContext, withTenantContext } from "@/lib/tenant";
 
 export async function PUT(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session) return new NextResponse("Unauthorized", { status: 401 });
-
+  const { tenantId, planTier } = await getTenantContext();
   try {
     const { id } = await params;
     const body = await req.json();
@@ -28,16 +25,16 @@ export async function PUT(
 
 export async function DELETE(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session) return new NextResponse("Unauthorized", { status: 401 });
-
-  try {
-    const { id } = await params;
-    await db.delete(feeSchemes).where(eq(feeSchemes.id, id));
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    return new NextResponse("Internal Server Error", { status: 500 });
-  }
+  const { tenantId, planTier } = await getTenantContext();
+  return await withTenantContext(tenantId, async (tx) => {
+    try {
+      const { id } = await params;
+      await tx.delete(feeSchemes).where(eq(feeSchemes.id, id));
+      return NextResponse.json({ success: true });
+    } catch (error) {
+      return new NextResponse("Internal Server Error", { status: 500 });
+    }
+  });
 }

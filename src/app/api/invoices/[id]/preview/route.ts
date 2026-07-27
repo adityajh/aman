@@ -2,9 +2,8 @@ import { db } from "@/lib/db";
 import { invoices, practiceSettings } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { formatIST } from "@/lib/tz";
+import { getTenantContext, withTenantContext } from "@/lib/tenant";
 
 // Format a date-only column (yyyy-MM-dd) without timezone drift.
 const fmtDate = (d: string | null | undefined) =>
@@ -12,116 +11,124 @@ const fmtDate = (d: string | null | undefined) =>
 
 export async function GET(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session) return new NextResponse("Unauthorized", { status: 401 });
+  const { tenantId, planTier } = await getTenantContext();
+  return await withTenantContext(tenantId, async (tx) => {
+    try {
+      const { id } = await params;
+      const [invoice, settings] = await Promise.all([
+        tx.query.invoices.findFirst({
+          where: eq(invoices.id, id),
+          with: {
+            client: true,
+            lineItems: { with: { session: true } },
+          },
+        }),
+        tx.query.practiceSettings.findFirst(),
+      ]);
 
-  try {
-    const { id } = await params;
-    const [invoice, settings] = await Promise.all([
-      db.query.invoices.findFirst({
-        where: eq(invoices.id, id),
-        with: {
-          client: true,
-          lineItems: { with: { session: true } },
-        },
-      }),
-      db.query.practiceSettings.findFirst()
-    ]);
+      if (!invoice)
+        return new NextResponse("Invoice not found", { status: 404 });
 
-    if (!invoice) return new NextResponse("Invoice not found", { status: 404 });
+      // Render line items in chronological session order. Nested relations have no
+      // ordering guarantee, so sort by the linked session's date (oldest first),
+      // falling back to the line item's own createdAt for any non-session lines.
+      invoice.lineItems.sort((a: any, b: any) => {
+        const ta = new Date(a.session?.scheduledAt ?? a.createdAt).getTime();
+        const tb = new Date(b.session?.scheduledAt ?? b.createdAt).getTime();
+        return ta - tb;
+      });
 
-    // Render line items in chronological session order. Nested relations have no
-    // ordering guarantee, so sort by the linked session's date (oldest first),
-    // falling back to the line item's own createdAt for any non-session lines.
-    invoice.lineItems.sort((a: any, b: any) => {
-      const ta = new Date(a.session?.scheduledAt ?? a.createdAt).getTime();
-      const tb = new Date(b.session?.scheduledAt ?? b.createdAt).getTime();
-      return ta - tb;
-    });
+      const profile = settings || {
+        practiceName: "Aman Counseling",
+        counselorName: "Vijay Gopal Sreenivasan",
+        address: "Noida, Uttar Pradesh",
+        phone: "+91-0000000000",
+        email: "counselor@aman.com",
+        monthlyQuote: "Progress is not a straight line.",
+        upiId: "",
+      };
 
-    const profile = settings || {
-      practiceName: "Aman Counseling",
-      counselorName: "Vijay Gopal Sreenivasan",
-      address: "Noida, Uttar Pradesh",
-      phone: "+91-0000000000",
-      email: "counselor@aman.com",
-      monthlyQuote: "Progress is not a straight line.",
-      upiId: ""
-    };
+      const formatCurrency = (val: any) => {
+        const num = parseFloat(val || "0");
+        return num.toLocaleString("en-IN", { minimumFractionDigits: 2 });
+      };
 
-    const formatCurrency = (val: any) => {
-      const num = parseFloat(val || "0");
-      return num.toLocaleString('en-IN', { minimumFractionDigits: 2 });
-    };
+      const currencySymbol = invoice.currency === "USD" ? "$" : "₹";
 
-    const currencySymbol = invoice.currency === 'USD' ? '$' : '₹';
-
-    // Return the HTML for preview
-    const html = `
+      // Return the HTML for preview
+      const html = `
       <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; color: #1e293b; background: white;">
         <div style="border-bottom: 2px solid #bef264; padding-bottom: 20px; margin-bottom: 20px;">
           <h1 style="color: #1e3a8a; margin: 0; font-size: 24px;">${profile.practiceName}</h1>
           <p style="margin: 5px 0 0; color: #64748b; font-size: 14px;">
-            ${(profile.address || "").replace(/\n/g, '<br>')}<br>
-            ${profile.phone} | ${profile.email}
-          </p>
-        </div>
+            ${(profile.address || "").replace(/\n/g, "<br>")}<br>
+                ${profile.phone} | ${profile.email}
+              </p>
+            </div>
 
-        <h2 style="color: #1e3a8a; font-size: 18px;">Session Invoice (PREVIEW)</h2>
-        <p style="margin: 0 0 12px; color: #64748b; font-size: 13px;">
-          <strong>${invoice.invoiceNumber}</strong>
-          &nbsp;·&nbsp; Issued: ${fmtDate(invoice.issuedDate) || "—"}
-          ${invoice.dueDate ? `&nbsp;·&nbsp; <span style="color:#b91c1c;">Due: ${fmtDate(invoice.dueDate)}</span>` : ""}
-        </p>
-        <p>Dear ${invoice.client?.name},</p>
+            <h2 style="color: #1e3a8a; font-size: 18px;">Session Invoice (PREVIEW)</h2>
+            <p style="margin: 0 0 12px; color: #64748b; font-size: 13px;">
+              <strong>${invoice.invoiceNumber}</strong>
+              &nbsp;·&nbsp; Issued: ${fmtDate(invoice.issuedDate) || "—"}
+              ${invoice.dueDate ? `&nbsp;·&nbsp; <span style="color:#b91c1c;">Due: ${fmtDate(invoice.dueDate)}</span>` : ""}
+            </p>
+            <p>Dear ${invoice.client?.name},</p>
 
-        <div style="background-color: #f8fafc; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #e2e8f0;">
-          <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-              <tr style="border-bottom: 2px solid #e2e8f0;">
-                <th style="padding: 10px; text-align: left; font-size: 13px; color: #64748b; text-transform: uppercase;">Description</th>
-                <th style="padding: 10px; text-align: right; font-size: 13px; color: #64748b; text-transform: uppercase;">Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${invoice.lineItems.map((item: any) => `
-                <tr style="border-bottom: 1px solid #f1f5f9;">
-                  <td style="padding: 12px 10px; font-size: 14px;">${item.description}</td>
-                  <td style="padding: 12px 10px; text-align: right; font-size: 14px;">${currencySymbol}${formatCurrency(item.amount)}</td>
-                </tr>
-              `).join('')}
-              <tr>
-                <td style="padding: 20px 10px 10px; font-weight: bold; font-size: 15px;">Total Due</td>
-                <td style="padding: 20px 10px 10px; text-align: right; font-weight: bold; font-size: 18px; color: #1e3a8a;">${currencySymbol}${formatCurrency(invoice.total)}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+            <div style="background-color: #f8fafc; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #e2e8f0;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                  <tr style="border-bottom: 2px solid #e2e8f0;">
+                    <th style="padding: 10px; text-align: left; font-size: 13px; color: #64748b; text-transform: uppercase;">Description</th>
+                    <th style="padding: 10px; text-align: right; font-size: 13px; color: #64748b; text-transform: uppercase;">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${invoice.lineItems
+                    .map(
+                      (item: any) => `
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                      <td style="padding: 12px 10px; font-size: 14px;">${item.description}</td>
+                      <td style="padding: 12px 10px; text-align: right; font-size: 14px;">${currencySymbol}${formatCurrency(item.amount)}</td>
+                    </tr>
+                  `,
+                    )
+                    .join("")}
+                  <tr>
+                    <td style="padding: 20px 10px 10px; font-weight: bold; font-size: 15px;">Total Due</td>
+                    <td style="padding: 20px 10px 10px; text-align: right; font-weight: bold; font-size: 18px; color: #1e3a8a;">${currencySymbol}${formatCurrency(invoice.total)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
-        <div style="background-color: #eff6ff; padding: 15px; border-radius: 5px; border: 1px solid #dbeafe; margin-bottom: 20px;">
-          <h3 style="margin: 0 0 10px; font-size: 14px; color: #1e3a8a; text-transform: uppercase;">Payment Details</h3>
-          <p style="margin: 0; font-size: 13px; color: #1e293b; line-height: 1.6;">
-            <strong>Bank:</strong> HSBC<br>
-            <strong>Account #:</strong> 499 034528 006<br>
-            <strong>IFSC:</strong> HSBC 0110007<br>
-            <strong>Account Name:</strong> Vijay Gopal Sreenivasan
-            ${profile.upiId ? `<br><strong>UPI ID:</strong> ${profile.upiId}` : ''}
-          </p>
-        </div>
-        
-        <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; font-style: italic; color: #64748b; font-size: 14px; text-align: center;">
-          "${profile.monthlyQuote}"
-        </div>
-      </div>
-    `;
+            <div style="background-color: #eff6ff; padding: 15px; border-radius: 5px; border: 1px solid #dbeafe; margin-bottom: 20px;">
+              <h3 style="margin: 0 0 10px; font-size: 14px; color: #1e3a8a; text-transform: uppercase;">Payment Details</h3>
+              <p style="margin: 0; font-size: 13px; color: #1e293b; line-height: 1.6;">
+                <strong>Bank:</strong> HSBC<br>
+                <strong>Account #:</strong> 499 034528 006<br>
+                <strong>IFSC:</strong> HSBC 0110007<br>
+                <strong>Account Name:</strong> Vijay Gopal Sreenivasan
+                ${profile.upiId ? `<br><strong>UPI ID:</strong> ${profile.upiId}` : ""}
+              </p>
+            </div>
+            
+            <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; font-style: italic; color: #64748b; font-size: 14px; text-align: center;">
+              "${profile.monthlyQuote}"
+            </div>
+          </div>
+        `;
 
-    return new NextResponse(html, {
-      headers: { "Content-Type": "text/html; charset=utf-8" },
-    });
-  } catch (error: any) {
-    console.error("Preview Error:", error);
-    return new NextResponse(`Error generating preview: ${error.message || 'Unknown error'}`, { status: 500 });
-  }
+      return new NextResponse(html, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    } catch (error: any) {
+      console.error("Preview Error:", error);
+      return new NextResponse(
+        `Error generating preview: ${error.message || "Unknown error"}`,
+        { status: 500 },
+      );
+    }
+  });
 }
