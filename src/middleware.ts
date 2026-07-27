@@ -15,6 +15,11 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // Redirect root path to dashboard or home based on auth status
+  if (pathname === "/") {
+    return NextResponse.redirect(new URL(token ? "/dashboard" : "/home", req.url));
+  }
+
   // If user is NOT signed in and trying to access a protected route
   if (!token && pathname !== "/login") {
     const url = new URL("/login", req.url);
@@ -34,13 +39,13 @@ export const config = {
   matcher: [
     /*
      * Protect all routes EXCEPT:
-     * - / (marketing landing page)
+     * - /home (marketing landing page)
      * - /login (sign-in page)
      * - /signup (registration page)
      * - /portal (client facing routes)
      * - /api/auth (NextAuth endpoints)
      * - Static files (_next, favicons, etc.)
      */
-    "/((?!login|signup|portal|api/auth|api/admin|_next/static|_next/image|favicon.ico|$).*)",
+    "/((?!login|signup|portal|api/auth|api/admin|home|_next/static|_next/image|favicon.ico).*)",
   ],
 };
