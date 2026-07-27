@@ -157,7 +157,7 @@ END $$;
     await sql.query(query);
     results["multi_tenancy_migration"] = "ok";
   } catch (e: any) {
-    results["multi_tenancy_migration"] = \`error: \${e.message}\`;
+    results["multi_tenancy_migration"] = `error: ${e.message}`;
   }
 
   return NextResponse.json({ success: true, results });
