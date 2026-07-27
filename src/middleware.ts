@@ -24,7 +24,7 @@ export async function middleware(req: NextRequest) {
 
   // If user IS signed in and trying to access login
   if (token && pathname === "/login") {
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
   return NextResponse.next();
@@ -34,12 +34,13 @@ export const config = {
   matcher: [
     /*
      * Protect all routes EXCEPT:
+     * - / (marketing landing page)
      * - /login (sign-in page)
      * - /signup (registration page)
      * - /portal (client facing routes)
      * - /api/auth (NextAuth endpoints)
      * - Static files (_next, favicons, etc.)
      */
-    "/((?!login|signup|portal|api/auth|api/admin|_next/static|_next/image|favicon.ico).*)",
+    "/((?!login|signup|portal|api/auth|api/admin|_next/static|_next/image|favicon.ico|$).*)",
   ],
 };

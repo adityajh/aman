@@ -27,12 +27,12 @@ export default function LoginPage() {
     const result = await signIn("credentials", {
       email,
       password,
-      callbackUrl: "/",
+      callbackUrl: "/dashboard",
       redirect: false,
     });
 
     if (result?.ok) {
-      window.location.href = "/";
+      window.location.href = "/dashboard";
     } else {
       toast.error("Invalid credentials. Please try again.");
       setLoading(false);
