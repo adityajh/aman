@@ -1,6 +1,6 @@
 # Aman — Clinical Practice Management
 
-Aman is a modern, lightweight practice management system designed for solo counselors. It streamlines the "Golden Path" of clinical work: scheduling sessions, writing clinical notes, and automating monthly invoicing.
+Aman is a modern, lightweight practice management system designed for independent therapists and multi-counselor clinics. Built as a secure, multi-tenant SaaS platform, it streamlines the "Golden Path" of clinical work: scheduling sessions, writing clinical notes, and automating monthly invoicing.
 
 ## ✨ Core Features
 

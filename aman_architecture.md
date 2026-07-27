@@ -11,7 +11,8 @@ Aman is a lightweight, single-counselor practice management tool built to stream
 | Field | Detail |
 |---|---|
 | **Product Name** | Aman |
-| **Primary User** | Single counsellor (no multi-user support required) |
+| **Architecture** | Multi-tenant SaaS (RLS isolated PostgreSQL) |
+| **Primary User** | Independent therapists and multi-counselor clinics |
 | **Invoicing Cycle** | Monthly — batch invoices sent by email from within the system |
 | **Stack** | Next.js 14 · Neon (PostgreSQL) · Resend · Razorpay · Claude AI API |
 | **Hosting** | Vercel (frontend + API routes) · Neon (serverless Postgres) |
@@ -79,7 +80,7 @@ Aman follows a monolithic Next.js architecture — frontend, API routes, and bac
 
 ## 4. Database Schema
 
-All tables use UUID primary keys and include `created_at` / `updated_at` timestamps. There is no multi-counselor support — counselor identity is handled via the single authenticated session.
+All tables use UUID primary keys and include `created_at` / `updated_at` timestamps. The application is **multi-tenant**. Every domain table (except `users` and `tenants`) includes a `tenant_id` column. PostgreSQL Row Level Security (RLS) policies enforce strict data isolation between practices. The `tenant_id` context is injected into all database operations via the `withTenantContext` middleware using `set_config('app.current_tenant_id')`.
 
 ### 4.1 `clients`
 

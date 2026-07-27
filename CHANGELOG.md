@@ -2,6 +2,21 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [4.0.0] - 2026-07-27
+### Added
+- **Multi-Tenancy Architecture**: Converted the platform into a true SaaS application. Data is now strictly isolated by practice/tenant using PostgreSQL Row Level Security (RLS) policies.
+- **Tenant Context Middleware**: Implemented `withTenantContext` wrapper to securely apply the current user's `tenant_id` to all database transactions.
+- **Marketing Landing Page**: Built a modern, high-converting public landing page at `/home` showcasing features and pricing tiers (Basic / Pro).
+- **Change Password Workflow**: Added a secure password update form under the practice Settings page (`/dashboard/settings`).
+- **Dynamic Routing**: Restructured the app by moving the core application to `/dashboard`. Unauthenticated users visiting the root are redirected to `/home`, and authenticated users to `/dashboard`.
+
+### Database
+- Added `tenants` and `users` tables.
+- Linked every domain table (`clients`, `sessions`, `invoices`, etc.) to `tenant_id` with strict RLS enforcement.
+- Created `drizzle/0006_multi_tenancy.sql` containing the full migration and RLS policy definitions.
+
+---
+
 ## [3.6.1] - 2026-07-02
 ### Changed
 - **Risk flag → two automatic ORS/SRS flags**: The single none/low/medium/high risk dropdown is replaced by two independent **YES / NO** flags derived from the scores, shown in the note editor as you enter scores:
