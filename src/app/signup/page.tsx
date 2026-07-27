@@ -100,7 +100,7 @@ export default function SignupPage() {
                       <h3 className="font-semibold text-sm">Basic Tier</h3>
                       {selectedPlan === "basic" && <Check className="h-4 w-4 text-primary" />}
                     </div>
-                    <p className="text-xs text-slate-500 mb-2">Free</p>
+                    <p className="text-xs text-slate-500 mb-2">₹999/mo</p>
                     <ul className="text-[11px] text-slate-600 space-y-1">
                       <li>• Client Management</li>
                       <li>• Invoicing & Billing</li>
