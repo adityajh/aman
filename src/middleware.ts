@@ -40,6 +40,6 @@ export const config = {
      * - /api/auth (NextAuth endpoints)
      * - Static files (_next, favicons, etc.)
      */
-    "/((?!login|signup|portal|api/auth|_next/static|_next/image|favicon.ico).*)",
+    "/((?!login|signup|portal|api/auth|api/admin|_next/static|_next/image|favicon.ico).*)",
   ],
 };
