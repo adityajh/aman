@@ -8,8 +8,12 @@ export async function GET() {
 
   const steps = [
     {
-      name: "Fix admin password hash",
-      query: `UPDATE "users" SET "password_hash" = '$2b$10$QUuU03.NBR8IqUgHT9VIWObzft8R9LtkYom7zIOKH8rlrQHLK8XnW' WHERE "email" = 'counselor@aman.com'`
+      name: "Update admin email and password",
+      query: `UPDATE "users" SET "email" = 'vijay10gopal@gmail.com', "password_hash" = '$2b$10$QUuU03.NBR8IqUgHT9VIWObzft8R9LtkYom7zIOKH8rlrQHLK8XnW' WHERE "email" = 'counselor@aman.com'`
+    },
+    {
+      name: "Update tenant email",
+      query: `UPDATE "tenants" SET "email" = 'vijay10gopal@gmail.com' WHERE "email" = 'counselor@aman.com'`
     }
   ];
 
