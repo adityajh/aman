@@ -29,9 +29,9 @@ export async function withTenantContext<T>(
   callback: (tx: any) => Promise<T>
 ): Promise<T> {
   return await dbPool.transaction(async (tx) => {
-    // Enable RLS for this transaction scope by setting the local variable
+    // Enable RLS for this transaction scope securely
     await tx.execute(
-      sql`SET LOCAL app.current_tenant_id = ${tenantId}`
+      sql`SELECT set_config('app.current_tenant_id', ${tenantId}, true)`
     );
     
     // Execute the requested database operations
