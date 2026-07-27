@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ShieldCheck, Activity, Users, CreditCard, ArrowRight, CheckCircle2 } from "lucide-react";
 
@@ -21,9 +22,9 @@ export default function LandingPage() {
             <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition">
               Log in
             </Link>
-            <Button asChild>
-              <Link href="/signup">Get Started</Link>
-            </Button>
+            <Link href="/signup" className={buttonVariants({ variant: "default" })}>
+              Get Started
+            </Link>
           </div>
         </div>
       </header>
@@ -39,14 +40,12 @@ export default function LandingPage() {
             and track clinical outcomes with built-in ORS and SRS measurements.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <Button size="lg" className="w-full sm:w-auto text-base h-12 px-8" asChild>
-              <Link href="/signup">
-                Start your practice <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-            <Button size="lg" variant="outline" className="w-full sm:w-auto text-base h-12 px-8" asChild>
-              <Link href="/login">Sign in</Link>
-            </Button>
+            <Link href="/signup" className={cn(buttonVariants({ variant: "default", size: "lg" }), "w-full sm:w-auto text-base h-12 px-8")}>
+              Start your practice <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+            <Link href="/login" className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full sm:w-auto text-base h-12 px-8")}>
+              Sign in
+            </Link>
           </div>
         </div>
       </section>
@@ -140,9 +139,9 @@ export default function LandingPage() {
                     <span className="text-slate-600">Multi-tenant Security</span>
                   </li>
                 </ul>
-                <Button className="w-full mt-8" variant="outline" asChild>
-                  <Link href="/signup">Get Started</Link>
-                </Button>
+                <Link href="/signup" className={cn(buttonVariants({ variant: "outline" }), "w-full mt-8")}>
+                  Get Started
+                </Link>
               </CardContent>
             </Card>
 
@@ -180,9 +179,9 @@ export default function LandingPage() {
                     <span className="text-slate-600">Clinical Flags & Alerts</span>
                   </li>
                 </ul>
-                <Button className="w-full mt-8" asChild>
-                  <Link href="/signup">Start Free Trial</Link>
-                </Button>
+                <Link href="/signup" className={cn(buttonVariants({ variant: "default" }), "w-full mt-8")}>
+                  Start Free Trial
+                </Link>
               </CardContent>
             </Card>
           </div>
