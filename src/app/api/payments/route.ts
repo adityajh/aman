@@ -52,7 +52,7 @@ export async function POST(req: Request) {
       const rcptYear =
         parseInt(payDate.slice(0, 4), 10) || new Date().getUTCFullYear();
       const receiptNumber = await nextReceiptNumber(rcptYear);
-      const [receipt] = await db
+      const [receipt] = await tx
         .insert(receipts)
         .values({
             tenantId: tenantId,
@@ -104,7 +104,7 @@ export async function POST(req: Request) {
           if (status === "draft") status = "partial";
         }
 
-        await db
+        await tx
           .update(invoices)
           .set({
             amountPaid: newPaid.toFixed(2),
@@ -115,6 +115,7 @@ export async function POST(req: Request) {
 
         // Prepare payment record (allocation of this receipt to the invoice)
         paymentRecords.push({
+          tenantId,
           receiptId: receipt.id,
           clientId,
           invoiceId: inv.id,
@@ -132,6 +133,7 @@ export async function POST(req: Request) {
       // 3. Handle leftover (Credit / Overpayment in that currency)
       if (remainingPayment > 0) {
         paymentRecords.push({
+          tenantId,
           receiptId: receipt.id,
           clientId,
           invoiceId: null,

@@ -44,7 +44,7 @@ export async function POST(req: Request) {
       const existing = await tx.query.practiceSettings.findFirst();
 
       if (existing) {
-        const inserted = await db
+        const inserted = await tx
           .update(practiceSettings)
           .set({
             counselorName,
@@ -70,7 +70,7 @@ export async function POST(req: Request) {
           .returning();
         return NextResponse.json(inserted[0]);
       } else {
-        const inserted = await db
+        const inserted = await tx
           .insert(practiceSettings)
           .values({
               tenantId: tenantId,

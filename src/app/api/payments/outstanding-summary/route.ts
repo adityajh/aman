@@ -14,7 +14,7 @@ export async function GET() {
       const firstOfFY = formatIST(istStartOfFYUTC(), "yyyy-MM-dd");
 
       // 1. Total outstanding (grouped by currency with explicit casting)
-      const outstandingRes = await db
+      const outstandingRes = await tx
         .select({
           currency: sql<string>`COALESCE(${invoices.currency}, 'INR')`,
           total: sql<number>`SUM(CAST(${invoices.total} AS NUMERIC) - CAST(${invoices.amountPaid} AS NUMERIC))`,
@@ -24,7 +24,7 @@ export async function GET() {
         .groupBy(sql`COALESCE(${invoices.currency}, 'INR')`);
 
       // 2. Total received this month (grouped by currency)
-      const thisMonthRes = await db
+      const thisMonthRes = await tx
         .select({
           currency: sql<string>`COALESCE(${payments.currency}, 'INR')`,
           total: sql<number>`SUM(CAST(${payments.amount} AS NUMERIC))`,
@@ -34,7 +34,7 @@ export async function GET() {
         .groupBy(sql`COALESCE(${payments.currency}, 'INR')`);
 
       // 3. YTD total received (grouped by currency) - FY logic (April to March)
-      const ytdRes = await db
+      const ytdRes = await tx
         .select({
           currency: sql<string>`COALESCE(${payments.currency}, 'INR')`,
           total: sql<number>`SUM(CAST(${payments.amount} AS NUMERIC))`,

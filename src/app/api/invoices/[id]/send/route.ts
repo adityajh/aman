@@ -168,7 +168,7 @@ export async function POST(
       // In live mode, mark the invoice as sent. In test mode, leave it as draft
       // so the counselor can flip the toggle off and re-send for real.
       if (!overrideOn) {
-        await db
+        await tx
           .update(invoices)
           .set({
             status: "sent",

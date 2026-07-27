@@ -146,7 +146,7 @@ export async function GET() {
         totalPast > 0 ? ((noShows / totalPast) * 100).toFixed(1) : "0.0";
 
       // Outstanding Revenue
-      const outstandingRevenue = await db
+      const outstandingRevenue = await tx
         .select({
           currency: sql<string>`COALESCE(${invoices.currency}, 'INR')`,
           total: sql<number>`SUM(CAST(${invoices.total} AS NUMERIC) - CAST(${invoices.amountPaid} AS NUMERIC))`,

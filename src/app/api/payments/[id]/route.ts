@@ -27,7 +27,7 @@ export async function DELETE(
       // 3. If this payment was linked to an invoice, recalculate its amountPaid
       if (payment.invoiceId) {
         // Sum all remaining payments for this invoice
-        const result = await db
+        const result = await tx
           .select({ total: sum(payments.amount) })
           .from(payments)
           .where(eq(payments.invoiceId, payment.invoiceId));
@@ -52,7 +52,7 @@ export async function DELETE(
             newStatus = "partial";
           }
 
-          await db
+          await tx
             .update(invoices)
             .set({
               amountPaid: newAmountPaid.toFixed(2),

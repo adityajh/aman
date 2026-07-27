@@ -9,18 +9,20 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { tenantId, planTier } = await getTenantContext();
-  try {
-    const { id } = await params;
-    const body = await req.json();
-    const [updated] = await db
-      .update(feeSchemes)
-      .set({ ...body, updatedAt: new Date() })
-      .where(eq(feeSchemes.id, id))
-      .returning();
-    return NextResponse.json(updated);
-  } catch (error) {
-    return new NextResponse("Internal Server Error", { status: 500 });
-  }
+  return await withTenantContext(tenantId, async (tx) => {
+    try {
+      const { id } = await params;
+      const body = await req.json();
+      const [updated] = await tx
+        .update(feeSchemes)
+        .set({ ...body, updatedAt: new Date() })
+        .where(eq(feeSchemes.id, id))
+        .returning();
+      return NextResponse.json(updated);
+    } catch (error) {
+      return new NextResponse("Internal Server Error", { status: 500 });
+    }
+  });
 }
 
 export async function DELETE(

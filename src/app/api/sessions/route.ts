@@ -173,6 +173,7 @@ export async function POST(req: Request) {
       const rows = Array.from({ length: totalCount }, (_, i) => {
         const offsetMs = i * intervalDays * 24 * 60 * 60 * 1000;
         return {
+          tenantId,
           clientId,
           scheduledAt: new Date(start.getTime() + offsetMs),
           endedAt: end ? new Date(end.getTime() + offsetMs) : null,

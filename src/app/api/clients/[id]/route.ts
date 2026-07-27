@@ -47,7 +47,7 @@ export async function PATCH(
         if (cancelPendingSessions) {
           const { sessions } = await import("@/lib/db/schema");
           const { and, isNull } = await import("drizzle-orm");
-          await db
+          await tx
             .update(sessions)
             .set({
               status: "cancelled",
@@ -57,7 +57,7 @@ export async function PATCH(
         }
       }
 
-      const [updated] = await db
+      const [updated] = await tx
         .update(clients)
         .set({
           name: name || undefined,

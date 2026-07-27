@@ -75,7 +75,7 @@ export async function POST(req: Request) {
         }
       }
 
-      const newClient = await db
+      const newClient = await tx
         .insert(clients)
         .values({
             tenantId: tenantId,

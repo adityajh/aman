@@ -53,18 +53,18 @@ export async function POST(
       }
 
       // 1. Unlink sessions back to unbilled.
-      await db
+      await tx
         .update(sessions)
         .set({ invoiceId: null, updatedAt: new Date() })
         .where(eq(sessions.invoiceId, id));
 
       // 2. Remove the line items so the invoice carries no false detail.
-      await db
+      await tx
         .delete(invoiceLineItems)
         .where(eq(invoiceLineItems.invoiceId, id));
 
       // 3. Mark the invoice itself as voided.
-      await db
+      await tx
         .update(invoices)
         .set({
           status: "void",

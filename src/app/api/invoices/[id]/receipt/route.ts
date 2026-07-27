@@ -65,7 +65,7 @@ export async function POST(
       const rcptYear =
         parseInt(payDate.slice(0, 4), 10) || new Date().getUTCFullYear();
       const receiptNumber = await nextReceiptNumber(rcptYear);
-      const [receipt] = await db
+      const [receipt] = await tx
         .insert(receipts)
         .values({
             tenantId: tenantId,
@@ -95,7 +95,7 @@ export async function POST(
           : `Receipt for ${invoice.invoiceNumber}`,
       });
 
-      await db
+      await tx
         .update(invoices)
         .set({
           amountPaid: newPaid.toFixed(2),
@@ -184,7 +184,7 @@ export async function POST(
         });
         emailedTo = sendTo;
         // Stamp when the receipt was sent (for tracking).
-        await db
+        await tx
           .update(receipts)
           .set({ sentAt: new Date() })
           .where(eq(receipts.id, receipt.id));

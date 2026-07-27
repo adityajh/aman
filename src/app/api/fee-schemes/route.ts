@@ -20,9 +20,9 @@ export async function POST(req: Request) {
   return await withTenantContext(tenantId, async (tx) => {
     try {
       const body = await req.json();
-      const [newFeeScheme] = await db
+      const [newFeeScheme] = await tx
         .insert(feeSchemes)
-        .values(body)
+        .values({ ...body, tenantId })
         .returning();
       return NextResponse.json(newFeeScheme);
     } catch (error) {

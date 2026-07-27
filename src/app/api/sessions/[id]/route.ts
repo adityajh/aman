@@ -29,7 +29,7 @@ export async function PATCH(
         }
       }
 
-      const [updated] = await db
+      const [updated] = await tx
         .update(sessions)
         .set({
           status: status || undefined,
