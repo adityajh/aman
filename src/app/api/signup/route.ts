@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { db, dbPool } from "@/lib/db";
 import { tenants, users, practiceSettings } from "@/lib/db/schema";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Ensure atomic creation of tenant, user, and default settings
-    await db.transaction(async (tx) => {
+    await dbPool.transaction(async (tx) => {
       // Create tenant
       const [newTenant] = await tx.insert(tenants).values({
         name: practiceName,
