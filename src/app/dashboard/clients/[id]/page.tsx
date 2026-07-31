@@ -45,7 +45,7 @@ export default function ClientDetailPage() {
   if (!client) {
     return (
       <div className="p-8">
-        <Link href="/clients" className="text-sm text-slate-500 hover:text-slate-900 inline-flex items-center gap-1">
+        <Link href="/dashboard/clients" className="text-sm text-slate-500 hover:text-slate-900 inline-flex items-center gap-1">
           <ArrowLeft className="h-4 w-4" /> Back to Clients
         </Link>
         <p className="mt-8 text-center text-slate-400">Client not found.</p>
@@ -56,7 +56,7 @@ export default function ClientDetailPage() {
   return (
     <div className="p-8 space-y-6">
       <div>
-        <Link href="/clients" className="text-sm text-slate-500 hover:text-slate-900 inline-flex items-center gap-1 mb-3">
+        <Link href="/dashboard/clients" className="text-sm text-slate-500 hover:text-slate-900 inline-flex items-center gap-1 mb-3">
           <ArrowLeft className="h-4 w-4" /> Back to Clients
         </Link>
         <div className="flex items-center gap-3 flex-wrap">

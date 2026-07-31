@@ -434,7 +434,7 @@ export default function ClientsPage() {
                           variant="ghost"
                           size="sm"
                           className="gap-1 text-blue-600 hover:text-blue-700"
-                          onClick={() => router.push(`/sessions?clientId=${client.id}&timeFilter=ytd`)}
+                          onClick={() => router.push(`/dashboard/sessions?clientId=${client.id}&timeFilter=ytd`)}
                         >
                           <Calendar className="h-3.5 w-3.5" /> Sessions
                         </Button>
@@ -442,7 +442,7 @@ export default function ClientsPage() {
                           variant="ghost"
                           size="sm"
                           className="gap-1 text-violet-600 hover:text-violet-700"
-                          onClick={() => router.push(`/clients/${client.id}`)}
+                          onClick={() => router.push(`/dashboard/clients/${client.id}`)}
                         >
                           <LineChart className="h-3.5 w-3.5" /> Charts
                         </Button>
@@ -697,7 +697,7 @@ export default function ClientsPage() {
                    {selectedClient.isActive && (
                     <Button 
                       className="bg-primary text-primary-foreground"
-                      onClick={() => router.push(`/sessions?clientId=${selectedClient.id}&openNew=true`)}
+                      onClick={() => router.push(`/dashboard/sessions?clientId=${selectedClient.id}&openNew=true`)}
                     >
                       Schedule Session
                     </Button>
