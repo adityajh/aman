@@ -30,9 +30,9 @@ export async function withTenantContext<T>(
 ): Promise<T> {
   return await dbPool.transaction(async (tx) => {
     // Enable RLS for this transaction scope securely
-    await tx.execute(
-      sql`SELECT set_config('app.current_tenant_id', ${tenantId}, true)`
-    );
+    // We MUST switch to a non-superuser role (authenticated) so that RLS is not bypassed.
+    await tx.execute(sql`SET LOCAL ROLE authenticated`);
+    await tx.execute(sql`SELECT set_config('app.current_tenant_id', ${tenantId}, true)`);
     
     // Execute the requested database operations
     const result = await callback(tx);
