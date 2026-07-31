@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { db, dbPool } from "@/lib/db";
+import { db } from "@/lib/db";
 import { tenants, users, practiceSettings } from "@/lib/db/schema";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
@@ -42,18 +42,21 @@ export async function POST(req: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Ensure atomic creation of tenant, user, and default settings
-    await dbPool.transaction(async (tx) => {
-      // Create tenant
-      const [newTenant] = await tx.insert(tenants).values({
-        name: practiceName,
-        slug,
-        email, // Email added for tenant
-        planTier: planTier || "basic",
-      }).returning();
+    // Ensure creation of tenant, user, and default settings
+    // Using neon-http driver sequentially since it doesn't support transactions,
+    // but avoids WebSocket cold-start timeouts on Vercel Serverless.
+    
+    // Create tenant
+    const [newTenant] = await db.insert(tenants).values({
+      name: practiceName,
+      slug,
+      email, // Email added for tenant
+      planTier: planTier || "basic",
+    }).returning();
 
+    try {
       // Create user
-      await tx.insert(users).values({
+      await db.insert(users).values({
         tenantId: newTenant.id,
         email,
         passwordHash: hashedPassword,
@@ -61,13 +64,17 @@ export async function POST(req: Request) {
       });
 
       // Create default practice settings for the new tenant
-      await tx.insert(practiceSettings).values({
+      await db.insert(practiceSettings).values({
         tenantId: newTenant.id,
         practiceName: practiceName,
         counselorName: name,
         email: email,
       });
-    });
+    } catch (err) {
+      // Cleanup if user creation fails
+      await db.delete(tenants).where(eq(tenants.id, newTenant.id));
+      throw err;
+    }
 
     return NextResponse.json({ success: true, message: "Account created successfully" });
   } catch (error: any) {
