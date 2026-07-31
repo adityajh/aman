@@ -44,8 +44,9 @@ export const config = {
      * - /signup (registration page)
      * - /portal (client facing routes)
      * - /api/auth (NextAuth endpoints)
+     * - /api/signup (Registration endpoint)
      * - Static files (_next, favicons, etc.)
      */
-    "/((?!login|signup|portal|api/auth|api/admin|home|_next/static|_next/image|favicon.ico).*)",
+    "/((?!login|signup|portal|api/auth|api/signup|api/admin|home|_next/static|_next/image|favicon.ico).*)",
   ],
 };
