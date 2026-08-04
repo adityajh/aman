@@ -2,6 +2,12 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [4.0.1] - 2026-08-04
+### Fixed
+- **Touch Device Accessibility**: Made the "delete receipt" (trash can) button on the Payments Ledger permanently visible. It was previously hidden behind a CSS hover state (`opacity-0 group-hover:opacity-100`), making it invisible and inaccessible on iPads and other touch devices.
+
+---
+
 ## [4.0.0] - 2026-07-27
 ### Added
 - **Multi-Tenancy Architecture**: Converted the platform into a true SaaS application. Data is now strictly isolated by practice/tenant using PostgreSQL Row Level Security (RLS) policies.

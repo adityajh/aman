@@ -312,7 +312,7 @@ export default function PaymentsPage() {
                       {r.kind === "receipt" && (confirmDeleteId === r.id ? (
                         <div className="flex gap-1"><Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => setConfirmDeleteId(null)}>Cancel</Button><Button size="sm" className="h-7 px-2 text-xs bg-rose-500 text-white" disabled={deletingId === r.id} onClick={() => handleDeleteReceipt(r.id!)}>{deletingId === r.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Confirm"}</Button></div>
                       ) : (
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-slate-300 hover:text-rose-500 opacity-0 group-hover:opacity-100" onClick={() => setConfirmDeleteId(r.id!)} title="Delete receipt"><Trash2 className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-slate-400 hover:text-rose-500 transition-opacity" onClick={() => setConfirmDeleteId(r.id!)} title="Delete receipt"><Trash2 className="h-4 w-4" /></Button>
                       ))}
                     </TableCell>
                   </TableRow>
