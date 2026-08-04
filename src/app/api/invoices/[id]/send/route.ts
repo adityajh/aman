@@ -1,8 +1,8 @@
 import nodemailer from "nodemailer";
 import { db } from "@/lib/db";
-import { invoices, invoiceLineItems, clients } from "@/lib/db/schema";
+import { invoices, invoiceLineItems, clients, receipts } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
+import { eq, and, lt, not } from "drizzle-orm";
 import { formatIST } from "@/lib/tz";
 import { getTenantContext, withTenantContext } from "@/lib/tenant";
 
@@ -56,10 +56,32 @@ export async function POST(
 
       const formatCurrency = (val: any) => {
         const num = parseFloat(val || "0");
-        return num.toLocaleString("en-IN", { minimumFractionDigits: 2 });
+        return num.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       };
 
       const currencySymbol = invoice.currency === "USD" ? "$" : "₹";
+
+      // Calculate Opening Balance
+      const previousInvoices = await tx.query.invoices.findMany({
+        where: and(
+          eq(invoices.clientId, invoice.clientId),
+          eq(invoices.currency, invoice.currency),
+          not(eq(invoices.status, "void")),
+          lt(invoices.createdAt, invoice.createdAt)
+        )
+      });
+      const previousReceipts = await tx.query.receipts.findMany({
+        where: and(
+          eq(receipts.clientId, invoice.clientId),
+          eq(receipts.currency, invoice.currency),
+          lt(receipts.createdAt, invoice.createdAt)
+        )
+      });
+
+      const totalPrevInvoiced = previousInvoices.reduce((sum: number, inv: any) => sum + parseFloat(inv.total), 0);
+      const totalPrevReceived = previousReceipts.reduce((sum: number, rec: any) => sum + parseFloat(rec.amount), 0);
+      const openingBalance = totalPrevInvoiced - totalPrevReceived;
+      const totalOutstanding = openingBalance + parseFloat(invoice.total);
 
       // Configure Nodemailer transporter (Gmail SMTP)
       const transporter = nodemailer.createTransport({
@@ -107,8 +129,30 @@ export async function POST(
                     )
                     .join("")}
                   <tr>
-                    <td style="padding: 24px 12px 12px; font-weight: 800; font-size: 16px; color: #1a365d;">Total Payable</td>
-                    <td style="padding: 24px 12px 12px; text-align: right; font-weight: 800; font-size: 22px; color: #2b6cb0;">${currencySymbol}${formatCurrency(invoice.total)}</td>
+                    <td style="padding: 24px 12px 12px; font-weight: 800; font-size: 16px; color: #1a365d;">Current Invoice Amount</td>
+                    <td style="padding: 24px 12px 12px; text-align: right; font-weight: 800; font-size: 18px; color: #2d3748;">${currencySymbol}${formatCurrency(invoice.total)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div style="background-color: #f7fafc; padding: 24px; border-radius: 8px; margin: 24px 0; border: 1px solid #e2e8f0;">
+              <h3 style="margin: 0 0 16px; font-size: 13px; color: #2c5282; text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em;">Account Summary</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tbody>
+                  <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 12px; font-size: 15px; color: #4a5568;">Opening Balance (Past Dues / Credits)</td>
+                    <td style="padding: 12px; text-align: right; font-size: 15px; color: #4a5568;">${openingBalance < 0 ? "-" : ""}${currencySymbol}${formatCurrency(Math.abs(openingBalance))}</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 12px; font-size: 15px; color: #4a5568;">Current Invoice Amount</td>
+                    <td style="padding: 12px; text-align: right; font-size: 15px; color: #4a5568;">${currencySymbol}${formatCurrency(invoice.total)}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 16px 12px 12px; font-weight: 800; font-size: 16px; color: #1a365d;">Total Outstanding Balance</td>
+                    <td style="padding: 16px 12px 12px; text-align: right; font-weight: 800; font-size: 22px; color: #2b6cb0;">
+                      ${totalOutstanding < 0 ? "-" : ""}${currencySymbol}${formatCurrency(Math.abs(totalOutstanding))}
+                    </td>
                   </tr>
                 </tbody>
               </table>
