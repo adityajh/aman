@@ -142,7 +142,9 @@ export async function POST(
                 <tbody>
                   <tr style="border-bottom: 1px solid #e2e8f0;">
                     <td style="padding: 12px; font-size: 15px; color: #4a5568;">Opening Balance (Past Dues / Credits)</td>
-                    <td style="padding: 12px; text-align: right; font-size: 15px; color: #4a5568; white-space: nowrap;">${openingBalance < 0 ? "-" : ""}${currencySymbol}${formatCurrency(Math.abs(openingBalance))}</td>
+                    <td style="padding: 12px; text-align: right; font-size: 15px; white-space: nowrap; color: ${openingBalance < 0 ? '#16a34a' : (openingBalance > 0 ? '#b91c1c' : '#4a5568')}; font-weight: ${openingBalance !== 0 ? '600' : 'normal'};">
+                      ${openingBalance < 0 ? "-" : ""}${currencySymbol}${formatCurrency(Math.abs(openingBalance))}
+                    </td>
                   </tr>
                   <tr style="border-bottom: 1px solid #e2e8f0;">
                     <td style="padding: 12px; font-size: 15px; color: #4a5568;">Current Invoice Amount</td>
@@ -150,7 +152,7 @@ export async function POST(
                   </tr>
                   <tr>
                     <td style="padding: 16px 12px 12px; font-weight: 800; font-size: 16px; color: #1a365d;">Total Outstanding Balance</td>
-                    <td style="padding: 16px 12px 12px; text-align: right; font-weight: 800; font-size: 22px; color: #2b6cb0; white-space: nowrap;">
+                    <td style="padding: 16px 12px 12px; text-align: right; font-weight: 800; font-size: 22px; white-space: nowrap; color: ${totalOutstanding < 0 ? '#16a34a' : (totalOutstanding > 0 ? '#b91c1c' : '#2b6cb0')};">
                       ${totalOutstanding < 0 ? "-" : ""}${currencySymbol}${formatCurrency(Math.abs(totalOutstanding))}
                     </td>
                   </tr>
