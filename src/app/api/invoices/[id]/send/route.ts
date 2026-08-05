@@ -142,7 +142,7 @@ export async function POST(
                 <tbody>
                   <tr style="border-bottom: 1px solid #e2e8f0;">
                     <td style="padding: 12px; font-size: 15px; color: #4a5568;">Opening Balance (Past Dues / Credits)</td>
-                    <td style="padding: 12px; text-align: right; font-size: 15px; color: #4a5568;">${openingBalance < 0 ? "-" : ""}${currencySymbol}${formatCurrency(Math.abs(openingBalance))}</td>
+                    <td style="padding: 12px; text-align: right; font-size: 15px; color: #4a5568; white-space: nowrap;">${openingBalance < 0 ? "-" : ""}${currencySymbol}${formatCurrency(Math.abs(openingBalance))}</td>
                   </tr>
                   <tr style="border-bottom: 1px solid #e2e8f0;">
                     <td style="padding: 12px; font-size: 15px; color: #4a5568;">Current Invoice Amount</td>
@@ -150,7 +150,7 @@ export async function POST(
                   </tr>
                   <tr>
                     <td style="padding: 16px 12px 12px; font-weight: 800; font-size: 16px; color: #1a365d;">Total Outstanding Balance</td>
-                    <td style="padding: 16px 12px 12px; text-align: right; font-weight: 800; font-size: 22px; color: #2b6cb0;">
+                    <td style="padding: 16px 12px 12px; text-align: right; font-weight: 800; font-size: 22px; color: #2b6cb0; white-space: nowrap;">
                       ${totalOutstanding < 0 ? "-" : ""}${currencySymbol}${formatCurrency(Math.abs(totalOutstanding))}
                     </td>
                   </tr>
@@ -212,12 +212,13 @@ export async function POST(
       // In live mode, mark the invoice as sent. In test mode, leave it as draft
       // so the counselor can flip the toggle off and re-send for real.
       if (!overrideOn) {
+        const updateData: any = { sentAt: new Date() };
+        if (invoice.status === "draft") {
+          updateData.status = "sent";
+        }
         await tx
           .update(invoices)
-          .set({
-            status: "sent",
-            sentAt: new Date(),
-          })
+          .set(updateData)
           .where(eq(invoices.id, id));
       }
 

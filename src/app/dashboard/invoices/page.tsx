@@ -702,7 +702,7 @@ export default function InvoicesPage() {
                     <TableCell><StatusPill status={invoice.status} /></TableCell>
                     <TableCell className="text-right pr-6">
                       <div className="flex justify-end items-center gap-1.5">
-                        {invoice.status === "draft" ? (
+                        {!invoice.sentAt && invoice.status !== "void" ? (
                           <Button
                             variant="outline"
                             size="sm"

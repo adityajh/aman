@@ -131,7 +131,7 @@ export async function GET(
                 <tbody>
                   <tr style="border-bottom: 1px solid #f1f5f9;">
                     <td style="padding: 10px; font-size: 14px; color: #475569;">Opening Balance (Past Dues / Credits)</td>
-                    <td style="padding: 10px; text-align: right; font-size: 14px; color: #475569;">${openingBalance < 0 ? "-" : ""}${currencySymbol}${formatCurrency(Math.abs(openingBalance))}</td>
+                    <td style="padding: 10px; text-align: right; font-size: 14px; color: #475569; white-space: nowrap;">${openingBalance < 0 ? "-" : ""}${currencySymbol}${formatCurrency(Math.abs(openingBalance))}</td>
                   </tr>
                   <tr style="border-bottom: 1px solid #f1f5f9;">
                     <td style="padding: 10px; font-size: 14px; color: #475569;">Current Invoice Amount</td>
@@ -139,7 +139,7 @@ export async function GET(
                   </tr>
                   <tr>
                     <td style="padding: 15px 10px 10px; font-weight: bold; font-size: 15px;">Total Outstanding Balance</td>
-                    <td style="padding: 15px 10px 10px; text-align: right; font-weight: bold; font-size: 18px; color: #1e3a8a;">
+                    <td style="padding: 15px 10px 10px; text-align: right; font-weight: bold; font-size: 18px; color: #1e3a8a; white-space: nowrap;">
                       ${totalOutstanding < 0 ? "-" : ""}${currencySymbol}${formatCurrency(Math.abs(totalOutstanding))}
                     </td>
                   </tr>
