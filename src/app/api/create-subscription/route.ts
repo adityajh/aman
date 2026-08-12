@@ -9,9 +9,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid plan selected" }, { status: 400 });
     }
 
-    // Map planTier to Razorpay Plan IDs (TEMPORARY: Using Rs.1 test plan for all tiers)
-    // const planId = planTier === "basic" ? "plan_TOl5mRuFjG4FZM" : "plan_TOl5SJ3ErBkUBB";
-    const planId = "plan_TOlRGR0I1RzTUw";
+    // Map planTier to Razorpay Plan IDs
+    const planId = planTier === "basic" ? "plan_TOl5mRuFjG4FZM" : "plan_TOl5SJ3ErBkUBB";
 
     const razorpay = new Razorpay({
       key_id: process.env.RAZORPAY_KEY_ID!,
