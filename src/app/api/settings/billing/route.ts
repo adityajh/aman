@@ -30,7 +30,7 @@ export async function GET() {
         status: subscription.status,
         planTier: tenant.planTier,
         nextBillingDate: subscription.charge_at ? new Date(subscription.charge_at * 1000).toISOString() : null,
-        cancelAtCycleEnd: subscription.cancel_at_cycle_end
+        cancelAtCycleEnd: (subscription as any).cancel_at_cycle_end
       });
 
     } catch (error: any) {
