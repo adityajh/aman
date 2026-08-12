@@ -53,7 +53,7 @@ export default function SignupPage() {
 
       // 2. Open Razorpay Modal
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_TOkt8Pm5ycPsNz",
         subscription_id: subscription_id,
         name: "Deepen",
         description: `Deepen ${selectedPlan === "pro" ? "Pro" : "Basic"} Monthly Subscription`,
