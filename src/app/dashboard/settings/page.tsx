@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Save, Loader2, User, Building, MapPin, Phone, Mail, Quote, Activity, Lock, CreditCard } from "lucide-react";
+import { Save, Loader2, User, Building, MapPin, Phone, Mail, Quote, Activity, Lock, CreditCard, Download } from "lucide-react";
 import { formatIST } from "@/lib/tz";
 
 export default function SettingsPage() {
@@ -15,6 +15,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [updatingPassword, setUpdatingPassword] = useState(false);
   const [cancellingSubscription, setCancellingSubscription] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [passwordForm, setPasswordForm] = useState({ newPassword: "", confirmPassword: "" });
   const [billingInfo, setBillingInfo] = useState<any>(null);
   const [settings, setSettings] = useState({
@@ -531,8 +532,8 @@ export default function SettingsPage() {
               </div>
             )}
             
-            {billingInfo && (billingInfo.status === 'active' || billingInfo.status === 'authenticated') && !billingInfo.cancelAtCycleEnd && (
-              <div className="flex justify-start pt-6 border-t border-slate-100 mt-6">
+            <div className={`flex items-center gap-3 ${billingInfo && (billingInfo.status === 'active' || billingInfo.status === 'authenticated') && !billingInfo.cancelAtCycleEnd ? '' : 'pt-6 border-t border-slate-100 mt-6'}`}>
+              {billingInfo && (billingInfo.status === 'active' || billingInfo.status === 'authenticated') && !billingInfo.cancelAtCycleEnd && (
                 <Button 
                   type="button" 
                   variant="destructive" 
@@ -543,8 +544,36 @@ export default function SettingsPage() {
                   {cancellingSubscription ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                   Cancel Subscription
                 </Button>
-              </div>
-            )}
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                className="gap-2"
+                disabled={exporting}
+                onClick={async () => {
+                  setExporting(true);
+                  try {
+                    const res = await fetch("/api/settings/export");
+                    if (!res.ok) throw new Error("Export failed");
+                    const blob = await res.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = "deepen-export.zip";
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    toast.success("Export downloaded!");
+                  } catch {
+                    toast.error("Failed to export data.");
+                  } finally {
+                    setExporting(false);
+                  }
+                }}
+              >
+                {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                Export Practice Data (.zip)
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
