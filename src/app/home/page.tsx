@@ -30,10 +30,10 @@ export default function Home() {
         {/* §1 Hero */}
         <section className="px-6 py-24 md:py-32 max-w-5xl mx-auto text-center">
           <h1 className="text-5xl md:text-7xl font-serif font-bold text-teal-ink tracking-tight mb-8 leading-tight">
-            Your practice tools track your business.<br className="hidden md:block"/> Deepen tracks your clients.
+            Built for the solo practice.<br className="hidden md:block"/> Deepen the work, automate the invoicing.
           </h1>
           <p className="text-xl md:text-2xl text-ink/80 mb-12 max-w-3xl mx-auto font-serif">
-            Most software shows you revenue and retention. Deepen tells you if the people you're seeing are actually getting better—and flags the ones sliding backwards before they leave.
+            Deepen automates your invoices in one click, and gives you a clear mirror to track your clients' progress over time.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-4">
             <Link href="/signup" className="w-full sm:w-auto px-10 py-4 bg-teal-action text-paper rounded-lg font-medium text-lg hover:bg-teal-ink transition-colors flex items-center justify-center shadow-lg shadow-teal-action/20">
@@ -248,14 +248,14 @@ export default function Home() {
               <p className="text-lg text-ink/80 max-w-2xl mx-auto">Honest version, compiled from public product pages.</p>
             </div>
             <div className="overflow-x-auto pb-4 shadow-xl shadow-black/5 rounded-2xl border border-hairline">
-              <table className="w-full text-left border-collapse min-w-[800px] bg-paper/20">
+              <table className="w-full text-left border-collapse table-fixed min-w-[800px] bg-paper/20">
                 <thead>
                   <tr className="border-b-2 border-teal-ink/20 bg-white">
-                    <th className="py-5 px-6 text-left font-serif font-bold text-ink">Capability</th>
-                    <th className="py-5 px-6 font-serif text-xl font-bold bg-teal-ink text-paper shadow-inner border-b-4 border-teal-action">deepen. Pro<br/><span className="text-sm font-sans font-normal opacity-80">₹1,999/mo</span></th>
-                    <th className="py-5 px-6 font-serif text-lg font-bold text-ink/70">Indian Clinical Tools<br/><span className="text-sm font-sans font-normal text-ink/60">₹1,000–3,000/mo</span></th>
-                    <th className="py-5 px-6 font-serif text-lg font-bold text-ink/60">Global Platforms<br/><span className="text-sm font-sans font-normal text-ink/60">~₹4,500/mo</span></th>
-                    <th className="py-5 px-6 font-serif text-lg font-bold text-ink/60">Generic Admin<br/><span className="text-sm font-sans font-normal text-ink/60">₹0/mo</span></th>
+                    <th className="py-5 px-6 w-1/4 text-left font-serif font-bold text-ink">Capability</th>
+                    <th className="py-5 px-4 text-center font-serif text-xl font-bold bg-teal-ink text-paper shadow-inner border-b-4 border-teal-action">deepen. Pro<br/><span className="text-sm font-sans font-normal opacity-80">₹1,999/mo</span></th>
+                    <th className="py-5 px-4 text-center font-serif text-lg font-bold text-ink/70">Indian Clinical Tools<br/><span className="text-sm font-sans font-normal text-ink/60">₹1,000–3,000/mo</span></th>
+                    <th className="py-5 px-4 text-center font-serif text-lg font-bold text-ink/60">Global Platforms<br/><span className="text-sm font-sans font-normal text-ink/60">~₹4,500/mo</span></th>
+                    <th className="py-5 px-4 text-center font-serif text-lg font-bold text-ink/60">Generic Admin<br/><span className="text-sm font-sans font-normal text-ink/60">₹0/mo</span></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -273,17 +273,17 @@ export default function Home() {
                   ].map((row, i) => (
                     <tr key={i} className="border-b border-hairline hover:bg-white transition-colors">
                       <td className="py-4 px-6 font-medium text-ink bg-white">{row[0]}</td>
-                      <td className="py-4 px-6 bg-teal-ink/5 border-l border-r border-teal-ink/10">{row[1] ? <Check className="w-6 h-6 text-teal-action" /> : <Minus className="w-5 h-5 text-ink/30" />}</td>
-                      <td className="py-4 px-6 bg-white">{row[2] ? <Check className="w-5 h-5 text-ink/40" /> : <Minus className="w-5 h-5 text-ink/30" />}</td>
-                      <td className="py-4 px-6 bg-white">{row[3] ? <Check className="w-5 h-5 text-ink/40" /> : <Minus className="w-5 h-5 text-ink/30" />}</td>
-                      <td className="py-4 px-6 bg-white">{row[4] ? <Check className="w-5 h-5 text-ink/40" /> : <Minus className="w-5 h-5 text-ink/30" />}</td>
+                      <td className="py-4 px-4 text-center bg-teal-ink/5 border-l border-r border-teal-ink/10">{row[1] ? <Check className="w-6 h-6 mx-auto text-teal-action" /> : <Minus className="w-5 h-5 mx-auto text-ink/30" />}</td>
+                      <td className="py-4 px-4 text-center bg-white">{row[2] ? <Check className="w-5 h-5 mx-auto text-ink/40" /> : <Minus className="w-5 h-5 mx-auto text-ink/30" />}</td>
+                      <td className="py-4 px-4 text-center bg-white">{row[3] ? <Check className="w-5 h-5 mx-auto text-ink/40" /> : <Minus className="w-5 h-5 mx-auto text-ink/30" />}</td>
+                      <td className="py-4 px-4 text-center bg-white">{row[4] ? <Check className="w-5 h-5 mx-auto text-ink/40" /> : <Minus className="w-5 h-5 mx-auto text-ink/30" />}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
             <p className="text-center text-ink/70 mt-10 max-w-3xl mx-auto">
-              Deepen does less than most of these, and some of what it does you can get free elsewhere. What it does instead is tell you whether the work is working — and it's the only one here that does that at all.
+              Deepen is highly focused. Some of these generic features you can get free elsewhere. What Deepen does instead is tell you whether the work is working — and it's the only one here that does that at all.
             </p>
           </div>
         </section>
@@ -298,12 +298,6 @@ export default function Home() {
             <p className="text-lg text-ink/70 mb-6 leading-relaxed">
               There is no supervisor view and no management dashboard. Your records are isolated, stored securely in India, and never used for AI training. Export everything—clients, sessions, and invoices—in one click, any time.
             </p>
-            <div className="mt-12 bg-white p-6 border border-hairline rounded-lg text-left shadow-sm">
-              <h4 className="font-bold text-ink mb-2">How the comparison works.</h4>
-              <p className="text-sm text-ink/70">
-                When you turn it on, three numbers leave your practice — where a client started, which session it is, and where they are now. No name, no date of birth, no notes, nothing identifying. Pooled with other practices, they're what makes the recovery band meaningful for everyone. It's off unless you switch it on, and you can switch it off whenever you like.
-              </p>
-            </div>
           </div>
         </section>
 
@@ -342,13 +336,15 @@ export default function Home() {
                 <p className="text-ink/60 mb-6 italic font-serif">Everything above, plus the ability to know whether it's working.</p>
                 <div className="text-4xl font-bold text-ink mb-8">₹1,999<span className="text-lg font-normal text-ink/60">/month</span><div className="text-sm font-normal text-ink/50 mt-1">₹19,990/year</div></div>
                 <ul className="space-y-4 mb-12 flex-1">
-                  <li className="flex items-center gap-3 text-ink/80"><Check className="w-5 h-5 text-teal-action" /> Everything in Practice</li>
-                  <li className="flex items-center gap-3 text-ink/80"><Check className="w-5 h-5 text-teal-action" /> Sessional outcome tracking</li>
-                  <li className="flex items-center gap-3 text-ink/80"><Check className="w-5 h-5 text-teal-action" /> Deterioration flags</li>
-                  <li className="flex items-center gap-3 text-ink/80"><Check className="w-5 h-5 text-teal-action" /> Per-client progress charts</li>
-                  <li className="flex items-center gap-3 text-ink/80 font-bold"><Check className="w-5 h-5 text-teal-action" /> Predicted Progress</li>
-                  <li className="flex items-center gap-3 text-ink/80"><Check className="w-5 h-5 text-teal-action" /> Practice outcomes dashboard</li>
-                  <li className="flex items-center gap-3 text-ink/80"><Check className="w-5 h-5 text-teal-action" /> The Outcome Report</li>
+                  <li className="flex items-center gap-3 text-ink/80"><Check className="w-5 h-5 text-teal-action shrink-0" /> Everything in Practice</li>
+                  <li className="flex items-center gap-3 text-ink/80"><Check className="w-5 h-5 text-teal-action shrink-0" /> Sessional outcome tracking</li>
+                  <li className="flex items-center gap-3 text-ink/80"><Check className="w-5 h-5 text-teal-action shrink-0" /> Deterioration flags</li>
+                  <li className="flex items-center gap-3 text-ink/80"><Check className="w-5 h-5 text-teal-action shrink-0" /> Per-client progress charts</li>
+                  <li className="flex items-center gap-3 text-ink/80 font-bold"><Check className="w-5 h-5 text-teal-action shrink-0" /> Predicted Progress</li>
+                  <li className="flex items-center gap-3 text-ink/80"><Check className="w-5 h-5 text-teal-action shrink-0" /> Practice outcomes dashboard</li>
+                  <li className="flex items-center gap-3 text-ink/80"><Check className="w-5 h-5 text-teal-action shrink-0" /> The Outcome Report</li>
+                  <li className="flex items-center gap-3 text-ink/80"><Check className="w-5 h-5 text-teal-action shrink-0" /> Free 45-min training on scientific progress measurement</li>
+                  <li className="flex items-center gap-3 text-ink/80"><Check className="w-5 h-5 text-teal-action shrink-0" /> Support WhatsApp group</li>
                 </ul>
                 <Link href="/signup" className="w-full block text-center py-4 bg-teal-action text-paper rounded-lg font-medium hover:bg-teal-action/90 transition-colors shadow-lg shadow-teal-action/20">
                   Start free trial
@@ -405,7 +401,12 @@ export default function Home() {
       {/* §12 FOOTER */}
       <footer className="bg-ink text-paper py-12 px-6">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-          <Logo variant="light" />
+          <div className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <div className="w-5 h-5 text-teal-action">
+              <Brandmark />
+            </div>
+            <Logo variant="light" />
+          </div>
           <div className="flex gap-6 text-sm text-paper/60">
             <Link href="/pricing" className="hover:text-paper">Pricing</Link>
             <Link href="/privacy" className="hover:text-paper">Privacy</Link>

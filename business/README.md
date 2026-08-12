@@ -30,7 +30,7 @@ business/
 | File | What it is |
 |---|---|
 | `strategy/03-business-strategy.md` | **Read first.** Thesis, who this is for, the two things we do, the never-build list |
-| `commercial/one-page-plan.html` | **The plan, v1.0.** Show this to anyone who asks what the business is. Prints to one A4 |
+| `commercial/one-page-plan.html` | **The plan, v1.1.** Show this to anyone who asks what the business is |
 | `marketing/brand-guide.html` | **The brand, v1.0.** Standalone. Name, voice, logo, colour, charts, governance |
 
 ## strategy/
@@ -51,7 +51,9 @@ Seven numbered documents compiled 31 July 2026. They cross-reference each other 
 
 | File | |
 |---|---|
-| `one-page-plan.html` | v1.0, frozen. Mission, two value props, market, competition, pricing, costs at 10/100/1,000 users, path to 100,000 |
+| `one-page-plan.html` | **v1.1.** The living source. Mission, two value props, market, competition, pricing, costs at 10/100/1,000 users, path to 100,000 |
+| `Deepen-business-plan.pdf` | **The one you send.** Three A4 pages, brand fonts embedded, searchable text. Rendered from the HTML |
+| `_build-pdf.md` | How to regenerate the PDF after editing the HTML |
 
 ## marketing/
 
