@@ -7,13 +7,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Save, Loader2, User, Building, MapPin, Phone, Mail, Quote, Activity, Lock } from "lucide-react";
+import { Save, Loader2, User, Building, MapPin, Phone, Mail, Quote, Activity, Lock, CreditCard } from "lucide-react";
+import { formatIST } from "@/lib/tz";
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [updatingPassword, setUpdatingPassword] = useState(false);
+  const [cancellingSubscription, setCancellingSubscription] = useState(false);
   const [passwordForm, setPasswordForm] = useState({ newPassword: "", confirmPassword: "" });
+  const [billingInfo, setBillingInfo] = useState<any>(null);
   const [settings, setSettings] = useState({
     counselorName: "",
     practiceName: "",
@@ -34,17 +37,6 @@ export default function SettingsPage() {
   });
 
   useEffect(() => {
-    fetch("/api/settings")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data) {
-          setSettings({
-            counselorName: data.counselorName || "",
-            practiceName: data.practiceName || "",
-            address: data.address || "",
-            phone: data.phone || "",
-            email: data.email || "",
-            monthlyQuote: data.monthlyQuote || "",
             upiId: data.upiId || "",
             orsCutoff: data.orsCutoff ?? 25,
             srsCutoff: data.srsCutoff ?? 36,
@@ -118,6 +110,28 @@ export default function SettingsPage() {
       toast.error("An error occurred while updating password");
     } finally {
       setUpdatingPassword(false);
+    }
+  };
+
+  const handleCancelSubscription = async () => {
+    if (!confirm("Are you sure you want to cancel your subscription? You will continue to have access until the end of your current billing cycle.")) {
+      return;
+    }
+    
+    setCancellingSubscription(true);
+    try {
+      const res = await fetch("/api/settings/billing/cancel", { method: "POST" });
+      if (!res.ok) throw new Error("Failed to cancel subscription");
+      
+      toast.success("Subscription cancelled successfully. It will remain active until the end of the billing cycle.");
+      
+      // Refresh billing info
+      const updatedBilling = await fetch("/api/settings/billing").then(r => r.json());
+      setBillingInfo(updatedBilling);
+    } catch (err: any) {
+      toast.error(err.message || "An error occurred");
+    } finally {
+      setCancellingSubscription(false);
     }
   };
 
@@ -454,6 +468,73 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       </form>
+
+      {/* Billing Section */}
+      <div className="space-y-6 pt-8 border-t border-slate-200">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5 text-primary" /> Deepen Billing
+            </CardTitle>
+            <CardDescription>Manage your SaaS subscription.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {!billingInfo ? (
+              <div className="text-sm text-muted-foreground flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" /> Loading billing details...
+              </div>
+            ) : (
+              <div className="grid gap-6 md:grid-cols-2">
+                <div>
+                  <h4 className="text-sm font-medium text-slate-500 mb-1">Current Plan</h4>
+                  <p className="text-lg font-semibold text-ink capitalize">
+                    Deepen {billingInfo.planTier}
+                  </p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-slate-500 mb-1">Status</h4>
+                  <div className="flex items-center gap-2">
+                    <span className={\`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium \${
+                      billingInfo.status === 'active' || billingInfo.status === 'authenticated' ? 'bg-emerald-100 text-emerald-800' :
+                      billingInfo.status === 'cancelled' ? 'bg-slate-100 text-slate-800' :
+                      'bg-amber-100 text-amber-800'
+                    }\`}>
+                      {billingInfo.status || "Unknown"}
+                    </span>
+                    {billingInfo.cancelAtCycleEnd && (
+                      <span className="text-xs text-rose-600 font-medium">(Cancels at end of cycle)</span>
+                    )}
+                  </div>
+                </div>
+                {billingInfo.nextBillingDate && (
+                  <div>
+                    <h4 className="text-sm font-medium text-slate-500 mb-1">Next Billing Date</h4>
+                    <p className="text-ink">
+                      {formatIST(new Date(billingInfo.nextBillingDate), "d MMM yyyy")}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {billingInfo && (billingInfo.status === 'active' || billingInfo.status === 'authenticated') && !billingInfo.cancelAtCycleEnd && (
+              <div className="flex justify-start pt-6 border-t border-slate-100 mt-6">
+                <Button 
+                  type="button" 
+                  variant="destructive" 
+                  onClick={handleCancelSubscription}
+                  disabled={cancellingSubscription}
+                  className="gap-2"
+                >
+                  {cancellingSubscription ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  Cancel Subscription
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
     </div>
   );
 }
