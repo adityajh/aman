@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { Logo } from "@/components/logo";
+import { Brandmark } from "@/components/brandmark";
 
 const routes = [
   {
@@ -75,6 +76,9 @@ export function Sidebar({ planTier = "basic", tenantSlug = "deepen" }: { planTie
   return (
     <div className="space-y-4 py-4 flex flex-col h-full bg-ink border-r border-hairline/10 text-paper">
       <div className="px-6 py-4 flex items-center gap-2 border-b border-hairline/10">
+        <div className="w-5 h-5 text-teal-action">
+          <Brandmark />
+        </div>
         <Logo variant="light" />
       </div>
       <div className="px-6 pt-2 pb-2">
