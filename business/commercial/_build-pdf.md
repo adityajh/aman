@@ -11,8 +11,10 @@ re-render. Do not hand-edit the PDF.
 2. **Adds print CSS.** A4 with 13/11/15/11mm margins, `print-color-adjust: exact` so the
    backgrounds survive, and `break-inside: avoid` on every card, table, grid and callout so
    nothing splits across a page.
-3. **Forces one page break**, before Competition. Without it the market section's two
-   conclusions get orphaned onto the next page.
+3. **Forces two page breaks**, before Competition and before Revenue and costs. Without the
+   first, the market section's two conclusions get orphaned onto the next page. Without the
+   second, the Revenue and costs heading is stranded at the foot of page 2 while its table
+   moves to page 3.
 4. **Renders through headless Chromium** at **scale 0.74**, which is the value that lands the
    document on three full pages. Higher pushes it to four with a half-empty page.
 5. **Adds a running footer** with page numbers, and sets the PDF metadata title.
@@ -20,8 +22,10 @@ re-render. Do not hand-edit the PDF.
 ## Rebuilding
 
 Chromium is at `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`, driven by Playwright.
-The steps: fetch and inline the two font families, inject the print stylesheet, add the
-`pagebreak` class to the Competition heading, then `page.pdf()` with `format: A4`,
+The steps: fetch and inline the two font families (request the CSS with a modern browser
+user-agent or Google returns TTF, not woff2), inject the print stylesheet, add the
+`pagebreak` class to the Competition and Revenue and costs headings, then `page.pdf()` with
+`format: A4`,
 `scale: 0.74`, `print_background: true`, `display_header_footer: true` and the footer
 template. Finish by writing the metadata with pypdf.
 
@@ -30,6 +34,9 @@ template. Finish by writing the metadata with pypdf.
 Always look at the result rather than trusting it. Render each page to PNG with
 `pdftoppm -png -r 68` and inspect. The two failure modes are a nearly empty page from a
 badly placed break, and a section heading stranded at the foot of a page.
+
+Also put `break-inside: avoid` on `.pjcard`. Without it the cost card splits, header on one
+page and table on the next.
 
 ## If the page count changes
 

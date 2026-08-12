@@ -72,7 +72,7 @@ Seven numbered documents compiled 31 July 2026. They cross-reference each other 
 | File | |
 |---|---|
 | `india-counselling-workforce-2036.html` | How many people in India actually do counselling for a living. Buyer-pool sizing |
-| `domain-check.md` | Domain sweep and the naming decision record |
+| `domain-check.md` | Domain sweep, the naming decision, and what we registered |
 
 ## customers/
 
@@ -82,13 +82,13 @@ Empty until the beta starts. Beta interview notes, the support log, objections, 
 
 ## Decided
 
-The name is **Deepen** (`deepen.health`, `deepen.co.in`). The colour system, the voice, the two value props, pricing, and the growth path are all settled. Do not reopen them without a reason.
+The name is **Deepen**. `deepen.health` and `deepen.co.in` are registered and set up. The colour system, the voice, the two value props, pricing, and the growth path are all settled. Do not reopen them without a reason.
 
 ## Open, in order
 
-1. **Register the domains.** Availability was checked by DNS, not at a registrar, and it moves.
-2. **Fix the two homepage claims** before anyone sees the build. See `marketing/homepage-copy-fixes.md`.
-3. **Swap the footer mark** for `marketing/logo/lockup.svg`.
+1. **Fix the two homepage claims** before anyone sees the build. See `marketing/homepage-copy-fixes.md`.
+2. **Swap the footer mark** for `marketing/logo/lockup.svg`.
+3. **Point the domains at the build.** `deepen.health` is primary, `deepen.co.in` redirects to it. Set both in one pass so email and links never split.
 4. India trademark search, classes 9 and 42. Fold into the IP review that already blocks launch.
 5. Say the name cold to the clinical co-founder.
 6. Execute the rename in code. `practiceSettings` still defaults to a real person's name and city.

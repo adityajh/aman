@@ -29,6 +29,7 @@ export const tenants = pgTable("tenants", {
   email: text("email").notNull(),
   phone: text("phone"),
   planTier: text("plan_tier").$type<"basic" | "pro">().notNull().default("basic"),
+  razorpaySubscriptionId: text("razorpay_subscription_id"),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),

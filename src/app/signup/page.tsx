@@ -10,6 +10,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { toast } from "sonner";
 import { Loader2, ShieldCheck, Check } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
+import Script from "next/script";
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 export default function SignupPage() {
   const router = useRouter();
@@ -30,27 +37,84 @@ export default function SignupPage() {
     };
 
     try {
-      const response = await fetch("/api/signup", {
+      // 1. Create Subscription Order
+      const subRes = await fetch("/api/create-subscription", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ planTier: selectedPlan }),
       });
 
-      if (!response.ok) {
-        const errorMsg = await response.text();
-        throw new Error(errorMsg || "Signup failed");
+      if (!subRes.ok) {
+        const errorMsg = await subRes.json();
+        throw new Error(errorMsg.error || "Failed to initialize subscription");
       }
 
-      toast.success("Account created! Please sign in.");
-      setTimeout(() => router.push("/login"), 2000);
+      const { subscription_id } = await subRes.json();
+
+      // 2. Open Razorpay Modal
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        subscription_id: subscription_id,
+        name: "Deepen",
+        description: `Deepen ${selectedPlan === "pro" ? "Pro" : "Basic"} Monthly Subscription`,
+        handler: async function (response: any) {
+          try {
+            // 3. Complete Signup with Signature
+            const signupData = {
+              ...data,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_subscription_id: response.razorpay_subscription_id,
+              razorpay_signature: response.razorpay_signature
+            };
+
+            const responseSignup = await fetch("/api/signup", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(signupData),
+            });
+
+            if (!responseSignup.ok) {
+              const errorMsg = await responseSignup.text();
+              throw new Error(errorMsg || "Signup failed");
+            }
+
+            toast.success("Account created! Please sign in.");
+            setTimeout(() => router.push("/login"), 2000);
+          } catch (signupErr: any) {
+            toast.error(signupErr.message || "Failed to create account. Please try again.");
+            setLoading(false);
+          }
+        },
+        prefill: {
+          name: data.name,
+          email: data.email,
+        },
+        theme: {
+          color: "#0B4F43" // teal-ink
+        },
+        modal: {
+          ondismiss: function() {
+            setLoading(false);
+          }
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', function (response: any){
+        toast.error(`Payment failed: ${response.error.description}`);
+        setLoading(false);
+      });
+      rzp.open();
+
     } catch (error: any) {
-      toast.error(error.message || "Failed to create account. Please try again.");
+      toast.error(error.message || "Failed to initiate payment. Please try again.");
       setLoading(false);
     }
   };
 
   return (
     <>
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       <Toaster />
       <div className="min-h-screen flex items-center justify-center bg-paper py-12">
         <Card className="w-full max-w-lg shadow-lg">

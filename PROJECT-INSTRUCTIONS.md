@@ -74,7 +74,7 @@ Next.js 16 · React 19 · Neon Postgres · Drizzle · NextAuth v4 · Vercel.
 
 ## Blocking / unverified
 
-1. **Rename to Deepen not yet executed in code**. `practiceSettings` still defaults to "Aman Counseling" and a co-founder's real name and city. Blocks the pricing page, footer, and launch. Domains and TM search still open.
+1. **Rename to Deepen not yet executed in code**. `practiceSettings` still defaults to "Aman Counseling" and a co-founder's real name and city. Blocks the pricing page, footer, and launch. Domains are registered. TM search still open.
 2. **Indian supervision rates**, the primary pricing anchor for Pro, not found. Ask the clinical co-founder before any price goes public.
 3. **Willingness to pay ₹1,999**, inferred from credential-buying behaviour, not observed. Beta question 1 tests it.
 4. **IP review** of the pluggable-instrument model, blocks launch.

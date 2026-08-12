@@ -15,6 +15,13 @@
       "when": 1776012697478,
       "tag": "0001_nappy_ser_duncan",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786516246417,
+      "tag": "0002_worried_scalphunter",
+      "breakpoints": true
     }
   ]
 }

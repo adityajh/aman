@@ -1,6 +1,8 @@
-# Domain availability check
+# Domain check and decision
 
-*12 August 2026. Method: DNS nameserver lookup via Google DoH. NXDOMAIN treated as likely available. Not authoritative. Confirm at a registrar before deciding.*
+*Sweep run 12 August 2026. Method: DNS nameserver lookup via Google DoH. NXDOMAIN treated as likely available.*
+
+> **Settled.** `deepen.health` and `deepen.co.in` were registered and set up on 12 August 2026. `deepen.health` is primary. `deepen.co.in` redirects to it. Everything below is the record of how we got there.
 
 ## The finding that matters
 
@@ -32,16 +34,16 @@ Weak for us: `.clinic` contradicts the solo-counsellor positioning. `.md` implie
 
 ## Available, deepen
 
-- **deepen.health**
-- **deepen.co.in**
+- **deepen.health** — taken by us
+- **deepen.co.in** — taken by us
 - **deepencare.com**, deepenpractice.com, mydeepen.com
 - deepen.care, deepen.so, deepen.clinic, deepen.org.in, deepen.net.in
 
 Taken: deepen.com, deepen.in (BigRock, possibly parked and buyable), deepen.io, usedeepen.com, joindeepen.com, withdeepen.com.
 
-## Recommendation
+## The decision
 
-**Switch to Deepen. Take deepen.health as primary, deepen.co.in for India, deepencare.com defensively.**
+**Switched to Deepen. deepen.health as primary, deepen.co.in for India. Both bought on the day of the sweep. deepencare.com left open for now.**
 
 Reasoning:
 
@@ -54,8 +56,9 @@ Reasoning:
 
 **Do not** buy an aftermarket fathom domain. Total founder runway to break-even is ₹2.5 to 3 lakh. A parked .com would eat a meaningful share of it before a single user pays.
 
-## Next
+## Still open
 
-1. Confirm deepen.health and deepen.co.in at a registrar today. Availability changes.
+1. Point `deepen.health` at the build. Redirect `deepen.co.in` to it. One pass, so links and email never split across two names.
 2. India trademark search on Deepen, classes 9 and 42.
-3. Say both names cold to the clinical co-founder.
+3. Say the name cold to the clinical co-founder.
+4. Decide on `deepencare.com`. Defensive only. Skip it if the renewal is not trivial.
