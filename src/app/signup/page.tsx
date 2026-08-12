@@ -44,12 +44,19 @@ export default function SignupPage() {
         body: JSON.stringify({ planTier: selectedPlan }),
       });
 
-      if (!subRes.ok) {
-        const errorMsg = await subRes.json();
-        throw new Error(errorMsg.error || "Failed to initialize subscription");
+      const subResText = await subRes.text();
+      let subResData;
+      try {
+        subResData = JSON.parse(subResText);
+      } catch {
+        throw new Error(`Server error: ${subResText.substring(0, 200)}`);
       }
 
-      const { subscription_id } = await subRes.json();
+      if (!subRes.ok) {
+        throw new Error(subResData.error || "Failed to initialize subscription");
+      }
+
+      const { subscription_id } = subResData;
 
       // 2. Open Razorpay Modal
       const options = {
