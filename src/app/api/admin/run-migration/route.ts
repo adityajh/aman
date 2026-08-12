@@ -9,11 +9,11 @@ export async function GET() {
   const steps = [
     {
       name: "Update admin email and password",
-      query: `UPDATE "users" SET "email" = 'vijay10gopal@gmail.com', "password_hash" = '$2b$10$QUuU03.NBR8IqUgHT9VIWObzft8R9LtkYom7zIOKH8rlrQHLK8XnW' WHERE "email" = 'counselor@aman.com'`
+      query: `UPDATE "users" SET "email" = 'vijay10gopal@gmail.com', "password_hash" = '$2b$10$QUuU03.NBR8IqUgHT9VIWObzft8R9LtkYom7zIOKH8rlrQHLK8XnW' WHERE "email" = 'counselor@deepen.health'`
     },
     {
       name: "Update tenant email",
-      query: `UPDATE "tenants" SET "email" = 'vijay10gopal@gmail.com' WHERE "email" = 'counselor@aman.com'`
+      query: `UPDATE "tenants" SET "email" = 'vijay10gopal@gmail.com' WHERE "email" = 'counselor@deepen.health'`
     }
   ];
 

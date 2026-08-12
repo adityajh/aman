@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import {
   Plus, User, CheckCircle2, Loader2, TrendingUp, History, AlertCircle,
-  Trash2, ArrowLeft, ChevronRight, Search, FileText, Receipt as ReceiptIcon, MailCheck,
+  Trash2, ArrowLeft, ChevronRight, Search, FileText, Receipt as ReceiptIcon, MailCheck, ArrowUpDown, ArrowUp, ArrowDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatIST, istTodayStr } from "@/lib/tz";
@@ -52,6 +52,8 @@ export default function PaymentsPage() {
   const [view, setView] = useState<"clients" | "invoices">("clients");
   const [drillClientId, setDrillClientId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [invoiceSortKey, setInvoiceSortKey] = useState<"date" | "number">("date");
+  const [invoiceSortDir, setInvoiceSortDir] = useState<"asc" | "desc">("desc");
 
   const [selectedClientId, setSelectedClientId] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("upi");
@@ -165,8 +167,18 @@ export default function PaymentsPage() {
     return invoices
       .filter((i) => i.status !== "void")
       .filter((i) => !q || i.invoiceNumber?.toLowerCase().includes(q) || i.client?.name?.toLowerCase().includes(q))
-      .sort((a, b) => (b.invoiceNumber || "").localeCompare(a.invoiceNumber || ""));
-  }, [invoices, search]);
+      .sort((a, b) => {
+        if (invoiceSortKey === "date") {
+          const dA = new Date(a.issuedDate || a.createdAt).getTime();
+          const dB = new Date(b.issuedDate || b.createdAt).getTime();
+          return invoiceSortDir === "asc" ? dA - dB : dB - dA;
+        } else {
+          return invoiceSortDir === "asc"
+            ? (a.invoiceNumber || "").localeCompare(b.invoiceNumber || "")
+            : (b.invoiceNumber || "").localeCompare(a.invoiceNumber || "");
+        }
+      });
+  }, [invoices, search, invoiceSortKey, invoiceSortDir]);
 
   const drillClient = drillClientId ? ledger.find((l) => l.id === drillClientId) : null;
 
@@ -369,7 +381,12 @@ export default function PaymentsPage() {
               ) : (
                 <Table>
                   <TableHeader className="bg-slate-50/70"><TableRow className="hover:bg-transparent border-slate-200">
-                    <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest">Invoice #</TableHead>
+                    <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest cursor-pointer hover:text-slate-700 transition-colors" onClick={() => { if (invoiceSortKey === "date") setInvoiceSortDir(invoiceSortDir === "asc" ? "desc" : "asc"); else { setInvoiceSortKey("date"); setInvoiceSortDir("desc"); }}}>
+                      <div className="flex items-center gap-1">Date {invoiceSortKey === "date" ? (invoiceSortDir === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-50" />}</div>
+                    </TableHead>
+                    <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest cursor-pointer hover:text-slate-700 transition-colors" onClick={() => { if (invoiceSortKey === "number") setInvoiceSortDir(invoiceSortDir === "asc" ? "desc" : "asc"); else { setInvoiceSortKey("number"); setInvoiceSortDir("desc"); }}}>
+                      <div className="flex items-center gap-1">Invoice # {invoiceSortKey === "number" ? (invoiceSortDir === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-50" />}</div>
+                    </TableHead>
                     <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest">Client</TableHead>
                     <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest text-right">Invoiced</TableHead>
                     <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest text-right">Received</TableHead>
@@ -377,13 +394,14 @@ export default function PaymentsPage() {
                     <TableHead className="py-4 font-bold text-slate-400 uppercase text-xs tracking-widest">Status</TableHead>
                   </TableRow></TableHeader>
                   <TableBody>
-                    {loading ? <TableRow><TableCell colSpan={6} className="text-center py-20"><Loader2 className="h-8 w-8 animate-spin mx-auto text-slate-200" /></TableCell></TableRow> :
-                    invoiceRows.length === 0 ? <TableRow><TableCell colSpan={6} className="text-center py-20 text-slate-400">No invoices found.</TableCell></TableRow> :
+                    {loading ? <TableRow><TableCell colSpan={7} className="text-center py-20"><Loader2 className="h-8 w-8 animate-spin mx-auto text-slate-200" /></TableCell></TableRow> :
+                    invoiceRows.length === 0 ? <TableRow><TableCell colSpan={7} className="text-center py-20 text-slate-400">No invoices found.</TableCell></TableRow> :
                     invoiceRows.map((i) => {
                       const bal = parseFloat(i.total) - parseFloat(i.amountPaid || "0");
                       return (
                         <TableRow key={i.id} className="hover:bg-slate-50/60 transition-colors cursor-pointer" onClick={() => setDrillClientId(i.clientId)}>
-                          <TableCell className="py-3 font-semibold text-slate-900">{i.invoiceNumber}</TableCell>
+                          <TableCell className="py-3 whitespace-nowrap text-slate-600">{formatIST(new Date(i.issuedDate || i.createdAt), "d MMM yyyy")}</TableCell>
+                          <TableCell className="font-semibold text-slate-900">{i.invoiceNumber}</TableCell>
                           <TableCell className="text-slate-700">{i.client?.name}</TableCell>
                           <TableCell className="text-right tabular-nums">{curSym(i.currency)}{fmt(parseFloat(i.total))}</TableCell>
                           <TableCell className="text-right tabular-nums text-slate-500">{curSym(i.currency)}{fmt(parseFloat(i.amountPaid || "0"))}</TableCell>

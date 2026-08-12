@@ -52,16 +52,16 @@ export default function SignupPage() {
   return (
     <>
       <Toaster />
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 py-12">
+      <div className="min-h-screen flex items-center justify-center bg-paper py-12">
         <Card className="w-full max-w-lg shadow-lg">
           <CardHeader className="text-center space-y-2">
             <div className="flex justify-center mb-2">
-              <div className="h-12 w-12 bg-primary rounded-xl flex items-center justify-center">
-                <ShieldCheck className="h-7 w-7 text-primary-foreground" />
+              <div className="h-12 w-12 bg-teal-ink rounded-xl flex items-center justify-center">
+                <ShieldCheck className="h-7 w-7 text-teal-action" />
               </div>
             </div>
-            <CardTitle className="text-2xl font-bold">Create your Practice</CardTitle>
-            <CardDescription>Join Aman to streamline your clinical practice.</CardDescription>
+            <CardTitle className="text-2xl font-serif font-bold text-teal-ink">Create your Practice</CardTitle>
+            <CardDescription>Join Deepen to streamline your clinical practice.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -93,12 +93,12 @@ export default function SignupPage() {
                   <div 
                     onClick={() => setSelectedPlan("basic")}
                     className={`cursor-pointer border rounded-lg p-4 transition-all ${
-                      selectedPlan === "basic" ? "border-primary ring-1 ring-primary bg-primary/5" : "hover:border-slate-300"
+                      selectedPlan === "basic" ? "border-teal-action ring-1 ring-teal-action bg-teal-action/5" : "hover:border-slate-300"
                     }`}
                   >
                     <div className="flex justify-between items-center mb-2">
-                      <h3 className="font-semibold text-sm">Basic Tier</h3>
-                      {selectedPlan === "basic" && <Check className="h-4 w-4 text-primary" />}
+                      <h3 className="font-semibold text-sm text-ink">Practice Tier</h3>
+                      {selectedPlan === "basic" && <Check className="h-4 w-4 text-teal-action" />}
                     </div>
                     <p className="text-xs text-slate-500 mb-2">₹999/mo</p>
                     <ul className="text-[11px] text-slate-600 space-y-1">
@@ -111,12 +111,12 @@ export default function SignupPage() {
                   <div 
                     onClick={() => setSelectedPlan("pro")}
                     className={`cursor-pointer border rounded-lg p-4 transition-all ${
-                      selectedPlan === "pro" ? "border-primary ring-1 ring-primary bg-primary/5" : "hover:border-slate-300"
+                      selectedPlan === "pro" ? "border-teal-action ring-1 ring-teal-action bg-teal-action/5" : "hover:border-slate-300"
                     }`}
                   >
                     <div className="flex justify-between items-center mb-2">
-                      <h3 className="font-semibold text-sm text-primary">Pro Tier</h3>
-                      {selectedPlan === "pro" && <Check className="h-4 w-4 text-primary" />}
+                      <h3 className="font-semibold text-sm text-teal-action">Pro Tier</h3>
+                      {selectedPlan === "pro" && <Check className="h-4 w-4 text-teal-action" />}
                     </div>
                     <p className="text-xs text-slate-500 mb-2">₹1,999/mo</p>
                     <ul className="text-[11px] text-slate-600 space-y-1">
@@ -128,7 +128,7 @@ export default function SignupPage() {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" className="w-full bg-teal-action hover:bg-teal-ink text-paper" disabled={loading}>
                 {loading ? (
                   <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Creating practice…</>
                 ) : (
@@ -138,7 +138,7 @@ export default function SignupPage() {
 
               <p className="text-center text-sm text-slate-500">
                 Already have an account?{" "}
-                <Link href="/login" className="text-primary hover:underline font-medium">
+                <Link href="/login" className="text-teal-action hover:underline font-medium">
                   Sign in
                 </Link>
               </p>

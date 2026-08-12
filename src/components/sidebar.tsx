@@ -22,65 +22,65 @@ const routes = [
     label: "Dashboard",
     icon: BarChart3,
     href: "/dashboard",
-    color: "text-lime-400",
+    color: "text-teal-action",
   },
   {
     label: "Clients",
     icon: Users,
     href: "/dashboard/clients",
-    color: "text-lime-400",
+    color: "text-teal-action",
   },
   {
     label: "Sessions",
     icon: Calendar,
     href: "/dashboard/sessions",
-    color: "text-lime-400",
+    color: "text-teal-action",
   },
   {
     label: "Invoices",
     icon: FileText,
     href: "/dashboard/invoices",
-    color: "text-lime-400",
+    color: "text-teal-action",
   },
   {
     label: "Payments",
     icon: Wallet,
     href: "/dashboard/payments",
-    color: "text-lime-400",
+    color: "text-teal-action",
   },
   {
     label: "Fees",
     icon: CreditCard,
     href: "/dashboard/fees",
-    color: "text-lime-400",
+    color: "text-teal-action",
   },
   {
     label: "Reports",
     icon: ClipboardList,
     href: "/dashboard/reports",
-    color: "text-lime-400",
+    color: "text-teal-action",
   },
   {
     label: "Settings",
     icon: Settings,
     href: "/dashboard/settings",
-    color: "text-lime-400",
+    color: "text-teal-action",
   },
 ];
 
-export function Sidebar({ planTier = "basic", tenantSlug = "aman" }: { planTier?: string, tenantSlug?: string }) {
+export function Sidebar({ planTier = "basic", tenantSlug = "deepen" }: { planTier?: string, tenantSlug?: string }) {
   const pathname = usePathname();
 
   return (
-    <div className="space-y-4 py-4 flex flex-col h-full bg-sidebar border-r border-sidebar-border text-sidebar-foreground">
+    <div className="space-y-4 py-4 flex flex-col h-full bg-ink border-r border-hairline/10 text-paper">
       <div className="px-6 py-2 flex items-center gap-2">
-        <div className="h-8 w-8 bg-sidebar-primary rounded-lg flex items-center justify-center">
-          <ShieldCheck className="h-5 w-5 text-sidebar-primary-foreground" />
+        <div className="h-8 w-8 bg-teal-ink rounded-lg flex items-center justify-center">
+          <ShieldCheck className="h-5 w-5 text-teal-action" />
         </div>
         <div className="flex flex-col">
-          <h1 className="text-xl font-bold tracking-tight text-white capitalize">{tenantSlug}</h1>
+          <h1 className="text-xl font-bold tracking-tight text-paper font-serif capitalize">{tenantSlug}</h1>
           {planTier === "pro" && (
-            <span className="text-[10px] font-bold tracking-wider text-sidebar-primary uppercase mt-[-2px]">Pro Tier</span>
+            <span className="text-[10px] font-bold tracking-wider text-teal-action uppercase mt-[-2px]">Pro Tier</span>
           )}
         </div>
       </div>
@@ -90,8 +90,8 @@ export function Sidebar({ planTier = "basic", tenantSlug = "aman" }: { planTier?
             key={route.href}
             href={route.href}
             className={cn(
-              "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:bg-sidebar-accent/50 rounded-lg transition",
-              pathname === route.href ? "text-sidebar-primary bg-sidebar-accent" : "text-slate-300",
+              "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:bg-white/5 rounded-lg transition",
+              pathname === route.href ? "text-teal-action bg-teal-ink/30" : "text-paper/80",
             )}
           >
             <div className="flex items-center flex-1">
@@ -104,9 +104,9 @@ export function Sidebar({ planTier = "basic", tenantSlug = "aman" }: { planTier?
       <div className="px-3">
         <button
           onClick={() => signOut()}
-          className="text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:bg-red-950/30 text-slate-400 hover:text-red-400 rounded-lg transition"
+          className="text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:bg-terracotta/10 text-paper/60 hover:text-terracotta rounded-lg transition"
         >
-          <LogOut className="h-5 w-5 mr-3 text-red-500" />
+          <LogOut className="h-5 w-5 mr-3 text-terracotta/70" />
           Logout
         </button>
       </div>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mark B, refined</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#FBFAF7;--card:#FFF;--ink:#14181C;--ink2:#4A5157;--muted:#878D93;--hair:#E4E1DA;
+        --teal-ink:#0B4F43;--teal:#0F8A72;--terra:#C2632A;--brick:#B4472F;--brass:#B8860B;
+        --serif:'Newsreader',Georgia,serif;--sans:'Inter',system-ui,sans-serif;}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:14px;line-height:1.55}
+  .wrap{max-width:880px;margin:0 auto;padding:44px 26px 50px}
+  .kick{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+  h1{font-family:var(--serif);font-size:34px;font-weight:500;margin-bottom:8px}
+  .lede{font-size:15px;color:var(--ink2);max-width:680px;margin-bottom:30px}
+  h2{font-family:var(--serif);font-size:22px;font-weight:500;margin-bottom:4px}
+  .sub{font-size:13px;color:var(--muted);margin-bottom:16px}
+
+  .probs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:32px}
+  @media(max-width:700px){.probs{grid-template-columns:1fr}}
+  .prob{background:var(--card);border:1px solid var(--hair);border-radius:11px;padding:20px 22px}
+  .prob .h{font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--brick);margin-bottom:8px}
+  .prob p{font-size:13px;color:var(--ink2)}
+  .prob .fix{font-size:12.5px;font-weight:600;color:var(--teal-ink);margin-top:10px;padding-top:9px;border-top:1px solid #F1EFE9}
+
+  .opt{background:var(--card);border:1px solid var(--hair);border-radius:12px;padding:24px;margin-bottom:14px}
+  .opt.win{border-color:#BFD8D1;box-shadow:0 2px 10px rgba(15,138,114,.07)}
+  .opthead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .optname{font-family:var(--serif);font-size:20px;font-weight:600}
+  .badge{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:100px}
+  .b-win{color:var(--teal-ink);background:#EFF6F4;border:1px solid #C9DED8}
+  .b-mid{color:#7A5A08;background:#FAF3E2;border:1px solid #E4CE96}
+  .b-no{color:var(--brick);background:#F9EAE6;border:1px solid #E3B7AC}
+  .tests{display:flex;gap:24px;align-items:flex-end;flex-wrap:wrap;padding:6px 0 14px;border-bottom:1px solid #F1EFE9;margin-bottom:13px}
+  .t{text-align:center}
+  .t .lbl{font-size:9.5px;color:var(--muted);margin-top:6px}
+  .darkcell{background:#16181A;border-radius:8px;padding:9px}
+  .optnote{font-size:13px;color:var(--ink2)}
+  .optnote b{color:var(--ink)}
+  .lock{display:flex;align-items:center;gap:12px;margin-top:13px;padding-top:13px;border-top:1px solid #F1EFE9}
+  .lockwm{font-family:var(--serif);font-size:30px;font-weight:500;color:var(--teal-ink);letter-spacing:-.015em}
+  .lockwm .fs{color:var(--terra)}
+  .rec{background:var(--card);border:1px solid var(--hair);border-left:3px solid var(--teal);border-radius:10px;padding:22px 26px;margin-top:20px}
+  .rec .h{font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--teal);margin-bottom:10px}
+  .rec p{font-size:13.5px;color:var(--ink2);margin-bottom:9px}
+  .rec p:last-child{margin-bottom:0}
+  .rec b{color:var(--teal-ink)}
+  @media print{.wrap{padding:14px 18px}@page{size:A4;margin:8mm}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kick">Brand · logo, mark B refined · 12 August 2026</div>
+  <h1>Keeping the bars, fixing the two faults</h1>
+  <p class="lede">Bars as drawn had two real problems. Neither is a reason to abandon the form. Each is fixable with one design decision, and all three variants below keep the horizontal-layers idea intact.</p>
+
+  <div class="probs">
+    <div class="prob">
+      <div class="h">Fault 1 · the hamburger</div>
+      <p>Three equal bars in a single colour is the universal menu icon. Every one-colour use, print, stamp, embroidery, would read as navigation.</p>
+      <div class="fix">Fix: never three equal bars. Vary weight or width so the eye reads structure, not a control.</div>
+    </div>
+    <div class="prob">
+      <div class="h">Fault 2 · the bar chart</div>
+      <p>Bars of differing length off a shared left edge encode magnitude. That is business analytics, the exact territory the positioning attacks.</p>
+      <div class="fix">Fix: centre the bars, or vary thickness rather than length. No shared baseline, no magnitude read.</div>
+    </div>
+  </div>
+
+  <h2>Three variants</h2>
+  <div class="sub">Tested at 48px, 24px, 16px, one colour, and reversed on dark.</div>
+
+  <!-- B1 -->
+  <div class="opt win">
+    <div class="opthead"><div class="optname">B1 · Surface and depth</div><span class="badge b-win">Recommended</span></div>
+    <div class="tests">
+      <div class="t"><svg width="48" height="48" viewBox="0 0 64 64"><rect x="10" y="15" width="44" height="4" rx="2" fill="#63BCA9"/><rect x="10" y="27" width="44" height="9" rx="3" fill="#0F8A72"/><rect x="10" y="42" width="44" height="12" rx="3.5" fill="#0B4F43"/></svg><div class="lbl">48</div></div>
+      <div class="t"><svg width="24" height="24" viewBox="0 0 64 64"><rect x="10" y="15" width="44" height="4" rx="2" fill="#63BCA9"/><rect x="10" y="27" width="44" height="9" rx="3" fill="#0F8A72"/><rect x="10" y="42" width="44" height="12" rx="3.5" fill="#0B4F43"/></svg><div class="lbl">24</div></div>
+      <div class="t"><svg width="16" height="16" viewBox="0 0 64 64"><rect x="10" y="15" width="44" height="4" rx="2" fill="#63BCA9"/><rect x="10" y="27" width="44" height="9" rx="3" fill="#0F8A72"/><rect x="10" y="42" width="44" height="12" rx="3.5" fill="#0B4F43"/></svg><div class="lbl">16</div></div>
+      <div class="t"><svg width="32" height="32" viewBox="0 0 64 64"><rect x="10" y="15" width="44" height="4" rx="2" fill="#14181C"/><rect x="10" y="27" width="44" height="9" rx="3" fill="#14181C"/><rect x="10" y="42" width="44" height="12" rx="3.5" fill="#14181C"/></svg><div class="lbl">1 colour</div></div>
+      <div class="t"><div class="darkcell"><svg width="32" height="32" viewBox="0 0 64 64"><rect x="10" y="15" width="44" height="4" rx="2" fill="#A8DACD"/><rect x="10" y="27" width="44" height="9" rx="3" fill="#2AA890"/><rect x="10" y="42" width="44" height="12" rx="3.5" fill="#5FC3AE"/></svg></div><div class="lbl">reversed</div></div>
+    </div>
+    <div class="optnote"><b>A thin rule on top is the waterline. Two solid blocks below it are the depth.</b> Thickness increases as it descends, so the eye reads density, not quantity. The weight difference between the rule and the blocks is what kills the hamburger: a menu icon never has one hairline and two slabs. Equal widths mean no magnitude read, so no chart. It also keeps the exact concept we agreed on, surface then depth, just expressed in bars.</div>
+    <div class="lock"><svg width="30" height="30" viewBox="0 0 64 64"><rect x="10" y="15" width="44" height="4" rx="2" fill="#63BCA9"/><rect x="10" y="27" width="44" height="9" rx="3" fill="#0F8A72"/><rect x="10" y="42" width="44" height="12" rx="3.5" fill="#0B4F43"/></svg><div class="lockwm">deepen<span class="fs">.</span></div></div>
+  </div>
+
+  <!-- B2 -->
+  <div class="opt">
+    <div class="opthead"><div class="optname">B2 · The descent</div><span class="badge b-mid">Most distinctive, one risk</span></div>
+    <div class="tests">
+      <div class="t"><svg width="48" height="48" viewBox="0 0 64 64"><rect x="8" y="15" width="48" height="7" rx="3.5" fill="#63BCA9"/><rect x="15" y="28" width="34" height="7" rx="3.5" fill="#0F8A72"/><rect x="22" y="41" width="20" height="7" rx="3.5" fill="#0B4F43"/></svg><div class="lbl">48</div></div>
+      <div class="t"><svg width="24" height="24" viewBox="0 0 64 64"><rect x="8" y="15" width="48" height="7" rx="3.5" fill="#63BCA9"/><rect x="15" y="28" width="34" height="7" rx="3.5" fill="#0F8A72"/><rect x="22" y="41" width="20" height="7" rx="3.5" fill="#0B4F43"/></svg><div class="lbl">24</div></div>
+      <div class="t"><svg width="16" height="16" viewBox="0 0 64 64"><rect x="8" y="15" width="48" height="7" rx="3.5" fill="#63BCA9"/><rect x="15" y="28" width="34" height="7" rx="3.5" fill="#0F8A72"/><rect x="22" y="41" width="20" height="7" rx="3.5" fill="#0B4F43"/></svg><div class="lbl">16</div></div>
+      <div class="t"><svg width="32" height="32" viewBox="0 0 64 64"><rect x="8" y="15" width="48" height="7" rx="3.5" fill="#14181C"/><rect x="15" y="28" width="34" height="7" rx="3.5" fill="#14181C"/><rect x="22" y="41" width="20" height="7" rx="3.5" fill="#14181C"/></svg><div class="lbl">1 colour</div></div>
+      <div class="t"><div class="darkcell"><svg width="32" height="32" viewBox="0 0 64 64"><rect x="8" y="15" width="48" height="7" rx="3.5" fill="#A8DACD"/><rect x="15" y="28" width="34" height="7" rx="3.5" fill="#2AA890"/><rect x="22" y="41" width="20" height="7" rx="3.5" fill="#5FC3AE"/></svg></div><div class="lbl">reversed</div></div>
+    </div>
+    <div class="optnote"><b>Centred bars narrowing as they descend.</b> The taper reads as perspective, things getting further away, which is the most legible way to say depth with straight lines. Centring kills the chart read completely, since there is no shared baseline to measure from. Holds up best of the three at 16px. <b>The risk:</b> narrowing downward is also the shape of a funnel, and a sales funnel is an unfortunate neighbour for a product that refuses to be a marketing tool. Whether that reads depends on the viewer.</div>
+    <div class="lock"><svg width="30" height="30" viewBox="0 0 64 64"><rect x="8" y="15" width="48" height="7" rx="3.5" fill="#63BCA9"/><rect x="15" y="28" width="34" height="7" rx="3.5" fill="#0F8A72"/><rect x="22" y="41" width="20" height="7" rx="3.5" fill="#0B4F43"/></svg><div class="lockwm">deepen<span class="fs">.</span></div></div>
+  </div>
+
+  <!-- B3 -->
+  <div class="opt">
+    <div class="opthead"><div class="optname">B3 · Weight</div><span class="badge b-no">Closest to the fault</span></div>
+    <div class="tests">
+      <div class="t"><svg width="48" height="48" viewBox="0 0 64 64"><rect x="10" y="16" width="44" height="6" rx="3" fill="#63BCA9"/><rect x="10" y="28" width="44" height="8" rx="3.5" fill="#0F8A72"/><rect x="10" y="42" width="44" height="10" rx="4" fill="#0B4F43"/></svg><div class="lbl">48</div></div>
+      <div class="t"><svg width="24" height="24" viewBox="0 0 64 64"><rect x="10" y="16" width="44" height="6" rx="3" fill="#63BCA9"/><rect x="10" y="28" width="44" height="8" rx="3.5" fill="#0F8A72"/><rect x="10" y="42" width="44" height="10" rx="4" fill="#0B4F43"/></svg><div class="lbl">24</div></div>
+      <div class="t"><svg width="16" height="16" viewBox="0 0 64 64"><rect x="10" y="16" width="44" height="6" rx="3" fill="#63BCA9"/><rect x="10" y="28" width="44" height="8" rx="3.5" fill="#0F8A72"/><rect x="10" y="42" width="44" height="10" rx="4" fill="#0B4F43"/></svg><div class="lbl">16</div></div>
+      <div class="t"><svg width="32" height="32" viewBox="0 0 64 64"><rect x="10" y="16" width="44" height="6" rx="3" fill="#14181C"/><rect x="10" y="28" width="44" height="8" rx="3.5" fill="#14181C"/><rect x="10" y="42" width="44" height="10" rx="4" fill="#14181C"/></svg><div class="lbl">1 colour</div></div>
+      <div class="t"><div class="darkcell"><svg width="32" height="32" viewBox="0 0 64 64"><rect x="10" y="16" width="44" height="6" rx="3" fill="#A8DACD"/><rect x="10" y="28" width="44" height="8" rx="3.5" fill="#2AA890"/><rect x="10" y="42" width="44" height="10" rx="4" fill="#5FC3AE"/></svg></div><div class="lbl">reversed</div></div>
+    </div>
+    <div class="optnote">Equal widths, thickening downward. Reads as density increasing with depth, which is the right idea. <b>But the weight steps are too subtle to do the work.</b> Look at the one-colour test: it is very close to a menu icon. Included for completeness, not recommended.</div>
+  </div>
+
+  <div class="rec">
+    <div class="h">Recommendation</div>
+    <p><b>B1.</b> It is the only variant that keeps the surface-and-depth idea explicit, and the hairline-against-slabs contrast is a decisive fix for the menu problem rather than a hopeful one. It is also the closest sibling to the circle mark, so if you ever want both, the thinking is consistent.</p>
+    <p><b>B2 if you want more character.</b> It is genuinely the better-looking mark and the strongest at small sizes. Take it if the funnel association does not bother you. Test it once by showing it to someone cold and asking what they see.</p>
+    <p>Say which and I will swap the brand guide section, regenerate the five SVG assets, and update the artifact.</p>
+  </div>
+
+</div>
+</body>
+</html>

@@ -2,7 +2,7 @@ import nodemailer from "nodemailer";
 import { db } from "@/lib/db";
 import { invoices, invoiceLineItems, clients, receipts } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
-import { eq, and, lt, not } from "drizzle-orm";
+import { eq, and, lt, lte, not } from "drizzle-orm";
 import { formatIST } from "@/lib/tz";
 import { getTenantContext, withTenantContext } from "@/lib/tenant";
 
@@ -45,11 +45,11 @@ export async function POST(
       }
 
       const practiceProfile = settings || {
-        practiceName: "Aman Practice Management",
+        practiceName: "Deepen Counseling",
         counselorName: "Vijay Gopal Sreenivasan",
         address: "Noida, Uttar Pradesh",
         phone: "+91-0000000000",
-        email: "counselor@aman.com",
+        email: "counselor@deepen.health",
         monthlyQuote: "Progress is not a straight line.",
         upiId: "",
       };
@@ -74,7 +74,7 @@ export async function POST(
         where: and(
           eq(receipts.clientId, invoice.clientId),
           eq(receipts.currency, invoice.currency),
-          lt(receipts.createdAt, invoice.createdAt)
+          lte(receipts.paymentDate, invoice.issuedDate)
         )
       });
 
@@ -181,7 +181,7 @@ export async function POST(
                 Billing Month: ${formatIST(new Date(invoice.billingMonth), "MMMM yyyy")}
               </p>
               <p style="font-size: 11px; color: #cbd5e0; margin: 8px 0 0;">
-                Aman Clinical Practice Management System
+                Deepen Clinical Practice Management System
               </p>
             </div>
           </div>

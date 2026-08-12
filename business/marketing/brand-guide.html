@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deepen · Brand Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBFAF7;--card:#FFFFFF;--ink:#14181C;--ink2:#4A5157;--muted:#878D93;--hair:#E4E1DA;
+    --teal-ink:#0B4F43;--teal:#0F8A72;--terra:#C2632A;--brass:#B8860B;--brick:#B4472F;
+    --dk-surf:#16181A;--dk-card:#1E2124;--dk-ink:#F5F4F1;--dk-hair:#2B2F33;
+    --dk-teal-ink:#5FC3AE;--dk-teal:#2AA890;--dk-terra:#CE7440;
+    --serif:'Newsreader',Georgia,'Times New Roman',serif;
+    --sans:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--sans);background:var(--paper);color:var(--ink);line-height:1.55;font-size:15px}
+  .wrap{max-width:880px;margin:0 auto;padding:0 24px}
+
+  /* cover */
+  header{padding:70px 0 44px;border-bottom:1px solid var(--hair)}
+  .covermark{display:flex;align-items:center;gap:18px;margin-bottom:16px}
+  .wm{font-family:var(--serif);color:var(--teal-ink);font-weight:500;letter-spacing:-.02em;font-size:64px;line-height:1}
+  .wm .fs{color:var(--terra)}
+  .desc{font-family:var(--serif);font-size:22px;color:var(--ink2);font-style:italic;margin-bottom:8px}
+  .subdesc{font-size:14px;color:var(--muted);margin-bottom:4px}
+  .mission{font-size:14px;font-weight:600;color:var(--terra);margin-bottom:22px}
+  .statusrow{display:flex;gap:8px;flex-wrap:wrap}
+  .tag{font-size:11.5px;font-weight:600;padding:4px 12px;border-radius:100px;border:1px solid var(--hair);background:var(--card);color:var(--ink2)}
+
+  /* nav */
+  .toc{display:flex;flex-wrap:wrap;gap:6px;padding:22px 0 0}
+  .toc a{font-size:11.5px;color:var(--ink2);text-decoration:none;background:var(--card);border:1px solid var(--hair);border-radius:100px;padding:4px 12px}
+  .toc a:hover{border-color:#BFD8D1;color:var(--teal-ink)}
+
+  section{padding:52px 0;border-bottom:1px solid var(--hair)}
+  .secnum{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:10px}
+  h2{font-family:var(--serif);font-size:31px;font-weight:500;letter-spacing:-.01em;margin-bottom:8px}
+  .lede{color:var(--ink2);max-width:640px;margin-bottom:26px}
+  h3{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin:30px 0 12px}
+  p.body{font-size:14px;color:var(--ink2);margin-bottom:12px;max-width:680px}
+  p.body b{color:var(--ink)}
+
+  .card{background:var(--card);border:1px solid var(--hair);border-radius:10px;padding:22px 24px}
+  .accent{border-left:3px solid var(--teal)}
+  .warm{background:#FBF3EC;border-color:#EBD5C2}
+  .cool{background:#EFF6F4;border-color:#C9DED8}
+
+  /* at a glance */
+  .glance{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+  @media(max-width:700px){.glance{grid-template-columns:1fr 1fr}}
+  .gc{background:var(--card);border:1px solid var(--hair);border-radius:10px;padding:16px 18px}
+  .gc .l{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+  .gc .v{font-size:13px;color:var(--ink);font-weight:500;line-height:1.45}
+  .gc .v span{color:var(--muted);font-weight:400}
+
+  /* test */
+  .testblock{background:var(--card);border:1px solid var(--hair);border-left:3px solid var(--teal);border-radius:10px;padding:28px 32px}
+  .testblock .q{font-family:var(--serif);font-size:23px;font-weight:500;line-height:1.4;color:var(--ink)}
+  .testblock .a{font-size:13px;color:var(--muted);margin-top:12px}
+
+  .mustgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:680px){.mustgrid{grid-template-columns:1fr}}
+  .mustcard{background:var(--card);border:1px solid var(--hair);border-radius:10px;padding:20px 22px}
+  .mustcard .h{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
+  .mustcard.yes .h{color:var(--teal-ink)}
+  .mustcard.no .h{color:var(--brick)}
+  .mustcard ul{list-style:none}
+  .mustcard li{padding:7px 0;border-top:1px solid #F1EFE9;font-size:13.5px;color:var(--ink2)}
+  .mustcard li:first-of-type{border-top:none}
+
+  /* name */
+  .three{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
+  @media(max-width:720px){.three{grid-template-columns:1fr}}
+  .mcard{background:var(--card);border:1px solid var(--hair);border-radius:10px;padding:20px 22px}
+  .mcard .w{font-family:var(--serif);font-size:19px;font-weight:600;margin-bottom:6px}
+  .mcard p{font-size:12.5px;color:var(--ink2)}
+  .writeit{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--hair);border-radius:10px;overflow:hidden}
+  .writeit td{font-size:13px;padding:10px 18px;border-bottom:1px solid #F1EFE9;color:var(--ink2)}
+  .writeit tr:last-child td{border-bottom:none}
+  .writeit td:first-child{width:46%;color:var(--ink);font-weight:500}
+  .ok{color:var(--teal);font-weight:700;margin-right:7px}
+  .nope{color:var(--brick);font-weight:700;margin-right:7px}
+
+  /* voice */
+  .prin{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:680px){.prin{grid-template-columns:1fr}}
+  .pcard{background:var(--card);border:1px solid var(--hair);border-radius:10px;padding:20px}
+  .pcard .n{font-family:var(--serif);font-size:26px;color:var(--teal);margin-bottom:6px}
+  .pcard .t{font-weight:600;font-size:14px;margin-bottom:6px}
+  .pcard p{font-size:12.5px;color:var(--ink2)}
+  table.lex{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--hair);border-radius:10px;overflow:hidden}
+  .lex th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;text-align:left;padding:12px 18px;border-bottom:1px solid var(--hair)}
+  .lex th.say{color:var(--teal-ink)}.lex th.nev{color:var(--brick)}
+  .lex td{font-size:13px;padding:10px 18px;border-bottom:1px solid #F1EFE9;color:var(--ink2);vertical-align:top}
+  .lex tr:last-child td{border-bottom:none}
+  .lex td.nev{color:var(--muted)}
+  .ba{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+  @media(max-width:680px){.ba{grid-template-columns:1fr}}
+  .bacard{background:var(--card);border:1px solid var(--hair);border-radius:10px;padding:18px 20px}
+  .bacard .h{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+  .bacard.b .h{color:var(--brick)}.bacard.a .h{color:var(--teal-ink)}
+  .bacard p{font-size:13.5px;color:var(--ink2);padding:7px 0;border-top:1px solid #F1EFE9}
+  .bacard p:first-of-type{border-top:none}
+
+  /* logo */
+  .logogrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:680px){.logogrid{grid-template-columns:1fr}}
+  .logocard{background:var(--card);border:1px solid var(--hair);border-radius:10px;padding:26px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:150px}
+  .logocard .cap{font-size:11.5px;color:var(--muted);text-align:center}
+  .lockup{display:flex;align-items:center;gap:13px}
+  .lockup .lw{font-family:var(--serif);font-size:34px;font-weight:500;color:var(--teal-ink);letter-spacing:-.015em}
+  .lockup .lw .fs{color:var(--terra)}
+  .sizerow{display:flex;gap:22px;align-items:flex-end;justify-content:center;flex-wrap:wrap}
+  .sz{text-align:center}
+  .sz .l{font-size:9.5px;color:var(--muted);margin-top:6px}
+  .darkcell{background:var(--dk-surf);border-radius:8px;padding:9px}
+  .specline{font-size:12.5px;color:var(--ink2);background:var(--card);border:1px solid var(--hair);border-left:3px solid var(--teal);border-radius:9px;padding:16px 20px;margin-top:14px}
+  .specline b{color:var(--teal-ink)}
+  .misuse{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px}
+  @media(max-width:700px){.misuse{grid-template-columns:1fr 1fr}}
+  .mis{background:var(--card);border:1px solid var(--hair);border-radius:9px;padding:14px;text-align:center}
+  .mis .x{font-size:11px;font-weight:700;color:var(--brick);margin-top:8px}
+  .mis .d{font-size:10.5px;color:var(--muted);margin-top:2px;line-height:1.4}
+
+  /* colour */
+  .swrow{display:flex;gap:10px;flex-wrap:wrap}
+  .sw{flex:1;min-width:96px}
+  .sw .chip{height:56px;border-radius:8px;border:1px solid rgba(0,0,0,.06);margin-bottom:6px}
+  .sw .nm{font-size:12px;font-weight:600}
+  .sw .hx{font-size:10.5px;color:var(--muted);font-family:ui-monospace,monospace}
+  .sw .use{font-size:11px;color:var(--muted)}
+  .ramp{display:flex;border-radius:8px;overflow:hidden;height:44px;margin-bottom:6px}
+  .ramp div{flex:1}
+  .rampcap{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+  .propbar{display:flex;height:34px;border-radius:8px;overflow:hidden;margin-bottom:8px;border:1px solid var(--hair)}
+  .propbar div{display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+  .terrarule{background:#FBF3EC;border:1px solid #EBD5C2;border-radius:10px;padding:18px 22px;font-size:13.5px;color:var(--ink2)}
+  .terrarule b{color:var(--terra)}
+  table.a11y{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--hair);border-radius:10px;overflow:hidden;margin-top:10px}
+  .a11y th{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;text-align:left;padding:11px 16px;border-bottom:1px solid var(--hair);color:var(--ink2)}
+  .a11y td{font-size:12.5px;padding:9px 16px;border-bottom:1px solid #F1EFE9;color:var(--ink2);font-variant-numeric:tabular-nums}
+  .a11y tr:last-child td{border-bottom:none}
+  .a11y td:first-child{font-family:ui-monospace,monospace;font-size:11.5px}
+
+  /* type */
+  .typegrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:680px){.typegrid{grid-template-columns:1fr}}
+  .typecard{background:var(--card);border:1px solid var(--hair);border-radius:10px;padding:24px}
+  .typecard .lbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  .spec-serif{font-family:var(--serif);font-size:27px;line-height:1.3;font-weight:500}
+  .spec-sans{font-size:14px;color:var(--ink2);line-height:1.6}
+  .typecard .note{font-size:11.5px;color:var(--muted);margin-top:12px}
+  table.scale{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--hair);border-radius:10px;overflow:hidden;margin-top:10px}
+  .scale th{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;text-align:left;padding:11px 16px;border-bottom:1px solid var(--hair);color:var(--ink2)}
+  .scale td{font-size:12.5px;padding:9px 16px;border-bottom:1px solid #F1EFE9;color:var(--ink2)}
+  .scale tr:last-child td{border-bottom:none}
+  .scale td:first-child{font-weight:600;color:var(--ink)}
+
+  /* charts */
+  .chartwrap{display:grid;grid-template-columns:1.35fr 1fr;gap:14px}
+  @media(max-width:680px){.chartwrap{grid-template-columns:1fr}}
+  .chartcard{background:var(--card);border:1px solid var(--hair);border-radius:10px;padding:18px 18px 10px}
+  .chartcard .t{font-size:13px;font-weight:600}
+  .chartcard .s{font-size:11px;color:var(--muted);margin-bottom:8px}
+  .orderchips{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:12px 0}
+  .oc{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--ink2);background:var(--paper);border:1px solid var(--hair);border-radius:100px;padding:4px 11px}
+  .oc i{width:10px;height:10px;border-radius:50%;display:inline-block}
+  .arrow{color:var(--muted);font-size:12px}
+  .chartrules{font-size:12.5px;color:var(--ink2)}
+  .chartrules li{margin:7px 0 7px 16px}
+  .verdrow{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+  .vchip{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;padding:7px 15px;border-radius:100px;border:1px solid}
+  .v-ahead{color:var(--ink);border-color:#D6D3CB;background:var(--card)}
+  .v-track{color:#7A5A08;border-color:#E4CE96;background:#FAF3E2}
+  .v-behind{color:#8A3524;border-color:#E3B7AC;background:#F9EAE6}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+  .pull{font-family:var(--serif);font-size:21px;font-style:italic;color:var(--ink);padding:6px 0}
+  .pull .em{color:var(--teal-ink);font-style:normal}
+
+  /* dark */
+  .darkstrip{background:var(--dk-surf);color:var(--dk-ink);border-radius:12px;padding:30px}
+  .darkstrip .kick{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#9BA0A5;margin-bottom:16px}
+  .darkstrip .wm{color:var(--dk-teal-ink);font-size:34px}
+  .darkstrip .wm .fs{color:var(--dk-terra)}
+  .dsw{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+  .dsw .sw .chip{border-color:rgba(255,255,255,.08)}
+  .dsw .sw .nm{color:var(--dk-ink)}
+  .dsw .sw .hx{color:#9BA0A5}
+
+  table.surf{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--hair);border-radius:10px;overflow:hidden}
+  .surf th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;text-align:left;padding:12px 18px;border-bottom:1px solid var(--hair);color:var(--ink2)}
+  .surf td{font-size:13px;padding:11px 18px;border-bottom:1px solid #F1EFE9;color:var(--ink2)}
+  .surf td:first-child{font-weight:600;color:var(--ink);white-space:nowrap}
+  .surf tr:last-child td{border-bottom:none}
+
+  footer{padding:40px 0 70px}
+  .foot{font-size:12px;color:var(--muted);line-height:1.7}
+  .foot b{color:var(--ink2)}
+  @media print{.wrap{padding:10px 16px}@page{size:A4;margin:9mm}section{padding:26px 0;break-inside:avoid}.toc{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ======== COVER ======== -->
+<header>
+  <div class="covermark">
+    <svg width="56" height="56" viewBox="0 0 64 64"><rect x="10" y="13" width="44" height="4" rx="2" fill="#0B4F43"/><rect x="10" y="24" width="44" height="9" rx="2" fill="#0B4F43"/><rect x="10" y="39" width="44" height="12" rx="2" fill="#0B4F43"/></svg>
+    <div class="wm">deepen<span class="fs">.</span></div>
+  </div>
+  <div class="desc">Go deeper than you could alone.</div>
+  <div class="subdesc">Outcome tracking for counsellors.</div>
+  <div class="mission">Empowering mental health practitioners.</div>
+  <div class="statusrow">
+    <span class="tag">Brand guide · v1.0</span>
+    <span class="tag">August 2026</span>
+    <span class="tag">Owner: the founders</span>
+  </div>
+  <div class="toc">
+    <a href="#s1">01 At a glance</a><a href="#s2">02 Audience</a><a href="#s3">03 The test</a>
+    <a href="#s4">04 Name</a><a href="#s5">05 Voice</a><a href="#s6">06 Logo</a>
+    <a href="#s7">07 Colour</a><a href="#s8">08 Type</a><a href="#s9">09 Data</a>
+    <a href="#s10">10 Imagery</a><a href="#s11">11 Applications</a><a href="#s12">12 Governance</a>
+  </div>
+</header>
+
+<!-- ======== 01 AT A GLANCE ======== -->
+<section id="s1">
+  <div class="secnum">01 · At a glance</div>
+  <h2>The whole brand on one screen</h2>
+  <p class="lede">If you read nothing else, read this. Everything after it is detail.</p>
+  <div class="glance">
+    <div class="gc"><div class="l">Name</div><div class="v">deepen<span>. Lowercase. Terracotta full stop.</span></div></div>
+    <div class="gc"><div class="l">Tagline</div><div class="v">Go deeper than you could alone</div></div>
+    <div class="gc"><div class="l">Mission</div><div class="v">Empowering mental health practitioners</div></div>
+    <div class="gc"><div class="l">Descriptor</div><div class="v">Outcome tracking for counsellors</div></div>
+  </div>
+  <div class="glance">
+    <div class="gc"><div class="l">Primary colour</div><div class="v" style="color:#0B4F43">Teal ink <span style="font-family:ui-monospace,monospace">#0B4F43</span></div></div>
+    <div class="gc"><div class="l">Accent</div><div class="v" style="color:#C2632A">Terracotta <span style="font-family:ui-monospace,monospace">#C2632A</span></div></div>
+    <div class="gc"><div class="l">Type</div><div class="v">Newsreader <span>+</span> Inter</div></div>
+    <div class="gc"><div class="l">Voice</div><div class="v">Plain, specific, unhurried, adult</div></div>
+  </div>
+  <div class="card accent" style="margin-top:14px;">
+    <p class="body" style="margin-bottom:0;"><b>The one thing to hold onto.</b> This product hands a counsellor numbers about her own effectiveness. Numbers like that can help a person or shame them, and the difference is entirely in how they are framed and who controls them. The brand exists to keep it on the helpful side. Every rule in this document traces back to that.</p>
+  </div>
+</section>
+
+<!-- ======== 02 AUDIENCE ======== -->
+<section id="s2">
+  <div class="secnum">02 · Audience</div>
+  <h2>Who we are speaking to</h2>
+  <p class="lede">One counsellor, working alone, at the end of a long day.</p>
+  <p class="body">She runs a small private practice. She is good at the work and has almost no way of proving it, to herself or anyone else. She has no supervisor she can afford to see often, no peer group that talks in numbers, and no idea whether her results are normal.</p>
+  <p class="body"><b>The thing that shapes this entire brand:</b> many counsellors have already met outcome measurement in its worst form. Scores demanded by an employer or a platform, reported upward, and read back as a verdict on their competence. For someone with that history, a product full of charts about her performance is not a neutral offer. It is a reminder.</p>
+  <p class="body">So we are not selling measurement. We are offering a counsellor a private mirror that nobody else can look into, and we say so early and plainly.</p>
+
+  <h3>What she must never feel</h3>
+  <div class="mustgrid">
+    <div class="mustcard yes">
+      <div class="h">Every surface should read as</div>
+      <ul>
+        <li>Information she holds and controls</li>
+        <li>Curiosity, not examination</li>
+        <li>About a client, never about her worth</li>
+        <li>Measured against that client's own starting point</li>
+        <li>Private by default and by architecture</li>
+      </ul>
+    </div>
+    <div class="mustcard no">
+      <div class="h">Never</div>
+      <ul>
+        <li>A score, a grade, a rank or a league table</li>
+        <li>Visible to an employer, a platform or a supervisor</li>
+        <li>Compared against other counsellors</li>
+        <li>Attached to any consequence</li>
+        <li>Framed as performance</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ======== 03 THE TEST ======== -->
+<section id="s3">
+  <div class="secnum">03 · The standing test</div>
+  <h2>One question governs everything</h2>
+  <p class="lede">Design reviews, copy reviews, feature decisions. This is the gate.</p>
+  <div class="testblock">
+    <div class="q">Would a counsellor who was once shamed by outcome metrics feel safe opening this?</div>
+    <div class="a">If a screen, a phrase, a colour or an icon fails this, it does not ship. Regardless of how well it converts.</div>
+  </div>
+  <h3>Four things we will not build, at any price</h3>
+  <p class="body">These are not a roadmap discussion. They are settled, and the reason is the same each time: each one turns a private mirror into a public verdict.</p>
+  <table class="writeit" style="margin-top:6px;">
+    <tr><td>Any view for an employer, platform or supervisor</td><td>The moment someone above her can see it, the meaning inverts</td></tr>
+    <tr><td>Rankings, league tables or comparison between counsellors</td><td>Turns hard cases into a liability and rewards cream-skimming</td></tr>
+    <tr><td>Public badges, seals or a practitioner directory</td><td>Makes outcome data a marketing asset, which corrupts the data</td></tr>
+    <tr><td>Streaks, scores, grades or gamification of any kind</td><td>Someone who internalises client failure will internalise a broken streak</td></tr>
+  </table>
+</section>
+
+<!-- ======== 04 NAME ======== -->
+<section id="s4">
+  <div class="secnum">04 · Name</div>
+  <h2>deepen<span style="color:var(--terra)">.</span></h2>
+  <p class="lede">Not a word we invented. A word the audience already uses for the thing they are trying to do.</p>
+  <div class="three">
+    <div class="mcard"><div class="w">Deepen the process</div><p>The clinical sense. Helping a client move past surface content to what is actually underneath. A named skill, taught and studied.</p></div>
+    <div class="mcard"><div class="w">Deepen your practice</div><p>The professional development phrase. What certifications, workshops and supervision all promise. A category counsellors already invest in.</p></div>
+    <div class="mcard"><div class="w">Deepen the picture</div><p>What the product does. Every session adds a reading, and the view of a client, and of a career, gets less shallow over time.</p></div>
+  </div>
+  <p class="body" style="margin-top:14px;"><b>Why it works.</b> The name describes the work, not the software. No verdict is possible inside it: to deepen assumes you are already good and offers you further. And the counsellor is always the subject. She deepens. The product never deepens her.</p>
+
+  <h3>The three lines, and when each is used</h3>
+  <p class="body">They do different jobs. Keep them apart and never blend them into one sentence.</p>
+  <table class="writeit" style="margin-bottom:14px;">
+    <tr>
+      <td><b style="color:var(--teal-ink);font-family:var(--serif);font-size:17px;font-style:italic;">Go deeper than you could alone.</b><br><span style="color:var(--muted);font-size:12px;">Tagline</span></td>
+      <td>Public and emotional. Sits under the wordmark, opens the site, closes a talk. Use where a person is meeting the brand for the first time.</td>
+    </tr>
+    <tr>
+      <td><b>Deepen, outcome tracking for counsellors.</b><br><span style="color:var(--muted);font-size:12px;">Descriptor</span></td>
+      <td>Functional and searchable. Title tags, app listings, social bios, the line after the name in an introduction. Never ship the name alone in metadata.</td>
+    </tr>
+    <tr>
+      <td><b style="color:var(--terra)">Empowering mental health practitioners.</b><br><span style="color:var(--muted);font-size:12px;">Mission</span></td>
+      <td>Internal north star. Decides what gets built. It can appear publicly, but it is not a sales line and should never do a tagline's job.</td>
+    </tr>
+  </table>
+  <div class="card cool" style="margin-bottom:14px;">
+    <p class="body" style="margin-bottom:8px;"><b>Why the tagline earns its place.</b> The deepest thing counsellors in solo practice report is not admin and it is not money. It is working without a reference point. No supervisor they can afford to see often, no peer group that talks in numbers, no way of knowing whether their experience is normal. <b>Alone</b> is the word that names that, and the line answers it without ever saying the word lonely.</p>
+    <p class="body" style="margin-bottom:0;">It is also literally true, which is what keeps it honest. A counsellor cannot see a recovery pattern from inside one practice. The comparison that makes prediction possible draws on more than she has. She really can go deeper than she could alone.</p>
+  </div>
+  <p class="body"><b>Two ways to get it wrong.</b> Do not turn it into a command with an exclamation mark. And do not let "alone" drift into a jab at how she works now: the line offers company, it does not criticise solitude.</p>
+
+  <h3>How to write it</h3>
+  <table class="writeit">
+    <tr><td><span class="ok">✓</span>deepen<span style="color:var(--terra)">.</span></td><td>The wordmark. Lowercase, serif, terracotta full stop.</td></tr>
+    <tr><td><span class="ok">✓</span>Deepen</td><td>In running text, sentence case, no full stop. "Deepen flagged her last week."</td></tr>
+    <tr><td><span class="ok">✓</span>Deepen, outcome tracking for counsellors</td><td>The descriptor. Use in titles, listings and bios.</td></tr>
+    <tr><td><span class="nope">✗</span>DEEPEN</td><td>Never all caps, never letterspaced.</td></tr>
+    <tr><td><span class="nope">✗</span>Deepen™, DeepenApp, Deepen.io</td><td>No symbols, no suffixes, no domain in the name.</td></tr>
+    <tr><td><span class="nope">✗</span>"a practice management tool"</td><td>Never. That phrase invites a comparison with free generic software and loses it.</td></tr>
+  </table>
+</section>
+
+<!-- ======== 05 VOICE ======== -->
+<section id="s5">
+  <div class="secnum">05 · Voice</div>
+  <h2>Plain, specific, unhurried, adult</h2>
+  <p class="lede">Write as if speaking to one experienced professional who is tired and does not want to be sold to.</p>
+  <div class="prin">
+    <div class="pcard"><div class="n">1</div><div class="t">Concede before you claim</div><p>Name what we do not do, and name who does it better. With clinicians, conceding is what makes the wins believable.</p></div>
+    <div class="pcard"><div class="n">2</div><div class="t">Say what it does, never what it proves</div><p>Shows, flags, tracks, compares, tells you. Never improves, optimises, transforms, unlocks.</p></div>
+    <div class="pcard"><div class="n">3</div><div class="t">One counsellor, second person</div><p>Not a market, not a segment. Short sentences. No exclamation marks, anywhere, ever.</p></div>
+  </div>
+
+  <h3>Lexicon</h3>
+  <table class="lex">
+    <tr><th class="say">Say</th><th class="nev">Never</th></tr>
+    <tr><td>your outcome measure · the scale you already use</td><td class="nev">the name of any specific instrument in public copy</td></tr>
+    <tr><td>a flag · something to look at · worth a closer look</td><td class="nev">an alert · a warning · a red flag</td></tr>
+    <tr><td>behind where similar clients were</td><td class="nev">failing · underperforming · at risk</td></tr>
+    <tr><td>your practice's numbers · what your caseload looks like</td><td class="nev">your performance · your score · your rating</td></tr>
+    <tr><td>records are isolated at the database level</td><td class="nev">any architecture term the reader has to decode</td></tr>
+    <tr><td>counsellor</td><td class="nev">user · provider · clinician-partner · practitioner-customer</td></tr>
+    <tr><td>nobody else ever sees this</td><td class="nev">secure · enterprise-grade · bank-level encryption</td></tr>
+  </table>
+
+  <h3>In practice</h3>
+  <div class="ba">
+    <div class="bacard b">
+      <div class="h">Do not write</div>
+      <p>Unlock powerful insights into your clinical performance.</p>
+      <p>Our proprietary algorithm predicts client outcomes with industry-leading accuracy.</p>
+      <p>Never miss an at-risk client again!</p>
+    </div>
+    <div class="bacard a">
+      <div class="h">Write</div>
+      <p>See whether your clients are actually getting better.</p>
+      <p>We compare this client against people who started in a similar place. When there is not enough history to say anything useful, we say so.</p>
+      <p>When someone slides, the note carries a flag and tells you why.</p>
+    </div>
+  </div>
+
+  <h3>Two lines that must appear wherever they apply</h3>
+  <div class="card cool" style="margin-top:6px;">
+    <p class="body" style="margin-bottom:8px;"><b>Above any practice-level outcome figures:</b> these numbers describe a caseload, not a clinician. Harder caseloads produce harder numbers.</p>
+    <p class="body" style="margin-bottom:0;"><b>Wherever prediction appears:</b> when there is not enough history to say something useful, the product says so rather than guessing. Never soften this into a hedge. It is a feature.</p>
+  </div>
+</section>
+
+<!-- ======== 06 LOGO ======== -->
+<section id="s6">
+  <div class="secnum">06 · Logo</div>
+  <h2>Wordmark leads. One mark for everywhere else.</h2>
+  <p class="lede">Three horizontal bars, thickening as they descend. A hairline on top is the surface. Two solid blocks below are the depth.</p>
+
+  <div class="logogrid">
+    <div class="logocard">
+      <div class="lockup">
+        <svg width="34" height="34" viewBox="0 0 64 64"><rect x="10" y="13" width="44" height="4" rx="2" fill="#0B4F43"/><rect x="10" y="24" width="44" height="9" rx="2" fill="#0B4F43"/><rect x="10" y="39" width="44" height="12" rx="2" fill="#0B4F43"/></svg>
+        <div class="lw">deepen<span class="fs">.</span></div>
+      </div>
+      <div class="cap">The lockup. Primary identity. Mark height matches cap height, gap is one stem width.</div>
+    </div>
+    <div class="logocard">
+      <div class="sizerow">
+        <div class="sz"><svg width="48" height="48" viewBox="0 0 64 64"><rect x="10" y="13" width="44" height="4" rx="2" fill="#0B4F43"/><rect x="10" y="24" width="44" height="9" rx="2" fill="#0B4F43"/><rect x="10" y="39" width="44" height="12" rx="2" fill="#0B4F43"/></svg><div class="l">48</div></div>
+        <div class="sz"><svg width="24" height="24" viewBox="0 0 64 64"><rect x="10" y="13" width="44" height="4" rx="2" fill="#0B4F43"/><rect x="10" y="24" width="44" height="9" rx="2" fill="#0B4F43"/><rect x="10" y="39" width="44" height="12" rx="2" fill="#0B4F43"/></svg><div class="l">24</div></div>
+        <div class="sz"><svg width="16" height="16" viewBox="0 0 64 64"><rect x="9" y="12" width="46" height="5" rx="2" fill="#0B4F43"/><rect x="9" y="24" width="46" height="10" rx="2" fill="#0B4F43"/><rect x="9" y="39" width="46" height="13" rx="2" fill="#0B4F43"/></svg><div class="l">16</div></div>
+        <div class="sz"><svg width="32" height="32" viewBox="0 0 64 64"><rect x="10" y="13" width="44" height="4" rx="2" fill="#14181C"/><rect x="10" y="24" width="44" height="9" rx="2" fill="#14181C"/><rect x="10" y="39" width="44" height="12" rx="2" fill="#14181C"/></svg><div class="l">1 colour</div></div>
+        <div class="sz"><div class="darkcell"><svg width="32" height="32" viewBox="0 0 64 64"><rect x="10" y="13" width="44" height="4" rx="2" fill="#5FC3AE"/><rect x="10" y="24" width="44" height="9" rx="2" fill="#5FC3AE"/><rect x="10" y="39" width="44" height="12" rx="2" fill="#5FC3AE"/></svg></div><div class="l">dark</div></div>
+      </div>
+      <div class="cap">At size. The 16px build thickens the bars so the hairline holds.</div>
+    </div>
+  </div>
+
+  <div class="specline">
+    <b>Construction.</b> 64 unit grid. Bars at x=10, width 44, corner radius 2. Heights 4, 9 and 12 at y=13, 24 and 39. Vertical span centred on 32. Gaps tighten going down, 7 then 6, so compression reads as depth. At 16px, bars thicken to 5, 10 and 13.<br><br>
+    <b>Single tone, always.</b> Every bar is the same colour. Thickness carries the whole idea and tone carries none of it. A tonal version puts the top hairline at roughly 2:1 against paper, too faint to survive at small sizes. Single tone means the mark is structurally identical everywhere and can never fail contrast.<br><br>
+    <b>Clear space.</b> On all four sides, leave at least the height of the bottom bar. Nothing sits inside that margin.<br><br>
+    <b>Minimum size.</b> Mark 16px. Lockup 90px wide. Below that, use the mark alone.<br><br>
+    <b>Which to use where.</b> The wordmark leads everywhere it fits: site header, invoice footer, reports, email. The mark appears only where a wordmark cannot go, which is the favicon, the app icon and the corner of a document. Never set both on the same surface.
+  </div>
+
+  <h3>Misuse</h3>
+  <div class="misuse">
+    <div class="mis">
+      <svg width="34" height="34" viewBox="0 0 64 64"><rect x="10" y="17" width="44" height="7" rx="2" fill="#B4472F"/><rect x="10" y="29" width="44" height="7" rx="2" fill="#B4472F"/><rect x="10" y="41" width="44" height="7" rx="2" fill="#B4472F"/></svg>
+      <div class="x">Never</div><div class="d">Equal bars. That is a menu icon.</div>
+    </div>
+    <div class="mis">
+      <svg width="34" height="34" viewBox="0 0 64 64"><rect x="10" y="15" width="20" height="6" rx="2" fill="#B4472F"/><rect x="10" y="28" width="34" height="6" rx="2" fill="#B4472F"/><rect x="10" y="41" width="46" height="6" rx="2" fill="#B4472F"/></svg>
+      <div class="x">Never</div><div class="d">Varying widths. That is a bar chart.</div>
+    </div>
+    <div class="mis">
+      <svg width="34" height="34" viewBox="0 0 64 64"><defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#63BCA9"/><stop offset="1" stop-color="#0B4F43"/></linearGradient></defs><rect x="10" y="13" width="44" height="4" rx="2" fill="url(#g1)"/><rect x="10" y="24" width="44" height="9" rx="2" fill="url(#g1)"/><rect x="10" y="39" width="44" height="12" rx="2" fill="url(#g1)"/></svg>
+      <div class="x">Never</div><div class="d">Gradients, shadows or effects.</div>
+    </div>
+    <div class="mis">
+      <svg width="34" height="34" viewBox="0 0 64 64" style="transform:rotate(-14deg)"><rect x="10" y="13" width="44" height="4" rx="2" fill="#B4472F"/><rect x="10" y="24" width="44" height="9" rx="2" fill="#B4472F"/><rect x="10" y="39" width="44" height="12" rx="2" fill="#B4472F"/></svg>
+      <div class="x">Never</div><div class="d">Rotate, stretch or recolour freely.</div>
+    </div>
+  </div>
+  <p class="body" style="margin-top:12px;">Also never: outline the bars, place the mark on a photograph or a busy field, put it inside a container shape it was not designed for, or animate it.</p>
+</section>
+
+<!-- ======== 07 COLOUR ======== -->
+<section id="s7">
+  <div class="secnum">07 · Colour</div>
+  <h2>Deep teal · fired clay · unbleached paper</h2>
+  <p class="lede">Teal sits between blue and green, which is trust meeting growth, or knowing meeting getting better. Terracotta is Indian warmth, for human moments only. Unbleached paper and ink keep the register of a field instrument rather than an app.</p>
+
+  <h3>Core roles</h3>
+  <div class="swrow">
+    <div class="sw"><div class="chip" style="background:#FBFAF7"></div><div class="nm">Paper</div><div class="hx">#FBFAF7</div><div class="use">page surface</div></div>
+    <div class="sw"><div class="chip" style="background:#14181C"></div><div class="nm">Ink</div><div class="hx">#14181C</div><div class="use">primary text</div></div>
+    <div class="sw"><div class="chip" style="background:#0B4F43"></div><div class="nm">Teal ink</div><div class="hx">#0B4F43</div><div class="use">headings, wordmark</div></div>
+    <div class="sw"><div class="chip" style="background:#0F8A72"></div><div class="nm">Teal action</div><div class="hx">#0F8A72</div><div class="use">buttons, links, data</div></div>
+    <div class="sw"><div class="chip" style="background:#C2632A"></div><div class="nm">Terracotta</div><div class="hx">#C2632A</div><div class="use">warmth only</div></div>
+  </div>
+  <div class="swrow" style="margin-top:10px;">
+    <div class="sw"><div class="chip" style="background:#FFFFFF"></div><div class="nm">Card</div><div class="hx">#FFFFFF</div><div class="use">raised surface</div></div>
+    <div class="sw"><div class="chip" style="background:#4A5157"></div><div class="nm">Ink 2</div><div class="hx">#4A5157</div><div class="use">body text</div></div>
+    <div class="sw"><div class="chip" style="background:#878D93"></div><div class="nm">Muted</div><div class="hx">#878D93</div><div class="use">captions, axes</div></div>
+    <div class="sw"><div class="chip" style="background:#E4E1DA"></div><div class="nm">Hairline</div><div class="hx">#E4E1DA</div><div class="use">rules, borders</div></div>
+    <div class="sw"><div class="chip" style="background:#EFF6F4"></div><div class="nm">Teal wash</div><div class="hx">#EFF6F4</div><div class="use">quiet highlight</div></div>
+  </div>
+
+  <h3>Proportion</h3>
+  <div class="propbar">
+    <div style="background:#FBFAF7;flex:70;color:#878D93">70% paper and card</div>
+    <div style="background:#14181C;flex:20;color:#F5F4F1">20% ink</div>
+    <div style="background:#0F8A72;flex:8;color:#fff">8%</div>
+    <div style="background:#C2632A;flex:2;color:#fff"></div>
+  </div>
+  <p class="body">Most of any surface is paper and ink. Teal is roughly one part in twelve and terracotta is a trace. <b>If a screen looks colourful, it is wrong.</b> The only thing that should draw the eye is the data.</p>
+
+  <h3>The depth ramp</h3>
+  <div class="ramp">
+    <div style="background:#DDF0EB"></div><div style="background:#A8DACD"></div><div style="background:#63BCA9"></div>
+    <div style="background:#2AA890"></div><div style="background:#0F8A72"></div><div style="background:#0B5F50"></div><div style="background:#083F35"></div>
+  </div>
+  <div class="rampcap"><span>surface</span><span>depth</span></div>
+  <p class="body" style="margin-top:10px;">One hue, light to dark, for any continuous magnitude. Light is what a single reading tells you. Dark is what the accumulated pattern tells you.</p>
+
+  <h3>The terracotta rule</h3>
+  <div class="terrarule">
+    Terracotta belongs to welcomes, onboarding, empty states, the wordmark's full stop, and one chart series. Never on a verdict, never on a flag, never on a button.
+    <b>If terracotta ever tells a counsellor something about her numbers, it is being misused.</b>
+  </div>
+
+  <h3>Accessibility</h3>
+  <p class="body">Every foreground colour clears 4.5:1 against its intended surface, which is WCAG AA for body text. Nothing meaningful is carried by hue alone.</p>
+  <table class="a11y">
+    <tr><th>Colour</th><th>On paper</th><th>On dark</th><th>Use</th></tr>
+    <tr><td>#0B4F43</td><td>9.1:1</td><td>low</td><td>Light surfaces only</td></tr>
+    <tr><td>#14181C</td><td>17.1:1</td><td>low</td><td>Light surfaces only</td></tr>
+    <tr><td>#0F8A72</td><td>4.1:1</td><td>4.2:1</td><td>Both, large text and marks</td></tr>
+    <tr><td>#5FC3AE</td><td>low</td><td>8.4:1</td><td>Dark surfaces only</td></tr>
+    <tr><td>#F5F4F1</td><td>low</td><td>15.2:1</td><td>Dark surfaces only</td></tr>
+  </table>
+</section>
+
+<!-- ======== 08 TYPE ======== -->
+<section id="s8">
+  <div class="secnum">08 · Typography</div>
+  <h2>A quiet serif over a working sans</h2>
+  <p class="lede">A serif headline is the cheapest way to not look like a wellness app. Both families are open licence, so there is no cost and no legal question.</p>
+  <div class="typegrid">
+    <div class="typecard">
+      <div class="lbl">Newsreader · headlines and editorial</div>
+      <div class="spec-serif">Nobody can tell you if you're any good at this.</div>
+      <div class="note">Weights 400 to 600. Lowercase or sentence case. Never all caps, never letterspaced.</div>
+    </div>
+    <div class="typecard">
+      <div class="lbl">Inter · interface, data, everything else</div>
+      <div class="spec-sans">Session notes, invoice tables, axis labels, buttons, tooltips. No serif inside a chart, ever.</div>
+      <div style="font-size:28px;font-weight:600;margin-top:10px;font-variant-numeric:tabular-nums">₹3,500 · 45 min · 0.75×</div>
+      <div class="note">Tabular figures in any column. Proportional figures for standalone hero numbers.</div>
+    </div>
+  </div>
+  <h3>Scale</h3>
+  <table class="scale">
+    <tr><th>Role</th><th>Family</th><th>Size</th><th>Notes</th></tr>
+    <tr><td>Display</td><td>Newsreader 500</td><td>56 to 64px</td><td>Cover and hero only</td></tr>
+    <tr><td>H1</td><td>Newsreader 500</td><td>36px</td><td>One per page</td></tr>
+    <tr><td>H2</td><td>Newsreader 500</td><td>24 to 31px</td><td>Section openers</td></tr>
+    <tr><td>H3</td><td>Inter 700</td><td>13px, uppercase, .06em</td><td>Sub-heads inside a section</td></tr>
+    <tr><td>Body</td><td>Inter 400</td><td>14 to 15px, 1.55</td><td>Max 680px measure</td></tr>
+    <tr><td>Small</td><td>Inter 400</td><td>12.5 to 13px</td><td>Table cells, secondary</td></tr>
+    <tr><td>Caption</td><td>Inter 400</td><td>10.5 to 11.5px</td><td>Sources, axis labels</td></tr>
+  </table>
+</section>
+
+<!-- ======== 09 DATA ======== -->
+<section id="s9">
+  <div class="secnum">09 · Data and charts</div>
+  <h2>The chart is the brand</h2>
+  <p class="lede">The most important thing this product shows anyone is a chart about a real person. It gets the most discipline.</p>
+
+  <div class="card cool" style="margin-bottom:18px;">
+    <p class="body" style="margin-bottom:8px;"><b style="color:var(--teal-ink)">Depth is the brand. Direction is the data. Never mix them.</b></p>
+    <p class="body" style="margin-bottom:8px;">A counsellor going deeper is the promise. A client's scores going down is deterioration. Both are "down" and they mean opposite things. The resolution is that depth here means insight, not submersion. Going deeper with a client, depth of understanding, depth psychology: all native to this profession and all good. The distress idioms belong to water, not depth. So the brand uses depth and never uses water.</p>
+    <p class="body" style="margin-bottom:0;"><b>The consequence.</b> Charts keep clinical convention: a higher score is better wellbeing, and the line goes up when someone improves. The depth metaphor lives in the interface, never in the data. If a chart ever implies deeper is better for a client, it is wrong.</p>
+  </div>
+
+  <div class="chartwrap">
+    <div class="chartcard">
+      <div class="t">Predicted progress</div>
+      <div class="s">Client against people who started in a similar place</div>
+      <svg viewBox="0 0 340 150" width="100%">
+        <path d="M14,110 C80,94 170,66 326,44 L326,82 C170,100 80,120 14,130 Z" fill="#E4E1DA" opacity="0.55"/>
+        <line x1="14" y1="136" x2="326" y2="136" stroke="#C9C6BE" stroke-width="1"/>
+        <path d="M14,120 C70,115 125,100 190,85 C245,73 285,63 318,50" fill="none" stroke="#0F8A72" stroke-width="2.4" stroke-linecap="round"/>
+        <circle cx="318" cy="50" r="4.5" fill="#0F8A72"/>
+        <text x="16" y="38" font-size="10" fill="#878D93" font-family="Inter, sans-serif">cohort band</text>
+        <text x="252" y="38" font-size="10" font-weight="600" fill="#0B4F43" font-family="Inter, sans-serif">this client</text>
+      </svg>
+    </div>
+    <div class="chartcard">
+      <div class="t">Series order</div>
+      <div class="s">Fixed. Assign in this order, never cycle.</div>
+      <div class="orderchips">
+        <span class="oc"><i style="background:#0F8A72"></i>teal</span><span class="arrow">→</span>
+        <span class="oc"><i style="background:#8A5BA8"></i>violet</span><span class="arrow">→</span>
+        <span class="oc"><i style="background:#C2632A"></i>terracotta</span><span class="arrow">→</span>
+        <span class="oc"><i style="background:#1F5FA8"></i>blue</span>
+      </div>
+      <ul class="chartrules">
+        <li>Slot one is always the client's own line</li>
+        <li>First three are safe in any chart form</li>
+        <li>Slot four needs direct labels alongside colour</li>
+        <li>Past four, fold to Other or facet. Never a fifth hue</li>
+        <li>The cohort band is neutral fill, never a series</li>
+        <li>One y-axis, always. Never two scales</li>
+        <li>Thin marks, recessive grid, hover layer by default</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Verdicts</h3>
+  <div class="verdrow">
+    <span class="vchip v-ahead"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3L13 4.5" stroke="#0F8A72" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Ahead</span>
+    <span class="vchip v-track"><span class="dot" style="background:#B8860B"></span>Tracking</span>
+    <span class="vchip v-behind"><span class="dot" style="background:#B4472F"></span>Worth a closer look</span>
+  </div>
+  <div class="pull">The product never celebrates loudly and never shames loudly. <span class="em">It points.</span></div>
+  <p class="body">Only "worth a closer look" earns a colour, and it is brick rather than alarm red. Saturated red tells someone primed to internalise failure that she did something wrong. Brick says look at this. Status never carries meaning by colour alone: always an icon and a label with it.</p>
+  <p class="body">Every screenshot, in every context, uses fabricated demonstration data. Never a real client, never a real name, not even blurred.</p>
+</section>
+
+<!-- ======== 10 IMAGERY ======== -->
+<section id="s10">
+  <div class="secnum">10 · Imagery</div>
+  <h2>Show the work, not the feeling</h2>
+  <p class="lede">The default hero image is a chart on demonstration data. It is the most honest picture of what the product does.</p>
+  <div class="mustgrid">
+    <div class="mustcard yes">
+      <div class="h">Use</div>
+      <ul>
+        <li>Product surfaces on fabricated data</li>
+        <li>The depth ramp as a flat illustration device</li>
+        <li>Plain diagrams in brand colours, one idea each</li>
+        <li>Generous white space around everything</li>
+        <li>If people appear at all: real practitioners, unposed, at work</li>
+      </ul>
+    </div>
+    <div class="mustcard no">
+      <div class="h">Never</div>
+      <ul>
+        <li>Stock photography of smiling professionals</li>
+        <li>Anyone appearing distressed or vulnerable</li>
+        <li>Sage and blush gradients, lotus, leaves, candles</li>
+        <li>Brains, heads with cogs, glowing neural networks</li>
+        <li>Purple gradients, glassmorphism, floating blobs, sparkle emoji</li>
+      </ul>
+    </div>
+  </div>
+  <p class="body" style="margin-top:14px;"><b>Illustration is not the logo.</b> The layered depth drawing is a brand illustration. It belongs on the site and in documents. It is not a mark, it does not go in a favicon, and it never replaces the logo.</p>
+</section>
+
+<!-- ======== 11 APPLICATIONS ======== -->
+<section id="s11">
+  <div class="secnum">11 · Applications</div>
+  <h2>One rule per surface</h2>
+  <table class="surf" style="margin-bottom:16px;">
+    <tr><th>Surface</th><th>The one thing that matters</th></tr>
+    <tr><td>Home page</td><td>The chart above the fold. The headline positions, the chart proves.</td></tr>
+    <tr><td>Product interface</td><td>Paper and ink. The only colour on screen should be the data.</td></tr>
+    <tr><td>Invoice email</td><td>The counsellor's practice name leads. We are a small footer mark. It is her invoice to her client.</td></tr>
+    <tr><td>Outcome report</td><td>The most designed artefact we make, because it goes to a supervisor. Methodology note, generated date, a completeness line, and the caseload framing.</td></tr>
+    <tr><td>Teaching content</td><td>Instrument-agnostic, useful on its own, no product pitch in the body.</td></tr>
+    <tr><td>Error and empty states</td><td>Warm, brief, never apologetic twice. Terracotta is allowed here.</td></tr>
+  </table>
+  <h3>Dark mode is a first-class surface</h3>
+  <p class="body">Counsellors write notes after their last session of the day. Dark is not an afterthought: it is the same system, stepped for a dark surface and checked against it.</p>
+  <div class="darkstrip">
+    <div class="kick">Dark · #16181A</div>
+    <div class="lockup">
+      <svg width="34" height="34" viewBox="0 0 64 64"><rect x="10" y="13" width="44" height="4" rx="2" fill="#5FC3AE"/><rect x="10" y="24" width="44" height="9" rx="2" fill="#5FC3AE"/><rect x="10" y="39" width="44" height="12" rx="2" fill="#5FC3AE"/></svg>
+      <div class="lw" style="color:#5FC3AE">deepen<span style="color:#CE7440">.</span></div>
+    </div>
+    <div class="dsw">
+      <div class="sw"><div class="chip" style="background:#F5F4F1"></div><div class="nm">Ink</div><div class="hx">#F5F4F1</div></div>
+      <div class="sw"><div class="chip" style="background:#B9BDC2"></div><div class="nm">Ink 2</div><div class="hx">#B9BDC2</div></div>
+      <div class="sw"><div class="chip" style="background:#5FC3AE"></div><div class="nm">Teal ink</div><div class="hx">#5FC3AE</div></div>
+      <div class="sw"><div class="chip" style="background:#2AA890"></div><div class="nm">Teal action</div><div class="hx">#2AA890</div></div>
+      <div class="sw"><div class="chip" style="background:#CE7440"></div><div class="nm">Terracotta</div><div class="hx">#CE7440</div></div>
+      <div class="sw"><div class="chip" style="background:#1E2124"></div><div class="nm">Card</div><div class="hx">#1E2124</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======== 12 GOVERNANCE ======== -->
+<section id="s12">
+  <div class="secnum">12 · Governance</div>
+  <h2>How this document changes</h2>
+  <table class="surf">
+    <tr><th>Item</th><th></th></tr>
+    <tr><td>Version</td><td>1.0, August 2026</td></tr>
+    <tr><td>Owner</td><td>The founders. Any change needs both.</td></tr>
+    <tr><td>Assets</td><td>Five SVG files: lockup, mark in teal, ink and reversed, plus a small-size favicon build.</td></tr>
+    <tr><td>Locked</td><td>The standing test, the four things we will not build, the terracotta rule, the depth-and-direction rule, the logo construction, the chart series order.</td></tr>
+    <tr><td>Open to revision</td><td>Type scale, application rules, imagery examples, anything not in the locked list.</td></tr>
+    <tr><td>Colour changes</td><td>Any new or altered colour is checked for contrast against both surfaces before it ships. Do not eyeball it.</td></tr>
+    <tr><td>Proposing a change</td><td>Say what breaks if we do not change it. If nothing breaks, the answer is no.</td></tr>
+  </table>
+  <div class="card accent" style="margin-top:16px;">
+    <p class="body" style="margin-bottom:0;"><b>A note on why this guide is strict.</b> Most brand rules exist to keep things tidy. Several of these exist to keep a person safe. A counsellor who reads a flag as an accusation, or sees her caseload described as her performance, does not file a complaint. She quietly stops using the product, and she is right to. That is the failure this document is built to prevent.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="foot">
+    <b>deepen.</b> Brand guide v1.0 · August 2026 · Empowering mental health practitioners.<br>
+    Typefaces: Newsreader and Inter, both open licence. All demonstration data in this document is fabricated.
+  </div>
+</footer>
+
+</div>
+</body>
+</html>

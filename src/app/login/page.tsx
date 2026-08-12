@@ -42,15 +42,15 @@ export default function LoginPage() {
   return (
     <>
       <Toaster />
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-paper">
         <Card className="w-full max-w-sm shadow-lg">
           <CardHeader className="text-center space-y-2">
             <div className="flex justify-center mb-2">
-              <div className="h-12 w-12 bg-primary rounded-xl flex items-center justify-center">
-                <ShieldCheck className="h-7 w-7 text-primary-foreground" />
+              <div className="h-12 w-12 bg-teal-ink rounded-xl flex items-center justify-center">
+                <ShieldCheck className="h-7 w-7 text-teal-action" />
               </div>
             </div>
-            <CardTitle className="text-2xl font-bold">Aman</CardTitle>
+            <CardTitle className="text-3xl font-serif font-bold text-teal-ink tracking-tight">deepen<span className="text-terracotta">.</span></CardTitle>
             <CardDescription>Clinical Practice Management</CardDescription>
           </CardHeader>
           <CardContent>
@@ -61,7 +61,7 @@ export default function LoginPage() {
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="counselor@aman.com"
+                  placeholder="counselor@deepen.health"
                   required
                   autoFocus
                 />
@@ -76,7 +76,7 @@ export default function LoginPage() {
                   required
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" className="w-full bg-teal-action hover:bg-teal-ink text-paper" disabled={loading}>
                 {loading ? (
                   <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Signing in…</>
                 ) : (
@@ -86,7 +86,7 @@ export default function LoginPage() {
               
               <p className="text-center text-sm text-slate-500 pt-2">
                 Don't have a practice yet?{" "}
-                <Link href="/signup" className="text-primary hover:underline font-medium">
+                <Link href="/signup" className="text-teal-action hover:underline font-medium">
                   Create one
                 </Link>
               </p>

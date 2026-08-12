@@ -19,7 +19,7 @@ export default async function DashboardLayout({
   const { planTier, tenantSlug } = context;
 
   return (
-    <div className="flex h-screen bg-slate-50/50">
+    <div className="flex h-screen bg-paper text-ink">
       <Sidebar planTier={planTier} tenantSlug={tenantSlug} />
       <main className="flex-1 overflow-y-auto">
         {children}

@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { invoices, receipts, practiceSettings } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
-import { eq, and, lt, not } from "drizzle-orm";
+import { eq, and, lt, lte, not } from "drizzle-orm";
 import { formatIST } from "@/lib/tz";
 import { getTenantContext, withTenantContext } from "@/lib/tenant";
 
@@ -41,11 +41,11 @@ export async function GET(
       });
 
       const profile = settings || {
-        practiceName: "Aman Counseling",
+        practiceName: "Deepen Counseling",
         counselorName: "Vijay Gopal Sreenivasan",
         address: "Noida, Uttar Pradesh",
         phone: "+91-0000000000",
-        email: "counselor@aman.com",
+        email: "counselor@deepen.health",
         monthlyQuote: "Progress is not a straight line.",
         upiId: "",
       };
@@ -70,7 +70,7 @@ export async function GET(
         where: and(
           eq(receipts.clientId, invoice.clientId),
           eq(receipts.currency, invoice.currency),
-          lt(receipts.createdAt, invoice.createdAt)
+          lte(receipts.paymentDate, invoice.issuedDate)
         )
       });
 

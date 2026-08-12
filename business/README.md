@@ -1,50 +1,107 @@
-# Aman — Business Workspace
+# Deepen · Business Workspace
 
-Everything commercial lives here. Code stays in `src/`. Technical docs stay at repo root (`aman_architecture.md`, `CHANGELOG.md`, `usage_guide.md`).
+**Go deeper than you could alone.**
+Outcome tracking for counsellors. Mission: empowering mental health practitioners.
 
-## The thesis, in one sentence
+> In India there is no way to tell a good counsellor from a bad one, including for the counsellor themselves. We give counsellors evidence of their own effectiveness, privately, so they can improve. Business is a byproduct.
 
-> **In India there is no way to tell a good counsellor from a bad one — including for the counsellor themselves. Aman gives counsellors evidence of their own effectiveness, privately, so they can improve. Business is a byproduct.**
+Everything commercial lives here. Code stays in `src/`. Technical docs stay at repo root.
 
-## The document set
+---
 
-Compiled 31 July 2026. These seven cross-reference each other by filename — keep them together in this folder.
+## Where things are
 
-| # | File | What it is | Read it when |
-|---|---|---|---|
-| **01** | `01-icp-research.md` | Voice of the Indian counsellor: pains, needs, gains, willingness to pay | Deciding who this is for or what they'll pay |
-| **02** | `02-market-analysis.md` | Competitive landscape — 3 Indian, 2 global measurement specialists, plus Zoho | Making competitor claims, or pricing |
-| **03** | `03-business-strategy.md` | **The core document.** Thesis, ICP, the two things we do, the never-build list, the medicine/poison line | Start here. Everything derives from it |
-| **04** | `04-pricing-plan.md` | Plans, anchoring logic, revenue model, what must be validated first | Before printing a price anywhere |
-| **05** | `05-homepage-content.md` | Ready-to-paste home page copy, section by section | Handing to a build agent |
-| **06** | `06-homepage-build-spec.md` | Structure, comparison tables, copy rules, build order | Alongside 05 |
-| **07** | `07-operating-plan.md` | GTM, 3-user beta, discipline rules, milestones, risk register | Weekly |
+```
+business/
+  README.md            this file
+  INDEX.html           the same map, visual
+  strategy/            01 to 07. The thinking everything else rests on
+  commercial/          the plan and anything financial
+  marketing/           brand, name, copy
+    logo/              the five SVG assets
+    _working/          explorations kept for their reasoning
+    _archive/          superseded, dated
+  research/            supporting research and decision records
+  customers/           beta interviews, support log, objections
+```
 
-**Reading order for someone new:** 03 → 01 → 04 → 07.
-**For a build agent:** 05 + 06, with the copy rules in 06 §2 treated as hard constraints.
+## Start here
 
-*Superseded and deleted: `aman-business-plan-v2.md` — its content lives in 03, 04 and 07.*
-
-## Working folders
-
-New work accumulates here rather than in the numbered set above.
-
-| Folder | What goes in it |
+| File | What it is |
 |---|---|
-| `research/` | Follow-up market research, competitor re-verification, DPDP and IP review notes, supervision-rate findings |
-| `commercial/` | Financial models, revenue tracking, launch plans, anything downstream of 03/04/07 |
-| `marketing/` | Website copy iterations, webinar materials, SEO posts, the 6-minute Loom script, campaign briefs |
-| `customers/` | Beta interview notes, support log, objections, testimonials |
+| `strategy/03-business-strategy.md` | **Read first.** Thesis, who this is for, the two things we do, the never-build list |
+| `commercial/one-page-plan.html` | **The plan, v1.0.** Show this to anyone who asks what the business is. Prints to one A4 |
+| `marketing/brand-guide.html` | **The brand, v1.0.** Standalone. Name, voice, logo, colour, charts, governance |
 
-When a working doc supersedes part of the numbered set, update the numbered doc and note it — don't leave two live versions.
+## strategy/
+
+Seven numbered documents compiled 31 July 2026. They cross-reference each other by bare filename, so they stay together in this folder. Reading order for someone new: **03, then 01, 04, 07.**
+
+| # | File | Read it when |
+|---|---|---|
+| 01 | `01-icp-research.md` | Deciding who this is for or what they will pay |
+| 02 | `02-market-analysis.md` | Making competitor claims, or pricing |
+| 03 | `03-business-strategy.md` | Start here. Thesis, ICP, never-build list |
+| 04 | `04-pricing-plan.md` | Before printing a price anywhere |
+| 05 | `05-homepage-content.md` | Handing copy to a build agent |
+| 06 | `06-homepage-build-spec.md` | Alongside 05. The copy rules in section 2 are hard constraints |
+| 07 | `07-operating-plan.md` | Weekly |
+
+## commercial/
+
+| File | |
+|---|---|
+| `one-page-plan.html` | v1.0, frozen. Mission, two value props, market, competition, pricing, costs at 10/100/1,000 users, path to 100,000 |
+
+## marketing/
+
+| File | |
+|---|---|
+| `brand-guide.html` | v1.0, standalone. Twelve sections. The one to hand a designer |
+| `brand-guide.md` | Same content as text. This is the one to grep |
+| `logo/` | lockup, mark in teal, ink and reversed, favicon build, plus usage notes |
+| `name-deepen.html` | Why the name is what it is. Background, not a rule |
+| `homepage-copy-fixes.md` | **Open action.** Two claims on the current build must not ship |
+| `_working/` | Logo explorations and the colour swatch sheet. Kept because they record why rejected options were rejected |
+| `_archive/` | Superseded documents, dated in the filename |
+
+## research/
+
+| File | |
+|---|---|
+| `india-counselling-workforce-2036.html` | How many people in India actually do counselling for a living. Buyer-pool sizing |
+| `domain-check.md` | Domain sweep and the naming decision record |
+
+## customers/
+
+Empty until the beta starts. Beta interview notes, the support log, objections, and testimonials go here. One file per person, named `YYYY-MM-DD-firstname.md`.
+
+---
+
+## Decided
+
+The name is **Deepen** (`deepen.health`, `deepen.co.in`). The colour system, the voice, the two value props, pricing, and the growth path are all settled. Do not reopen them without a reason.
+
+## Open, in order
+
+1. **Register the domains.** Availability was checked by DNS, not at a registrar, and it moves.
+2. **Fix the two homepage claims** before anyone sees the build. See `marketing/homepage-copy-fixes.md`.
+3. **Swap the footer mark** for `marketing/logo/lockup.svg`.
+4. India trademark search, classes 9 and 42. Fold into the IP review that already blocks launch.
+5. Say the name cold to the clinical co-founder.
+6. Execute the rename in code. `practiceSettings` still defaults to a real person's name and city.
+
+---
 
 ## Conventions
 
-- **Filenames:** `YYYY-MM-DD-slug.md` for dated material (interviews, research runs, campaigns). Plain `slug.md` for living documents.
-- **Every doc opens with a date line and a status:** `draft` / `active` / `superseded`.
-- **Mark estimates as estimates.** The set above is scrupulous about separating verified from inferred — maintain that. See `README` § "verified vs assumed" in `07` and the blocking items list.
-- **Superseded docs go to `_archive/` inside their folder**, not the bin. The reasoning history matters.
+- Dated material: `YYYY-MM-DD-slug.md`. Living documents: plain `slug.md`.
+- Every document opens with a date and a status: draft, active, or superseded.
+- **Keep verified and inferred separate.** The strategy set is strict about this. Match it.
+- Superseded documents move to `_archive/` inside their folder with the date in the filename. They are not deleted, because the reasoning history matters.
+- Explorations that informed a decision go to `_working/`, not the bin. They stop old options being re-proposed.
+- **No em-dashes. Short sentences. Write it the way you would say it.**
 
 ## Before committing
 
-Confirm `github.com/adityajh/aman` is private. If it's public, add `/business/` to `.gitignore` and keep this tree local until the repo is locked down.
+Confirm the repository is private. If it is public, add `/business/` to `.gitignore` and keep this tree local until the repository is locked down.

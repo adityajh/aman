@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The name: fathom</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper:#FBFAF7; --card:#FFFFFF; --ink:#14181C; --ink2:#4A5157; --muted:#878D93;
+    --hair:#E4E1DA; --teal-ink:#0B4F43; --teal:#0F8A72; --terra:#C2632A;
+    --serif:'Newsreader', Georgia, serif; --sans:'Inter', system-ui, sans-serif;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:var(--sans); background:var(--paper); color:var(--ink); font-size:14px; line-height:1.55; }
+  .wrap { max-width:880px; margin:0 auto; padding:44px 26px 50px; }
+
+  .kick { font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:14px; }
+
+  /* hero */
+  .hero { display:flex; align-items:flex-end; gap:26px; flex-wrap:wrap; margin-bottom:6px; }
+  .wm { font-family:var(--serif); font-size:76px; font-weight:500; color:var(--teal-ink); letter-spacing:-0.02em; line-height:1; }
+  .wm .fs { color:var(--terra); }
+  .phon { font-family:var(--serif); font-style:italic; font-size:17px; color:var(--muted); padding-bottom:10px; }
+  .ety { font-family:var(--serif); font-size:23px; font-weight:400; line-height:1.45; color:var(--ink2); max-width:660px; margin:14px 0 6px; }
+  .ety b { color:var(--teal-ink); font-weight:500; }
+  .etysrc { font-size:11px; color:var(--muted); margin-bottom:34px; }
+
+  .punch { font-family:var(--serif); font-size:27px; font-weight:500; line-height:1.35; max-width:700px; margin-bottom:34px; }
+  .punch em { font-style:normal; color:var(--terra); }
+
+  h2 { font-family:var(--serif); font-size:23px; font-weight:500; margin-bottom:4px; }
+  .sub { font-size:13px; color:var(--muted); margin-bottom:16px; }
+
+  /* three meanings */
+  .three { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:36px; }
+  @media(max-width:720px){ .three{ grid-template-columns:1fr; } }
+  .mcard { background:var(--card); border:1px solid var(--hair); border-radius:12px; padding:22px 22px 20px; }
+  .mwhen { font-size:10.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--teal); margin-bottom:10px; }
+  .mword { font-family:var(--serif); font-size:21px; font-weight:600; color:var(--ink); margin-bottom:6px; }
+  .mcard p { font-size:13px; color:var(--ink2); }
+  .mcard .prod { font-size:12px; font-weight:600; color:var(--teal-ink); margin-top:12px; padding-top:10px; border-top:1px solid #F1EFE9; }
+
+  /* story */
+  .story { display:grid; grid-template-columns:1.35fr 1fr; gap:16px; margin-bottom:14px; }
+  @media(max-width:720px){ .story{ grid-template-columns:1fr; } }
+  .scard { background:var(--card); border:1px solid var(--hair); border-radius:12px; padding:26px 28px; }
+  .scard p { font-size:14px; color:var(--ink2); margin-bottom:11px; }
+  .scard p:last-child { margin-bottom:0; }
+  .scard .lede { font-family:var(--serif); font-size:19px; font-weight:500; color:var(--ink); line-height:1.4; margin-bottom:14px; }
+  .callq { font-family:var(--serif); font-style:italic; font-size:21px; color:var(--teal-ink); border-left:2px solid var(--terra); padding-left:16px; margin:16px 0; line-height:1.4; }
+  .callq span { display:block; font-style:normal; font-size:12px; color:var(--muted); font-family:var(--sans); margin-top:6px; }
+
+  .depthbox { background:var(--card); border:1px solid var(--hair); border-radius:12px; padding:18px 18px 14px; display:flex; flex-direction:column; }
+  .depthbox .h { font-size:10.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--teal); margin-bottom:12px; }
+  .depthcap { font-size:11.5px; color:var(--muted); margin-top:10px; line-height:1.5; }
+
+  .storynote { font-size:13px; color:var(--ink2); background:var(--card); border:1px solid var(--hair); border-left:3px solid var(--teal); border-radius:10px; padding:16px 22px; margin-bottom:36px; }
+  .storynote b { color:var(--teal-ink); }
+
+  /* fit test */
+  .fit { width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--hair); border-radius:12px; overflow:hidden; margin-bottom:12px; }
+  .fit th { font-size:11px; letter-spacing:.07em; text-transform:uppercase; text-align:left; padding:12px 18px; border-bottom:1px solid var(--hair); color:var(--ink2); }
+  .fit td { font-size:13px; padding:11px 18px; border-bottom:1px solid #F1EFE9; color:var(--ink2); vertical-align:top; }
+  .fit tr:last-child td { border-bottom:none; }
+  .fit td:first-child { font-weight:600; color:var(--ink); width:34%; }
+  .fit .tick { color:var(--teal); font-weight:700; margin-right:7px; }
+
+  /* usage */
+  .usegrid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:36px; }
+  @media(max-width:720px){ .usegrid{ grid-template-columns:1fr; } }
+  .ucard { background:var(--card); border:1px solid var(--hair); border-radius:12px; padding:22px; }
+  .ucard .h { font-size:10.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--teal); margin-bottom:12px; }
+  .said { font-family:var(--serif); font-size:16.5px; color:var(--ink); padding:5px 0; border-top:1px solid #F1EFE9; }
+  .said:first-of-type { border-top:none; }
+  .lex { font-size:13px; color:var(--ink2); padding:5px 0; border-top:1px solid #F1EFE9; }
+  .lex:first-of-type { border-top:none; }
+  .lex b { color:var(--teal-ink); }
+
+  /* cost */
+  .cost { background:#FBF3EC; border:1px solid #EBD5C2; border-radius:12px; padding:22px 26px; margin-bottom:14px; }
+  .cost .h { font-size:10.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--terra); margin-bottom:10px; }
+  .cost p { font-size:13.5px; color:var(--ink2); margin-bottom:9px; }
+  .cost p:last-child { margin-bottom:0; }
+  .cost b { color:var(--ink); }
+
+  /* gates */
+  .gates { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px; }
+  @media(max-width:720px){ .gates{ grid-template-columns:1fr; } }
+  .gate { background:var(--card); border:1px solid var(--hair); border-radius:12px; padding:18px 20px; }
+  .gate .n { font-family:var(--serif); font-size:19px; color:var(--teal); font-weight:600; }
+  .gate .t { font-weight:600; font-size:13.5px; margin:2px 0 4px; }
+  .gate p { font-size:12px; color:var(--muted); }
+
+  .verdict { font-family:var(--serif); font-size:21px; font-style:italic; color:var(--ink); text-align:center; padding:26px 0 8px; line-height:1.45; }
+  .verdict .em { font-style:normal; font-weight:600; color:var(--teal-ink); }
+
+  footer { font-size:11px; color:var(--muted); line-height:1.7; border-top:1px solid var(--hair); padding-top:16px; margin-top:16px; }
+  footer b { color:var(--ink2); }
+
+  @media print { .wrap{ padding:14px 18px; } @page { size:A4; margin:8mm; } body{ font-size:12px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="kick">The name · August 2026</div>
+
+  <!-- hero -->
+  <div class="hero">
+    <div class="wm">fathom<span class="fs">.</span></div>
+    <div class="phon">/ˈfaðəm/</div>
+  </div>
+  <div class="ety">Old English <b>fæðm</b>. The length of a man's outstretched arms. Also: arms, grasp, <b>embrace</b>.</div>
+  <div class="etysrc">Etymonline</div>
+
+  <div class="punch">A unit of measurement that began as <em>a pair of open arms</em>. Nine hundred years later we are building software that measures how a person is doing, and tries to be kind about it.</div>
+
+  <!-- three meanings -->
+  <h2>One word, three jobs</h2>
+  <div class="sub">Each meaning arrived separately. All three describe the product.</div>
+  <div class="three">
+    <div class="mcard">
+      <div class="mwhen">Old English</div>
+      <div class="mword">To hold</div>
+      <p>Six feet. As wide as a person can reach. The unit is a human body, not a machine's idea of distance.</p>
+      <div class="prod">The measure stays human sized.</div>
+    </div>
+    <div class="mcard">
+      <div class="mwhen">c. 1600</div>
+      <div class="mword">To sound</div>
+      <p>To take soundings. Drop a weighted line and find out how much water is under you, while there is still time to turn.</p>
+      <div class="prod">A score each session. The flag.</div>
+    </div>
+    <div class="mcard">
+      <div class="mwhen">1620s</div>
+      <div class="mword">To understand</div>
+      <p>To get to the bottom of something. "I can't fathom it." The only word in English that means both measuring and understanding.</p>
+      <div class="prod">Numbers turned into meaning.</div>
+    </div>
+  </div>
+
+  <!-- story -->
+  <h2>The story we tell</h2>
+  <div class="sub">Short, true, and it sticks.</div>
+  <div class="story">
+    <div class="scard">
+      <div class="lede">Before sonar, one sailor stood at the bow with a rope.</div>
+      <p>A lead weight on a knotted line. He threw it forward, let the boat come over it, and called out how deep the water was. Again. And again. All night if he had to.</p>
+      <p>He was not grading the river. He was telling the pilot what was underneath them, early enough to steer.</p>
+      <div class="callq">"By the mark, twain."<span>Two fathoms. Twelve feet. Safe water. Samuel Clemens liked the call so much he took it as his name.</span></div>
+      <p>That is the job. Someone watching the depth so the person steering can do their work. A counsellor sitting with a client cannot also be watching the numbers. fathom holds the line.</p>
+    </div>
+    <div class="depthbox">
+      <div class="h">Taking a sounding</div>
+      <svg viewBox="0 0 200 220" width="100%" style="flex:1;">
+        <rect x="0" y="30" width="200" height="26" fill="#DDF0EB"/>
+        <rect x="0" y="56" width="200" height="26" fill="#A8DACD"/>
+        <rect x="0" y="82" width="200" height="26" fill="#63BCA9"/>
+        <rect x="0" y="108" width="200" height="26" fill="#2AA890"/>
+        <rect x="0" y="134" width="200" height="26" fill="#0F8A72"/>
+        <rect x="0" y="160" width="200" height="26" fill="#0B5F50"/>
+        <rect x="0" y="186" width="200" height="30" fill="#083F35"/>
+        <line x1="0" y1="30" x2="200" y2="30" stroke="#0B4F43" stroke-width="1.5"/>
+        <line x1="96" y1="8" x2="96" y2="150" stroke="#14181C" stroke-width="1.6"/>
+        <circle cx="96" cy="62" r="2.6" fill="#14181C"/>
+        <circle cx="96" cy="94" r="2.6" fill="#14181C"/>
+        <rect x="90" y="150" width="12" height="17" rx="2.5" fill="#C2632A"/>
+        <line x1="118" y1="82" x2="140" y2="82" stroke="#C2632A" stroke-width="1.4"/>
+        <text x="144" y="86" font-size="11" font-weight="700" fill="#C2632A" font-family="Inter, sans-serif">2</text>
+        <text x="8" y="24" font-size="9.5" fill="#878D93" font-family="Inter, sans-serif">surface</text>
+        <text x="8" y="209" font-size="9.5" fill="#DDF0EB" font-family="Inter, sans-serif">seven fathoms</text>
+      </svg>
+      <div class="depthcap">The brand's depth ramp is the same idea. Light at the surface, dark as it goes down.</div>
+    </div>
+  </div>
+  <div class="storynote"><b>Why this matters commercially.</b> A name people can retell is a name that travels. This one comes with a story a counsellor can repeat at a supervision group in thirty seconds, and it ends on the product's actual promise.</div>
+
+  <!-- fit -->
+  <h2>Why it fits this product, and not a generic one</h2>
+  <div class="sub">The research says the wrong name makes this product feel like the worst thing that happened to our buyer at work.</div>
+  <table class="fit">
+    <tr><th>What the name has to do</th><th>How fathom does it</th></tr>
+    <tr><td>Never read as a verdict</td><td><span class="tick">✓</span>To fathom is to understand. Nobody is graded by a depth reading. The word cannot be turned into a score.</td></tr>
+    <tr><td>Put the counsellor in charge</td><td><span class="tick">✓</span>The counsellor holds the line and takes the sounding. They are the sailor, never the seabed.</td></tr>
+    <tr><td>Carry care, not surveillance</td><td><span class="tick">✓</span>The root is an embrace. That is not decoration. It is the difference between measuring someone and holding them.</td></tr>
+    <tr><td>Be a thing, not a person</td><td><span class="tick">✓</span>Fixes the old mistake. No new tenant boots up with someone's name on their invoices.</td></tr>
+    <tr><td>Not sound like a wellness app</td><td><span class="tick">✓</span>Nautical and plain. It sits with instruments, not incense.</td></tr>
+    <tr><td>Work first time across India</td><td><span class="tick">✓</span>Two syllables, no spelling trap, no unfortunate meaning in any Indian language.</td></tr>
+  </table>
+  <div style="height:36px;"></div>
+
+  <!-- usage -->
+  <h2>How it sounds once it is real</h2>
+  <div class="sub">A name has to survive being said out loud by a tired person.</div>
+  <div class="usegrid">
+    <div class="ucard">
+      <div class="h">Out loud</div>
+      <div class="said">"I use fathom for my practice."</div>
+      <div class="said">"Fathom flagged her last week."</div>
+      <div class="said">"Let me check fathom before we meet."</div>
+      <div class="said">"Have you fathomed this month yet?"</div>
+    </div>
+    <div class="ucard">
+      <div class="h">The vocabulary it unlocks</div>
+      <div class="lex"><b>A sounding.</b> One session's scores.</div>
+      <div class="lex"><b>The line.</b> A client's run of scores over time.</div>
+      <div class="lex"><b>Depth.</b> Where someone started. The baseline.</div>
+      <div class="lex"><b>Safe water.</b> A client tracking ahead.</div>
+      <div class="lex"><b>Shallows.</b> Worth a closer look.</div>
+      <div class="lex" style="color:var(--muted);">Free product language, already coherent. No other candidate gave us this.</div>
+    </div>
+  </div>
+
+  <!-- cost -->
+  <h2>What it costs us</h2>
+  <div class="sub">Stated plainly, because the case is weaker if we hide it.</div>
+  <div class="cost">
+    <div class="h">The crowded word problem</div>
+    <p><b>Four software companies already use Fathom.</b> Fathom.video is an AI meeting notetaker in daily use across professional life. There is also Fathom Analytics, FathomHQ in financial reporting, and a Fathom in health AI.</p>
+    <p><b>What that means.</b> We will never own this word globally. If we take the outcomes wedge international in years three to five, our buyer already has a different Fathom open in another tab.</p>
+    <p><b>Why we take it anyway.</b> None of the four is in India. None is in therapy. Four Fathoms coexisting is itself the evidence that a fifth in a separate category is defensible. And our first three years are India only, where the word is clean.</p>
+    <p><b>The mitigation.</b> Never ship the word alone. Every title, listing and bio reads <b>fathom, outcome tracking for counsellors</b>. Growth here comes from supervision circles and referrals, not from winning a search result.</p>
+  </div>
+  <div style="height:26px;"></div>
+
+  <!-- gates -->
+  <h2>Three gates before we commit</h2>
+  <div class="gates">
+    <div class="gate">
+      <div class="n">01</div>
+      <div class="t">Domain</div>
+      <p>fathom.health, fathom.in, getfathom.in. Not yet checked. Do this first. The name is cheap to change today and expensive next month.</p>
+    </div>
+    <div class="gate">
+      <div class="n">02</div>
+      <div class="t">Trademark</div>
+      <p>India, classes 9 and 42. Fold it into the IP review that already blocks launch. One pass, two questions.</p>
+    </div>
+    <div class="gate">
+      <div class="n">03</div>
+      <div class="t">The counsellor's read</div>
+      <p>Say it cold to the clinical co-founder and watch his face before any logo exists. He is the only real customer in the room.</p>
+    </div>
+  </div>
+
+  <div class="verdict">A word that means <span class="em">to measure</span>, <span class="em">to understand</span>, and <span class="em">to hold</span>.<br>We would have had to invent it.</div>
+
+  <footer>
+    <b>Sources.</b> Etymology and dates from Etymonline. "Mark twain" as the two fathom sounding call, and Samuel Clemens adopting it in 1863, from Word Histories. Competing Fathom companies verified from public company profiles, August 2026.<br>
+    <b>Status.</b> Recommended, not final. Second option on the shortlist is Deepen. Rejected earlier: Bearing, Riyaaz, Candor, Attune, Sounding, Regard, Cairn. Full reasoning in <span style="font-family:ui-monospace,monospace;">business/marketing/brand-guide.md</span>.
+  </footer>
+
+</div>
+</body>
+</html>

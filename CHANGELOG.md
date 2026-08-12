@@ -2,6 +2,17 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [4.0.3] - 2026-08-06
+### Fixed
+- **Invoice Live Statement Logic**: Changed the opening balance logic on invoices to calculate receipts based on their actual \`paymentDate\` (transaction date) rather than their data-entry date (\`createdAt\`). This ensures that backdated or late-entered payments are correctly accounted for in the invoice's outstanding balance, guaranteeing that the invoice's "Total Outstanding" matches the client's actual ledger balance as of the invoice issue date.
+
+### Changed
+- **Invoices Page UI**: Simplified the Invoices page by removing the "Confirm Payment" action and the payment-related summary metric cards, redirecting all payment workflows to the Ledger via a new "Open Ledger" action button.
+- **Ledger Page Sorting**: Added a "Date" column to the Ledger's "By Invoice" view and enabled sorting for both the Date and Invoice # headers.
+- **Sessions Sort Default**: The Sessions list now defaults to sorting chronologically descending (most recent first).
+
+---
+
 ## [4.0.2] - 2026-08-04
 ### Added
 - **Invoice Account Summary**: Added a new "Account Summary" table to both the invoice preview and the generated email. It dynamically calculates the client's past outstanding balance by tallying all past invoices against past receipts, and displays the **Opening Balance**, **Current Invoice Amount**, and **Total Outstanding Balance** at the bottom of the invoice.

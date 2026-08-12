@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -87,17 +88,15 @@ function StatusPill({ status }: { status: string }) {
 function RowActions({
   invoice,
   onPreview,
-  onConfirm,
   onVoid,
 }: {
   invoice: any;
   onPreview: () => void;
-  onConfirm: () => void;
   onVoid: () => void;
 }) {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
   const close = () => setOpen(false);
-  const canConfirm = invoice.status !== "draft" && invoice.status !== "paid" && invoice.status !== "void";
   const canVoid = invoice.status !== "paid" && invoice.status !== "void" && parseFloat(invoice.amountPaid || "0") === 0;
   const item = "flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors text-left";
   return (
@@ -113,11 +112,9 @@ function RowActions({
         <button className={item} onClick={() => { onPreview(); close(); }}>
           <Eye className="h-4 w-4 text-slate-400" /> View
         </button>
-        {canConfirm && (
-          <button className={item} onClick={() => { onConfirm(); close(); }}>
-            <BadgeCheck className="h-4 w-4 text-emerald-500" /> Confirm Payment
-          </button>
-        )}
+        <button className={item} onClick={() => { router.push('/dashboard/payments'); close(); }}>
+          <Wallet className="h-4 w-4 text-emerald-500" /> Open Ledger
+        </button>
         {canVoid && (
           <button className={cn(item, "text-rose-600 hover:bg-rose-50")} onClick={() => { onVoid(); close(); }}>
             <Trash2 className="h-4 w-4" /> Void
@@ -137,15 +134,6 @@ export default function InvoicesPage() {
   const [open, setOpen] = useState(false);
   const [previewId, setPreviewId] = useState<string | null>(null);
 
-  // Confirm-payment dialog state. Holds a snapshot of the invoice being paid
-  // so the dialog can prefill amount / currency / client name.
-  const [confirmInvoice, setConfirmInvoice] = useState<any | null>(null);
-  const [confirmAmount, setConfirmAmount] = useState<string>("");
-  const [confirmDate, setConfirmDate] = useState<string>(istTodayStr());
-  const [confirmMethod, setConfirmMethod] = useState<string>("upi");
-  const [confirmRef, setConfirmRef] = useState<string>("");
-  const [confirmEmail, setConfirmEmail] = useState<boolean>(true);
-  const [confirmSubmitting, setConfirmSubmitting] = useState(false);
 
   // Void-invoice dialog state.
   const [voidInvoice, setVoidInvoice] = useState<any | null>(null);
@@ -171,54 +159,6 @@ export default function InvoicesPage() {
     }
   };
 
-  const openConfirm = (inv: any) => {
-    const total = parseFloat(inv.total || "0");
-    const paid = parseFloat(inv.amountPaid || "0");
-    const balance = Math.max(0, total - paid);
-    setConfirmInvoice(inv);
-    setConfirmAmount(balance.toFixed(2));
-    setConfirmDate(istTodayStr());
-    setConfirmMethod("upi");
-    setConfirmRef("");
-    setConfirmEmail(true);
-  };
-
-  const handleConfirmReceipt = async () => {
-    if (!confirmInvoice) return;
-    setConfirmSubmitting(true);
-    try {
-      const res = await fetch(`/api/invoices/${confirmInvoice.id}/receipt`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amount: confirmAmount,
-          paymentDate: confirmDate,
-          method: confirmMethod,
-          referenceId: confirmRef || undefined,
-          sendEmail: confirmEmail,
-        }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        toast.success(
-          data.emailedTo
-            ? data.testMode
-              ? `Payment recorded · receipt sent to YOU (test mode)`
-              : `Payment recorded · receipt emailed to client`
-            : `Payment recorded`,
-        );
-        setConfirmInvoice(null);
-        fetchData();
-      } else {
-        const err = await res.text();
-        toast.error(`Failed: ${err}`);
-      }
-    } catch (err) {
-      toast.error("An error occurred");
-    } finally {
-      setConfirmSubmitting(false);
-    }
-  };
   const [filterGenerated, setFilterGenerated] = useState(true);
   const [filterSent, setFilterSent] = useState(true);
   const [filterPaid, setFilterPaid] = useState(true);
@@ -560,7 +500,7 @@ export default function InvoicesPage() {
       </div>
 
       {/* Summary metric cards — "Pending Billing" now lives here as context. */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="max-w-sm">
         <Card className="border-slate-200">
           <CardContent className="p-4 space-y-1">
             <div className="flex items-center gap-2 text-slate-400">
@@ -569,36 +509,6 @@ export default function InvoicesPage() {
             </div>
             <p className="text-2xl font-bold text-slate-900 tabular-nums">{renderMoney(pending)}</p>
             <p className="text-[11px] text-slate-500">{unbilled.length} clients · {pendingSessions} sessions awaiting billing</p>
-          </CardContent>
-        </Card>
-        <Card className="border-slate-200">
-          <CardContent className="p-4 space-y-1">
-            <div className="flex items-center gap-2 text-slate-400">
-              <Wallet className="h-4 w-4" />
-              <span className="text-[11px] font-bold uppercase tracking-wider">Outstanding</span>
-            </div>
-            <p className="text-2xl font-bold text-slate-900 tabular-nums">{renderMoney(outstanding)}</p>
-            <p className="text-[11px] text-slate-500">{outstandingCount} unpaid invoice{outstandingCount === 1 ? "" : "s"}</p>
-          </CardContent>
-        </Card>
-        <Card className="border-slate-200">
-          <CardContent className="p-4 space-y-1">
-            <div className="flex items-center gap-2 text-slate-400">
-              <AlertCircle className="h-4 w-4" />
-              <span className="text-[11px] font-bold uppercase tracking-wider">Overdue / Partial</span>
-            </div>
-            <p className={cn("text-2xl font-bold tabular-nums", counts.overdue > 0 ? "text-rose-600" : "text-slate-900")}>{counts.overdue}</p>
-            <p className="text-[11px] text-slate-500">invoices needing follow-up</p>
-          </CardContent>
-        </Card>
-        <Card className="border-slate-200">
-          <CardContent className="p-4 space-y-1">
-            <div className="flex items-center gap-2 text-slate-400">
-              <TrendingUp className="h-4 w-4" />
-              <span className="text-[11px] font-bold uppercase tracking-wider">Collected</span>
-            </div>
-            <p className="text-2xl font-bold text-emerald-600 tabular-nums">{renderMoney(collected)}</p>
-            <p className="text-[11px] text-slate-500">{counts.paid} paid in full</p>
           </CardContent>
         </Card>
       </div>
@@ -723,7 +633,7 @@ export default function InvoicesPage() {
                         <RowActions
                           invoice={invoice}
                           onPreview={() => setPreviewId(invoice.id)}
-                          onConfirm={() => openConfirm(invoice)}
+                          
                           onVoid={() => setVoidInvoice(invoice)}
                         />
                       </div>
@@ -791,75 +701,7 @@ export default function InvoicesPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!confirmInvoice} onOpenChange={(v) => !v && setConfirmInvoice(null)}>
-        <DialogContent className="bg-white border-slate-200 max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-emerald-700">
-              <BadgeCheck className="h-5 w-5" /> Confirm Payment
-            </DialogTitle>
-          </DialogHeader>
-          {confirmInvoice && (
-            <div className="space-y-4 py-2">
-              <div className="text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-1">
-                <div>Invoice <strong>{confirmInvoice.invoiceNumber}</strong> for <strong>{confirmInvoice.client?.name}</strong></div>
-                <div className="text-xs text-slate-500">
-                  Outstanding: {confirmInvoice.currency === 'USD' ? '$' : '₹'}
-                  {Math.max(0, parseFloat(confirmInvoice.total || '0') - parseFloat(confirmInvoice.amountPaid || '0')).toFixed(2)}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Amount Received</Label>
-                  <Input type="number" step="0.01" min={0} value={confirmAmount} onChange={(e) => setConfirmAmount(e.target.value)} className="h-10 bg-slate-50" />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Payment Date (IST)</Label>
-                  <Input type="date" value={confirmDate} onChange={(e) => setConfirmDate(e.target.value)} className="h-10 bg-slate-50" />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Method</Label>
-                  <select
-                    value={confirmMethod}
-                    onChange={(e) => setConfirmMethod(e.target.value)}
-                    className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm"
-                  >
-                    <option value="upi">UPI</option>
-                    <option value="bank_transfer">Bank Transfer</option>
-                    <option value="cash">Cash</option>
-                    <option value="card">Card</option>
-                    <option value="online">Online</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Reference (Optional)</Label>
-                  <Input value={confirmRef} onChange={(e) => setConfirmRef(e.target.value)} placeholder="UPI ref / cheque no." className="h-10 bg-slate-50" />
-                </div>
-              </div>
-
-              <label className="flex items-center gap-3 cursor-pointer select-none border border-slate-200 rounded-lg p-3 bg-slate-50/60">
-                <input type="checkbox" checked={confirmEmail} onChange={(e) => setConfirmEmail(e.target.checked)} className="h-4 w-4 accent-emerald-500" />
-                <span className="text-sm text-slate-700">
-                  Email receipt to <strong>{confirmInvoice.client?.email || "(no email on file)"}</strong>
-                </span>
-              </label>
-
-              <div className="flex justify-end gap-3 pt-2">
-                <Button variant="outline" onClick={() => setConfirmInvoice(null)}>Back</Button>
-                <Button
-                  onClick={handleConfirmReceipt}
-                  disabled={confirmSubmitting || !confirmAmount || parseFloat(confirmAmount) <= 0}
-                  className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold gap-2"
-                >
-                  {confirmSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <BadgeCheck className="h-4 w-4" />}
-                  Confirm Receipt
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      
     </div>
   );
 }

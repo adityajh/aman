@@ -1,5 +1,5 @@
 // ============================================================
-// AMAN — Drizzle ORM Schema
+// DEEPEN — Drizzle ORM Schema
 // /lib/db/schema.ts
 // Compatible with Neon (PostgreSQL) + Drizzle ORM
 // ============================================================
@@ -389,10 +389,10 @@ export const practiceSettings = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     tenantId: uuid("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
     counselorName: text("counselor_name").notNull().default("Vijay Gopal Sreenivasan"),
-    practiceName: text("practice_name").notNull().default("Aman Counseling"),
+    practiceName: text("practice_name").notNull().default("Deepen Counseling"),
     address: text("address").default("Noida, Uttar Pradesh"),
     phone: text("phone").default("+91-0000000000"),
-    email: text("email").default("counselor@aman.com"),
+    email: text("email").default("counselor@deepen.health"),
     upiId: text("upi_id"),
     monthlyQuote: text("monthly_quote").default("Progress is not a straight line."),
     orsCutoff: integer("ors_cutoff").notNull().default(25),

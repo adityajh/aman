@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logo exploration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#FBFAF7;--card:#FFF;--ink:#14181C;--ink2:#4A5157;--muted:#878D93;--hair:#E4E1DA;
+        --teal-ink:#0B4F43;--teal:#0F8A72;--terra:#C2632A;--brick:#B4472F;
+        --serif:'Newsreader',Georgia,serif;--sans:'Inter',system-ui,sans-serif;}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:14px;line-height:1.55}
+  .wrap{max-width:880px;margin:0 auto;padding:44px 26px 50px}
+  .kick{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+  h1{font-family:var(--serif);font-size:36px;font-weight:500;margin-bottom:8px}
+  .lede{font-size:15px;color:var(--ink2);max-width:660px;margin-bottom:34px}
+  h2{font-family:var(--serif);font-size:23px;font-weight:500;margin-bottom:4px}
+  .sub{font-size:13px;color:var(--muted);margin-bottom:16px}
+
+  /* verdict box */
+  .vbox{background:var(--card);border:1px solid var(--hair);border-left:3px solid var(--brick);border-radius:10px;padding:20px 24px;margin-bottom:34px}
+  .vbox .h{font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--brick);margin-bottom:8px}
+  .vbox p{font-size:13.5px;color:var(--ink2);margin-bottom:8px}
+  .vbox p:last-child{margin-bottom:0}
+  .vbox b{color:var(--ink)}
+
+  /* option rows */
+  .opt{background:var(--card);border:1px solid var(--hair);border-radius:12px;padding:24px;margin-bottom:14px}
+  .opt.win{border-color:#BFD8D1;box-shadow:0 2px 10px rgba(15,138,114,.07)}
+  .opthead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+  .optname{font-family:var(--serif);font-size:21px;font-weight:600}
+  .optbadge{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:100px}
+  .b-win{color:var(--teal-ink);background:#EFF6F4;border:1px solid #C9DED8}
+  .b-no{color:var(--brick);background:#F9EAE6;border:1px solid #E3B7AC}
+  .b-mid{color:#7A5A08;background:#FAF3E2;border:1px solid #E4CE96}
+
+  .tests{display:flex;gap:26px;align-items:flex-end;flex-wrap:wrap;padding:8px 0 14px;border-bottom:1px solid #F1EFE9;margin-bottom:14px}
+  .t{text-align:center}
+  .t .lbl{font-size:9.5px;color:var(--muted);margin-top:7px;letter-spacing:.04em}
+  .darkcell{background:#16181A;border-radius:8px;padding:10px}
+  .optnote{font-size:13px;color:var(--ink2)}
+  .optnote b{color:var(--ink)}
+
+  .lock{display:flex;align-items:center;gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid #F1EFE9}
+  .lockwm{font-family:var(--serif);font-size:30px;font-weight:500;color:var(--teal-ink);letter-spacing:-.015em}
+  .lockwm .fs{color:var(--terra)}
+
+  .wmonly{background:var(--card);border:1px solid var(--hair);border-radius:12px;padding:30px;text-align:center;margin-bottom:14px}
+  .wmbig{font-family:var(--serif);font-size:56px;font-weight:500;color:var(--teal-ink);letter-spacing:-.02em}
+  .wmbig .fs{color:var(--terra)}
+  .wmnote{font-size:12.5px;color:var(--muted);margin-top:10px}
+
+  .rec{background:var(--card);border:1px solid var(--hair);border-left:3px solid var(--teal);border-radius:10px;padding:22px 26px;margin-top:8px}
+  .rec .h{font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--teal);margin-bottom:10px}
+  .rec p{font-size:13.5px;color:var(--ink2);margin-bottom:9px}
+  .rec p:last-child{margin-bottom:0}
+  .rec b{color:var(--teal-ink)}
+  footer{font-size:11px;color:var(--muted);border-top:1px solid var(--hair);padding-top:16px;margin-top:30px;line-height:1.7}
+  @media print{.wrap{padding:14px 18px}@page{size:A4;margin:8mm}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="kick">Brand · logo exploration · 12 August 2026</div>
+  <h1>Can the depth visual be the mark?</h1>
+  <p class="lede">The idea is right. The current drawing is not a logo, it is an illustration. Here is the test it fails, three reductions that pass, and a recommendation.</p>
+
+  <!-- the problem -->
+  <div class="vbox">
+    <div class="h">Why the current visual cannot be the logo</div>
+    <p><b>It dies at 16px.</b> Seven bands inside a favicon is mud. The brand guide's own rule: works at 16px, works in one colour, works stamped in ink on the corner of a PDF.</p>
+    <p><b>It cannot go one-colour.</b> The whole meaning is carried by the gradient. Strip the colour for a fax, an embroidery, a black-and-white invoice, and nothing is left.</p>
+    <p><b>It is a diagram, not a mark.</b> The lead weight and line explain an idea. A logo does not explain, it identifies.</p>
+    <p style="margin-top:12px;"><b>Keep it anyway</b>, as the brand's illustration. Use it on the site, in the deck, in these documents. Brand illustration and logo mark are different jobs and most good systems have both.</p>
+  </div>
+
+  <!-- options -->
+  <h2>Three reductions</h2>
+  <div class="sub">Each tested at 72px, 32px, 16px, in one colour, and reversed on dark.</div>
+
+  <!-- A -->
+  <div class="opt">
+    <div class="opthead">
+      <div class="optname">A · The descent</div>
+      <span class="optbadge b-mid">Most literal, weakest small</span>
+    </div>
+    <div class="tests">
+      <div class="t">
+        <svg width="72" height="72" viewBox="0 0 64 64" fill="none">
+          <line x1="6" y1="18" x2="58" y2="18" stroke="#0B4F43" stroke-width="4" stroke-linecap="round"/>
+          <line x1="32" y1="20" x2="32" y2="44" stroke="#0B4F43" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="32" cy="52" r="6" fill="#C2632A"/>
+        </svg><div class="lbl">72px</div>
+      </div>
+      <div class="t">
+        <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
+          <line x1="6" y1="18" x2="58" y2="18" stroke="#0B4F43" stroke-width="4" stroke-linecap="round"/>
+          <line x1="32" y1="20" x2="32" y2="44" stroke="#0B4F43" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="32" cy="52" r="6" fill="#C2632A"/>
+        </svg><div class="lbl">32px</div>
+      </div>
+      <div class="t">
+        <svg width="16" height="16" viewBox="0 0 64 64" fill="none">
+          <line x1="6" y1="18" x2="58" y2="18" stroke="#0B4F43" stroke-width="4" stroke-linecap="round"/>
+          <line x1="32" y1="20" x2="32" y2="44" stroke="#0B4F43" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="32" cy="52" r="6" fill="#C2632A"/>
+        </svg><div class="lbl">16px</div>
+      </div>
+      <div class="t">
+        <svg width="44" height="44" viewBox="0 0 64 64" fill="none">
+          <line x1="6" y1="18" x2="58" y2="18" stroke="#14181C" stroke-width="4" stroke-linecap="round"/>
+          <line x1="32" y1="20" x2="32" y2="44" stroke="#14181C" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="32" cy="52" r="6" fill="#14181C"/>
+        </svg><div class="lbl">1 colour</div>
+      </div>
+      <div class="t"><div class="darkcell">
+        <svg width="44" height="44" viewBox="0 0 64 64" fill="none">
+          <line x1="6" y1="18" x2="58" y2="18" stroke="#5FC3AE" stroke-width="4" stroke-linecap="round"/>
+          <line x1="32" y1="20" x2="32" y2="44" stroke="#5FC3AE" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="32" cy="52" r="6" fill="#CE7440"/>
+        </svg></div><div class="lbl">reversed</div>
+      </div>
+    </div>
+    <div class="optnote">The sounding line reduced to three elements: surface, line, weight. <b>Most faithful to the story.</b> But the vertical stroke thins to nothing at 16px and the weight detaches into a floating speck. Note the deliberate gap below the surface line, so it never forms a medical cross.</div>
+    <div class="lock">
+      <svg width="30" height="30" viewBox="0 0 64 64" fill="none">
+        <line x1="6" y1="18" x2="58" y2="18" stroke="#0B4F43" stroke-width="4" stroke-linecap="round"/>
+        <line x1="32" y1="20" x2="32" y2="44" stroke="#0B4F43" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="32" cy="52" r="6" fill="#C2632A"/>
+      </svg>
+      <div class="lockwm">deepen<span class="fs">.</span></div>
+    </div>
+  </div>
+
+  <!-- B -->
+  <div class="opt">
+    <div class="opthead">
+      <div class="optname">B · Depth bands</div>
+      <span class="optbadge b-no">Reads as a chart</span>
+    </div>
+    <div class="tests">
+      <div class="t">
+        <svg width="72" height="72" viewBox="0 0 64 64">
+          <rect x="8" y="16" width="48" height="7" rx="3.5" fill="#A8DACD"/>
+          <rect x="8" y="29" width="48" height="7" rx="3.5" fill="#2AA890"/>
+          <rect x="8" y="42" width="48" height="7" rx="3.5" fill="#0B4F43"/>
+        </svg><div class="lbl">72px</div>
+      </div>
+      <div class="t">
+        <svg width="32" height="32" viewBox="0 0 64 64">
+          <rect x="8" y="16" width="48" height="7" rx="3.5" fill="#A8DACD"/>
+          <rect x="8" y="29" width="48" height="7" rx="3.5" fill="#2AA890"/>
+          <rect x="8" y="42" width="48" height="7" rx="3.5" fill="#0B4F43"/>
+        </svg><div class="lbl">32px</div>
+      </div>
+      <div class="t">
+        <svg width="16" height="16" viewBox="0 0 64 64">
+          <rect x="8" y="16" width="48" height="7" rx="3.5" fill="#A8DACD"/>
+          <rect x="8" y="29" width="48" height="7" rx="3.5" fill="#2AA890"/>
+          <rect x="8" y="42" width="48" height="7" rx="3.5" fill="#0B4F43"/>
+        </svg><div class="lbl">16px</div>
+      </div>
+      <div class="t">
+        <svg width="44" height="44" viewBox="0 0 64 64">
+          <rect x="8" y="16" width="48" height="7" rx="3.5" fill="#14181C"/>
+          <rect x="8" y="29" width="48" height="7" rx="3.5" fill="#14181C"/>
+          <rect x="8" y="42" width="48" height="7" rx="3.5" fill="#14181C"/>
+        </svg><div class="lbl">1 colour</div>
+      </div>
+      <div class="t"><div class="darkcell">
+        <svg width="44" height="44" viewBox="0 0 64 64">
+          <rect x="8" y="16" width="48" height="7" rx="3.5" fill="#0B5F50"/>
+          <rect x="8" y="29" width="48" height="7" rx="3.5" fill="#2AA890"/>
+          <rect x="8" y="42" width="48" height="7" rx="3.5" fill="#A8DACD"/>
+        </svg></div><div class="lbl">reversed</div>
+      </div>
+    </div>
+    <div class="optnote">Three bands, darkening downward. Survives 16px. <b>But it collapses in one colour into a hamburger menu icon</b>, and in teal it reads as a bar chart, which is precisely the "your analytics" territory the positioning attacks. Rejected.</div>
+  </div>
+
+  <!-- C -->
+  <div class="opt win">
+    <div class="opthead">
+      <div class="optname">C · The surface</div>
+      <span class="optbadge b-win">Recommended</span>
+    </div>
+    <div class="tests">
+      <div class="t">
+        <svg width="72" height="72" viewBox="0 0 64 64">
+          <defs><clipPath id="c1"><circle cx="32" cy="32" r="26"/></clipPath></defs>
+          <circle cx="32" cy="32" r="26" fill="none" stroke="#0B4F43" stroke-width="4"/>
+          <rect x="0" y="26" width="64" height="38" fill="#0B4F43" clip-path="url(#c1)"/>
+        </svg><div class="lbl">72px</div>
+      </div>
+      <div class="t">
+        <svg width="32" height="32" viewBox="0 0 64 64">
+          <defs><clipPath id="c2"><circle cx="32" cy="32" r="26"/></clipPath></defs>
+          <circle cx="32" cy="32" r="26" fill="none" stroke="#0B4F43" stroke-width="4"/>
+          <rect x="0" y="26" width="64" height="38" fill="#0B4F43" clip-path="url(#c2)"/>
+        </svg><div class="lbl">32px</div>
+      </div>
+      <div class="t">
+        <svg width="16" height="16" viewBox="0 0 64 64">
+          <defs><clipPath id="c3"><circle cx="32" cy="32" r="26"/></clipPath></defs>
+          <circle cx="32" cy="32" r="26" fill="none" stroke="#0B4F43" stroke-width="5"/>
+          <rect x="0" y="26" width="64" height="38" fill="#0B4F43" clip-path="url(#c3)"/>
+        </svg><div class="lbl">16px</div>
+      </div>
+      <div class="t">
+        <svg width="44" height="44" viewBox="0 0 64 64">
+          <defs><clipPath id="c4"><circle cx="32" cy="32" r="26"/></clipPath></defs>
+          <circle cx="32" cy="32" r="26" fill="none" stroke="#14181C" stroke-width="4"/>
+          <rect x="0" y="26" width="64" height="38" fill="#14181C" clip-path="url(#c4)"/>
+        </svg><div class="lbl">1 colour</div>
+      </div>
+      <div class="t"><div class="darkcell">
+        <svg width="44" height="44" viewBox="0 0 64 64">
+          <defs><clipPath id="c5"><circle cx="32" cy="32" r="26"/></clipPath></defs>
+          <circle cx="32" cy="32" r="26" fill="none" stroke="#5FC3AE" stroke-width="4"/>
+          <rect x="0" y="26" width="64" height="38" fill="#5FC3AE" clip-path="url(#c5)"/>
+        </svg></div><div class="lbl">reversed</div>
+      </div>
+    </div>
+    <div class="optnote">A circle with a waterline across it. Empty above, solid below. <b>Two elements, so it holds at any size and in any single colour.</b> It says the one thing the name says: most of it is under the surface. And it rhymes with the terracotta full stop in the wordmark, which is already a dot. The mark and the ornament become the same idea.</div>
+    <div class="lock">
+      <svg width="30" height="30" viewBox="0 0 64 64">
+        <defs><clipPath id="c6"><circle cx="32" cy="32" r="26"/></clipPath></defs>
+        <circle cx="32" cy="32" r="26" fill="none" stroke="#0B4F43" stroke-width="4"/>
+        <rect x="0" y="26" width="64" height="38" fill="#0B4F43" clip-path="url(#c6)"/>
+      </svg>
+      <div class="lockwm">deepen<span class="fs">.</span></div>
+    </div>
+  </div>
+
+  <!-- control -->
+  <h2 style="margin-top:34px;">The control</h2>
+  <div class="sub">No mark at all. This is a serious option, not a placeholder.</div>
+  <div class="wmonly">
+    <div class="wmbig">deepen<span class="fs">.</span></div>
+    <div class="wmnote">Serif wordmark, teal ink, terracotta full stop. One ornament, no mark.</div>
+  </div>
+  <p style="font-size:13.5px;color:var(--ink2);margin-bottom:34px;">A two-person product does not need a symbol. Wordmark-only is disciplined, costs nothing to maintain, and never looks amateur. The only place it genuinely hurts is the favicon and the app icon, where a "d" would have to stand in.</p>
+
+  <!-- recommendation -->
+  <h2>Recommendation</h2>
+  <div class="rec">
+    <div class="h">What I would do</div>
+    <p><b>Wordmark as the primary identity. Mark C as the icon.</b> The wordmark leads everywhere it fits: site header, invoice footer, the Outcome Report, email. Mark C exists for the places a wordmark cannot go, which is the favicon, the app icon, and the corner of a PDF.</p>
+    <p><b>Keep the surface-to-depth illustration as illustration.</b> It is doing good work in these documents and it belongs on the site. It just is not the mark.</p>
+    <p><b>Retire the bezel.</b> The old brand guide proposed a compass bezel with an index tick. That was Fathom's navigation metaphor and the rename orphaned it. Mark C replaces it cleanly.</p>
+    <p style="margin-top:12px;color:var(--muted);font-size:12.5px;">One risk worth naming: a circle half-filled is not a rare shape. Check it against a battery icon, a coffee cup and a moon phase before committing, and consider raising the waterline slightly so it never sits at exactly half.</p>
+  </div>
+
+  <footer>
+    Tests rendered at true pixel sizes in this document, not scaled down from large art. Colours are the Teal Plus system: ink <span style="font-family:ui-monospace,monospace">#0B4F43</span>, terracotta <span style="font-family:ui-monospace,monospace">#C2632A</span>, reversed <span style="font-family:ui-monospace,monospace">#5FC3AE</span>.
+  </footer>
+
+</div>
+</body>
+</html>

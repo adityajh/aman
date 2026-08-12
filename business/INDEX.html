@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Deepen · workspace map</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+ :root{--paper:#FBFAF7;--card:#FFF;--ink:#14181C;--ink2:#4A5157;--muted:#878D93;--hair:#E4E1DA;
+       --teal-ink:#0B4F43;--teal:#0F8A72;--terra:#C2632A;--serif:'Newsreader',Georgia,serif;--sans:'Inter',system-ui,sans-serif}
+ *{margin:0;padding:0;box-sizing:border-box}
+ body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:14px;line-height:1.55}
+ .wrap{max-width:880px;margin:0 auto;padding:46px 26px 50px}
+ .head{display:flex;align-items:center;gap:15px;margin-bottom:10px}
+ .lw{font-family:var(--serif);font-size:44px;font-weight:500;color:var(--teal-ink);letter-spacing:-.02em}
+ .lw .fs{color:var(--terra)}
+ .tag{font-family:var(--serif);font-style:italic;font-size:19px;color:var(--ink2);margin-bottom:3px}
+ .mission{font-size:13px;font-weight:600;color:var(--terra)}
+ .kick{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:22px 0 26px}
+ h2{font-family:var(--serif);font-size:21px;font-weight:500;margin:32px 0 3px}
+ .sub{font-size:12.5px;color:var(--muted);margin-bottom:14px}
+ .tree{background:var(--card);border:1px solid var(--hair);border-radius:11px;padding:20px 24px;font-family:ui-monospace,monospace;font-size:12.5px;line-height:1.85;color:var(--ink2);margin-bottom:8px}
+ .tree b{color:var(--teal-ink)}
+ .tree span{color:var(--muted)}
+ .row{display:flex;gap:14px;align-items:flex-start;background:var(--card);border:1px solid var(--hair);border-radius:11px;padding:15px 20px;margin-bottom:8px}
+ .row.key{border-color:#BFD8D1;box-shadow:0 1px 6px rgba(15,138,114,.06)}
+ .fn{font-family:ui-monospace,monospace;font-size:12px;color:var(--teal-ink);font-weight:600;min-width:200px}
+ .dsc{font-size:13px;color:var(--ink2)}
+ .dsc b{color:var(--ink)}
+ .st{font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 8px;border-radius:100px;white-space:nowrap;align-self:flex-start}
+ .s-set{color:var(--teal-ink);background:#EFF6F4;border:1px solid #C9DED8}
+ .s-ref{color:var(--ink2);background:var(--paper);border:1px solid var(--hair)}
+ .s-open{color:#7A5A08;background:#FAF3E2;border:1px solid #E4CE96}
+ .open{background:var(--card);border:1px solid var(--hair);border-left:3px solid var(--terra);border-radius:10px;padding:18px 24px;margin-top:22px}
+ .open .h{font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--terra);margin-bottom:9px}
+ .open li{font-size:13px;color:var(--ink2);margin:5px 0 5px 17px}
+ .conv{background:var(--card);border:1px solid var(--hair);border-left:3px solid var(--teal);border-radius:10px;padding:18px 24px;margin-top:14px}
+ .conv .h{font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--teal);margin-bottom:9px}
+ .conv li{font-size:12.5px;color:var(--ink2);margin:4px 0 4px 17px}
+ @media print{.wrap{padding:14px 18px}@page{size:A4;margin:8mm}}
+ @media(max-width:660px){.row{flex-direction:column;gap:6px}.fn{min-width:0}}
+</style></head><body><div class="wrap">
+
+<div class="head">
+  <svg width="42" height="42" viewBox="0 0 64 64"><rect x="10" y="13" width="44" height="4" rx="2" fill="#0B4F43"/><rect x="10" y="24" width="44" height="9" rx="2" fill="#0B4F43"/><rect x="10" y="39" width="44" height="12" rx="2" fill="#0B4F43"/></svg>
+  <div>
+    <div class="lw">deepen<span class="fs">.</span></div>
+  </div>
+</div>
+<div class="tag">Go deeper than you could alone.</div>
+<div class="mission">Empowering mental health practitioners.</div>
+<div class="kick">Workspace map · 12 August 2026</div>
+
+<h2>The shape of it</h2>
+<div class="tree">
+business/<br>
+&nbsp;&nbsp;README.md&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>the same map, in text</span><br>
+&nbsp;&nbsp;INDEX.html&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>this page</span><br>
+&nbsp;&nbsp;<b>strategy/</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>01 to 07. The thinking everything rests on</span><br>
+&nbsp;&nbsp;<b>commercial/</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>the plan and anything financial</span><br>
+&nbsp;&nbsp;<b>marketing/</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>brand, name, copy</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;logo/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>five SVG assets</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;_working/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>explorations, kept for their reasoning</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;_archive/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>superseded, dated</span><br>
+&nbsp;&nbsp;<b>research/</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>supporting research, decision records</span><br>
+&nbsp;&nbsp;<b>customers/</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>beta notes. Empty until the beta starts</span>
+</div>
+
+<h2>Start here</h2>
+<div class="sub">Three documents carry the whole thing.</div>
+<div class="row key"><div class="fn">strategy/<br>03-business-strategy.md</div><div class="dsc"><b>Read first.</b> Thesis, who this is for, the two things we do, the never-build list. Everything else derives from it.</div><span class="st s-ref">Core</span></div>
+<div class="row key"><div class="fn">commercial/<br>one-page-plan.html</div><div class="dsc"><b>The plan, v1.0.</b> Mission, two value props, market, competition, pricing, costs at 10/100/1,000 users, path to 100,000. Prints to one A4.</div><span class="st s-set">Frozen</span></div>
+<div class="row key"><div class="fn">marketing/<br>brand-guide.html</div><div class="dsc"><b>The brand, v1.0.</b> Standalone and complete. Name, voice, logo, colour, chart discipline, governance. The one to hand a designer.</div><span class="st s-set">v1.0</span></div>
+
+<h2>strategy/</h2>
+<div class="sub">Seven documents compiled 31 July. They cross-reference each other by bare filename, so they stay together. Reading order: 03, then 01, 04, 07.</div>
+<div class="row"><div class="fn">01-icp-research.md</div><div class="dsc">Voice of the Indian counsellor. Pains, needs, willingness to pay. The finding that shapes the whole brand lives here.</div><span class="st s-ref">Source</span></div>
+<div class="row"><div class="fn">02-market-analysis.md</div><div class="dsc">Competitors, Indian and global, plus the free generic stack. Why the admin layer has no pricing power.</div><span class="st s-ref">Source</span></div>
+<div class="row"><div class="fn">03-business-strategy.md</div><div class="dsc">Thesis, ICP, the two things we do, the never-build list, the medicine and poison line.</div><span class="st s-ref">Core</span></div>
+<div class="row"><div class="fn">04-pricing-plan.md</div><div class="dsc">Plans, anchoring logic, revenue model, what must be validated before any price goes public.</div><span class="st s-ref">Source</span></div>
+<div class="row"><div class="fn">05-homepage-content.md<br>06-homepage-build-spec.md</div><div class="dsc">Copy and structure for the site. The copy rules in 06 section 2 are hard constraints, not suggestions.</div><span class="st s-ref">Source</span></div>
+<div class="row"><div class="fn">07-operating-plan.md</div><div class="dsc">Go to market, the three-user beta, discipline rules, milestones, risk register. Read weekly.</div><span class="st s-ref">Weekly</span></div>
+
+<h2>marketing/</h2>
+<div class="row"><div class="fn">brand-guide.md</div><div class="dsc">The guide as text. This is the one to grep and the one a future session reads.</div><span class="st s-set">v1.0</span></div>
+<div class="row"><div class="fn">logo/</div><div class="dsc">lockup, mark in teal, ink and reversed, a favicon build with thickened bars, plus usage notes.</div><span class="st s-set">Final</span></div>
+<div class="row"><div class="fn">name-deepen.html</div><div class="dsc">Why the name is what it is. Background reading, not a rule. The guide is the rule.</div><span class="st s-ref">Background</span></div>
+<div class="row"><div class="fn">homepage-copy-fixes.md</div><div class="dsc"><b>Open action.</b> Two claims on the current build must not ship: a dataset that does not exist, and an unverified compliance claim. Drop-in replacement copy included.</div><span class="st s-open">Open</span></div>
+<div class="row"><div class="fn">_working/</div><div class="dsc">Logo explorations and the colour swatch sheet. Kept because they record why the rejected options were rejected, which stops them being re-proposed.</div><span class="st s-ref">History</span></div>
+<div class="row"><div class="fn">_archive/</div><div class="dsc">Superseded documents, dated in the filename.</div><span class="st s-ref">Archive</span></div>
+
+<h2>research/</h2>
+<div class="row"><div class="fn">india-counselling-<br>workforce-2036.html</div><div class="dsc">How many people in India actually do counselling for a living. Buyer-pool sizing through 2036.</div><span class="st s-ref">Source</span></div>
+<div class="row"><div class="fn">domain-check.md</div><div class="dsc">Domain sweep and the naming decision record.</div><span class="st s-ref">Record</span></div>
+
+<h2>customers/</h2>
+<div class="sub">Empty until the beta starts.</div>
+<div class="row"><div class="fn">(waiting)</div><div class="dsc">Beta interview notes, the support log, objections and testimonials. One file per person, named <span style="font-family:ui-monospace,monospace">YYYY-MM-DD-firstname.md</span>. With three beta users, the support log is the research.</div><span class="st s-ref">Empty</span></div>
+
+<div class="open">
+  <div class="h">Open, in order</div>
+  <ol>
+    <li><b>Register the domains.</b> Availability was checked by DNS, not at a registrar, and it moves.</li>
+    <li><b>Fix the two homepage claims</b> before anyone sees the build.</li>
+    <li><b>Swap the footer mark</b> for <span style="font-family:ui-monospace,monospace">marketing/logo/lockup.svg</span>.</li>
+    <li>India trademark search, classes 9 and 42. Fold into the IP review already blocking launch.</li>
+    <li>Say the name cold to the clinical co-founder.</li>
+    <li>Execute the rename in code. Settings still default to a real person's name and city.</li>
+  </ol>
+</div>
+
+<div class="conv">
+  <div class="h">Conventions</div>
+  <ul>
+    <li>Dated material <span style="font-family:ui-monospace,monospace">YYYY-MM-DD-slug.md</span>. Living documents plain <span style="font-family:ui-monospace,monospace">slug.md</span>.</li>
+    <li>Every document opens with a date and a status: draft, active, or superseded.</li>
+    <li>Keep verified and inferred separate. The strategy set is strict about this. Match it.</li>
+    <li>Superseded goes to <span style="font-family:ui-monospace,monospace">_archive/</span> with the date in the filename. Never deleted, because the reasoning history matters.</li>
+    <li>Explorations that informed a decision go to <span style="font-family:ui-monospace,monospace">_working/</span>. They stop old options being re-proposed.</li>
+    <li>No em-dashes. Short sentences. Write it the way you would say it.</li>
+  </ul>
+</div>
+
+</div></body></html>

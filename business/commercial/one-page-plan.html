@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>One-page business plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper:#FBFAF7; --card:#FFFFFF; --ink:#14181C; --ink2:#4A5157; --muted:#878D93;
+    --hair:#E4E1DA; --teal-ink:#0B4F43; --teal:#0F8A72; --terra:#C2632A;
+    --serif:'Newsreader', Georgia, serif; --sans:'Inter', system-ui, sans-serif;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:var(--sans); background:var(--paper); color:var(--ink); font-size:14px; line-height:1.5; }
+  .wrap { max-width:900px; margin:0 auto; padding:40px 26px 48px; }
+
+  /* header */
+  .head { display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:12px; margin-bottom:28px; }
+  .wm { font-family:var(--serif); font-size:32px; font-weight:500; color:var(--teal-ink); letter-spacing:-0.015em; }
+  .wm .fs { color:var(--terra); }
+  .mission { font-size:13.5px; font-weight:600; color:var(--terra); margin-top:2px; }
+  .kick { font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:2px; }
+  .tags { display:flex; gap:6px; flex-wrap:wrap; }
+  .tag { font-size:10.5px; font-weight:600; padding:3px 11px; border-radius:100px; border:1px solid var(--hair); background:var(--card); color:var(--ink2); }
+
+  /* one-liner */
+  .oneliner { font-family:var(--serif); font-size:28px; font-weight:500; line-height:1.32; max-width:740px; margin-bottom:10px; }
+  .oneliner em { font-style:normal; color:var(--teal-ink); }
+  .who { font-size:14px; color:var(--ink2); margin-bottom:34px; max-width:700px; }
+
+  /* value props */
+  .vgrid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:34px; }
+  @media(max-width:720px){ .vgrid{ grid-template-columns:1fr; } }
+  .vcard { background:var(--card); border:1px solid var(--hair); border-radius:14px; padding:28px; }
+  .vcard.hero { border-color:#BFD8D1; box-shadow:0 2px 10px rgba(15,138,114,.07); }
+  .vnum { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--teal); margin-bottom:14px; }
+  .vtitle { font-family:var(--serif); font-size:25px; font-weight:500; line-height:1.25; margin-bottom:10px; }
+  .vcard p { font-size:13.5px; color:var(--ink2); }
+  .vline { font-size:13px; font-weight:600; color:var(--teal-ink); margin-top:14px; padding-top:12px; border-top:1px solid #F1EFE9; }
+  .vpain { font-family:var(--serif); font-style:italic; font-size:15px; line-height:1.45; color:var(--ink2); border-left:2px solid var(--hair); padding-left:14px; margin-bottom:14px; }
+
+  .minichart { margin-top:14px; background:var(--paper); border:1px solid var(--hair); border-radius:8px; padding:10px 12px 6px; }
+  .minichart .cap { font-size:10px; color:var(--muted); margin-bottom:2px; }
+
+  h2 { font-family:var(--serif); font-size:24px; font-weight:500; margin-bottom:4px; }
+  .sub { font-size:13px; color:var(--muted); margin-bottom:16px; }
+
+  /* competition */
+  .comp { width:100%; border-collapse:separate; border-spacing:0; background:var(--card); border:1px solid var(--hair); border-radius:12px; overflow:hidden; margin-bottom:10px; }
+  .comp th, .comp td { padding:11px 10px; text-align:center; font-size:12.5px; border-bottom:1px solid #F1EFE9; }
+  .comp tr:last-child th, .comp tr:last-child td { border-bottom:none; }
+  .comp thead th { font-size:11.5px; font-weight:700; border-bottom:1px solid var(--hair); color:var(--ink2); }
+  .comp thead th:first-child { text-align:left; }
+  .comp td:first-child { text-align:left; font-weight:500; color:var(--ink); }
+  .comp .uscol { background:#F2F8F6; font-weight:600; }
+  .comp thead .uscol { color:var(--teal-ink); font-size:12.5px; }
+  .yes { color:var(--teal); font-weight:700; font-size:15px; }
+  .no  { color:#C9C6BE; font-size:15px; }
+  .comp .price td { border-top:1px solid var(--hair); font-weight:700; font-size:13px; }
+  .comp .sub2 { display:block; font-size:10px; font-weight:400; color:var(--muted); }
+  .compnote { font-size:12.5px; color:var(--muted); margin-bottom:34px; }
+  .compnote b { color:var(--ink2); }
+
+  /* pricing */
+  .pgrid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:12px; }
+  @media(max-width:720px){ .pgrid{ grid-template-columns:1fr; } }
+  .pcard { background:var(--card); border:1px solid var(--hair); border-radius:14px; padding:26px 28px; }
+  .pcard.pro { border-color:#BFD8D1; box-shadow:0 2px 10px rgba(15,138,114,.07); }
+  .prole { font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+  .pcard.pro .prole { color:var(--teal); }
+  .pname { font-family:var(--serif); font-size:24px; font-weight:600; margin-bottom:2px; }
+  .pcard.pro .pname { color:var(--teal-ink); }
+  .pprice { font-size:30px; font-weight:700; letter-spacing:-0.01em; margin-bottom:8px; }
+  .pprice span { font-size:13px; font-weight:400; color:var(--muted); }
+  .pfor { font-size:13.5px; color:var(--ink2); }
+  .anchor { background:var(--card); border:1px solid var(--hair); border-left:3px solid var(--teal); border-radius:10px; padding:16px 22px; font-size:14px; color:var(--ink2); margin-bottom:36px; }
+  .anchor b { color:var(--teal-ink); }
+
+  /* market */
+  .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:12px; }
+  @media(max-width:720px){ .stats{ grid-template-columns:1fr 1fr; } }
+  .stat { background:var(--card); border:1px solid var(--hair); border-radius:12px; padding:18px 18px 14px; }
+  .stat .big { font-family:var(--serif); font-size:30px; font-weight:600; color:var(--teal-ink); letter-spacing:-0.01em; line-height:1.1; }
+  .stat .big span { font-size:15px; color:var(--muted); font-weight:400; }
+  .stat .lbl { font-size:12px; color:var(--ink2); margin-top:6px; line-height:1.45; }
+  .stat .src { font-size:9.5px; color:var(--muted); margin-top:7px; }
+  .slice { background:var(--card); border:1px solid var(--hair); border-left:3px solid var(--teal); border-radius:10px; padding:14px 20px; font-size:13.5px; color:var(--ink2); margin-bottom:36px; }
+  .slice b { color:var(--teal-ink); }
+
+  /* projections */
+  .pjcard { background:var(--card); border:1px solid var(--hair); border-radius:12px; padding:18px 20px 14px; margin-bottom:14px; }
+  .pjcard .h { font-size:10.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--teal); margin-bottom:4px; }
+  .pjcard .s { font-size:11.5px; color:var(--muted); margin-bottom:12px; }
+  .pjlegend { display:flex; gap:14px; font-size:11px; color:var(--ink2); margin-bottom:10px; }
+  .pjlegend i { width:10px; height:10px; border-radius:3px; display:inline-block; margin-right:5px; vertical-align:-1px; }
+  .pbars { display:flex; gap:18px; align-items:flex-end; height:130px; margin:0 4px; }
+  .pgroup { flex:1; display:flex; flex-direction:column; height:100%; }
+  .pgroup .duo { flex:1; display:flex; gap:5px; align-items:flex-end; justify-content:center; }
+  .pgroup .b { width:26px; border-radius:4px 4px 0 0; }
+  .pgroup .bv { font-size:9.5px; font-weight:700; text-align:center; margin-top:-16px; white-space:nowrap; }
+  .pgroup .glbl { text-align:center; font-size:10.5px; color:var(--muted); margin-top:6px; }
+  .pbase { border-top:1px solid #C9C6BE; margin:0 4px; }
+  .breakeven { margin-top:12px; padding-top:10px; border-top:1px solid #F1EFE9; font-size:12.5px; color:var(--ink2); }
+  .breakeven b { color:var(--teal-ink); }
+
+  table.cost { width:100%; border-collapse:collapse; }
+  .cost th { font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--ink2); text-align:right; padding:7px 8px; border-bottom:1px solid var(--hair); }
+  .cost th:first-child { text-align:left; }
+  .cost td { font-size:12px; padding:7px 8px; text-align:right; border-bottom:1px solid #F1EFE9; color:var(--ink2); font-variant-numeric:tabular-nums; }
+  .cost td:first-child { text-align:left; color:var(--ink); font-weight:500; }
+  .cost tr.tot td { font-weight:700; color:var(--ink); border-top:1px solid var(--hair); }
+  .cost tr.net td { font-weight:700; }
+  .cost tr:last-child td { border-bottom:none; }
+  .cost .pos { color:var(--teal-ink); }
+  .cost .neg { color:var(--ink2); }
+  .cost .qt { color:var(--muted); font-weight:400; }
+
+  /* path */
+  .path { display:grid; grid-template-columns:repeat(4,1fr); gap:0; margin-bottom:12px; }
+  @media(max-width:720px){ .path{ grid-template-columns:1fr 1fr; } }
+  .pstep { border:1px solid var(--hair); background:var(--card); padding:16px 18px; }
+  .pstep + .pstep { border-left:none; }
+  @media(max-width:720px){ .pstep:nth-child(3){ border-left:1px solid var(--hair); } .pstep:nth-child(n+3){ border-top:none; } }
+  .pstep:first-child { border-radius:12px 0 0 12px; }
+  .pstep:last-child { border-radius:0 12px 12px 0; }
+  @media(max-width:720px){
+    .pstep:first-child{ border-radius:12px 0 0 0; } .pstep:nth-child(2){ border-radius:0 12px 0 0; }
+    .pstep:nth-child(3){ border-radius:0 0 0 12px; } .pstep:last-child{ border-radius:0 0 12px 0; }
+  }
+  .pwhen { font-size:10px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--teal); margin-bottom:5px; }
+  .pbig { font-family:var(--serif); font-size:26px; font-weight:600; margin-bottom:3px; }
+  .psm { font-size:11.5px; color:var(--muted); line-height:1.5; }
+  .psm b { color:var(--ink2); }
+  .pathnote { font-size:12.5px; color:var(--muted); margin-bottom:36px; }
+  .pathnote b { color:var(--ink2); }
+
+  footer { font-size:11px; color:var(--muted); line-height:1.7; border-top:1px solid var(--hair); padding-top:16px; }
+  footer b { color:var(--ink2); }
+
+  @media print { .wrap{ padding:14px 18px; } @page { size:A4; margin:8mm; } body{ font-size:12px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- header -->
+  <div class="head">
+    <div>
+      <div class="kick">One-page business plan · v1.0 · August 2026</div>
+      <div class="wm">deepen<span class="fs">.</span></div>
+      <div class="mission">Empowering mental health practitioners.</div>
+    </div>
+    <div class="tags">
+      <span class="tag">Pre-revenue · 1 practice live</span>
+      <span class="tag">India first</span>
+      <span class="tag">2 founders · 10 hrs a month</span>
+    </div>
+  </div>
+
+  <!-- one-liner -->
+  <div class="oneliner">Most counsellors work blind. On <em>the money they're owed</em>. And on <em>the clients quietly getting worse</em>.</div>
+  <div class="who">deepen fixes both. Invoicing that runs itself, and a warning before a client slips away. Sold self-serve, grown by referral, run in ten founder-hours a month.</div>
+
+  <!-- value props -->
+  <div class="vgrid">
+    <div class="vcard">
+      <div class="vnum">Pain 1 · why they sign up</div>
+      <div class="vpain">"Month-end is spreadsheets, invoices made by hand, and awkward messages chasing payment. Some clients just disappear."</div>
+      <div class="vtitle">Your month closes in ten minutes.</div>
+      <p>Log sessions as you go. One click bills everyone. Rupee and dollar clients stay separate. Short sessions pro-rate themselves. Receipts, part-payments and credits are handled properly.</p>
+      <div class="vline">Admin is the loudest complaint in therapist burnout studies. It is not the deepest one.</div>
+    </div>
+
+    <div class="vcard hero">
+      <div class="vnum">Pain 2 · why they stay. Nobody in India does this</div>
+      <div class="vpain">"Some clients get worse. You don't see it until they stop replying, and then you guess for a very long time."</div>
+      <div class="vtitle">You'll know by session three.</div>
+      <p>A quick score each session, measured against where that client started. When someone slides, the note carries a flag and says why. It is information about the client, never a verdict on the counsellor.</p>
+      <div class="minichart">
+        <div class="cap">Predicted progress: this client against similar starters</div>
+        <svg viewBox="0 0 300 90" width="100%">
+          <path d="M10,62 C65,52 150,36 292,24 L292,48 C150,58 65,70 10,76 Z" fill="#E4E1DA" opacity="0.55"/>
+          <line x1="10" y1="80" x2="292" y2="80" stroke="#C9C6BE" stroke-width="1"/>
+          <path d="M10,70 C60,66 110,56 170,47 C215,40 255,34 284,28" fill="none" stroke="#0F8A72" stroke-width="2.2" stroke-linecap="round"/>
+          <circle cx="284" cy="28" r="4" fill="#0F8A72"/>
+        </svg>
+      </div>
+      <div class="vline">Private by design. No employer, no platform, no supervisor ever sees it.</div>
+    </div>
+  </div>
+
+  <!-- market -->
+  <h2>The market</h2>
+  <div class="sub">We count buyers, not patients. Every number here is a practitioner who could pay for software.</div>
+  <div class="stats">
+    <div class="stat">
+      <div class="big">13k<span> registered</span></div>
+      <div class="lbl"><b>India.</b> 9,000 psychiatrists and 4,309 clinical psychologists. The unregistered counsellor workforce is many times larger. No registry exists.</div>
+      <div class="src">Business Standard, Oct 2025</div>
+    </div>
+    <div class="stat">
+      <div class="big">675k+</div>
+      <div class="lbl"><b>US and UK alone.</b> Roughly 600,000 US therapists, 75,000 UK BACP members. US counsellor numbers growing 20% by 2033.</div>
+      <div class="src">AutoNotes/BLS 2026 · BACP</div>
+    </div>
+    <div class="stat">
+      <div class="big">$2.4B <span>→ $7.8B</span></div>
+      <div class="lbl"><b>What they spend on software.</b> Global practice-management market, 2025 to 2035. Growing 12.4% a year.</div>
+      <div class="src">Towards Healthcare, 2026</div>
+    </div>
+    <div class="stat">
+      <div class="big">200k+</div>
+      <div class="lbl"><b>Proof it scales.</b> SimplePractice runs 200,000 practitioners on one product at $49 to $99 a month. Six figures is not a hope.</div>
+      <div class="src">SimplePractice, 2026</div>
+    </div>
+  </div>
+  <div class="slice"><b>The revenue math.</b> 100,000 users at roughly $10 a month is <b>$12M a year</b>, about 1.5% of the 2035 market. Phase one needs 100.</div>
+
+  <!-- competition -->
+  <h2>Competition</h2>
+  <div class="sub">Taken from public product pages, 31 July 2026. Re-check before quoting.</div>
+  <table class="comp">
+    <thead>
+      <tr>
+        <th></th>
+        <th class="uscol">deepen.</th>
+        <th>PractiPal<span class="sub2">India</span></th>
+        <th>PracFlow<span class="sub2">India</span></th>
+        <th>Zoho free<span class="sub2">India</span></th>
+        <th>Greenspace<span class="sub2">global</span></th>
+        <th>SimplePractice<span class="sub2">global · 200k users</span></th>
+        <th>TherapyNotes<span class="sub2">global</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Invoicing and payments</td><td class="uscol"><span class="yes">✓</span></td><td><span class="yes">✓</span></td><td><span class="yes">✓</span></td><td><span class="yes">✓</span></td><td><span class="no">·</span></td><td><span class="yes">✓</span></td><td><span class="yes">✓</span></td></tr>
+      <tr><td>Clinical session notes</td><td class="uscol"><span class="yes">✓</span></td><td><span class="yes">✓</span></td><td><span class="yes">✓</span></td><td><span class="no">·</span></td><td><span class="no">·</span></td><td><span class="yes">✓</span></td><td><span class="yes">✓</span></td></tr>
+      <tr><td>Tracks whether clients improve</td><td class="uscol"><span class="yes">✓</span></td><td><span class="no">·</span></td><td><span class="no">·</span></td><td><span class="no">·</span></td><td><span class="yes">✓</span></td><td><span class="yes">✓</span></td><td><span class="yes">✓</span></td></tr>
+      <tr><td>Flags clients sliding back</td><td class="uscol"><span class="yes">✓</span></td><td><span class="no">·</span></td><td><span class="no">·</span></td><td><span class="no">·</span></td><td><span class="no">·</span></td><td><span class="no">·</span></td><td><span class="no">·</span></td></tr>
+      <tr><td>Predicts progress against similar clients</td><td class="uscol"><span class="yes">✓</span></td><td><span class="no">·</span></td><td><span class="no">·</span></td><td><span class="no">·</span></td><td><span class="no">·</span></td><td><span class="no">·</span></td><td><span class="no">·</span></td></tr>
+      <tr><td>Scheduling, reminders, client portal</td><td class="uscol"><span class="no">·</span></td><td><span class="yes">✓</span></td><td><span class="yes">✓</span></td><td><span class="yes">✓</span></td><td><span class="no">·</span></td><td><span class="yes">✓</span></td><td><span class="yes">✓</span></td></tr>
+      <tr class="price"><td>Price a month</td><td class="uscol">₹999–1,999</td><td>₹1,499</td><td>₹1,199+</td><td>₹0</td><td>₹2,100</td><td>₹4.3–8.7k</td><td>₹6k</td></tr>
+    </tbody>
+  </table>
+  <div class="compnote"><b>The honest read.</b> Indian tools sell admin. Their "analytics" count revenue and cancellations, not client progress. The global players do track scores, but none flags deterioration or predicts trajectory, and at ₹4,000 to ₹9,000 a month they have priced themselves out of India. <b>Two rows are ours alone. The price column is the moat at home.</b></div>
+
+  <!-- pricing -->
+  <h2>Pricing</h2>
+  <div class="sub">No free tier. 14-day trial. Annual by default. The first 25 users keep their price for three years.</div>
+  <div class="pgrid">
+    <div class="pcard">
+      <div class="prole">The wedge</div>
+      <div class="pname">Practice</div>
+      <div class="pprice">₹999<span> a month · ₹9,990 a year</span></div>
+      <div class="pfor">Billing and clinical records, working in fifteen minutes. Wins on setup, not features.</div>
+    </div>
+    <div class="pcard pro">
+      <div class="prole">The business</div>
+      <div class="pname">Pro</div>
+      <div class="pprice">₹1,999<span> a month · ₹19,990 a year</span></div>
+      <div class="pfor">Everything above, plus progress tracking, flags and predicted progress. Priced against supervision and training, which counsellors already pay for.</div>
+    </div>
+  </div>
+  <div class="anchor">Today a counsellor buys measurement (₹2,100) and billing (₹1,499) separately. That is ₹3,600 a month, and still no prediction. <b>Pro does both for ₹1,999.</b></div>
+
+  <!-- projections -->
+  <h2>Revenue and costs</h2>
+  <div class="sub">Three cases, each ten times the last. India economics at ₹1,100 blended per user. Targets, not forecasts.</div>
+
+  <div class="pjcard">
+    <div class="h">Monthly costs. Three lines, no office.</div>
+    <div class="s">Only the tech role steps up: part-time contract to 100 users, full-time at 1,000.</div>
+    <table class="cost">
+      <tr><th>₹ a month</th><th>10 users <span class="qt">launch</span></th><th>100 <span class="qt">month 18</span></th><th>1,000 <span class="qt">year 2–3</span></th></tr>
+      <tr><td>Servers and tools <span class="qt">Neon, Vercel, Resend</span></td><td>6,000</td><td>12,000</td><td>40,000</td></tr>
+      <tr><td>Tech person <span class="qt">20 hrs a week, then full-time</span></td><td>40,000</td><td>40,000</td><td>1,20,000</td></tr>
+      <tr><td>Digital marketing <span class="qt">content, webinar, email</span></td><td>15,000</td><td>20,000</td><td>50,000</td></tr>
+      <tr class="tot"><td>Total cost</td><td>61,000</td><td>72,000</td><td>2,10,000</td></tr>
+      <tr><td>Revenue</td><td>11,000</td><td>1,10,000</td><td>11,00,000</td></tr>
+      <tr class="net"><td>Net a month</td><td class="neg">−50,000</td><td class="pos">+38,000</td><td class="pos">+8,90,000</td></tr>
+      <tr><td>Net margin</td><td class="neg">n/a</td><td class="pos">35%</td><td class="pos">81%</td></tr>
+    </table>
+    <div class="s" style="margin-top:10px; margin-bottom:0;">Founders take nothing until past 100 users. Marketing is digital only. Content and tooling first, small paid experiments out of the same line.</div>
+  </div>
+
+  <div class="pjcard">
+    <div class="h">Revenue against operating cost, ₹ a month</div>
+    <div class="pjlegend">
+      <span><i style="background:#0F8A72"></i>Revenue</span>
+      <span><i style="background:#8A5BA8"></i>Costs</span>
+    </div>
+    <div class="pbars">
+      <div class="pgroup">
+        <div class="duo">
+          <div class="b" style="height:1%; min-height:3px; background:#0F8A72;"><div class="bv" style="color:#0B4F43;">11k</div></div>
+          <div class="b" style="height:5.5%; background:#8A5BA8;"><div class="bv" style="color:#6B4788;">61k</div></div>
+        </div>
+        <div class="glbl">10 users · costs 5.5× revenue</div>
+      </div>
+      <div class="pgroup">
+        <div class="duo">
+          <div class="b" style="height:10%; background:#0F8A72;"><div class="bv" style="color:#0B4F43;">1.1L</div></div>
+          <div class="b" style="height:6.5%; background:#8A5BA8;"><div class="bv" style="color:#6B4788;">72k</div></div>
+        </div>
+        <div class="glbl">100 · profitable</div>
+      </div>
+      <div class="pgroup">
+        <div class="duo">
+          <div class="b" style="height:100%; background:#0F8A72;"><div class="bv" style="color:#0B4F43;">11L</div></div>
+          <div class="b" style="height:19%; background:#8A5BA8;"><div class="bv" style="color:#6B4788;">2.1L</div></div>
+        </div>
+        <div class="glbl">1,000 · costs fall away</div>
+      </div>
+    </div>
+    <div class="pbase"></div>
+    <div class="breakeven"><b>Break-even at 59 users</b>, around month 12. Getting there costs the founders <b>₹2.5 to 3 lakh</b>. That is the price of finding out whether this works. After that, users grow ten times and costs grow three.</div>
+  </div>
+
+  <!-- path -->
+  <h2>The path to 100,000 users</h2>
+  <div class="sub">Four stages. Each one starts only if the last one's numbers hold. Grown through the founders' clinical network, a free monthly webinar, and content that compounds. No cold outreach, no demos, no selling to organisations.</div>
+  <div class="path">
+    <div class="pstep">
+      <div class="pwhen">India · months 0–18</div>
+      <div class="pbig">100</div>
+      <div class="psm"><b>Prove the habit.</b> Three-user beta, paid launch at month 4, break-even at 59. ₹1.1L a month. Still a side product.</div>
+    </div>
+    <div class="pstep">
+      <div class="pwhen">India · years 2–3</div>
+      <div class="pbig">1,000</div>
+      <div class="psm"><b>Own the beachhead.</b> Webinar engine, psychology departments, training institutes. ₹1.3Cr a year. Tech hire goes full-time. <b>The fork sits here.</b></div>
+    </div>
+    <div class="pstep">
+      <div class="pwhen">English-speaking · years 3–5</div>
+      <div class="pbig">10,000</div>
+      <div class="psm"><b>Take it abroad.</b> Dollar pricing is already built. Needs HIPAA and GDPR, a team of five. About $1.5 to 2M a year.</div>
+    </div>
+    <div class="pstep">
+      <div class="pwhen">Global · years 5–8</div>
+      <div class="pbig">100,000</div>
+      <div class="psm"><b>Own the category.</b> The benchmark pool gets better with every user. Incumbents run fixed curves and cannot copy it. About $12M a year.</div>
+    </div>
+  </div>
+  <div class="pathnote">Stages three and four mean giving up the side-product life. That is a decision taken at the 1,000 mark with real revenue in hand, not a drift. North star throughout: <b>counsellors who have recorded scores four weeks running.</b></div>
+
+  <footer>
+    <b>Honesty line.</b> No revenue today. One practice live, a co-founder's. Every projection is a target at a 60/40 Practice/Pro mix, not a forecast. Pricing stays unproven until the beta answers one question: what did you spend last year to become a better counsellor? Stages two to four depend on stage one working. Name decided: Deepen. Domains and trademark search pending.<br>
+    <b>Sources.</b> India practitioner counts, Business Standard Oct 2025. US counts, AutoNotes/BLS 2026. UK, BACP. Software market, Towards Healthcare 2026. SimplePractice user count is vendor-reported. All are third-party estimates. Strategy detail sits in <span style="font-family:ui-monospace,monospace;">business/strategy/</span>.
+  </footer>
+
+</div>
+</body>
+</html>

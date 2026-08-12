@@ -164,7 +164,7 @@ export default function SettingsPage() {
                   id="practiceName"
                   value={settings.practiceName}
                   onChange={(e) => setSettings({ ...settings, practiceName: e.target.value })}
-                  placeholder="Aman Counseling"
+                  placeholder="Deepen Counseling"
                   required
                 />
               </div>
@@ -186,7 +186,7 @@ export default function SettingsPage() {
                   type="email"
                   value={settings.email}
                   onChange={(e) => setSettings({ ...settings, email: e.target.value })}
-                  placeholder="counselor@aman.com"
+                  placeholder="counselor@deepen.health"
                 />
               </div>
               <div className="space-y-2">

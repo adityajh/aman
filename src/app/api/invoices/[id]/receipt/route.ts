@@ -109,7 +109,7 @@ export async function POST(
       let testMode = false;
       if (body.sendEmail && invoice.client.email) {
         const practiceProfile = settings || {
-          practiceName: "Aman Practice Management",
+          practiceName: "Deepen Counseling",
           counselorName: "",
           address: "",
           phone: "",
