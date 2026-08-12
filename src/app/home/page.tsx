@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Check, Minus, TrendingUp, Zap } from "lucide-react";
 import { Logo } from "@/components/logo";
+import { Brandmark } from "@/components/brandmark";
 
 export default function Home() {
   return (
@@ -383,8 +384,11 @@ export default function Home() {
 
         {/* §11 CLOSING CTA */}
         <section className="px-6 py-24 bg-teal-ink text-paper text-center">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-4xl font-serif font-bold mb-6">Find out.</h2>
+          <div className="max-w-4xl mx-auto flex flex-col items-center">
+            <div className="w-16 h-16 mb-8 text-teal-action">
+              <Brandmark />
+            </div>
+            <h2 className="text-4xl md:text-5xl font-serif font-bold mb-6 tracking-tight">Go deeper than you could alone.</h2>
             <p className="text-xl text-paper/80 mb-10 max-w-2xl mx-auto">
               Fourteen days, no card, everything included. If it tells you something uncomfortable, that's the product working.
             </p>
