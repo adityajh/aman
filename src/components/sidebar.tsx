@@ -16,7 +16,7 @@ import {
   ClipboardList,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
-import { Brandmark } from "@/components/brandmark";
+import { Logo } from "@/components/logo";
 
 const routes = [
   {
@@ -74,14 +74,15 @@ export function Sidebar({ planTier = "basic", tenantSlug = "deepen" }: { planTie
 
   return (
     <div className="space-y-4 py-4 flex flex-col h-full bg-ink border-r border-hairline/10 text-paper">
-      <div className="px-6 py-2 flex items-center gap-2">
-        <div className="h-8 w-8 bg-teal-ink rounded-lg flex items-center justify-center p-[6px]">
-          <Brandmark className="text-teal-action" />
-        </div>
+      <div className="px-6 py-4 flex items-center gap-2 border-b border-hairline/10">
+        <Logo variant="light" />
+      </div>
+      <div className="px-6 pt-2 pb-2">
         <div className="flex flex-col">
-          <h1 className="text-xl font-bold tracking-tight text-paper font-serif capitalize">{tenantSlug}</h1>
+          <span className="text-xs font-semibold text-paper/50 uppercase tracking-wider mb-1">Practice</span>
+          <h2 className="text-lg font-bold tracking-tight text-paper font-serif capitalize truncate">{tenantSlug}</h2>
           {planTier === "pro" && (
-            <span className="text-[10px] font-bold tracking-wider text-teal-action uppercase mt-[-2px]">Pro Tier</span>
+            <span className="text-[10px] font-bold tracking-wider text-teal-action uppercase mt-1">Pro Tier</span>
           )}
         </div>
       </div>

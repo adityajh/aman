@@ -20,7 +20,8 @@
   .head { display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:12px; margin-bottom:28px; }
   .wm { font-family:var(--serif); font-size:32px; font-weight:500; color:var(--teal-ink); letter-spacing:-0.015em; }
   .wm .fs { color:var(--terra); }
-  .mission { font-size:13.5px; font-weight:600; color:var(--terra); margin-top:2px; }
+  .tagline { font-family:var(--serif); font-style:italic; font-size:16px; color:var(--ink2); margin-top:6px; }
+  .mission { font-size:13px; font-weight:600; color:var(--terra); margin-top:2px; }
   .kick { font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:2px; }
   .tags { display:flex; gap:6px; flex-wrap:wrap; }
   .tag { font-size:10.5px; font-weight:600; padding:3px 11px; border-radius:100px; border:1px solid var(--hair); background:var(--card); color:var(--ink2); }
@@ -149,7 +150,11 @@
   <div class="head">
     <div>
       <div class="kick">One-page business plan · v1.0 · August 2026</div>
-      <div class="wm">deepen<span class="fs">.</span></div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <svg width="30" height="30" viewBox="0 0 64 64"><rect x="10" y="13" width="44" height="4" rx="2" fill="#0B4F43"/><rect x="10" y="24" width="44" height="9" rx="2" fill="#0B4F43"/><rect x="10" y="39" width="44" height="12" rx="2" fill="#0B4F43"/></svg>
+        <div class="wm">deepen<span class="fs">.</span></div>
+      </div>
+      <div class="tagline">Go deeper than you could alone.</div>
       <div class="mission">Empowering mental health practitioners.</div>
     </div>
     <div class="tags">
@@ -193,30 +198,31 @@
 
   <!-- market -->
   <h2>The market</h2>
-  <div class="sub">We count buyers, not patients. Every number here is a practitioner who could pay for software.</div>
+  <div class="sub">India has no register of counsellors, so the number had to be reconstructed from the graduate pipeline and benchmarked against countries that do count. Base case, 2026.</div>
   <div class="stats">
     <div class="stat">
-      <div class="big">13k<span> registered</span></div>
-      <div class="lbl"><b>India.</b> 9,000 psychiatrists and 4,309 clinical psychologists. The unregistered counsellor workforce is many times larger. No registry exists.</div>
-      <div class="src">Business Standard, Oct 2025</div>
+      <div class="big">20,756</div>
+      <div class="lbl"><b>Solo counsellors in India we can actually reach.</b> Out of roughly 54,000 practising, 24,400 in solo private practice, and this many digitally reachable.</div>
+      <div class="src">Workforce model, Aug 2026</div>
+    </div>
+    <div class="stat">
+      <div class="big">6,642</div>
+      <div class="lbl"><b>Of those, able to afford Pro today.</b> About a third. The rest are priced out, not unpersuaded.</div>
+      <div class="src">Workforce model, Aug 2026</div>
+    </div>
+    <div class="stat">
+      <div class="big">₹24 cr</div>
+      <div class="lbl"><b>India at 100% penetration, today.</b> Rising to ₹54 cr by 2036 on the base case. A ceiling, not a forecast.</div>
+      <div class="src">Workforce model, Aug 2026</div>
     </div>
     <div class="stat">
       <div class="big">675k+</div>
-      <div class="lbl"><b>US and UK alone.</b> Roughly 600,000 US therapists, 75,000 UK BACP members. US counsellor numbers growing 20% by 2033.</div>
+      <div class="lbl"><b>Therapists in the US and UK alone.</b> Roughly 600,000 US, 75,000 UK. Why the ceiling is not in India.</div>
       <div class="src">AutoNotes/BLS 2026 · BACP</div>
     </div>
-    <div class="stat">
-      <div class="big">$2.4B <span>→ $7.8B</span></div>
-      <div class="lbl"><b>What they spend on software.</b> Global practice-management market, 2025 to 2035. Growing 12.4% a year.</div>
-      <div class="src">Towards Healthcare, 2026</div>
-    </div>
-    <div class="stat">
-      <div class="big">200k+</div>
-      <div class="lbl"><b>Proof it scales.</b> SimplePractice runs 200,000 practitioners on one product at $49 to $99 a month. Six figures is not a hope.</div>
-      <div class="src">SimplePractice, 2026</div>
-    </div>
   </div>
-  <div class="slice"><b>The revenue math.</b> 100,000 users at roughly $10 a month is <b>$12M a year</b>, about 1.5% of the 2035 market. Phase one needs 100.</div>
+  <div class="slice"><b>The affordability wall is the finding that matters.</b> Most Indian therapists earn ₹3 lakh a year or less. Pro at ₹1,999 a month is ₹24,000 a year, which is <b>8% of their gross revenue.</b> That is not a pricing objection to negotiate past. It is a structural ceiling that only moves when practitioner earnings move.</div>
+  <div class="slice" style="border-left-color:#B8860B;"><b>So India proves the product. It cannot make it big.</b> Full penetration of India's payable solo market is ₹24 crore today and ₹54 crore by 2036. For scale, the combined FY24 revenue of India's ten best-known digital mental health platforms was about ₹103 crore. <b>100 paying users is 0.5% of the reachable base and entirely achievable. 10,000 would be a fifth of every solo counsellor in India we could reach, in 2036, on the base case.</b> The path below is built on that.</div>
 
   <!-- competition -->
   <h2>Competition</h2>
@@ -267,7 +273,7 @@
 
   <!-- projections -->
   <h2>Revenue and costs</h2>
-  <div class="sub">Three cases, each ten times the last. India economics at ₹1,100 blended per user. Targets, not forecasts.</div>
+  <div class="sub">Three cases, each ten times the last. India economics at ₹1,100 blended per user, which assumes a 60/40 Practice/Pro mix. Worth knowing: the workforce model puts only about a third of the reachable base above the Pro affordability line, so 40% is the optimistic end. Targets, not forecasts.</div>
 
   <div class="pjcard">
     <div class="h">Monthly costs. Three lines, no office.</div>
@@ -320,30 +326,30 @@
 
   <!-- path -->
   <h2>The path to 100,000 users</h2>
-  <div class="sub">Four stages. Each one starts only if the last one's numbers hold. Grown through the founders' clinical network, a free monthly webinar, and content that compounds. No cold outreach, no demos, no selling to organisations.</div>
+  <div class="sub">Four stages. The first two are India. The last two cannot be, and the workforce numbers are why. Grown through the founders' clinical network, a free monthly webinar, and content that compounds. No cold outreach, no demos, no selling to organisations.</div>
   <div class="path">
     <div class="pstep">
       <div class="pwhen">India · months 0–18</div>
       <div class="pbig">100</div>
-      <div class="psm"><b>Prove the habit.</b> Three-user beta, paid launch at month 4, break-even at 59. ₹1.1L a month. Still a side product.</div>
+      <div class="psm"><b>Prove the habit.</b> 0.5% of the reachable base. Three-user beta, paid launch at month 4, break-even at 59. ₹1.1L a month. Still a side product.</div>
     </div>
     <div class="pstep">
       <div class="pwhen">India · years 2–3</div>
       <div class="pbig">1,000</div>
-      <div class="psm"><b>Own the beachhead.</b> Webinar engine, psychology departments, training institutes. ₹1.3Cr a year. Tech hire goes full-time. <b>The fork sits here.</b></div>
+      <div class="psm"><b>Own the beachhead.</b> About 5% of everyone in India we can reach and who can pay. Roughly ₹1.3Cr a year. <b>This is close to India's practical ceiling, and it is the fork.</b></div>
     </div>
     <div class="pstep">
       <div class="pwhen">English-speaking · years 3–5</div>
       <div class="pbig">10,000</div>
-      <div class="psm"><b>Take it abroad.</b> Dollar pricing is already built. Needs HIPAA and GDPR, a team of five. About $1.5 to 2M a year.</div>
+      <div class="psm"><b>Go abroad, because India realistically cannot supply this.</b> Dollar pricing is already built, and the affordability wall does not exist in those markets. Needs HIPAA and GDPR, a team of five.</div>
     </div>
     <div class="pstep">
       <div class="pwhen">Global · years 5–8</div>
       <div class="pbig">100,000</div>
-      <div class="psm"><b>Own the category.</b> The benchmark pool gets better with every user. Incumbents run fixed curves and cannot copy it. About $12M a year.</div>
+      <div class="psm"><b>Own the category.</b> The benchmark pool improves with every user and incumbents run fixed curves. About $12M a year at a blended $10.</div>
     </div>
   </div>
-  <div class="pathnote">Stages three and four mean giving up the side-product life. That is a decision taken at the 1,000 mark with real revenue in hand, not a drift. North star throughout: <b>counsellors who have recorded scores four weeks running.</b></div>
+  <div class="pathnote"><b>The honest gate.</b> Stages three and four abandon the side-product life, and they are not optional if the goal is size. India is where this gets proven and where the product earns its clinical credibility. It is not where the revenue is. That decision gets taken at the 1,000 mark with real numbers in hand, not before. North star throughout: <b>counsellors who have recorded scores four weeks running.</b></div>
 
   <footer>
     <b>Honesty line.</b> No revenue today. One practice live, a co-founder's. Every projection is a target at a 60/40 Practice/Pro mix, not a forecast. Pricing stays unproven until the beta answers one question: what did you spend last year to become a better counsellor? Stages two to four depend on stage one working. Name decided: Deepen. Domains and trademark search pending.<br>
