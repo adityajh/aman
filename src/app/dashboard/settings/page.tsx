@@ -508,11 +508,11 @@ export default function SettingsPage() {
                 <div>
                   <h4 className="text-sm font-medium text-slate-500 mb-1">Status</h4>
                   <div className="flex items-center gap-2">
-                    <span className={\`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium \${
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                       billingInfo.status === 'active' || billingInfo.status === 'authenticated' ? 'bg-emerald-100 text-emerald-800' :
                       billingInfo.status === 'cancelled' ? 'bg-slate-100 text-slate-800' :
                       'bg-amber-100 text-amber-800'
-                    }\`}>
+                    }`}>
                       {billingInfo.status || "Unknown"}
                     </span>
                     {billingInfo.cancelAtCycleEnd && (
