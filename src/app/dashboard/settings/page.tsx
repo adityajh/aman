@@ -37,24 +37,38 @@ export default function SettingsPage() {
   });
 
   useEffect(() => {
-            upiId: data.upiId || "",
-            orsCutoff: data.orsCutoff ?? 25,
-            srsCutoff: data.srsCutoff ?? 36,
-            orsDeteriorationThreshold: data.orsDeteriorationThreshold ?? 5,
-            srsDeclineThreshold: data.srsDeclineThreshold ?? 2,
-            orsRciThreshold: data.orsRciThreshold ?? 5,
-            orsAmberLow: data.orsAmberLow ?? 26,
-            orsGreenLow: data.orsGreenLow ?? 32,
-            invoiceDueDays: data.invoiceDueDays ?? 15,
-            emailOverride: data.emailOverride ?? false,
-          });
-        }
-        setLoading(false);
-      })
-      .catch(() => {
-        toast.error("Failed to load settings");
-        setLoading(false);
-      });
+    Promise.all([
+      fetch("/api/settings").then(res => res.json()),
+      fetch("/api/settings/billing").then(res => res.json()).catch(() => null)
+    ]).then(([settingsData, billingData]) => {
+      if (settingsData) {
+        setSettings({
+          counselorName: settingsData.counselorName || "",
+          practiceName: settingsData.practiceName || "",
+          address: settingsData.address || "",
+          phone: settingsData.phone || "",
+          email: settingsData.email || "",
+          monthlyQuote: settingsData.monthlyQuote || "",
+          upiId: settingsData.upiId || "",
+          orsCutoff: settingsData.orsCutoff ?? 25,
+          srsCutoff: settingsData.srsCutoff ?? 36,
+          orsDeteriorationThreshold: settingsData.orsDeteriorationThreshold ?? 5,
+          srsDeclineThreshold: settingsData.srsDeclineThreshold ?? 2,
+          orsRciThreshold: settingsData.orsRciThreshold ?? 5,
+          orsAmberLow: settingsData.orsAmberLow ?? 26,
+          orsGreenLow: settingsData.orsGreenLow ?? 32,
+          invoiceDueDays: settingsData.invoiceDueDays ?? 15,
+          emailOverride: settingsData.emailOverride ?? false,
+        });
+      }
+      if (billingData && !billingData.error) {
+        setBillingInfo(billingData);
+      }
+      setLoading(false);
+    }).catch(() => {
+      toast.error("Failed to load settings");
+      setLoading(false);
+    });
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
