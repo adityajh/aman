@@ -20,7 +20,7 @@ export async function POST(req: Request) {
 
     const options = {
       plan_id: planId,
-      total_count: 120, // 10 years, acts as open-ended
+      total_count: 100, // Max allowed by Razorpay (~8 years)
     };
 
     const subscription = await razorpay.subscriptions.create(options);
