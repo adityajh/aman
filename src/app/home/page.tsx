@@ -26,10 +26,10 @@ export default function Home() {
         {/* §1 Hero */}
         <section className="px-6 py-24 md:py-32 max-w-5xl mx-auto text-center">
           <h1 className="text-5xl md:text-7xl font-serif font-bold text-teal-ink tracking-tight mb-8 leading-tight">
-            Your analytics tell you about your business.<br className="hidden md:block"/> Not your clients.
+            Your practice tools track your business.<br className="hidden md:block"/> Deepen tracks your clients.
           </h1>
           <p className="text-xl md:text-2xl text-ink/80 mb-12 max-w-3xl mx-auto font-serif">
-            Every practice tool in India shows you revenue, retention and cancellations. Deepen shows you whether the people you're seeing are actually getting better — and flags the ones sliding backwards before they drop out.
+            Most software shows you revenue and retention. Deepen tells you if the people you're seeing are actually getting better—and flags the ones sliding backwards before they leave.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-4">
             <Link href="/signup" className="w-full sm:w-auto px-10 py-4 bg-teal-action text-paper rounded-lg font-medium text-lg hover:bg-teal-ink transition-colors flex items-center justify-center shadow-lg shadow-teal-action/20">
@@ -80,10 +80,7 @@ export default function Home() {
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-serif font-bold text-teal-ink mb-6">Nobody can tell you if you're any good at this.</h2>
             <p className="text-xl text-ink/80 leading-relaxed mb-6 text-left max-w-3xl mx-auto">
-              Your supervisor, if you have one and can afford one, sees a fraction of your work. Your clients tell you what they think you want to hear. Your booking calendar tells you how busy you are, which is not the same thing.
-            </p>
-            <p className="text-xl text-ink/80 leading-relaxed mb-10 text-left max-w-3xl mx-auto">
-              And some clients get worse in therapy. Not many — but some. Without measurement, that's usually invisible until they stop replying to messages, and you're left guessing what happened for a very long time.
+              Your supervisor sees a fraction of your work. Clients tell you what they think you want to hear. Without measurement, deterioration is invisible until they stop replying to messages—leaving you guessing for a very long time.
             </p>
             <div className="inline-block px-8 py-6 bg-paper border border-hairline rounded-xl text-lg font-serif italic text-teal-ink shadow-sm">
               You don't need a research department. You need a few numbers each session and something that reads them properly.
@@ -93,31 +90,13 @@ export default function Home() {
 
         {/* §3 DETERIORATION FLAGS */}
         <section className="px-6 py-24 max-w-5xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-3xl font-serif font-bold text-teal-ink mb-6">You'll know by session three.</h2>
-              <p className="text-lg text-ink/80 leading-relaxed mb-6">
-                Deepen watches every score against that client's own starting point — not against an average, not against anyone else. When wellbeing drops past the threshold you set, or the working relationship weakens, the session note carries a flag and tells you exactly why in plain language.
-              </p>
-              <p className="text-lg text-ink/80 leading-relaxed mb-6">
-                It isn't a judgement about your work. It's a prompt to look at one client more closely, while there's still time to do something about it.
-              </p>
-              <div className="text-sm font-semibold text-teal-action uppercase tracking-wider">
-                Your practice, your thresholds. Set them where they make clinical sense to you.
-              </div>
-            </div>
-            {/* Visual */}
-            <div className="bg-white p-6 rounded-xl border border-hairline shadow-sm relative">
-              <div className="absolute top-0 left-0 w-1 h-full bg-[#B4472F] rounded-l-xl"></div>
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-full bg-[#B4472F]/10 flex items-center justify-center flex-shrink-0 mt-1">
-                  <span className="w-2 h-2 rounded-full bg-[#B4472F]"></span>
-                </div>
-                <div>
-                  <h4 className="font-serif font-bold text-ink text-lg mb-1">Worth a closer look</h4>
-                  <p className="text-sm text-ink/70">Score dropped by 4 points since last session. Client reported feeling significantly more overwhelmed this week.</p>
-                </div>
-              </div>
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-3xl font-serif font-bold text-teal-ink mb-6">You'll know by session three.</h2>
+            <p className="text-lg text-ink/80 leading-relaxed mb-6">
+              Deepen watches every score against that client's own starting point. When wellbeing drops past the threshold you set, the session note carries a flag and tells you why. It isn't a judgement about your work—it's a prompt to look at one client more closely, while there's still time to do something about it.
+            </p>
+            <div className="text-sm font-semibold text-teal-action uppercase tracking-wider">
+              Your practice, your thresholds.
             </div>
           </div>
         </section>
@@ -127,13 +106,10 @@ export default function Home() {
           <div className="max-w-4xl mx-auto text-center mb-16">
             <h2 className="text-4xl font-serif font-bold text-teal-ink mb-6">Is this client on track, or just not there yet?</h2>
             <p className="text-xl text-ink/80 leading-relaxed max-w-3xl mx-auto mb-8">
-              The hardest question in practice, and the one you usually answer on instinct.
-            </p>
-            <p className="text-lg text-ink/70 text-left mb-6 max-w-3xl mx-auto">
-              Deepen compares this client against everyone who started in a similar place: a shaded band of what recovery has typically looked like from there, their own line drawn over it, and a straight verdict — ahead, tracking, or behind.
+              Deepen compares this client against everyone who started in a similar place. It tells you if they are on track, or just not there yet. 
             </p>
             <p className="text-lg text-ink/70 text-left mb-10 max-w-3xl mx-auto">
-              Slow progress from a difficult starting point is not the same as stalled progress. This tells you which one you're looking at.
+              Slow progress from a difficult starting point is not the same as stalled progress. Deepen tells you which one you're looking at.
             </p>
             <div className="grid md:grid-cols-2 gap-8 text-left max-w-3xl mx-auto">
               <div className="bg-white p-6 rounded-lg border border-hairline shadow-sm">
@@ -154,9 +130,7 @@ export default function Home() {
         <section className="px-6 py-24 max-w-6xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-serif font-bold text-teal-ink mb-6">The question your supervisor asks, answered with data.</h2>
           <p className="text-xl text-ink/80 max-w-3xl mx-auto mb-12">
-            Across the clients you've closed: how many reliably improved, how many reached a meaningful recovery, how many stayed flat, how many got worse. How long they stayed. How strong the working relationship was. How many left before the work was done.
-            <br/><br/>
-            Most counsellors have never seen this about themselves, at any point in their career. That's the point.
+            Across the clients you've closed: how many improved, how many stayed flat, how many got worse. Most counsellors have never seen this about themselves. That's the point.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div className="bg-white border border-hairline p-8 rounded-xl shadow-sm">
@@ -191,41 +165,77 @@ export default function Home() {
               It isn't why you'd come here. It's why you'd stay.
             </div>
 
-            {/* Billing Visual */}
-            <div className="max-w-md mx-auto bg-white rounded-xl overflow-hidden shadow-2xl shadow-black/40 border border-teal-action/20 text-left">
-              <div className="bg-paper border-b border-hairline px-6 py-4 flex items-center justify-between">
-                <div className="text-ink font-serif font-bold text-lg">August 2026 Invoices</div>
-                <div className="text-xs font-semibold uppercase tracking-wider text-teal-action bg-teal-action/10 px-2 py-1 rounded-full">14 Drafts</div>
-              </div>
-              <div className="p-6">
-                <div className="space-y-4 mb-8">
-                  <div className="flex justify-between items-center text-sm">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-teal-action/10 flex items-center justify-center text-teal-action font-bold text-xs">AK</div>
-                      <span className="text-ink font-medium">Aarav K.</span>
+            {/* Visuals Grid */}
+            <div className="grid md:grid-cols-2 gap-8 items-start max-w-4xl mx-auto">
+              
+              {/* Billing Visual */}
+              <div className="w-full bg-white rounded-xl overflow-hidden shadow-2xl shadow-black/40 border border-teal-action/20 text-left">
+                <div className="bg-paper border-b border-hairline px-6 py-4 flex items-center justify-between">
+                  <div className="text-ink font-serif font-bold text-lg">August 2026 Invoices</div>
+                  <div className="text-xs font-semibold uppercase tracking-wider text-teal-action bg-teal-action/10 px-2 py-1 rounded-full">14 Drafts</div>
+                </div>
+                <div className="p-6">
+                  <div className="space-y-4 mb-8">
+                    <div className="flex justify-between items-center text-sm">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-teal-action/10 flex items-center justify-center text-teal-action font-bold text-xs">AK</div>
+                        <span className="text-ink font-medium">Aarav K.</span>
+                      </div>
+                      <div className="text-ink font-medium text-right">₹6,000 <div className="text-ink/40 font-normal text-xs">4 sessions</div></div>
                     </div>
-                    <div className="text-ink font-medium text-right">₹6,000 <div className="text-ink/40 font-normal text-xs">4 sessions</div></div>
+                    <div className="flex justify-between items-center text-sm">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-teal-action/10 flex items-center justify-center text-teal-action font-bold text-xs">SM</div>
+                        <span className="text-ink font-medium">Sanya M.</span>
+                      </div>
+                      <div className="text-ink font-medium text-right">₹4,500 <div className="text-ink/40 font-normal text-xs">3 sessions</div></div>
+                    </div>
+                    <div className="flex justify-between items-center text-sm opacity-60">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-terracotta/10 flex items-center justify-center text-terracotta font-bold text-xs">DJ</div>
+                        <span className="text-ink font-medium">David J.</span>
+                      </div>
+                      <div className="text-ink font-medium text-right">$400 <div className="text-ink/40 font-normal text-xs">USD • 4 sessions</div></div>
+                    </div>
                   </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-teal-action/10 flex items-center justify-center text-teal-action font-bold text-xs">SM</div>
-                      <span className="text-ink font-medium">Sanya M.</span>
-                    </div>
-                    <div className="text-ink font-medium text-right">₹4,500 <div className="text-ink/40 font-normal text-xs">3 sessions</div></div>
-                  </div>
-                  <div className="flex justify-between items-center text-sm opacity-60">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-terracotta/10 flex items-center justify-center text-terracotta font-bold text-xs">DJ</div>
-                      <span className="text-ink font-medium">David J.</span>
-                    </div>
-                    <div className="text-ink font-medium text-right">$400 <div className="text-ink/40 font-normal text-xs">USD • 4 sessions</div></div>
+                  
+                  <div className="pt-6 border-t border-hairline">
+                    <button className="w-full bg-teal-action text-paper py-3 rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-teal-action/90 transition-colors shadow-lg shadow-teal-action/20">
+                      <Check className="w-5 h-5" /> Generate 14 Invoices
+                    </button>
                   </div>
                 </div>
-                
-                <div className="pt-6 border-t border-hairline">
-                  <button className="w-full bg-teal-action text-paper py-3 rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-teal-action/90 transition-colors shadow-lg shadow-teal-action/20">
-                    <Check className="w-5 h-5" /> Generate & Send 14 Invoices
-                  </button>
+              </div>
+
+              {/* Payment Ledger Visual */}
+              <div className="w-full bg-white rounded-xl overflow-hidden shadow-2xl shadow-black/40 border border-teal-action/20 text-left mt-8 md:mt-12">
+                <div className="bg-paper border-b border-hairline px-6 py-4 flex items-center justify-between">
+                  <div className="text-ink font-serif font-bold text-lg">Outstanding Ledger</div>
+                  <div className="text-xs font-semibold uppercase tracking-wider text-ink/70 bg-ink/5 px-2 py-1 rounded-full">₹12,500 Due</div>
+                </div>
+                <div className="p-0">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-paper/50 text-ink/60 border-b border-hairline">
+                        <th className="font-medium px-6 py-3 text-left">Client</th>
+                        <th className="font-medium px-6 py-3 text-right">Balance</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="border-b border-hairline">
+                        <td className="px-6 py-4 font-medium text-ink flex items-center gap-3"><div className="w-2 h-2 rounded-full bg-teal-action"></div> Kavya T.</td>
+                        <td className="px-6 py-4 text-right font-medium text-ink">₹8,000</td>
+                      </tr>
+                      <tr className="border-b border-hairline bg-terracotta/5">
+                        <td className="px-6 py-4 font-medium text-ink flex items-center gap-3"><div className="w-2 h-2 rounded-full bg-terracotta"></div> Rohan M.</td>
+                        <td className="px-6 py-4 text-right font-medium text-terracotta">₹4,500 <div className="text-xs font-normal opacity-70">30 days overdue</div></td>
+                      </tr>
+                      <tr>
+                        <td className="px-6 py-4 font-medium text-ink/60 flex items-center gap-3"><div className="w-2 h-2 rounded-full bg-ink/20"></div> Priya S.</td>
+                        <td className="px-6 py-4 text-right font-medium text-ink/60">₹0 <div className="text-xs font-normal opacity-70">Settled</div></td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
