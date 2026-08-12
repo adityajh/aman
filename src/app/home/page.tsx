@@ -35,9 +35,6 @@ export default function Home() {
             <Link href="/signup" className="w-full sm:w-auto px-10 py-4 bg-teal-action text-paper rounded-lg font-medium text-lg hover:bg-teal-ink transition-colors flex items-center justify-center shadow-lg shadow-teal-action/20">
               Start your 14-day trial
             </Link>
-            <button className="flex items-center gap-2 text-ink/70 hover:text-teal-action transition-colors font-medium">
-              Watch a 6-minute walkthrough <ArrowRight className="w-4 h-4" />
-            </button>
           </div>
           <p className="text-sm text-ink/50">No card charged until the trial ends. Export everything, any time.</p>
 
@@ -104,12 +101,9 @@ export default function Home() {
         {/* §4 PREDICTED PROGRESS */}
         <section className="px-6 py-24 bg-paper border-y border-hairline">
           <div className="max-w-4xl mx-auto text-center mb-16">
-            <h2 className="text-4xl font-serif font-bold text-teal-ink mb-6">Is this client on track, or just not there yet?</h2>
-            <p className="text-xl text-ink/80 leading-relaxed max-w-3xl mx-auto mb-8">
-              Deepen compares this client against everyone who started in a similar place. It tells you if they are on track, or just not there yet. 
-            </p>
-            <p className="text-lg text-ink/70 text-left mb-10 max-w-3xl mx-auto">
-              Slow progress from a difficult starting point is not the same as stalled progress. Deepen tells you which one you're looking at.
+            <h2 className="text-4xl font-serif font-bold text-teal-ink mb-6">Are they on track? Or just not there yet?</h2>
+            <p className="text-xl text-ink/80 leading-relaxed max-w-3xl mx-auto mb-10">
+              Slow progress from a difficult starting point is not the same as stalled progress. Deepen compares your client against thousands who started in a similar place, so you know exactly which one you're looking at.
             </p>
             <div className="grid md:grid-cols-2 gap-8 text-left max-w-3xl mx-auto">
               <div className="bg-white p-6 rounded-lg border border-hairline shadow-sm">
@@ -128,10 +122,10 @@ export default function Home() {
 
         {/* §5 PRACTICE OUTCOMES */}
         <section className="px-6 py-24 max-w-6xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-serif font-bold text-teal-ink mb-6">The question your supervisor asks, answered with data.</h2>
-          <p className="text-xl text-ink/80 max-w-3xl mx-auto mb-12">
-            Across the clients you've closed: how many improved, how many stayed flat, how many got worse. Most counsellors have never seen this about themselves. That's the point.
-          </p>
+          <h2 className="text-3xl md:text-4xl font-serif font-bold text-teal-ink mb-6">A mirror for your practice. Finally.</h2>
+            <p className="text-xl text-ink/80 max-w-3xl mx-auto mb-12">
+              Across all the clients you've seen: how many improved, how many stayed flat, how many got worse? Most counsellors have never seen this data. With Deepen, you will.
+            </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div className="bg-white border border-hairline p-8 rounded-xl shadow-sm">
               <div className="text-5xl font-serif font-bold text-teal-action mb-2">0.82</div>
@@ -246,18 +240,18 @@ export default function Home() {
         <section className="px-6 py-24 bg-white">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-3xl font-serif font-bold text-teal-ink mb-4">What we don't do.</h2>
-              <p className="text-lg text-ink/80 max-w-2xl mx-auto">Honest version, compiled from public product pages. Check current features before you decide anything.</p>
+              <h2 className="text-3xl font-serif font-bold text-teal-ink mb-4">Deepen vs. The Alternatives</h2>
+              <p className="text-lg text-ink/80 max-w-2xl mx-auto">Honest version, compiled from public product pages.</p>
             </div>
-            <div className="overflow-x-auto pb-4">
-              <table className="w-full text-left border-collapse min-w-[800px]">
+            <div className="overflow-x-auto pb-4 shadow-xl shadow-black/5 rounded-2xl border border-hairline">
+              <table className="w-full text-left border-collapse min-w-[800px] bg-paper/20">
                 <thead>
-                  <tr className="border-b-2 border-teal-ink">
-                    <th className="py-4 px-6 text-left font-serif font-bold text-ink">Capability</th>
-                    <th className="py-4 px-6 font-serif text-lg font-bold text-teal-action">deepen. Pro<br/><span className="text-sm font-sans font-normal text-ink/60">₹1,999/mo</span></th>
-                    <th className="py-4 px-6 font-serif text-lg font-bold text-ink/70">Indian Clinical Tools<br/><span className="text-sm font-sans font-normal text-ink/60">₹1,000–3,000/mo</span></th>
-                    <th className="py-4 px-6 font-serif text-lg font-bold text-ink/60">Global Platforms<br/><span className="text-sm font-sans font-normal text-ink/60">~₹4,500/mo</span></th>
-                    <th className="py-4 px-6 font-serif text-lg font-bold text-ink/60">Generic Admin<br/><span className="text-sm font-sans font-normal text-ink/60">₹0/mo</span></th>
+                  <tr className="border-b-2 border-teal-ink/20 bg-white">
+                    <th className="py-5 px-6 text-left font-serif font-bold text-ink">Capability</th>
+                    <th className="py-5 px-6 font-serif text-xl font-bold bg-teal-ink text-paper shadow-inner border-b-4 border-teal-action">deepen. Pro<br/><span className="text-sm font-sans font-normal opacity-80">₹1,999/mo</span></th>
+                    <th className="py-5 px-6 font-serif text-lg font-bold text-ink/70">Indian Clinical Tools<br/><span className="text-sm font-sans font-normal text-ink/60">₹1,000–3,000/mo</span></th>
+                    <th className="py-5 px-6 font-serif text-lg font-bold text-ink/60">Global Platforms<br/><span className="text-sm font-sans font-normal text-ink/60">~₹4,500/mo</span></th>
+                    <th className="py-5 px-6 font-serif text-lg font-bold text-ink/60">Generic Admin<br/><span className="text-sm font-sans font-normal text-ink/60">₹0/mo</span></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -273,21 +267,20 @@ export default function Home() {
                     ["Client Portal & Intake Forms", false, true, true, true],
                     ["Waitlist Management", false, true, true, false],
                   ].map((row, i) => (
-                    <tr key={i} className="border-b border-hairline hover:bg-paper/50 transition-colors">
-                      <td className="py-4 px-6 font-medium text-ink">{row[0]}</td>
-                      <td className="py-4 px-6">{row[1] ? <Check className="w-5 h-5 text-teal-action" /> : <Minus className="w-5 h-5 text-ink/30" />}</td>
-                      <td className="py-4 px-6">{row[2] ? <Check className="w-5 h-5 text-ink/40" /> : <Minus className="w-5 h-5 text-ink/30" />}</td>
-                      <td className="py-4 px-6">{row[3] ? <Check className="w-5 h-5 text-ink/40" /> : <Minus className="w-5 h-5 text-ink/30" />}</td>
-                      <td className="py-4 px-6">{row[4] ? <Check className="w-5 h-5 text-ink/40" /> : <Minus className="w-5 h-5 text-ink/30" />}</td>
+                    <tr key={i} className="border-b border-hairline hover:bg-white transition-colors">
+                      <td className="py-4 px-6 font-medium text-ink bg-white">{row[0]}</td>
+                      <td className="py-4 px-6 bg-teal-ink/5 border-l border-r border-teal-ink/10">{row[1] ? <Check className="w-6 h-6 text-teal-action" /> : <Minus className="w-5 h-5 text-ink/30" />}</td>
+                      <td className="py-4 px-6 bg-white">{row[2] ? <Check className="w-5 h-5 text-ink/40" /> : <Minus className="w-5 h-5 text-ink/30" />}</td>
+                      <td className="py-4 px-6 bg-white">{row[3] ? <Check className="w-5 h-5 text-ink/40" /> : <Minus className="w-5 h-5 text-ink/30" />}</td>
+                      <td className="py-4 px-6 bg-white">{row[4] ? <Check className="w-5 h-5 text-ink/40" /> : <Minus className="w-5 h-5 text-ink/30" />}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            <p className="text-center text-ink/70 mt-8 max-w-3xl mx-auto">
+            <p className="text-center text-ink/70 mt-10 max-w-3xl mx-auto">
               Deepen does less than most of these, and some of what it does you can get free elsewhere. What it does instead is tell you whether the work is working — and it's the only one here that does that at all.
             </p>
-            <p className="text-center text-xs text-ink/40 mt-4">Verified August 2026.</p>
           </div>
         </section>
 
@@ -296,13 +289,10 @@ export default function Home() {
           <div className="max-w-3xl mx-auto">
             <h2 className="text-3xl font-serif font-bold text-teal-ink mb-6">Nobody else ever sees this.</h2>
             <p className="text-xl text-ink/80 mb-6 leading-relaxed">
-              Not your employer. Not a platform. Not an investor. Not us.
+              Your data belongs to you. Not your employer, not a platform, not us.
             </p>
             <p className="text-lg text-ink/70 mb-6 leading-relaxed">
-              Your outcome data belongs to you and is visible only to you. Deepen is not sold to organisations and never will be — no supervisor view, no management dashboard, no way for anyone to use these numbers to assess you.
-            </p>
-            <p className="text-lg text-ink/70 mb-6 leading-relaxed">
-              Your records are isolated at the database level, hosted in India, and never used to train anything. Export everything — clients, sessions, notes, invoices, receipts — in one click, any time, including after you cancel.
+              There is no supervisor view and no management dashboard. Your records are isolated, stored securely in India, and never used for AI training. Export everything—clients, sessions, and invoices—in one click, any time.
             </p>
             <div className="mt-12 bg-white p-6 border border-hairline rounded-lg text-left shadow-sm">
               <h4 className="font-bold text-ink mb-2">How the comparison works.</h4>
