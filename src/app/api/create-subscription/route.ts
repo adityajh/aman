@@ -21,7 +21,6 @@ export async function POST(req: Request) {
     const options = {
       plan_id: planId,
       total_count: 120, // 10 years, acts as open-ended
-      customer_notify: 1 as const, // Razorpay handles email notifications
     };
 
     const subscription = await razorpay.subscriptions.create(options);
