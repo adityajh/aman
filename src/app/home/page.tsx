@@ -7,9 +7,12 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-paper text-ink font-sans">
       {/* Navigation */}
-      <header className="flex items-center justify-between px-6 py-4 border-b border-hairline">
+      <header className="flex items-center justify-between px-6 py-4 border-b border-hairline bg-white/50 backdrop-blur-md sticky top-0 z-50">
         <div className="flex items-center gap-2">
-          <Link href="/home">
+          <Link href="/home" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <div className="w-5 h-5 text-teal-ink">
+              <Brandmark />
+            </div>
             <Logo />
           </Link>
         </div>
@@ -40,15 +43,15 @@ export default function Home() {
           <p className="text-sm text-ink/50">No card charged until the trial ends. Export everything, any time.</p>
 
           {/* Hero Visual: Predicted Progress Concept */}
-          <div className="mt-24 relative max-w-4xl mx-auto border border-hairline bg-white rounded-xl shadow-sm p-6 overflow-hidden">
+          <div className="mt-24 relative max-w-4xl mx-auto border border-hairline bg-white rounded-xl shadow-2xl shadow-teal-ink/5 p-6 overflow-hidden transform hover:-translate-y-1 transition-transform duration-500">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-teal-action to-teal-ink"></div>
             <div className="flex justify-between items-end mb-8 border-b border-hairline pb-4">
-              <div>
-                <h3 className="text-lg font-serif font-bold text-teal-ink">Predicted Progress</h3>
-                <p className="text-sm text-ink/70">Client ID: 8492 • Session 4</p>
+              <div className="text-left">
+                <h3 className="text-lg font-serif font-bold text-teal-ink mb-1">Predicted Progress</h3>
+                <p className="text-sm text-ink/50 font-medium uppercase tracking-wider">Client ID: 8492 • Session 4</p>
               </div>
-              <div className="flex items-center gap-2 text-[#B8860B] bg-[#B8860B]/10 px-3 py-1 rounded-full text-sm font-medium">
-                <span className="w-2 h-2 rounded-full bg-[#B8860B]"></span> Tracking
+              <div className="flex items-center gap-2 text-[#B8860B] bg-[#B8860B]/5 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-[#B8860B]/20">
+                <span className="w-2 h-2 rounded-full bg-[#B8860B] animate-pulse"></span> Tracking
               </div>
             </div>
             {/* Abstract Chart Representation */}
@@ -63,11 +66,11 @@ export default function Home() {
                 <path d="M0,180 Q100,170 200,140 T400,100 T600,80 T800,70 L800,200 L0,200 Z" fill="#FBFAF7" fillOpacity="1" />
               </svg>
               {/* Client Line */}
-              <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
-                <path d="M0,140 L200,110 L400,70" stroke="#0F8A72" strokeWidth="3" fill="none" />
+              <svg className="absolute inset-0 w-full h-full drop-shadow-md" preserveAspectRatio="none">
+                <path d="M0,140 L200,110 L400,70" stroke="#0F8A72" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
                 <circle cx="0" cy="140" r="5" fill="#0F8A72" />
                 <circle cx="200" cy="110" r="5" fill="#0F8A72" />
-                <circle cx="400" cy="70" r="6" fill="#0F8A72" stroke="#FBFAF7" strokeWidth="2" />
+                <circle cx="400" cy="70" r="7" fill="#0F8A72" stroke="#FBFAF7" strokeWidth="3" />
               </svg>
             </div>
           </div>
