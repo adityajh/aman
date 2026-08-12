@@ -55,11 +55,7 @@ export default function SignupPage() {
       <div className="min-h-screen flex items-center justify-center bg-paper py-12">
         <Card className="w-full max-w-lg shadow-lg">
           <CardHeader className="text-center space-y-2">
-            <div className="flex justify-center mb-2">
-              <div className="h-12 w-12 bg-teal-ink rounded-xl flex items-center justify-center">
-                <ShieldCheck className="h-7 w-7 text-teal-action" />
-              </div>
-            </div>
+
             <CardTitle className="text-2xl font-serif font-bold text-teal-ink">Create your Practice</CardTitle>
             <CardDescription>Join Deepen to streamline your clinical practice.</CardDescription>
           </CardHeader>

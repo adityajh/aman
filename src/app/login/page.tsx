@@ -45,11 +45,7 @@ export default function LoginPage() {
       <div className="min-h-screen flex items-center justify-center bg-paper">
         <Card className="w-full max-w-sm shadow-lg">
           <CardHeader className="text-center space-y-2">
-            <div className="flex justify-center mb-2">
-              <div className="h-12 w-12 bg-teal-ink rounded-xl flex items-center justify-center">
-                <ShieldCheck className="h-7 w-7 text-teal-action" />
-              </div>
-            </div>
+
             <CardTitle className="text-3xl font-serif font-bold text-teal-ink tracking-tight">deepen<span className="text-terracotta">.</span></CardTitle>
             <CardDescription>Clinical Practice Management</CardDescription>
           </CardHeader>

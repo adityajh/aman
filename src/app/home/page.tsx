@@ -187,8 +187,47 @@ export default function Home() {
             <p className="text-xl text-paper/80 leading-relaxed max-w-3xl mx-auto mb-10">
               Log sessions as you go. One click generates every invoice, keeps rupee and dollar clients in separate batches, pro-rates the short sessions, applies your cancellation policy, and emails them out. Receipts, part-payments and credits handled the way an accountant would expect.
             </p>
-            <div className="text-lg font-serif italic text-terracotta">
+            <div className="text-lg font-serif italic text-terracotta mb-16">
               It isn't why you'd come here. It's why you'd stay.
+            </div>
+
+            {/* Billing Visual */}
+            <div className="max-w-md mx-auto bg-white rounded-xl overflow-hidden shadow-2xl shadow-black/40 border border-teal-action/20 text-left">
+              <div className="bg-paper border-b border-hairline px-6 py-4 flex items-center justify-between">
+                <div className="text-ink font-serif font-bold text-lg">August 2026 Invoices</div>
+                <div className="text-xs font-semibold uppercase tracking-wider text-teal-action bg-teal-action/10 px-2 py-1 rounded-full">14 Drafts</div>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4 mb-8">
+                  <div className="flex justify-between items-center text-sm">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-teal-action/10 flex items-center justify-center text-teal-action font-bold text-xs">AK</div>
+                      <span className="text-ink font-medium">Aarav K.</span>
+                    </div>
+                    <div className="text-ink font-medium text-right">₹6,000 <div className="text-ink/40 font-normal text-xs">4 sessions</div></div>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-teal-action/10 flex items-center justify-center text-teal-action font-bold text-xs">SM</div>
+                      <span className="text-ink font-medium">Sanya M.</span>
+                    </div>
+                    <div className="text-ink font-medium text-right">₹4,500 <div className="text-ink/40 font-normal text-xs">3 sessions</div></div>
+                  </div>
+                  <div className="flex justify-between items-center text-sm opacity-60">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-terracotta/10 flex items-center justify-center text-terracotta font-bold text-xs">DJ</div>
+                      <span className="text-ink font-medium">David J.</span>
+                    </div>
+                    <div className="text-ink font-medium text-right">$400 <div className="text-ink/40 font-normal text-xs">USD • 4 sessions</div></div>
+                  </div>
+                </div>
+                
+                <div className="pt-6 border-t border-hairline">
+                  <button className="w-full bg-teal-action text-paper py-3 rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-teal-action/90 transition-colors shadow-lg shadow-teal-action/20">
+                    <Check className="w-5 h-5" /> Generate & Send 14 Invoices
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </section>
