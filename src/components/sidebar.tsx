@@ -70,8 +70,18 @@ const routes = [
   },
 ];
 
-export function Sidebar({ planTier = "basic", tenantSlug = "deepen" }: { planTier?: string, tenantSlug?: string }) {
+export function Sidebar({ 
+  planTier = "basic", 
+  tenantSlug = "deepen",
+  practiceName 
+}: { 
+  planTier?: string;
+  tenantSlug?: string;
+  practiceName?: string;
+}) {
   const pathname = usePathname();
+
+  const displayName = practiceName || tenantSlug;
 
   return (
     <div className="space-y-4 py-4 flex flex-col h-full bg-ink border-r border-hairline/10 text-paper">
@@ -84,7 +94,15 @@ export function Sidebar({ planTier = "basic", tenantSlug = "deepen" }: { planTie
       <div className="px-6 pt-2 pb-2">
         <div className="flex flex-col">
           <span className="text-xs font-semibold text-paper/50 uppercase tracking-wider mb-1">Practice</span>
-          <h2 className="text-lg font-bold tracking-tight text-paper font-serif capitalize truncate">{tenantSlug}</h2>
+          <h2 
+            className={cn(
+              "text-lg font-bold tracking-tight text-paper font-serif truncate",
+              !practiceName && "capitalize"
+            )}
+            title={displayName}
+          >
+            {displayName}
+          </h2>
           {planTier === "pro" && (
             <span className="text-[10px] font-bold tracking-wider text-teal-action uppercase mt-1">Pro Tier</span>
           )}

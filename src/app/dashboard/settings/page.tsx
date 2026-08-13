@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,7 @@ import { Save, Loader2, User, Building, MapPin, Phone, Mail, Quote, Activity, Lo
 import { formatIST } from "@/lib/tz";
 
 export default function SettingsPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [updatingPassword, setUpdatingPassword] = useState(false);
@@ -85,6 +87,7 @@ export default function SettingsPage() {
 
       if (res.ok) {
         toast.success("Settings saved successfully");
+        router.refresh();
       } else {
         toast.error("Failed to save settings");
       }
