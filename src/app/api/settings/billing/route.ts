@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 import { getTenantContext, withTenantContext } from "@/lib/tenant";
+import { tenants } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function GET() {
   const { tenantId } = await getTenantContext();
@@ -25,6 +27,15 @@ export async function GET() {
       });
 
       const subscription = await razorpay.subscriptions.fetch(tenant.razorpaySubscriptionId);
+
+      // Sync active status with database
+      const isActiveStatus = subscription.status === "active" || subscription.status === "authenticated";
+      if (tenant.isActive !== isActiveStatus) {
+        await tx
+          .update(tenants)
+          .set({ isActive: isActiveStatus })
+          .where(eq(tenants.id, tenant.id));
+      }
 
       return NextResponse.json({
         status: subscription.status,

@@ -73,11 +73,13 @@ const routes = [
 export function Sidebar({ 
   planTier = "basic", 
   tenantSlug = "deepen",
-  practiceName 
+  practiceName,
+  isBlocked = false
 }: { 
   planTier?: string;
   tenantSlug?: string;
   practiceName?: string;
+  isBlocked?: boolean;
 }) {
   const pathname = usePathname();
 
@@ -109,21 +111,39 @@ export function Sidebar({
         </div>
       </div>
       <div className="flex-1 px-3 mt-4">
-        {routes.map((route) => (
-          <Link
-            key={route.href}
-            href={route.href}
-            className={cn(
-              "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:bg-white/5 rounded-lg transition",
-              pathname === route.href ? "text-teal-action bg-teal-ink/30" : "text-paper/80",
-            )}
-          >
-            <div className="flex items-center flex-1">
-              <route.icon className={cn("h-5 w-5 mr-3", route.color)} />
-              {route.label}
-            </div>
-          </Link>
-        ))}
+        {routes.map((route) => {
+          const isRouteDisabled = isBlocked && route.href !== "/dashboard/settings";
+
+          if (isRouteDisabled) {
+            return (
+              <div
+                key={route.href}
+                className="text-sm group flex p-3 w-full justify-start font-medium opacity-40 cursor-not-allowed rounded-lg text-paper/40 select-none"
+              >
+                <div className="flex items-center flex-1">
+                  <route.icon className="h-5 w-5 mr-3 text-paper/40" />
+                  {route.label}
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <Link
+              key={route.href}
+              href={route.href}
+              className={cn(
+                "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:bg-white/5 rounded-lg transition",
+                pathname === route.href ? "text-teal-action bg-teal-ink/30" : "text-paper/80",
+              )}
+            >
+              <div className="flex items-center flex-1">
+                <route.icon className={cn("h-5 w-5 mr-3", route.color)} />
+                {route.label}
+              </div>
+            </Link>
+          );
+        })}
       </div>
       <div className="px-3">
         <button

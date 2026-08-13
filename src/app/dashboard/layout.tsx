@@ -1,7 +1,7 @@
 import { Sidebar } from "@/components/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { getTenantContext, withTenantContext } from "@/lib/tenant";
-
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 export default async function DashboardLayout({
@@ -18,22 +18,44 @@ export default async function DashboardLayout({
   }
   const { tenantId, planTier, tenantSlug } = context;
 
-  // Fetch the practice name from settings
+  // Get current pathname from headers set in middleware
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") || "";
+
+  // Fetch the practice name and active status from settings
   let practiceName = "";
+  let isActive = true;
   try {
-    const settings = await withTenantContext(tenantId, async (tx) => {
-      return await tx.query.practiceSettings.findFirst();
+    const data = await withTenantContext(tenantId, async (tx) => {
+      const settings = await tx.query.practiceSettings.findFirst();
+      const tenant = await tx.query.tenants.findFirst();
+      return { settings, tenant };
     });
-    if (settings?.practiceName) {
-      practiceName = settings.practiceName;
+    if (data.settings?.practiceName) {
+      practiceName = data.settings.practiceName;
+    }
+    if (data.tenant) {
+      isActive = data.tenant.isActive;
     }
   } catch (e) {
-    console.error("Failed to fetch practice settings in DashboardLayout:", e);
+    console.error("Failed to fetch practice settings and tenant status in DashboardLayout:", e);
+  }
+
+  // Redirect logic for subscription/trial status
+  const isBlocked = !isActive;
+  if (isBlocked) {
+    if (pathname !== "/dashboard/inactive" && pathname !== "/dashboard/settings") {
+      redirect("/dashboard/inactive");
+    }
+  } else {
+    if (pathname === "/dashboard/inactive") {
+      redirect("/dashboard");
+    }
   }
 
   return (
     <div className="flex h-screen bg-paper text-ink">
-      <Sidebar planTier={planTier} tenantSlug={tenantSlug} practiceName={practiceName} />
+      <Sidebar planTier={planTier} tenantSlug={tenantSlug} practiceName={practiceName} isBlocked={isBlocked} />
       <main className="flex-1 overflow-y-auto">
         {children}
       </main>
