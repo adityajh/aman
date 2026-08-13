@@ -2,6 +2,18 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [4.1.0] - 2026-08-13
+### Added
+- **Subscription & Trial Enforcement**: Implemented system-wide active subscription checks to restrict inactive users. Inactive tenants are redirected to a block screen.
+- **Account Inactive Page**: Created `/dashboard/inactive` which displays a premium block screen informing users of their inactive status with clear actions to manage billing or log out.
+- **Razorpay Webhooks Integration**: Added `/api/webhooks/razorpay` to receive webhook events from Razorpay. Listens to subscription activation and charges to enable tenant access, and suspension/cancellations to disable access.
+- **Real-Time Billing Sync**: Synchronizes the tenant's database active status with the live subscription state from Razorpay when fetching billing info from settings.
+
+### Changed
+- **Sidebar Access Control**: Modified the sidebar to dynamically grey out and disable all core navigation routes (Dashboard, Clients, Sessions, Invoices, Payments, Fees, Reports) when a tenant is blocked, keeping only Settings and Logout accessible.
+
+---
+
 ## [4.0.4] - 2026-08-13
 ### Added
 - **Practice Name display in Sidebar**: Queries the actual `practiceName` from `practice_settings` for the current tenant on the server-side layout and displays it under the "Practice" header instead of the raw `tenantSlug`. Falls back to the capitalized `tenantSlug` if no practice name is set.
