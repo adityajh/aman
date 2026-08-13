@@ -28,12 +28,12 @@ export async function GET() {
       const allInvoices = await tx.query.invoices.findMany();
 
       // Build a client name lookup for denormalization
-      const clientMap = new Map(allClients.map(c => [c.id, c.name]));
+      const clientMap = new Map(allClients.map((c: any) => [c.id, c.name]));
 
       // Clients CSV
       const clientsCSV = toCSV(
         ["Name", "Email", "Phone", "Date of Birth", "Default Fee", "Fee Type", "Active", "Tags", "Intake Notes", "Terminated At", "Termination Reason", "Created At"],
-        allClients.map(c => [
+        allClients.map((c: any) => [
           c.name, c.email, c.phone, c.dateOfBirth, c.defaultFee, c.feeType,
           c.isActive ? "Yes" : "No", c.tags?.join("; "), c.intakeNotes,
           c.terminatedAt, c.terminationReason, c.createdAt
@@ -43,7 +43,7 @@ export async function GET() {
       // Sessions CSV
       const sessionsCSV = toCSV(
         ["Client", "Scheduled At", "Duration (min)", "Type", "Modality", "Status", "Fee Charged", "Cancellation Reason", "Created At"],
-        allSessions.map(s => [
+        allSessions.map((s: any) => [
           clientMap.get(s.clientId) || s.clientId,
           s.scheduledAt, s.durationMin, s.sessionType, s.modality, s.status,
           s.feeCharged, s.cancellationReason, s.createdAt
@@ -53,7 +53,7 @@ export async function GET() {
       // Session Notes CSV
       const sessionNotesCSV = toCSV(
         ["Session ID", "Note Type", "Subjective", "Objective", "Assessment", "Plan", "Updates", "Client Actions", "My Actions", "Agenda", "Feedback", "ORS Total", "SRS Total", "Risk Flag", "Created At"],
-        allSessionNotes.map(n => [
+        allSessionNotes.map((n: any) => [
           n.sessionId, n.noteType, n.subjective, n.objective, n.assessment,
           n.plan, n.updates, n.clientActions, n.myActions, n.agenda, n.feedback,
           n.orsTotal, n.srsTotal, n.riskFlag, n.createdAt
@@ -63,7 +63,7 @@ export async function GET() {
       // Invoices CSV
       const invoicesCSV = toCSV(
         ["Invoice Number", "Client", "Billing Month", "Issued Date", "Due Date", "Subtotal", "Discount", "Tax", "Total", "Amount Paid", "Status", "Created At"],
-        allInvoices.map(i => [
+        allInvoices.map((i: any) => [
           i.invoiceNumber, clientMap.get(i.clientId) || i.clientId,
           i.billingMonth, i.issuedDate, i.dueDate, i.subtotal, i.discount,
           i.taxAmount, i.total, i.amountPaid, i.status, i.createdAt
@@ -79,7 +79,7 @@ export async function GET() {
 
       const zipBuffer = await zip.generateAsync({ type: "nodebuffer" });
 
-      return new NextResponse(zipBuffer, {
+      return new NextResponse(new Uint8Array(zipBuffer), {
         status: 200,
         headers: {
           "Content-Type": "application/zip",
