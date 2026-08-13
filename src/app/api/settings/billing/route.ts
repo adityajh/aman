@@ -14,10 +14,21 @@ export async function GET() {
         return NextResponse.json({ error: "Tenant not found" }, { status: 404 });
       }
 
+      const isVijay = tenant.slug === "aman-counseling" || tenant.email === "vijay10gopal@gmail.com";
+
       if (!tenant.razorpaySubscriptionId) {
+        // Ensure Vijay's tenant is marked active in the database as well
+        if (isVijay && !tenant.isActive) {
+          await tx
+            .update(tenants)
+            .set({ isActive: true })
+            .where(eq(tenants.id, tenant.id));
+        }
+
         return NextResponse.json({ 
-          status: "none", 
-          planTier: tenant.planTier 
+          status: isVijay ? "active" : "none", 
+          planTier: tenant.planTier,
+          isExempt: isVijay
         });
       }
 
@@ -30,18 +41,21 @@ export async function GET() {
 
       // Sync active status with database
       const isActiveStatus = subscription.status === "active" || subscription.status === "authenticated";
-      if (tenant.isActive !== isActiveStatus) {
+      const newActiveState = isVijay ? true : isActiveStatus;
+      
+      if (tenant.isActive !== newActiveState) {
         await tx
           .update(tenants)
-          .set({ isActive: isActiveStatus })
+          .set({ isActive: newActiveState })
           .where(eq(tenants.id, tenant.id));
       }
 
       return NextResponse.json({
-        status: subscription.status,
+        status: isVijay ? "active" : subscription.status,
         planTier: tenant.planTier,
-        nextBillingDate: subscription.charge_at ? new Date(subscription.charge_at * 1000).toISOString() : null,
-        cancelAtCycleEnd: (subscription as any).cancel_at_cycle_end
+        nextBillingDate: isVijay ? null : (subscription.charge_at ? new Date(subscription.charge_at * 1000).toISOString() : null),
+        cancelAtCycleEnd: isVijay ? false : (subscription as any).cancel_at_cycle_end,
+        isExempt: isVijay
       });
 
     } catch (error: any) {
