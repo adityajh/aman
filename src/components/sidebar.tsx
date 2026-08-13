@@ -84,7 +84,7 @@ export function Sidebar({
   const displayName = practiceName || tenantSlug;
 
   return (
-    <div className="space-y-4 py-4 flex flex-col h-full bg-ink border-r border-hairline/10 text-paper">
+    <div className="w-64 shrink-0 space-y-4 py-4 flex flex-col h-full bg-ink border-r border-hairline/10 text-paper">
       <div className="px-6 py-4 flex items-center gap-2 border-b border-hairline/10">
         <div className="w-5 h-5 text-teal-action">
           <Brandmark />
@@ -96,7 +96,7 @@ export function Sidebar({
           <span className="text-xs font-semibold text-paper/50 uppercase tracking-wider mb-1">Practice</span>
           <h2 
             className={cn(
-              "text-lg font-bold tracking-tight text-paper font-serif truncate",
+              "text-lg font-bold tracking-tight text-paper font-serif whitespace-normal leading-tight",
               !practiceName && "capitalize"
             )}
             title={displayName}
