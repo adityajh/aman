@@ -2,6 +2,18 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [4.0.4] - 2026-08-13
+### Added
+- **Practice Name display in Sidebar**: Queries the actual `practiceName` from `practice_settings` for the current tenant on the server-side layout and displays it under the "Practice" header instead of the raw `tenantSlug`. Falls back to the capitalized `tenantSlug` if no practice name is set.
+
+### Changed
+- **Sidebar Layout and Text Wrapping**:
+  - Frozen the left sidebar menu column width to `w-64 shrink-0` to stabilize the navigation column.
+  - Replaced the `truncate` class on the practice name header `<h2>` with `whitespace-normal leading-tight` to allow longer practice names to wrap onto multiple lines.
+  - Integrated `router.refresh()` into the Settings page (`/dashboard/settings`) so that saving practice settings updates the sidebar practice name immediately without requiring a manual page reload.
+
+---
+
 ## [4.0.3] - 2026-08-06
 ### Fixed
 - **Invoice Live Statement Logic**: Changed the opening balance logic on invoices to calculate receipts based on their actual \`paymentDate\` (transaction date) rather than their data-entry date (\`createdAt\`). This ensures that backdated or late-entered payments are correctly accounted for in the invoice's outstanding balance, guaranteeing that the invoice's "Total Outstanding" matches the client's actual ledger balance as of the invoice issue date.
