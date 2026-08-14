@@ -2,29 +2,13 @@ import Link from "next/link";
 import { ArrowRight, Check, Minus, TrendingUp, Zap } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { Brandmark } from "@/components/brandmark";
+import { HomeHeader } from "@/components/home-header";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-paper text-ink font-sans">
       {/* Navigation */}
-      <header className="flex items-center justify-between px-6 py-4 border-b border-hairline bg-white/50 backdrop-blur-md sticky top-0 z-50">
-        <div className="flex items-center gap-2">
-          <Link href="/home" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="w-5 h-5 text-teal-ink">
-              <Brandmark />
-            </div>
-            <Logo />
-          </Link>
-        </div>
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
-          <Link href="#features" className="hover:text-teal-action transition-colors">Features</Link>
-          <Link href="#pricing" className="hover:text-teal-action transition-colors">Pricing</Link>
-          <Link href="/login" className="hover:text-teal-action transition-colors">Log in</Link>
-          <Link href="/signup" className="px-4 py-2 bg-teal-action text-paper rounded-md hover:bg-teal-ink transition-colors">
-            Start free trial
-          </Link>
-        </nav>
-      </header>
+      <HomeHeader />
 
       <main>
         {/* §1 Hero */}
