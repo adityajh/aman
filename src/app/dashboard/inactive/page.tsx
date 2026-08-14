@@ -28,17 +28,17 @@ export default function InactivePage() {
             Please update your billing details or verify your subscription status to reactivate your clinical dashboard. You can still export your practice data anytime.
           </p>
 
-          <div className="flex flex-col gap-3">
-            <Link href="/dashboard/settings" className="w-full">
-              <Button className="w-full bg-teal-action hover:bg-teal-ink text-paper flex items-center justify-center gap-2">
-                <Settings className="h-4 w-4" /> Go to Billing Settings
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-6">
+            <Link href="/dashboard/settings">
+              <Button className="w-full sm:w-auto font-medium shadow-sm hover:shadow-md transition-shadow">
+                <Settings className="w-4 h-4 mr-2" /> Open Settings
               </Button>
             </Link>
-            
-            <Button 
-              variant="outline" 
-              onClick={() => signOut()} 
-              className="w-full border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-800 flex items-center justify-center gap-2"
+
+            <Button
+              variant="outline"
+              onClick={() => signOut()}
+              className="w-full sm:w-auto border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-800 flex items-center justify-center gap-2"
             >
               <LogOut className="h-4 w-4" /> Log out
             </Button>

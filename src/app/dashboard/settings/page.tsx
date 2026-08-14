@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Save, Loader2, User, Building, MapPin, Phone, Mail, Quote, Activity, Lock, CreditCard, Download } from "lucide-react";
 import { formatIST } from "@/lib/tz";
+import { BillingSettings } from "@/components/billing-settings";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -487,98 +488,8 @@ export default function SettingsPage() {
         </Card>
       </form>
 
-      {/* Billing Section */}
       <div className="space-y-6 pt-8 border-t border-slate-200">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5 text-primary" /> Deepen Billing
-            </CardTitle>
-            <CardDescription>Manage your SaaS subscription.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {!billingInfo ? (
-              <div className="text-sm text-muted-foreground flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" /> Loading billing details...
-              </div>
-            ) : (
-              <div className="grid gap-6 md:grid-cols-2">
-                <div>
-                  <h4 className="text-sm font-medium text-slate-500 mb-1">Current Plan</h4>
-                  <p className="text-lg font-semibold text-ink capitalize">
-                    Deepen {billingInfo.planTier}
-                  </p>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-slate-500 mb-1">Status</h4>
-                  <div className="flex items-center gap-2">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      billingInfo.status === 'active' || billingInfo.status === 'authenticated' ? 'bg-emerald-100 text-emerald-800' :
-                      billingInfo.status === 'cancelled' ? 'bg-slate-100 text-slate-800' :
-                      'bg-amber-100 text-amber-800'
-                    }`}>
-                      {billingInfo.status || "Unknown"}
-                    </span>
-                    {billingInfo.cancelAtCycleEnd && (
-                      <span className="text-xs text-rose-600 font-medium">(Cancels at end of cycle)</span>
-                    )}
-                  </div>
-                </div>
-                {billingInfo.nextBillingDate && (
-                  <div>
-                    <h4 className="text-sm font-medium text-slate-500 mb-1">Next Billing Date</h4>
-                    <p className="text-ink">
-                      {formatIST(new Date(billingInfo.nextBillingDate), "d MMM yyyy")}
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-            
-            <div className={`flex items-center gap-3 ${billingInfo && (billingInfo.status === 'active' || billingInfo.status === 'authenticated') && !billingInfo.cancelAtCycleEnd ? '' : 'pt-6 border-t border-slate-100 mt-6'}`}>
-              {billingInfo && (billingInfo.status === 'active' || billingInfo.status === 'authenticated') && !billingInfo.cancelAtCycleEnd && (
-                <Button 
-                  type="button" 
-                  variant="destructive" 
-                  onClick={handleCancelSubscription}
-                  disabled={cancellingSubscription}
-                  className="gap-2"
-                >
-                  {cancellingSubscription ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  Cancel Subscription
-                </Button>
-              )}
-              <Button
-                type="button"
-                variant="outline"
-                className="gap-2"
-                disabled={exporting}
-                onClick={async () => {
-                  setExporting(true);
-                  try {
-                    const res = await fetch("/api/settings/export");
-                    if (!res.ok) throw new Error("Export failed");
-                    const blob = await res.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = "deepen-export.zip";
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    toast.success("Export downloaded!");
-                  } catch {
-                    toast.error("Failed to export data.");
-                  } finally {
-                    setExporting(false);
-                  }
-                }}
-              >
-                {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-                Export Practice Data (.zip)
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <BillingSettings />
       </div>
 
     </div>

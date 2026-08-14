@@ -2,15 +2,12 @@
 
 All notable changes to the Aman project will be documented in this file.
 
-## [4.1.0] - 2026-08-13
+## [4.1.0] - 2026-08-14
 ### Added
-- **Subscription & Trial Enforcement**: Implemented system-wide active subscription checks to restrict inactive users. Inactive tenants are redirected to a block screen.
-- **Account Inactive Page**: Created `/dashboard/inactive` which displays a premium block screen informing users of their inactive status with clear actions to manage billing or log out.
-- **Razorpay Webhooks Integration**: Added `/api/webhooks/razorpay` to receive webhook events from Razorpay. Listens to subscription activation and charges to enable tenant access, and suspension/cancellations to disable access.
-- **Real-Time Billing Sync**: Synchronizes the tenant's database active status with the live subscription state from Razorpay when fetching billing info from settings.
-
-### Changed
-- **Sidebar Access Control**: Modified the sidebar to dynamically grey out and disable all core navigation routes (Dashboard, Clients, Sessions, Invoices, Payments, Fees, Reports) when a tenant is blocked, keeping only Settings and Logout accessible.
+- **Deepen Billing Reactivation & Upgrades**: The `/dashboard/settings` billing section has been completely refactored. Users can now reactivate subscriptions, cancel, and update payment methods natively via Razorpay without creating duplicates.
+- **Beta Promo Codes**: Added a "Promo Code" input to the signup page. Entering the beta promo code automatically attaches the Razorpay subscription offer to grant a discounted rate.
+- **Super-Admin Portal**: Created a secure `/admin` dashboard restricted to approved emails. Admins can view all registered practices, manually block/activate them, and apply "Lifetime Exempt" status to bypass billing enforcement.
+- **Exempt Tenant Bypass**: Introduced `isExempt` to the `tenants` table to allow specific practices (like the founder's) to operate indefinitely without a subscription.
 
 ---
 

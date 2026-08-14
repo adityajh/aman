@@ -33,6 +33,7 @@ export default function SignupPage() {
       email: formData.get("email"),
       practiceName: formData.get("practiceName"),
       password: formData.get("password"),
+      promoCode: formData.get("promoCode")?.toString().trim() || "",
       planTier: selectedPlan,
     };
 
@@ -41,7 +42,7 @@ export default function SignupPage() {
       const subRes = await fetch("/api/create-subscription", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planTier: selectedPlan }),
+        body: JSON.stringify({ planTier: selectedPlan, promoCode: data.promoCode }),
       });
 
       const subResText = await subRes.text();
@@ -152,6 +153,11 @@ export default function SignupPage() {
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <Input id="password" name="password" type="password" placeholder="••••••••" required />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="promoCode">Promo Code <span className="text-slate-400 font-normal">(Optional)</span></Label>
+                <Input id="promoCode" name="promoCode" type="text" placeholder="e.g. BETA50" />
               </div>
 
               <div className="space-y-3">

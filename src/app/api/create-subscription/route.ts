@@ -3,7 +3,7 @@ import Razorpay from "razorpay";
 
 export async function POST(req: Request) {
   try {
-    const { planTier } = await req.json();
+    const { planTier, promoCode } = await req.json();
 
     if (!planTier || (planTier !== "basic" && planTier !== "pro")) {
       return NextResponse.json({ error: "Invalid plan selected" }, { status: 400 });
@@ -17,10 +17,16 @@ export async function POST(req: Request) {
       key_secret: process.env.RAZORPAY_KEY_SECRET!,
     });
 
-    const options = {
+    const options: any = {
       plan_id: planId,
       total_count: 100, // Max allowed by Razorpay (~8 years)
     };
+
+    if (promoCode && process.env.BETA_PROMO_CODE && process.env.RAZORPAY_BETA_OFFER_ID) {
+      if (promoCode.trim().toUpperCase() === process.env.BETA_PROMO_CODE.toUpperCase()) {
+        options.offer_id = process.env.RAZORPAY_BETA_OFFER_ID;
+      }
+    }
 
     const subscription = await razorpay.subscriptions.create(options);
 

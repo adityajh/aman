@@ -1,0 +1,1 @@
+ALTER TABLE "tenants" ADD COLUMN "is_exempt" boolean DEFAULT false NOT NULL;

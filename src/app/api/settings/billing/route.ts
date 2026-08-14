@@ -9,26 +9,15 @@ export async function GET() {
   return await withTenantContext(tenantId, async (tx) => {
     try {
       const tenant = await tx.query.tenants.findFirst();
-      
+
       if (!tenant) {
         return NextResponse.json({ error: "Tenant not found" }, { status: 404 });
       }
 
-      const isVijay = tenant.slug === "aman-counseling" || tenant.email === "vijay10gopal@gmail.com";
-
       if (!tenant.razorpaySubscriptionId) {
-        // Ensure Vijay's tenant is marked active in the database as well
-        if (isVijay && !tenant.isActive) {
-          await tx
-            .update(tenants)
-            .set({ isActive: true })
-            .where(eq(tenants.id, tenant.id));
-        }
-
-        return NextResponse.json({ 
-          status: isVijay ? "active" : "none", 
-          planTier: tenant.planTier,
-          isExempt: isVijay
+        return NextResponse.json({
+          status: "none",
+          planTier: tenant.planTier
         });
       }
 
@@ -41,21 +30,18 @@ export async function GET() {
 
       // Sync active status with database
       const isActiveStatus = subscription.status === "active" || subscription.status === "authenticated";
-      const newActiveState = isVijay ? true : isActiveStatus;
-      
-      if (tenant.isActive !== newActiveState) {
+      if (tenant.isActive !== isActiveStatus) {
         await tx
           .update(tenants)
-          .set({ isActive: newActiveState })
+          .set({ isActive: isActiveStatus })
           .where(eq(tenants.id, tenant.id));
       }
 
       return NextResponse.json({
-        status: isVijay ? "active" : subscription.status,
+        status: subscription.status,
         planTier: tenant.planTier,
-        nextBillingDate: isVijay ? null : (subscription.charge_at ? new Date(subscription.charge_at * 1000).toISOString() : null),
-        cancelAtCycleEnd: isVijay ? false : (subscription as any).cancel_at_cycle_end,
-        isExempt: isVijay
+        nextBillingDate: subscription.charge_at ? new Date(subscription.charge_at * 1000).toISOString() : null,
+        cancelAtCycleEnd: (subscription as any).cancel_at_cycle_end
       });
 
     } catch (error: any) {
