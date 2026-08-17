@@ -74,12 +74,14 @@ export function Sidebar({
   planTier = "basic", 
   tenantSlug = "deepen",
   practiceName,
-  isBlocked = false
+  isBlocked = false,
+  isAdmin = false
 }: { 
   planTier?: string;
   tenantSlug?: string;
   practiceName?: string;
   isBlocked?: boolean;
+  isAdmin?: boolean;
 }) {
   const pathname = usePathname();
 
@@ -144,6 +146,18 @@ export function Sidebar({
             </Link>
           );
         })}
+        
+        {isAdmin && (
+          <Link
+            href="/admin"
+            className="text-sm group flex p-3 mt-4 w-full justify-start font-medium cursor-pointer hover:bg-emerald-500/10 rounded-lg transition text-emerald-400 border border-emerald-900/30"
+          >
+            <div className="flex items-center flex-1">
+              <ShieldCheck className="h-5 w-5 mr-3 text-emerald-500" />
+              Platform Admin
+            </div>
+          </Link>
+        )}
       </div>
       <div className="px-3">
         <button

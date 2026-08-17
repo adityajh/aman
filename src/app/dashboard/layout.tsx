@@ -4,11 +4,19 @@ import { getTenantContext, withTenantContext } from "@/lib/tenant";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await getServerSession(authOptions);
+  const email = session?.user?.email?.toLowerCase() || "";
+  const envAdmins = (process.env.ADMIN_EMAILS || "vijay10gopal@gmail.com").split(",");
+  const adminEmails = [...envAdmins, "adityaj@adipa.com"].map(e => e.trim().toLowerCase());
+  const isAdmin = adminEmails.includes(email);
   let context;
   try {
     context = await getTenantContext();
@@ -55,7 +63,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex h-screen bg-paper text-ink">
-      <Sidebar planTier={planTier} tenantSlug={tenantSlug} practiceName={practiceName} isBlocked={isBlocked} />
+      <Sidebar planTier={planTier} tenantSlug={tenantSlug} practiceName={practiceName} isBlocked={isBlocked} isAdmin={isAdmin} />
       <main className="flex-1 overflow-y-auto">
         {children}
       </main>
