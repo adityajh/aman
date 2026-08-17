@@ -13,23 +13,28 @@ export async function POST(req: Request) {
       email, 
       password, 
       planTier,
+      promoCode,
       razorpay_payment_id,
       razorpay_subscription_id,
       razorpay_signature
     } = await req.json();
 
-    if (!name || !practiceName || !email || !password || !razorpay_payment_id || !razorpay_subscription_id || !razorpay_signature) {
-      return new NextResponse("Missing required fields or payment details", { status: 400 });
-    }
+    const isBypass = promoCode?.toUpperCase() === "FREEBIE";
 
-    // Verify Razorpay Signature
-    const secret = process.env.RAZORPAY_KEY_SECRET!;
-    const shasum = crypto.createHmac("sha256", secret);
-    shasum.update(`${razorpay_payment_id}|${razorpay_subscription_id}`);
-    const digest = shasum.digest("hex");
+    if (!isBypass) {
+      if (!name || !practiceName || !email || !password || !razorpay_payment_id || !razorpay_subscription_id || !razorpay_signature) {
+        return new NextResponse("Missing required fields or payment details", { status: 400 });
+      }
 
-    if (digest !== razorpay_signature) {
-      return new NextResponse("Invalid payment signature", { status: 400 });
+      // Verify Razorpay Signature
+      const secret = process.env.RAZORPAY_KEY_SECRET!;
+      const shasum = crypto.createHmac("sha256", secret);
+      shasum.update(`${razorpay_payment_id}|${razorpay_subscription_id}`);
+      const digest = shasum.digest("hex");
+
+      if (digest !== razorpay_signature) {
+        return new NextResponse("Invalid payment signature", { status: 400 });
+      }
     }
 
     // 1. Check if email is already in use
@@ -72,7 +77,8 @@ export async function POST(req: Request) {
       slug,
       email, // Email added for tenant
       planTier: planTier || "basic",
-      razorpaySubscriptionId: razorpay_subscription_id,
+      razorpaySubscriptionId: isBypass ? null : razorpay_subscription_id,
+      isExempt: isBypass,
     }).returning();
 
     try {

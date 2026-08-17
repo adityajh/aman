@@ -38,6 +38,31 @@ export default function SignupPage() {
     };
 
     try {
+      const isBypass = data.promoCode.toUpperCase() === "FREEBIE";
+
+      if (isBypass) {
+        const signupData = {
+          ...data,
+          razorpay_payment_id: "bypass_payment",
+          razorpay_subscription_id: "bypass_sub",
+          razorpay_signature: "bypass_sig"
+        };
+        const responseSignup = await fetch("/api/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(signupData),
+        });
+
+        if (!responseSignup.ok) {
+          const errorMsg = await responseSignup.text();
+          throw new Error(errorMsg || "Signup failed");
+        }
+
+        toast.success("Account created! Please sign in.");
+        setTimeout(() => router.push("/login"), 2000);
+        return;
+      }
+
       // 1. Create Subscription Order
       const subRes = await fetch("/api/create-subscription", {
         method: "POST",
