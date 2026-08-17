@@ -87,8 +87,30 @@
   .stat .big span { font-size:15px; color:var(--muted); font-weight:400; }
   .stat .lbl { font-size:12px; color:var(--ink2); margin-top:6px; line-height:1.45; }
   .stat .src { font-size:9.5px; color:var(--muted); margin-top:7px; }
-  .slice { background:var(--card); border:1px solid var(--hair); border-left:3px solid var(--teal); border-radius:10px; padding:14px 20px; font-size:13.5px; color:var(--ink2); margin-bottom:36px; }
+  .slice { background:var(--card); border:1px solid var(--hair); border-left:3px solid var(--teal); border-radius:10px; padding:14px 20px; font-size:13.5px; color:var(--ink2); margin-bottom:14px; }
+  .slice:last-of-type { margin-bottom:36px; }
   .slice b { color:var(--teal-ink); }
+
+  /* funnel */
+  .funnel { display:flex; align-items:stretch; gap:0; background:var(--card); border:1px solid var(--hair); border-radius:12px; overflow:hidden; margin-bottom:12px; }
+  .fstep { flex:1; padding:14px 16px; border-right:1px solid #F1EFE9; }
+  .fstep:last-child { border-right:none; background:#F2F8F6; }
+  .fstep .fn { font-family:var(--serif); font-size:23px; font-weight:600; color:var(--ink); letter-spacing:-0.01em; line-height:1.1; }
+  .fstep:last-child .fn { color:var(--teal-ink); }
+  .fstep .fl { font-size:11px; color:var(--ink2); margin-top:5px; line-height:1.45; }
+  .fstep .fd { font-size:9.5px; color:var(--muted); margin-top:5px; }
+  @media(max-width:720px){ .funnel{ flex-wrap:wrap; } .fstep{ flex:1 1 45%; } }
+
+  /* scenario strip */
+  .scen { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:12px; }
+  @media(max-width:720px){ .scen{ grid-template-columns:1fr; } }
+  .sc { background:var(--card); border:1px solid var(--hair); border-radius:10px; padding:13px 15px; }
+  .sc.base { border-color:#BFD8D1; background:#F2F8F6; }
+  .sc .sn { font-size:10px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--muted); margin-bottom:5px; }
+  .sc.base .sn { color:var(--teal); }
+  .sc .sv { font-family:var(--serif); font-size:19px; font-weight:600; color:var(--ink); line-height:1.15; }
+  .sc.base .sv { color:var(--teal-ink); }
+  .sc .sd { font-size:11px; color:var(--ink2); margin-top:5px; line-height:1.45; }
 
   /* projections */
   .pjcard { background:var(--card); border:1px solid var(--hair); border-radius:12px; padding:18px 20px 14px; margin-bottom:14px; }
@@ -149,7 +171,7 @@
   <!-- header -->
   <div class="head">
     <div>
-      <div class="kick">Business plan · v1.1 · August 2026</div>
+      <div class="kick">Business plan · v1.2 · 12 August 2026</div>
       <div style="display:flex;align-items:center;gap:12px;">
         <svg width="30" height="30" viewBox="0 0 64 64"><rect x="10" y="13" width="44" height="4" rx="2" fill="#0B4F43"/><rect x="10" y="24" width="44" height="9" rx="2" fill="#0B4F43"/><rect x="10" y="39" width="44" height="12" rx="2" fill="#0B4F43"/></svg>
         <div class="wm">deepen<span class="fs">.</span></div>
@@ -166,7 +188,7 @@
 
   <!-- one-liner -->
   <div class="oneliner">Most counsellors work blind. On <em>the money they're owed</em>. And on <em>the clients quietly getting worse</em>.</div>
-  <div class="who">deepen fixes both. Invoicing that runs itself, and a warning before a client slips away. Sold self-serve, grown by referral, run in ten founder-hours a month.</div>
+  <div class="who"><b style="color:#0B4F43;">Deepen, outcome tracking for counsellors.</b> It fixes both. Invoicing that runs itself, and a warning before a client slips away. Sold self-serve, grown by referral, run in ten founder-hours a month.</div>
 
   <!-- value props -->
   <div class="vgrid">
@@ -198,31 +220,57 @@
 
   <!-- market -->
   <h2>The market</h2>
-  <div class="sub">India has no register of counsellors, so the number had to be reconstructed from the graduate pipeline and benchmarked against countries that do count. Base case, 2026.</div>
-  <div class="stats">
-    <div class="stat">
-      <div class="big">20,756</div>
-      <div class="lbl"><b>Solo counsellors in India we can actually reach.</b> Out of roughly 54,000 practising, 24,400 in solo private practice, and this many digitally reachable.</div>
-      <div class="src">Workforce model, Aug 2026</div>
+  <div class="sub">India keeps no register of counsellors, so the number is reconstructed from the graduate pipeline and benchmarked against countries that do count. Base case shown; the model runs three scenarios and they differ by 3.4× at 2036.</div>
+
+  <div class="funnel">
+    <div class="fstep">
+      <div class="fn">54,263</div>
+      <div class="fl"><b>Practising counsellors in India.</b> Talk therapy as the primary paid job.</div>
+      <div class="fd">Against 12,942 psychiatrists and 5,074 licensed clinical psychologists</div>
     </div>
-    <div class="stat">
-      <div class="big">6,642</div>
-      <div class="lbl"><b>Of those, able to afford Pro today.</b> About a third. The rest are priced out, not unpersuaded.</div>
-      <div class="src">Workforce model, Aug 2026</div>
+    <div class="fstep">
+      <div class="fn">24,418</div>
+      <div class="fl"><b>In solo private practice.</b> Everyone employed by a hospital, school, NGO or EAP leaves the universe — we never sell to organisations.</div>
     </div>
-    <div class="stat">
-      <div class="big">₹24 cr</div>
-      <div class="lbl"><b>India at 100% penetration, today.</b> Rising to ₹54 cr by 2036 on the base case. A ceiling, not a forecast.</div>
-      <div class="src">Workforce model, Aug 2026</div>
+    <div class="fstep">
+      <div class="fn">20,756</div>
+      <div class="fl"><b>Digitally reachable.</b> Self-serve, online, payable in rupees. The real top of funnel.</div>
     </div>
-    <div class="stat">
-      <div class="big">675k+</div>
-      <div class="lbl"><b>Therapists in the US and UK alone.</b> Roughly 600,000 US, 75,000 UK. Why the ceiling is not in India.</div>
-      <div class="src">AutoNotes/BLS 2026 · BACP</div>
+    <div class="fstep">
+      <div class="fn">6,642</div>
+      <div class="fl"><b>Able to afford Pro today.</b> About a third. The rest are priced out, not unpersuaded.</div>
     </div>
   </div>
-  <div class="slice"><b>The affordability wall is the finding that matters.</b> Most Indian therapists earn ₹3 lakh a year or less. Pro at ₹1,999 a month is ₹24,000 a year, which is <b>8% of their gross revenue.</b> That is not a pricing objection to negotiate past. It is a structural ceiling that only moves when practitioner earnings move.</div>
-  <div class="slice" style="border-left-color:#B8860B;"><b>So India proves the product. It cannot make it big.</b> Full penetration of India's payable solo market is ₹24 crore today and ₹54 crore by 2036. For scale, the combined FY24 revenue of India's ten best-known digital mental health platforms was about ₹103 crore. <b>100 paying users is 0.5% of the reachable base and entirely achievable. 10,000 would be a fifth of every solo counsellor in India we could reach, in 2036, on the base case.</b> The path below is built on that.</div>
+  <div class="sub" style="margin-bottom:22px;">Workforce model, August 2026 · <span style="font-family:ui-monospace,monospace;">business/research/</span></div>
+
+  <div class="slice"><b>The 98% is the customer.</b> India graduates 14,759 psychology postgraduates a year against roughly 290 clinical psychology seats. Two per cent can ever be licensed; the rest go into unregulated counselling with no supervisor, no institutional quality signal and no way to know whether they are any good. <b>The regulatory gap that makes this market impossible to count is the same gap that creates the need.</b></div>
+
+  <div class="slice"><b>The affordability wall is the finding that matters.</b> Most Indian therapists earn ₹3 lakh a year or less. Pro at ₹1,999 a month is ₹24,000 a year — <b>8% of gross revenue.</b> That is not a pricing objection to negotiate past. It is a structural ceiling that only moves when practitioner earnings move.</div>
+
+  <h2 style="font-size:19px; margin-top:26px;">What moves the ceiling</h2>
+  <div class="sub">The scenarios differ on whether a payer appears, not on training capacity. India already produces far more psychology postgraduates than practice absorbs.</div>
+  <div class="scen">
+    <div class="sc">
+      <div class="sn">Credential drift</div>
+      <div class="sv">65,664 <span style="font-size:13px;font-weight:400;color:var(--muted);">counsellors · ₹23 cr</span></div>
+      <div class="sd">No counsellor pathway, parity unenforced. The credentialed pool grows faster than practice does.</div>
+    </div>
+    <div class="sc base">
+      <div class="sn">Steady formalisation · base</div>
+      <div class="sv">121,827 <span style="font-size:13px;font-weight:400;color:#4A5157;">counsellors · ₹54 cr</span></div>
+      <div class="sd">NCAHP registers counsellors, EAP demand compounds, school mandate partly enforced.</div>
+    </div>
+    <div class="sc">
+      <div class="sn">Demand unlock</div>
+      <div class="sv">225,575 <span style="font-size:13px;font-weight:400;color:var(--muted);">counsellors · ₹132 cr</span></div>
+      <div class="sd">A payer event fires — insurance parity enforced, a subsidised session scheme, or Tele-MANAS paying panel counsellors.</div>
+    </div>
+  </div>
+  <div class="compnote" style="margin-bottom:22px;">2036 figures at full penetration of the payable solo market. Every historical episode of fast workforce growth — UK IAPT, Australia's Better Access, the US post-parity decade — was triggered by a payer, not a training expansion. <b>The thing that grows this market is the same event that defines the third column.</b></div>
+
+  <div class="slice" style="border-left-color:#B8860B;"><b>So India proves the product. It cannot make it big.</b> Full penetration of the payable solo market is <b>₹24 crore today and ₹54 crore by 2036</b> on the base case. For scale, the combined FY24 revenue of India's ten best-known digital mental health platforms was about ₹103 crore. <b>100 paying users is 0.5% of the reachable base and entirely achievable. 10,000 would be a fifth of every solo counsellor in India we could reach, in 2036.</b> The path below is built on that.</div>
+
+  <div class="slice" style="margin-bottom:36px;"><b>Why the ceiling is not in India.</b> Roughly 600,000 therapists in the US and 75,000 in the UK, in markets where the affordability wall does not exist. India is where the product earns its clinical credibility and its data. It is not where the revenue is.</div>
 
   <!-- competition -->
   <h2>Competition</h2>
@@ -346,14 +394,14 @@
     <div class="pstep">
       <div class="pwhen">Global · years 5–8</div>
       <div class="pbig">100,000</div>
-      <div class="psm"><b>Own the category.</b> The benchmark pool improves with every user and incumbents run fixed curves. About $12M a year at a blended $10.</div>
+      <div class="psm"><b>Own the category.</b> The comparison pool improves with every user while incumbents run fixed curves. About $12M a year at a blended $10, plus a second line: <b>licensing our own outcome measure</b> to other vendors.</div>
     </div>
   </div>
-  <div class="pathnote"><b>The honest gate.</b> Stages three and four abandon the side-product life, and they are not optional if the goal is size. India is where this gets proven and where the product earns its clinical credibility. It is not where the revenue is. That decision gets taken at the 1,000 mark with real numbers in hand, not before. North star throughout: <b>counsellors who have recorded scores four weeks running.</b></div>
+  <div class="pathnote"><b>The honest gate.</b> Stages three and four abandon the side-product life, and they are not optional if the goal is size. That decision gets taken at the 1,000 mark with real numbers in hand, not before. <b>The one thing that could change it is a payer event in India</b> — enforced parity, a subsidised session scheme, or Tele-MANAS paying panel counsellors. That moves the ceiling from ₹54 crore to ₹132 crore and is entirely outside our control, so we plan without it and watch for it. North star throughout: <b>counsellors who have recorded scores four weeks running.</b></div>
 
   <footer>
-    <b>Honesty line.</b> No revenue today. One practice live, a co-founder's. Every projection is a target at a 60/40 Practice/Pro mix, not a forecast. Pricing stays unproven until the beta answers one question: what did you spend last year to become a better counsellor? Stages two to four depend on stage one working. Name decided: Deepen, domains registered. Trademark search pending.<br>
-    <b>Sources.</b> India practitioner counts, Business Standard Oct 2025. US counts, AutoNotes/BLS 2026. UK, BACP. Software market, Towards Healthcare 2026. SimplePractice user count is vendor-reported. All are third-party estimates. Strategy detail sits in <span style="font-family:ui-monospace,monospace;">business/strategy/</span>.
+    <b>Honesty line.</b> No revenue today. One practice live, a co-founder's. Every projection is a target at a 60/40 Practice/Pro mix, not a forecast. Pricing stays unproven until the beta answers one question: what did you spend last year to become a better counsellor? Stages two to four depend on stage one working. Name decided: Deepen, domains registered, trademark search pending. The outcome measure is being brought in-house — the scales in the product today are third-party and are being replaced with our own, which is also what makes the licensing line in stage four possible.<br>
+    <b>Sources.</b> India workforce counts are model output, not observation: reconstructed in <span style="font-family:ui-monospace,monospace;">business/research/india-counselling-workforce-2036.html</span> from AISHE 2023–24 postgraduate out-turn (14,759, verified against the primary table), RCI register growth and WHO Atlas country profiles. Practitioner earnings, Zensible 2026 (n=285, metro-skewed). US counts, AutoNotes/BLS 2026. UK, BACP. SimplePractice user count is vendor-reported. Strategy detail sits in <span style="font-family:ui-monospace,monospace;">business/strategy/</span>.
   </footer>
 
 </div>
