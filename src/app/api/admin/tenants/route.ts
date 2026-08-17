@@ -9,7 +9,8 @@ async function isAdmin() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) return false;
   
-  const adminEmails = (process.env.ADMIN_EMAILS || "vijay10gopal@gmail.com").split(",").map(e => e.trim().toLowerCase());
+  const envAdmins = (process.env.ADMIN_EMAILS || "vijay10gopal@gmail.com").split(",");
+  const adminEmails = [...envAdmins, "adityaj@adipa.com"].map(e => e.trim().toLowerCase());
   return adminEmails.includes(session.user.email.toLowerCase());
 }
 
