@@ -13,7 +13,8 @@ export default async function AdminLayout({
     redirect("/login");
   }
 
-  const adminEmails = (process.env.ADMIN_EMAILS || "vijay10gopal@gmail.com,adityaj@adipa.com").split(",").map(e => e.trim().toLowerCase());
+  const envAdmins = (process.env.ADMIN_EMAILS || "vijay10gopal@gmail.com").split(",");
+  const adminEmails = [...envAdmins, "adityaj@adipa.com"].map(e => e.trim().toLowerCase());
   if (!adminEmails.includes(session.user.email.toLowerCase())) {
     redirect("/dashboard");
   }
