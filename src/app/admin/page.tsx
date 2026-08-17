@@ -81,6 +81,8 @@ export default function AdminPage() {
               <th className="px-6 py-4">Practice / User</th>
               <th className="px-6 py-4">Plan</th>
               <th className="px-6 py-4">Signup Date</th>
+              <th className="px-6 py-4 text-center">Clients</th>
+              <th className="px-6 py-4">Last Active</th>
               <th className="px-6 py-4">Status</th>
               <th className="px-6 py-4 text-right">Actions</th>
             </tr>
@@ -100,6 +102,12 @@ export default function AdminPage() {
                 </td>
                 <td className="px-6 py-4 text-slate-600 whitespace-nowrap">
                   {formatIST(new Date(t.createdAt), "MMM d, yyyy")}
+                </td>
+                <td className="px-6 py-4 text-slate-600 text-center font-medium">
+                  {t.clientCount || 0}
+                </td>
+                <td className="px-6 py-4 text-slate-600 whitespace-nowrap text-sm">
+                  {t.lastActive ? formatIST(new Date(t.lastActive), "MMM d, yyyy") : "Never"}
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex flex-col gap-2">
@@ -142,7 +150,7 @@ export default function AdminPage() {
             ))}
             {filteredTenants.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-slate-500">
+                <td colSpan={7} className="px-6 py-8 text-center text-slate-500">
                   No practices found matching "{searchTerm}"
                 </td>
               </tr>
