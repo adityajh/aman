@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 
 import { db } from "@/lib/db";
-import { tenants } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { tenants, promoCodes } from "@/lib/db/schema";
+import { eq, and } from "drizzle-orm";
 
 export async function POST(req: Request) {
   try {
@@ -23,7 +23,26 @@ export async function POST(req: Request) {
     let selectedPlanId = defaultPlanId;
     let selectedOfferId: string | undefined = undefined;
 
-    if (promoCode && promoCode.trim().toUpperCase() === foundingPromo.toUpperCase()) {
+    if (promoCode && promoCode.trim()) {
+      const codeStr = promoCode.trim().toUpperCase();
+      let isValidPromo = false;
+
+      // 1. Check database for unused promo code
+      const dbCode = await db.query.promoCodes.findFirst({
+        where: and(eq(promoCodes.code, codeStr), eq(promoCodes.isUsed, false)),
+      });
+
+      if (dbCode) {
+        isValidPromo = true;
+      } else if (codeStr === foundingPromo.toUpperCase()) {
+        // 2. Fallback check for static env code
+        isValidPromo = true;
+      }
+
+      if (!isValidPromo) {
+        return NextResponse.json({ error: "Invalid or already used promo code" }, { status: 400 });
+      }
+
       const existingFounding = await db.query.tenants.findMany({
         where: eq(tenants.isFounding, true),
       });

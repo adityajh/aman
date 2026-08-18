@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { tenants, users, practiceSettings } from "@/lib/db/schema";
+import { tenants, users, practiceSettings, promoCodes } from "@/lib/db/schema";
 import bcrypt from "bcryptjs";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import crypto from "crypto";
 
 export async function POST(req: Request) {
@@ -73,7 +73,16 @@ export async function POST(req: Request) {
     
     // Calculate founding status if applicable
     const foundingPromo = process.env.FOUNDING_PROMO_CODE || "FOUNDING50";
-    const isFoundingOffer = promoCode && promoCode.trim().toUpperCase() === foundingPromo.toUpperCase();
+    let matchedDbPromo: any = null;
+
+    if (promoCode && promoCode.trim()) {
+      const codeStr = promoCode.trim().toUpperCase();
+      matchedDbPromo = await db.query.promoCodes.findFirst({
+        where: and(eq(promoCodes.code, codeStr), eq(promoCodes.isUsed, false)),
+      });
+    }
+
+    const isFoundingOffer = matchedDbPromo || (promoCode && promoCode.trim().toUpperCase() === foundingPromo.toUpperCase());
 
     let isFounding = false;
     let foundingSeat: number | null = null;
@@ -86,7 +95,7 @@ export async function POST(req: Request) {
       if (existingFounding.length < 50) {
         isFounding = true;
         foundingSeat = existingFounding.length + 1;
-        priceInrMonthly = 699;
+        priceInrMonthly = matchedDbPromo?.priceInrMonthly ?? 699;
       }
     }
 
@@ -102,6 +111,17 @@ export async function POST(req: Request) {
       razorpaySubscriptionId: isBypass ? null : razorpay_subscription_id,
       isExempt: isBypass,
     }).returning();
+
+    // Mark matched promo code as used
+    if (matchedDbPromo) {
+      await db.update(promoCodes)
+        .set({
+          isUsed: true,
+          usedByTenantId: newTenant.id,
+          usedAt: new Date(),
+        })
+        .where(eq(promoCodes.id, matchedDbPromo.id));
+    }
 
     try {
       // Create user

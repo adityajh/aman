@@ -446,6 +446,28 @@ export const auditLog = pgTable(
 );
 
 // ─────────────────────────────────────────────
+// PROMO CODES
+// ─────────────────────────────────────────────
+export const promoCodes = pgTable(
+  "promo_codes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    code: text("code").notNull().unique(),
+    priceInrMonthly: integer("price_inr_monthly").notNull().default(699),
+    isUsed: boolean("is_used").notNull().default(false),
+    usedByTenantId: uuid("used_by_tenant_id").references(() => tenants.id, { onDelete: "set null" }),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (t) => ({
+    codeIdx: uniqueIndex("idx_promo_codes_code").on(t.code),
+    usedIdx: index("idx_promo_codes_used").on(t.isUsed),
+  })
+);
+
+// ─────────────────────────────────────────────
 // RELATIONSHIPS
 // ─────────────────────────────────────────────
 
@@ -455,6 +477,14 @@ export const tenantsRelations = relations(tenants, ({ many }) => ({
   sessions: many(sessions),
   invoices: many(invoices),
   receipts: many(receipts),
+  promoCodes: many(promoCodes),
+}));
+
+export const promoCodesRelations = relations(promoCodes, ({ one }) => ({
+  usedByTenant: one(tenants, {
+    fields: [promoCodes.usedByTenantId],
+    references: [tenants.id],
+  }),
 }));
 
 export const usersRelations = relations(users, ({ one }) => ({
@@ -562,3 +592,5 @@ export type NewFeeScheme = typeof feeSchemes.$inferInsert;
 export type AuditLog = typeof auditLog.$inferSelect;
 export type PracticeSettings = typeof practiceSettings.$inferSelect;
 export type NewPracticeSettings = typeof practiceSettings.$inferInsert;
+export type PromoCode = typeof promoCodes.$inferSelect;
+export type NewPromoCode = typeof promoCodes.$inferInsert;
