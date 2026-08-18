@@ -155,7 +155,7 @@ export default function SignupPage() {
           <CardHeader className="text-center space-y-2">
 
             <CardTitle className="text-2xl font-serif font-bold text-teal-ink">Create your Practice</CardTitle>
-            <CardDescription>Join Deepen to streamline your clinical practice.</CardDescription>
+            <CardDescription>Your month closes in ten minutes. Nobody else sees your data.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -197,7 +197,7 @@ export default function SignupPage() {
                   <li>• For one counsellor. Nobody else can see your data, including us.</li>
                 </ul>
                 <p className="text-[11px] text-slate-400 font-medium border-t border-slate-200/60 pt-2">
-                  14 days free. Cancel in one click. No annual commitment.
+                  14 days free. Cancel in one click. No long commitment.
                 </p>
               </div>
 
@@ -209,15 +209,7 @@ export default function SignupPage() {
                   className="mt-0.5"
                 />
                 <Label htmlFor="agreedToTerms" className="text-sm font-normal text-slate-600">
-                  I&rsquo;ve read the{" "}
-                  <Link href="/terms" className="text-teal-action hover:underline">
-                    terms
-                  </Link>{" "}
-                  and the{" "}
-                  <Link href="/privacy" className="text-teal-action hover:underline">
-                    privacy note
-                  </Link>
-                  .
+                  I&rsquo;ve read the <Link href="/terms" className="text-teal-action hover:underline">terms</Link> and the <Link href="/privacy" className="text-teal-action hover:underline">privacy note</Link>.
                 </Label>
               </div>
 
@@ -229,7 +221,7 @@ export default function SignupPage() {
                 {loading ? (
                   <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Creating practice…</>
                 ) : (
-                  "Start 14-day free trial"
+                  "Start my 14-day trial"
                 )}
               </Button>
 

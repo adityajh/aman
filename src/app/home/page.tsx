@@ -311,51 +311,37 @@ export default function Home() {
         </section>
 
         {/* §3b Things we will never build */}
-        <section className="max-w-6xl mx-auto px-6 py-16">
-          <h2 className="font-serif text-3xl md:text-4xl font-medium text-teal-ink mb-3">
-            Things we will never build.
-          </h2>
-          <p className="text-lg text-ink-2 max-w-2xl mb-8">
-            Not later either. Every one of these would turn your numbers into someone else&rsquo;s business.
-          </p>
-          <div className="grid md:grid-cols-5 gap-4">
-            <div className="bg-white border border-hairline rounded-xl p-5">
-              <div className="font-semibold text-ink text-sm mb-1">Scheduling or booking pages</div>
-              <p className="text-sm text-ink-2">Keep the calendar you have.</p>
-            </div>
-            <div className="bg-white border border-hairline rounded-xl p-5">
-              <div className="font-semibold text-ink text-sm mb-1">Seats or a second login</div>
-              <p className="text-sm text-ink-2">One counsellor, one account.</p>
-            </div>
-            <div className="bg-white border border-hairline rounded-xl p-5">
-              <div className="font-semibold text-ink text-sm mb-1">A supervisor or employer view</div>
-              <p className="text-sm text-ink-2">Nobody sees your numbers but you.</p>
-            </div>
-            <div className="bg-white border border-hairline rounded-xl p-5">
-              <div className="font-semibold text-ink text-sm mb-1">A directory or public profile</div>
-              <p className="text-sm text-ink-2">Your results are not a listing.</p>
-            </div>
-            <div className="bg-white border border-hairline rounded-xl p-5">
-              <div className="font-semibold text-ink text-sm mb-1">Badges, streaks or scores</div>
-              <p className="text-sm text-ink-2">You are not being graded.</p>
-            </div>
-          </div>
-        </section>
+        
 
         {/* §4 Privacy */}
         <section className="bg-teal-ink text-paper py-16 px-6">
-          <div className="max-w-4xl mx-auto space-y-6">
-            <h2 className="text-3xl md:text-4xl font-serif font-medium text-paper">
-              Nobody else ever sees this.
-            </h2>
-            <p className="text-lg text-[#CFE3DD] leading-relaxed">
-              Not your employer. Not a platform. Not us. Deepen is built for one counsellor and is never sold to organisations.
-            </p>
-            <div className="flex flex-wrap gap-3 pt-2">
-              <span className="border border-white/20 rounded-full px-4 py-1.5 text-xs text-paper">One login per account</span>
-              <span className="border border-white/20 rounded-full px-4 py-1.5 text-xs text-paper">Hosted in India</span>
-              <span className="border border-white/20 rounded-full px-4 py-1.5 text-xs text-paper">Never used to train anything</span>
-              <span className="border border-white/20 rounded-full px-4 py-1.5 text-xs text-paper">Export everything in one click</span>
+          <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-start">
+            <div className="space-y-6">
+              <h2 className="text-3xl md:text-4xl font-serif font-medium text-paper">
+                Nobody else ever sees this.
+              </h2>
+              <p className="text-lg text-[#CFE3DD] leading-relaxed">
+                Not your employer. Not a platform. Not us. Deepen is built for one counsellor and is never sold to organisations.
+              </p>
+              <div className="flex flex-wrap gap-3 pt-2">
+                <span className="border border-white/20 rounded-full px-4 py-1.5 text-xs text-paper">One login per account</span>
+                <span className="border border-white/20 rounded-full px-4 py-1.5 text-xs text-paper">Hosted in India</span>
+                <span className="border border-white/20 rounded-full px-4 py-1.5 text-xs text-paper">Never used to train anything</span>
+                <span className="border border-white/20 rounded-full px-4 py-1.5 text-xs text-paper">Export everything in one click</span>
+                <span className="border border-white/20 rounded-full px-4 py-1.5 text-xs text-paper">Deleted 30 days after you leave</span>
+              </div>
+              <p className="text-sm text-[#9FC9BE]">
+                <Link href="/privacy" className="underline underline-offset-4 hover:text-paper">Read the privacy note</Link>
+              </p>
+            </div>
+            <div className="md:pl-8 md:border-l md:border-white/15">
+              <h3 className="text-2xl font-serif font-medium text-paper mb-2">Things we will never build.</h3>
+              <p className="text-sm text-[#9FC9BE] mb-5">Not later either. Each one would turn your numbers into someone else&rsquo;s business.</p>
+              <ul className="space-y-4">
+                <li className="flex gap-3"><span className="mt-2 w-1.5 h-1.5 rounded-full bg-[#5FC3AE] shrink-0" /><div><span className="font-semibold text-paper">Seats or a second login.</span> <span className="text-[#CFE3DD]">One counsellor, one account.</span></div></li>
+                <li className="flex gap-3"><span className="mt-2 w-1.5 h-1.5 rounded-full bg-[#5FC3AE] shrink-0" /><div><span className="font-semibold text-paper">A supervisor or employer view.</span> <span className="text-[#CFE3DD]">Nobody sees your numbers but you.</span></div></li>
+                <li className="flex gap-3"><span className="mt-2 w-1.5 h-1.5 rounded-full bg-[#5FC3AE] shrink-0" /><div><span className="font-semibold text-paper">A directory, badges or scores.</span> <span className="text-[#CFE3DD]">Your results are not a listing, and you are not being graded.</span></div></li>
+              </ul>
             </div>
           </div>
         </section>

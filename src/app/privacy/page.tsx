@@ -88,11 +88,11 @@ export default function PrivacyPage() {
       <section>
         <H2>Contact</H2>
         <p>
-          <mark>[LEGAL ENTITY NAME]</mark>
+          Aditya Jhunjhunwala
           <br />
-          <mark>[REGISTERED ADDRESS]</mark>
+          301 Mitzen, near BT Kawade Road flyover, Pune 411001, India
           <br />
-          <mark>[SUPPORT EMAIL]</mark>
+          <a href="mailto:adityaj@adipa.com" className="text-teal-action underline underline-offset-4">adityaj@adipa.com</a>
         </p>
       </section>
     </LegalPage>
