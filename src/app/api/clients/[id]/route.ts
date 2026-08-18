@@ -1,8 +1,8 @@
 import { db } from "@/lib/db";
-import { clients } from "@/lib/db/schema";
+import { clients, tenants } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
-import { getTenantContext, withTenantContext } from "@/lib/tenant";
+import { eq, sql } from "drizzle-orm";
+import { getTenantContext, withTenantContext, MAX_ACTIVE_CLIENTS } from "@/lib/tenant";
 
 export async function PATCH(
   req: Request,
@@ -28,9 +28,36 @@ export async function PATCH(
         prematureTerminationManual,
       } = body;
 
-      // Reactivation logic
+      // Reactivation logic & fence check
       let terminationFields = {};
       if (isActive === true) {
+        const existingClient = await tx.query.clients.findFirst({
+          where: eq(clients.id, id),
+        });
+
+        if (existingClient && !existingClient.isActive) {
+          const tenantRow = await tx.query.tenants.findFirst({
+            where: eq(tenants.id, tenantId),
+          });
+
+          if (!tenantRow?.isExempt) {
+            const activeCountRes: any = await tx.execute(sql`
+              SELECT COUNT(*)::int AS count FROM clients WHERE is_active = true
+            `);
+            const count = activeCountRes[0]?.count ?? activeCountRes.rows?.[0]?.count ?? 0;
+            if (count >= MAX_ACTIVE_CLIENTS) {
+              return NextResponse.json(
+                {
+                  error: "CLIENT_LIMIT",
+                  message:
+                    "Deepen is built for one counsellor. Thirty active clients is more than one person can see, so we stop here. If you're a group or an organisation, Deepen isn't for you. If this is a mistake, write to us.",
+                },
+                { status: 403 },
+              );
+            }
+          }
+        }
+
         terminationFields = {
           terminationReason: null,
           terminationType: null,

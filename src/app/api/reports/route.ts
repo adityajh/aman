@@ -21,8 +21,18 @@ function stddev(values: number[]): number | null {
   );
 }
 
+import { hasFeature } from "@/lib/tenant";
+
 export async function GET() {
   const { tenantId, planTier } = await getTenantContext();
+  if (!hasFeature(planTier, "PRACTICE_OUTCOMES")) {
+    return NextResponse.json({
+      clinical: null,
+      locked: true,
+      message: "How are you doing, across all of them? That's Deepen Pro. Coming.",
+    });
+  }
+
   return await withTenantContext(tenantId, async (tx) => {
     try {
       const settingsArr = await tx.select().from(practiceSettings).limit(1);

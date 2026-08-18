@@ -28,7 +28,9 @@ export default function AdminPage() {
     fetchTenants();
   }, []);
 
-  const handleToggle = async (tenantId: string, action: "toggleActive" | "toggleExempt", currentValue: boolean) => {
+  const foundingCount = tenants.filter(t => t.isFounding).length;
+
+  const handleToggle = async (tenantId: string, action: "toggleActive" | "toggleExempt" | "togglePro", currentValue: boolean) => {
     try {
       const res = await fetch("/api/admin/tenants", {
         method: "PATCH",
@@ -60,7 +62,9 @@ export default function AdminPage() {
       <div className="flex justify-between items-end">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Registered Practices</h1>
-          <p className="text-slate-500">Manage all {tenants.length} tenants on the platform.</p>
+          <p className="text-slate-500">
+            Manage all {tenants.length} tenants on the platform. · <span className="font-semibold text-teal-700">Founding Seats Used: {foundingCount} / 50</span>
+          </p>
         </div>
         <div className="relative">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
@@ -79,7 +83,7 @@ export default function AdminPage() {
           <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b">
             <tr>
               <th className="px-6 py-4">Practice / User</th>
-              <th className="px-6 py-4">Plan</th>
+              <th className="px-6 py-4">Plan & Price</th>
               <th className="px-6 py-4">Signup Date</th>
               <th className="px-6 py-4 text-center">Clients</th>
               <th className="px-6 py-4">Last Active</th>
@@ -96,9 +100,16 @@ export default function AdminPage() {
                   <div className="text-xs text-slate-400 font-mono mt-1">{t.slug}</div>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="capitalize px-2 py-1 bg-slate-100 rounded text-slate-700 font-medium">
-                    {t.planTier}
-                  </span>
+                  <div className="flex flex-col gap-1">
+                    <span className="capitalize px-2 py-0.5 bg-slate-100 rounded text-slate-700 font-medium text-xs w-fit">
+                      {t.planTier}
+                    </span>
+                    {t.isFounding && (
+                      <span className="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded border border-teal-200 w-fit">
+                        Founding Seat #{t.foundingSeat} (₹{t.priceInrMonthly ?? 699}/mo)
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="px-6 py-4 text-slate-600 whitespace-nowrap">
                   {formatIST(new Date(t.createdAt), "MMM d, yyyy")}
@@ -128,7 +139,14 @@ export default function AdminPage() {
                   </div>
                 </td>
                 <td className="px-6 py-4 text-right">
-                  <div className="flex justify-end gap-2">
+                  <div className="flex justify-end gap-2 flex-wrap">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleToggle(t.id, "togglePro", t.planTier === "pro")}
+                    >
+                      {t.planTier === "pro" ? "Set to Deepen" : "Set to Pro"}
+                    </Button>
                     <Button 
                       variant={t.isActive ? "outline" : "default"} 
                       size="sm"

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deepen · Plans</title>
+<style>
+  :root{--teal-deep:#0B4F43;--teal:#0F8A72;--terra:#C2632A;--paper:#FBFAF7;--ink:#14181C;--muted:#5c6560;--rule:#e4e0d8;}
+  *{box-sizing:border-box;}
+  body{margin:0;padding:48px 28px 72px;background:var(--paper);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;font-size:15.5px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:900px;margin:0 auto;}
+  .mark{display:flex;flex-direction:column;gap:3px;margin-bottom:22px;}
+  .mark i{display:block;width:34px;background:var(--teal-deep);border-radius:2px;}
+  .mark i:nth-child(1){height:5px}.mark i:nth-child(2){height:11px}.mark i:nth-child(3){height:15px}
+  h1{font-size:30px;line-height:1.15;margin:0 0 6px;letter-spacing:-.02em;font-weight:650;}
+  .sub{color:var(--muted);margin:0 0 4px;}
+  .stamp{color:var(--muted);font-size:12.5px;margin:0 0 40px;}
+
+  .lede{font-size:19px;line-height:1.4;margin:0 0 40px;max-width:640px;}
+  .lede b{color:var(--teal-deep);font-weight:650;}
+
+  .tiers{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:16px;}
+  .tier{border:1px solid var(--rule);border-radius:12px;padding:26px 26px 24px;background:#fff;position:relative;}
+  .tier.now{border-color:var(--teal-deep);border-width:1.5px;}
+  .tier .name{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:650;margin-bottom:10px;}
+  .tier.now .name{color:var(--teal-deep);}
+  .tier .price{font-size:38px;font-weight:650;letter-spacing:-.025em;line-height:1;}
+  .tier .price span{font-size:14px;font-weight:400;color:var(--muted);letter-spacing:0;}
+  .tier .annual{font-size:13px;color:var(--muted);margin-top:8px;}
+  .tier .one{margin:18px 0 0;padding-top:16px;border-top:1px solid var(--rule);font-size:16px;font-weight:600;color:var(--teal-deep);}
+  .tier ul{margin:12px 0 0;padding:0;list-style:none;}
+  .tier li{padding:6px 0 6px 22px;position:relative;font-size:15px;}
+  .tier li::before{content:"";position:absolute;left:0;top:14px;width:9px;height:9px;border-radius:50%;background:var(--teal);}
+  .tier li.plus::before{background:var(--teal-deep);}
+  .tier li small{display:block;color:var(--muted);font-size:13px;margin-top:1px;}
+  .tier .fence{margin-top:18px;font-size:13.5px;color:var(--muted);}
+  .tier .fence b{color:var(--ink);font-weight:600;}
+  .soon{position:absolute;top:18px;right:18px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--terra);border:1px solid var(--terra);border-radius:3px;padding:2px 6px;font-weight:650;}
+  .found{border:1px dashed var(--teal);border-radius:12px;padding:16px 22px;margin:0 0 44px;font-size:15px;background:#fff;}
+  .found b{color:var(--teal-deep);}
+
+  h2{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:650;margin:0 0 14px;}
+  table{width:100%;border-collapse:collapse;margin-bottom:12px;background:#fff;border:1px solid var(--rule);border-radius:12px;overflow:hidden;}
+  th{text-align:left;font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:650;padding:14px 16px 10px;border-bottom:1px solid var(--rule);}
+  th.c{text-align:center;width:120px;}
+  td{padding:11px 16px;border-bottom:1px solid var(--rule);vertical-align:top;font-size:15px;}
+  td.c{text-align:center;}
+  tr:last-child td{border-bottom:none;}
+  .y{color:var(--teal);font-weight:700;font-size:17px;}
+  .n{color:#c9c4ba;font-size:17px;}
+  .rowhead td{background:#f5f2ec;font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:650;padding:9px 16px;}
+  .cap{font-size:13px;color:var(--muted);margin:0 0 44px;}
+
+  .foot{font-size:13px;color:var(--muted);line-height:1.6;border-top:1px solid var(--rule);padding-top:18px;}
+  .foot p{margin:0 0 7px;}
+  @media (max-width:680px){.tiers{grid-template-columns:1fr}body{padding:32px 18px 56px}th.c{width:80px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="mark"><i></i><i></i><i></i></div>
+  <h1>Deepen · plans</h1>
+  <p class="sub">Go deeper than you could alone.</p>
+  <p class="stamp">Final structure · 17 August 2026 · pre-launch draft</p>
+
+  <p class="lede">Practice software helps you run your practice. <b>Deepen also tells you, privately, whether your clients are getting better.</b></p>
+
+  <div class="tiers">
+    <div class="tier now">
+      <div class="name">Deepen</div>
+      <div class="price">₹999<span> /month</span></div>
+      <div class="annual">₹9,990 a year</div>
+      <div class="one">Your month closes in ten minutes.</div>
+      <ul>
+        <li>Clients, sessions and notes<small>Everything about a client, in one place.</small></li>
+        <li>Batch invoicing, receipts, part-payments<small>Every invoice for the month, in one go.</small></li>
+        <li>How each client is doing<small>A short check-in each session. A chart per client. A quiet alert when someone is sliding.</small></li>
+        <li>Full export, any time<small>Your data is yours. Nobody else can see it, including us.</small></li>
+      </ul>
+      <div class="fence"><b>For one counsellor.</b> Up to 30 active clients, more than one person can see. Groups and organisations, this isn't for you.</div>
+    </div>
+
+    <div class="tier">
+      <span class="soon">Coming</span>
+      <div class="name">Deepen Pro</div>
+      <div class="price">₹1,999<span> /month</span></div>
+      <div class="annual">₹19,990 a year</div>
+      <div class="one">How are you doing, across all of them?</div>
+      <ul>
+        <li class="plus">Everything in Deepen</li>
+        <li class="plus">Predicted progress<small>Where a client is likely to end up, not just where they are now.</small></li>
+        <li class="plus">Your whole caseload on one screen<small>These numbers describe a caseload, not a clinician.</small></li>
+        <li class="plus">The Outcome Report<small>A PDF you generate, and you choose who sees it.</small></li>
+        <li class="plus">How you compare<small>Against other counsellors, anonymously. Only if you opt in.</small></li>
+      </ul>
+      <div class="fence">Arrives when the Outcome Report ships. Nobody on Deepen loses anything when it does.</div>
+    </div>
+  </div>
+
+  <div class="found"><b>Founding 50:</b> the first fifty counsellors pay ₹699 a month, locked for three years. Said at signup, and meant.</div>
+
+  <h2>Against what else you could use</h2>
+  <table>
+    <thead><tr><th>&nbsp;</th><th class="c">Deepen</th><th class="c">Practice software</th><th class="c">Zoho stack</th></tr></thead>
+    <tbody>
+      <tr class="rowhead"><td colspan="4">Running the practice</td></tr>
+      <tr><td>Client records and session notes</td><td class="c"><span class="y">●</span></td><td class="c"><span class="y">●</span></td><td class="c"><span class="n">—</span></td></tr>
+      <tr><td>Invoicing and receipts</td><td class="c"><span class="y">●</span></td><td class="c"><span class="y">●</span></td><td class="c"><span class="y">●</span></td></tr>
+      <tr><td>Scheduling, booking page, reminders</td><td class="c"><span class="n">—</span></td><td class="c"><span class="y">●</span></td><td class="c"><span class="y">●</span></td></tr>
+      <tr><td>Video calls, payment gateway</td><td class="c"><span class="n">—</span></td><td class="c"><span class="y">●</span></td><td class="c"><span class="y">●</span></td></tr>
+      <tr><td>Set up in five minutes, nothing to configure</td><td class="c"><span class="y">●</span></td><td class="c"><span class="y">●</span></td><td class="c"><span class="n">—</span></td></tr>
+      <tr class="rowhead"><td colspan="4">Knowing whether it's working</td></tr>
+      <tr><td>A check-in each session, charted per client</td><td class="c"><span class="y">●</span></td><td class="c"><span class="n">—</span></td><td class="c"><span class="n">—</span></td></tr>
+      <tr><td>An alert when a client is sliding</td><td class="c"><span class="y">●</span></td><td class="c"><span class="n">—</span></td><td class="c"><span class="n">—</span></td></tr>
+      <tr><td>Your results across your whole caseload <span style="color:var(--terra);font-size:12px">Pro</span></td><td class="c"><span class="y">●</span></td><td class="c"><span class="n">—</span></td><td class="c"><span class="n">—</span></td></tr>
+      <tr class="rowhead"><td colspan="4">Who it's for</td></tr>
+      <tr><td>Built for one counsellor, never sold to organisations</td><td class="c"><span class="y">●</span></td><td class="c"><span class="n">—</span></td><td class="c"><span class="n">—</span></td></tr>
+      <tr><td>Nobody but you can see your data</td><td class="c"><span class="y">●</span></td><td class="c">varies</td><td class="c">varies</td></tr>
+    </tbody>
+  </table>
+  <p class="cap">We lose the scheduling rows on purpose. If you need a booking page or video, use one of theirs, they're good at it. Deepen is for the part they don't do. "Practice software" here means the Indian tools at ₹0 to ₹1,500 a month; verify their feature lists on the day this goes public.</p>
+
+  <div class="foot">
+    <p><b>Copy rules held.</b> No instrument named. No claim that Deepen improves outcomes. No claim of novelty. Losing rows conceded. Cap is a fence for one counsellor, not an upgrade lever; nothing clinical is ever blocked.</p>
+    <p><b>Numbers.</b> One plan at ₹999: break-even around 65 paying counsellors. Pro lifts it when it lands. Judge the first year on retention and the invoicing habit, not the north star, until automated check-in delivery ships.</p>
+  </div>
+</div>
+</body>
+</html>

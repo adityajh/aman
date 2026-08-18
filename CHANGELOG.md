@@ -2,6 +2,18 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [5.0.0] - 2026-08-17
+### Added
+- **Single Pricing Tier ("Deepen" @ ₹999/mo)**: Consolidated the primary offering into one simple tier with all core features enabled, including clinical measurements, check-ins, per-client charts, slide flags, and batch invoicing.
+- **Founding 50 Offer (₹699/mo for 12 Months)**: Added support for manual coupon codes (`FOUNDING50`) that apply a ₹300/month Razorpay offer discount for the first 12 billing cycles, capped at 50 seats.
+- **30 Active Client Fence**: Enforced a cap of 30 active clients (`clients.isActive = true`) per non-exempt tenant on creation and reactivation. The UI gracefully disables the "Add Client" button and shows a soft usage banner at 25+ clients.
+- **90-Day Stale Session Nudge**: Clients with no session in 90+ days display a muted `no session in 90 days` indicator on the Clients list with a one-click option to close the record.
+- **Locked Practice Layer ("Deepen Pro")**: Practice-wide outcome dashboards and predicted progress trajectories are gated behind the `PRACTICE_OUTCOMES` flag with locked UI states explaining the upcoming Pro tier.
+- **Safe Measurement Copy**: Added privacy reassurance empty states to progress charts (*"Only you can see this chart. Deepen is here to help you spot trends, not to grade you."*).
+- **Home Page Redesign**: Fully rebuilt the home page at `/home` to match the brand copy and lexicon, emphasizing solo practice workflows and total privacy.
+
+---
+
 ## [4.1.0] - 2026-08-14
 ### Added
 - **Deepen Billing Reactivation & Upgrades**: The `/dashboard/settings` billing section has been completely refactored. Users can now reactivate subscriptions, cancel, and update payment methods natively via Razorpay without creating duplicates.

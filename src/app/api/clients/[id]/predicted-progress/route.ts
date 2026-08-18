@@ -35,8 +35,8 @@ export async function GET(
   const { id } = await params;
   const { tenantId, planTier } = await getTenantContext();
   
-  if (!hasFeature(planTier, "CLINICAL_MEASUREMENT")) {
-    return new NextResponse("Upgrade to Pro to access Clinical Measurements.", { status: 403 });
+  if (!hasFeature(planTier, "PRACTICE_OUTCOMES")) {
+    return new NextResponse("Upgrade to Deepen Pro to access Predicted Progress.", { status: 403 });
   }
 
   return await withTenantContext(tenantId, async (tx) => {

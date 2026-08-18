@@ -235,8 +235,15 @@ export default function ClientsPage() {
     }
   };
 
+  const activeCount = clients.filter(c => c.isActive).length;
+
   return (
     <div className="p-8 space-y-6">
+      {activeCount >= 25 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-xs text-amber-800 flex items-center justify-between font-medium">
+          <span><strong>{activeCount} of 30 active clients.</strong> Deepen is built for one counsellor.</span>
+        </div>
+      )}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Clients</h1>
@@ -260,13 +267,13 @@ export default function ClientsPage() {
               <SelectTrigger className="w-[160px] border-0 h-8 bg-transparent shadow-none font-semibold focus:ring-0">
                 <SelectValue>
                   {statusFilter === "active" ? "Active" :
-                   statusFilter === "terminated" ? "Terminated" : "All"}
+                   statusFilter === "terminated" ? "Closed" : "All"}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-white border-slate-200">
                 <SelectItem value="all" label="All">All</SelectItem>
                 <SelectItem value="active" label="Active">Active</SelectItem>
-                <SelectItem value="terminated" label="Terminated">Terminated</SelectItem>
+                <SelectItem value="terminated" label="Closed">Closed</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -274,7 +281,11 @@ export default function ClientsPage() {
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger
             render={
-              <Button className="gap-2">
+              <Button 
+                className="gap-2" 
+                disabled={activeCount >= 30}
+                title={activeCount >= 30 ? "Deepen is built for solo practices. You've reached the 30 active client limit." : undefined}
+              >
                 <Plus className="h-4 w-4" /> Add Client
               </Button>
             }
@@ -385,7 +396,19 @@ export default function ClientsPage() {
                       <div className="flex flex-col">
                         <div className="font-medium text-slate-900 flex items-center gap-2">
                           {client.name}
-                          {!client.isActive && <Badge variant="outline" className="bg-rose-50 text-rose-600 border-rose-200 uppercase text-[10px]">Terminated</Badge>}
+                          {!client.isActive && <Badge variant="outline" className="bg-rose-50 text-rose-600 border-rose-200 uppercase text-[10px]">Closed</Badge>}
+                          {client.isActive && (() => {
+                            const lastDate = client.lastSessionAt ? new Date(client.lastSessionAt).getTime() : new Date(client.createdAt).getTime();
+                            const daysDiff = (Date.now() - lastDate) / (1000 * 60 * 60 * 24);
+                            if (daysDiff >= 90) {
+                              return (
+                                <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 text-[10px]" title="No session recorded in the last 90 days. Click Details to Close if completed.">
+                                  no session in 90 days
+                                </Badge>
+                              );
+                            }
+                            return null;
+                          })()}
                         </div>
                         <span className="text-xs text-slate-500">Since {formatIST(client.createdAt, "d MMM yyyy")}</span>
                       </div>

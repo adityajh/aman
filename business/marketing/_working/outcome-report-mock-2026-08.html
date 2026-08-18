@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Outcome report · demonstration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#FBFAF7;--card:#fff;--ink:#14181C;--ink2:#4A5157;--muted:#878D93;--hair:#E4E1DA;--teal-ink:#0B4F43;--teal:#0F8A72;--terra:#C2632A;--brick:#B4472F;--sand:#C9C4BA}
+  *{box-sizing:border-box}
+  body{margin:0;background:#E9E6DF;font-family:Inter,-apple-system,system-ui,sans-serif;color:var(--ink);font-size:14.5px;line-height:1.5;-webkit-font-smoothing:antialiased;padding:32px 16px}
+  .page{width:794px;margin:0 auto;background:var(--paper);padding:60px 64px 40px;position:relative;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .serif{font-family:Newsreader,Georgia,serif;font-weight:500}
+  .demo{position:absolute;top:18px;right:64px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--terra);font-weight:700}
+  .practice{font-size:14px;color:var(--ink2)}
+  h1{font-size:40px;line-height:1.1;margin:6px 0 4px;color:var(--teal-ink);letter-spacing:-.01em}
+  .period{font-size:14px;color:var(--ink2);margin-bottom:26px}
+  .frame{border-left:3px solid var(--teal);padding:8px 0 8px 14px;margin:0 0 30px;font-size:14px;color:var(--ink)}
+  .frame b{color:var(--teal-ink)}
+  .headline{font-size:22px;line-height:1.35;color:var(--ink);margin:0 0 22px}
+  .headline b{color:var(--teal-ink);font-weight:600}
+  .bar{display:flex;height:44px;border-radius:8px;overflow:hidden;gap:3px;margin-bottom:10px}
+  .bar div{display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:14px}
+  .b1{background:var(--teal)}
+  .b2{background:var(--sand);color:var(--ink) !important}
+  .b3{background:var(--brick)}
+  .legend{display:flex;gap:22px;font-size:13.5px;color:var(--ink2);margin-bottom:34px}
+  .legend i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:7px;vertical-align:-1px}
+  h2{font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 0 12px}
+  .rows{display:grid;grid-template-columns:1fr 1fr;gap:12px 40px;margin-bottom:34px}
+  .row{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--hair);padding:9px 0;font-size:14.5px;color:var(--ink2)}
+  .row b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;font-size:16px;white-space:nowrap;margin-left:12px}
+  .plain{background:var(--card);border:1px solid var(--hair);border-radius:10px;padding:18px 20px;margin-bottom:26px}
+  .plain p{margin:0 0 8px;font-size:14px;color:var(--ink2)}
+  .plain p:last-child{margin-bottom:0}
+  .plain b{color:var(--ink)}
+  .foot{margin-top:26px;padding-top:12px;border-top:1px solid var(--hair);display:flex;gap:14px;align-items:center;font-size:11.5px;color:var(--muted)}
+  .mark{display:flex;flex-direction:column;gap:2px}
+  .mark i{display:block;width:22px;background:var(--teal-ink);border-radius:1px}
+  .mark i:nth-child(1){height:2px}.mark i:nth-child(2){height:5px}.mark i:nth-child(3){height:7px}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="demo">Demonstration · not a real practice</div>
+  <div class="practice">Meera Iyer Counselling</div>
+  <h1 class="serif">How did my clients do this year?</h1>
+  <div class="period">Clients you finished with between August 2025 and July 2026 · generated 17 August 2026</div>
+
+  <div class="frame"><b>These numbers describe a caseload, not a clinician.</b> Harder caseloads produce harder numbers. Yours started a little harder than most.</div>
+
+  <p class="headline">You finished with <b>38 clients</b>. You measured 31 of them from start to end. Of those 31, <b>18 got better</b>, 10 stayed about the same, and 3 got worse.</p>
+
+  <div class="bar" role="img" aria-label="Of 31 measured clients: 18 got better, 10 about the same, 3 got worse">
+    <div class="b1" style="flex:18">18 got better</div>
+    <div class="b2" style="flex:10">10 about the same</div>
+    <div class="b3" style="flex:3">3</div>
+  </div>
+  <div class="legend"><span><i style="background:var(--teal)"></i>Got better</span><span><i style="background:var(--sand)"></i>About the same</span><span><i style="background:var(--brick)"></i>Got worse</span></div>
+
+  <h2>For comparison</h2>
+  <p style="margin:0 0 30px;font-size:14.5px;color:var(--ink2)">Across the pool, of clients who started in a similar place, about <b style="color:var(--ink)">half get better</b> and about <b style="color:var(--ink)">one in eight get worse</b>. Your year: 58% better, 10% worse.</p>
+
+  <h2>The rest of the picture</h2>
+  <div class="rows">
+    <div class="row"><span>Typical number of sessions</span><b>9</b></div>
+    <div class="row"><span>Left before you'd finished</span><b>6 of 38</b></div>
+    <div class="row"><span>Typical time in care</span><b>14 weeks</b></div>
+    <div class="row"><span>Not measured start to end</span><b>7 of 38</b></div>
+    <div class="row"><span>How clients rated the working relationship</span><b>8.2 / 10</b></div>
+    <div class="row"><span>Flagged, then went on to get better</span><b>5 of 9</b></div>
+  </div>
+
+  <div class="plain">
+    <p><b>"Got better" means</b> the change from first to last reading was bigger than the measure's normal wobble. Not just a good day.</p>
+    <p><b>The comparison</b> uses only anonymous readings from counsellors who chose to share them. Yours are included only if you switched that on.</p>
+    <p><b>This can't tell you</b> whether you caused the change, or how someone else would have done. It's a description of one year of your work. Nothing more.</p>
+  </div>
+
+  <div class="foot"><div class="mark" aria-hidden="true"><i></i><i></i><i></i></div><div>Generated by Deepen. Nobody outside this practice sees this unless you share it.</div></div>
+</div>
+</body>
+</html>

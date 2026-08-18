@@ -107,9 +107,9 @@ export function Sidebar({
           >
             {displayName}
           </h2>
-          {planTier === "pro" && (
-            <span className="text-[10px] font-bold tracking-wider text-teal-action uppercase mt-1">Pro Tier</span>
-          )}
+          <span className="text-[10px] font-bold tracking-wider text-teal-action uppercase mt-1">
+            {planTier === "pro" ? "Deepen Pro" : "Deepen"}
+          </span>
         </div>
       </div>
       <div className="flex-1 px-3 mt-4">

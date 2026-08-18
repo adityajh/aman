@@ -382,8 +382,11 @@ export function ClientProgressChart({ clientId, clientName, compact = false, var
   if (!data || (data.orsPoints.length === 0 && data.srsPoints.length === 0)) {
     if (compact) return <span className="text-slate-300 text-[10px]">No data</span>;
     return (
-      <div className="text-center py-8 text-slate-400 text-sm">
-        No clinical notes recorded yet. Complete a session note to see progress graphs.
+      <div className="text-center py-10 px-4 bg-slate-50 border border-slate-100 rounded-xl space-y-2">
+        <p className="text-slate-600 font-medium text-sm">No clinical notes recorded yet.</p>
+        <p className="text-xs text-slate-400 max-w-md mx-auto italic">
+          Only you can see this chart. Deepen is here to help you spot trends, not to grade you.
+        </p>
       </div>
     );
   }
@@ -532,7 +535,18 @@ export function ClientProgressChart({ clientId, clientName, compact = false, var
         <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">
           Predicted Progress (vs. clients with a similar starting ORS)
         </p>
-        <PredictedProgressChart clientId={clientId} />
+        {planTier === "pro" ? (
+          <PredictedProgressChart clientId={clientId} />
+        ) : (
+          <div className="rounded-lg border border-slate-200 bg-slate-50/50 p-6 text-center space-y-2">
+            <p className="text-sm font-semibold text-slate-700">
+              How are you doing, across all of them? That's Deepen Pro. Coming.
+            </p>
+            <p className="text-xs text-slate-400">
+              Predicted progress compares trajectories against similar caseloads.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

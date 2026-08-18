@@ -71,12 +71,34 @@ export async function POST(req: Request) {
     // Using neon-http driver sequentially since it doesn't support transactions,
     // but avoids WebSocket cold-start timeouts on Vercel Serverless.
     
+    // Calculate founding status if applicable
+    const foundingPromo = process.env.FOUNDING_PROMO_CODE || "FOUNDING50";
+    const isFoundingOffer = promoCode && promoCode.trim().toUpperCase() === foundingPromo.toUpperCase();
+
+    let isFounding = false;
+    let foundingSeat: number | null = null;
+    let priceInrMonthly = 999;
+
+    if (isFoundingOffer) {
+      const existingFounding = await db.query.tenants.findMany({
+        where: eq(tenants.isFounding, true),
+      });
+      if (existingFounding.length < 50) {
+        isFounding = true;
+        foundingSeat = existingFounding.length + 1;
+        priceInrMonthly = 699;
+      }
+    }
+
     // Create tenant
     const [newTenant] = await db.insert(tenants).values({
       name: practiceName,
       slug,
-      email, // Email added for tenant
-      planTier: planTier || "basic",
+      email,
+      planTier: "deepen",
+      isFounding,
+      foundingSeat,
+      priceInrMonthly,
       razorpaySubscriptionId: isBypass ? null : razorpay_subscription_id,
       isExempt: isBypass,
     }).returning();

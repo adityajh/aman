@@ -1,138 +1,67 @@
-# Aman — Pricing Plan
+# Deepen — Pricing Plan and Code Change Plan
 
-*July 2026. Derived from the market analysis and ICP research. Supersedes all earlier pricing.*
+*17 August 2026, v1.1. Supersedes the pricing sections of 03 and 04. Written for the agent building this. Read the whole file before touching code. v1.1 adds the definition of "active", the 90-day nudge, and the home page v2 reference.*
 
 ---
 
-## 1. The plans
+## Part 1 · The pricing plan
 
-| | **Practice** | **Pro** |
+### 1.1 The decision
+
+One plan at launch. Everything switched on, including measurement. Pro arrives later, above it, when the Outcome Report exists.
+
+| | **Deepen** | **Deepen Pro** |
 |---|---|---|
-| Monthly | **₹999** | **₹1,999** |
-| Annual | **₹9,990** | **₹19,990** |
-| Effective monthly on annual | ₹833 | ₹1,666 |
-| Job in the business | Acquisition | Revenue |
-| Feature flag | `basic` | `pro` |
+| Price | **₹999 / month** | ₹1,999 / month |
+| Status | Live at launch | Not sold until the Outcome Report ships |
+| Billing | Monthly only. **No annual option for now.** | Monthly only |
+| Feature flag | `deepen` | `pro` |
+| Fence | One counsellor. **Up to 30 active clients.** | Same fence |
 
-**Founding member** (beta converts only): **₹11,990/year on Pro, locked for 3 years.**
+**Founding 50.** The first fifty paying counsellors pay **₹699 / month**, locked for 12 months, distributed via a manual coupon code.
 
 **No free tier.** 14-day trial, card at signup, no charge until the trial ends.
 
-**Annual is the default selection** on both plans.
+### 1.2 What is in each
 
-### What's in each
+**Deepen (₹999)**, the whole product as it exists today:
 
-**Practice** — clients · session logging · clinical notes · batch monthly invoicing · multi-currency batches · receipts, part-payments and credits · pro-rata and cancellation fee logic · full export
+- Clients, sessions, structured notes, clinical history, termination workflow
+- Batch monthly invoicing, receipts, part-payments, credits, pro-rata and cancellation fee logic, multi-currency batches
+- A short check-in recorded each session, a progress chart per client, an alert when a client is sliding
+- Full export, any time
 
-**Pro** — everything in Practice, plus: sessional outcome measurement · deterioration flags · per-client progress charts · Predicted Progress · practice outcomes dashboard · the Outcome Report · PDF export
+**Deepen Pro (₹1,999)**, the practice layer. Everything in Deepen, plus:
 
----
+- Predicted progress (where a client is likely to end up)
+- The practice outcomes dashboard (whole caseload on one screen; always carries the line "these numbers describe a caseload, not a clinician")
+- The Outcome Report (PDF, generated on demand, counsellor decides who sees it) — *not built*
+- Benchmark comparison, opt-in and anonymous — *not built*
 
-## 2. The anchoring decision — this is the important part
+The line between the two is the question being answered. **Deepen answers "how is this client doing." Pro answers "how am I doing."** Never describe the split as basic versus advanced, or admin versus clinical.
 
-### What Aman is *not* priced against
+### 1.3 Why this shape
 
-Practice-management software. That comparison loses before it starts:
+- Measurement sits in the cheapest plan because a counsellor who has never measured will not pay extra for it. They have to experience it first. A paywall means the sceptics never do.
+- Two of Pro's four features do not exist. Nothing is sold that is not built.
+- One plan is the easiest possible thing to explain to a non-technical buyer, and it removes a decision from signup.
+- Admin is included and never charged for separately. In India the admin layer is worth ₹0 (PracFlow ₹0 + 5%, PractiPal free to five clients, Zoho free). We do not compete there and we say so.
+- ₹999 keeps clear of PractiPal's ₹1,499, which is the price at which a buyer starts counting features. Deepen loses a feature count on purpose.
+- Founding 50 at ₹699 is the low entry Adi wanted, without setting ₹699 as the permanent floor. It can become permanent later if the market says so; the reverse move is not available.
 
-| Competitor | Solo price/mo | Notes |
-|---|---|---|
-| **Zoho Invoice + Zoho Bookings** | **₹0** | Free forever. Invoicing, payment collection, expense tracking, client portal, reports, scheduling, reminders. Indian, GST-native |
-| PracFlow | ₹1,199 annual / ₹1,499 monthly | Or 5% commission with no fixed fee |
-| PractiPal | ₹1,499 | Free tier to 5 clients |
-| Therasoft India | ₹699–999 floor | ₹79–129 per appointment above minimum |
+### 1.4 The fence, and what it is not
 
-**The admin layer in India is worth ₹0.** No pricing argument survives contact with that. Practice is not priced to win this comparison — it is priced to make assembling the free stack not worth a non-technical counsellor's afternoon.
+The 30-active-client cap exists for one reason: to stop a group or organisation running several counsellors through one account. **It is not an upgrade lever and must never read as one.** Copy above the line does not say "upgrade". It says Deepen is built for one counsellor.
 
-### What Pro *is* priced against
+**Definition of "active".** An active client is one the counsellor has not terminated. That is the whole definition. It is a count of open client records (`clients.isActive = true`), not a monthly activity meter. It has nothing to do with sessions this month or invoices this month. Terminated clients keep their full record forever and do not count.
 
-**The things Indian counsellors already pay money for in order to get better at their work.**
+Rules:
 
-The ICP research is clear that the client-facing fee ladder is sorted almost entirely by credential — trainee, independent counsellor, experienced psychotherapist, clinical psychologist, RCI registration, overseas training. Counsellors respond rationally: they buy credentials. CBT, DBT and EMDR certifications, TISS and institute programmes, supervision hours.
-
-They demonstrably pay for **things that make them better and things that let them charge more.** They demonstrably do not pay for admin software.
-
-Aman Pro belongs in the first category. It should be positioned, priced and marketed as professional development, not as practice management.
-
-| Reference | Indian cost | Status |
-|---|---|---|
-| Certification course (CBT/DBT/EMDR) | Tens of thousands, one-off | Well evidenced |
-| Clinical supervision | **Unknown — not found** | ⚠️ Must be established |
-| Aman Pro | ₹1,999/mo · ₹19,990/yr | |
-
-**⚠️ Open item: Indian supervision rates.** UK comparables run £100–160 for 1:1 and £40–80 for group per session, but no reliable Indian figure was found. This is now the primary pricing anchor and it is unverified. **Ask Vijay before any number goes on a public page.**
-
-### Secondary anchor — the stacked alternative
-
-For a counsellor who wants what Pro does today, the only route is stacking:
-
-> Greenspace, for measurement alone: ~₹2,100/month
-> Plus an Indian practice tool for the billing: ₹1,199–1,499
-> **Aman Pro does both, plus trajectory prediction neither offers, for ₹1,999.**
-
-Useful, but secondary. It frames Aman as software. The supervision-and-training frame is the one that supports the price.
-
----
-
-## 3. Rationale, decision by decision
-
-**Practice at ₹999, not ₹499.** Against free, the argument is never price — it's effort saved. ₹33/day versus an afternoon of Zoho setup plus permanent two-system friction is an easy case to make. Dropping to ₹499 wouldn't strengthen it and would turn the step up to Pro into a 4× jump. A 2× step is a decision; a 4× step is a re-evaluation.
-
-**Pro at ₹1,999, not ₹1,499.** ₹1,499 puts Pro at parity with a scheduling tool, which frames Aman as a PractiPal alternative — a category it loses. ₹1,999 breaks the frame while sitting below every global measurement platform.
-
-**Annual-first.** Indian recurring-mandate failures are a permanent admin tax. Annual means one payment and one renewal reminder per year.
-
-**No free tier**, despite PractiPal's 5-client tier and PracFlow's commission plan. Free cohorts generate maximum support at zero revenue. A narrower, self-selecting, paying funnel is the correct trade for a low-time operator.
-
-**Keep the `basic`/`pro` flags.** Already implemented in `tenant.ts`. No new gating architecture needed.
-
----
-
-## 4. Revenue model
-
-At a 60/40 Practice/Pro mix, blended ARPU ≈ ₹1,100/month.
-
-| Paying users | MRR | Annualised |
-|---|---|---|
-| 25 | ₹27,500 | ₹3.3L |
-| 50 | ₹55,000 | ₹6.6L |
-| **100** | **₹1,10,000** | **₹13.2L** |
-| 150 | ₹1,65,000 | ₹19.8L |
-
-**Mix is the primary growth lever after the first 50 users.** Every 10 points shifted from Practice to Pro adds ~₹10,000/month at 100 users — cheaper than acquisition and entirely controlled by how well the free webinar and the in-app locked features convert.
-
-**Costs at 100 users:** ~₹6,000/month infrastructure (Neon, Vercel, Resend, domain). Gross margin ~95%.
-
-**Target: 100 paying users at ≥40% Pro mix within 18 months → ~₹1.1L/month.**
-
----
-
-## 5. The fee-increase argument — and where it must not go
-
-> Counsellors who can evidence their outcomes can defend their fees. A ₹100 increase per session across twenty sessions a month covers the subscription several times over.
-
-This is true, and it is the strongest economic case for Pro.
-
-**It does not go on the home page.** It belongs in the pricing FAQ, or in an email to someone already measuring at month three.
-
-Leading with it recruits counsellors motivated by marketing rather than by curiosity — and per the ICP research, those are precisely the users whose self-reported data cannot be trusted, which degrades the benchmark pool every other user depends on. Honest users are the raw material of this business. The hook has to select for them.
-
----
-
-## 6. What must be validated before committing
-
-| # | Question | Why it matters | How |
-|---|---|---|---|
-| 1 | **What have you spent money on in the last year to become a better counsellor, and how much?** | The entire ₹1,999 thesis rests on this. If the answer is "nothing," the price is a fantasy | Beta interview |
-| 2 | What do Indian counsellors pay for supervision? | It is now the primary pricing anchor and is unverified | Ask Vijay; ask beta users |
-| 3 | Would you have assembled Zoho yourself? | Tests whether ease-of-setup is genuinely the Practice moat | Beta interview |
-| 4 | Does ₹999→₹1,999 read as a step or a wall? | Tests the tier gap | Observe at conversion |
-
-**Do not print prices publicly until questions 1 and 2 are answered.**
-
----
-
-## 7. Grandfathering
-
-Beta converts and the first 25 paying users keep their entry price for three years. Two reasons: it rewards early risk, and it preserves the option to raise prices later without punishing the people who validated the product.
-
-State this explicitly at signup. It is also, quietly, a reason to buy now.
+- Active clients only. Terminated clients never count.
+- The counsellor moves a client between active and terminated. The system never does it for her. Termination is a clinical decision (it carries a reason and a planned/unplanned type that feed the outcome data), so it stays a human call.
+- The system may **suggest**: a client with no session in 90 days gets a quiet note on the clients list with Terminate one click away. Suggest, never auto-close. A client on a planned break is still hers.
+- Reactivating a terminated client is allowed and is checked against the fence exactly like a new client.
+- Terminating a client to make room, then reactivating them later, is fine. It is their record. The fence is a fence, not a trap. Say this in the terms.
+- One login per account. No seats, no invites, ever.
+- Existing clients, sessions, notes, scores and invoices are **never** blocked by the fence. Only the creation or reactivation of a 31st active client is refused.
+- Admin can exempt a tenant (existing `isExempt`).

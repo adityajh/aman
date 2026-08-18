@@ -28,6 +28,9 @@ export async function GET() {
         email: tenants.email,
         phone: tenants.phone,
         planTier: tenants.planTier,
+        isFounding: tenants.isFounding,
+        foundingSeat: tenants.foundingSeat,
+        priceInrMonthly: tenants.priceInrMonthly,
         razorpaySubscriptionId: tenants.razorpaySubscriptionId,
         isActive: tenants.isActive,
         isExempt: tenants.isExempt,
@@ -68,6 +71,10 @@ export async function PATCH(req: Request) {
     } else if (action === "toggleExempt") {
       await db.update(tenants)
         .set({ isExempt: value })
+        .where(eq(tenants.id, tenantId));
+    } else if (action === "togglePro") {
+      await db.update(tenants)
+        .set({ planTier: value ? "pro" : "deepen" })
         .where(eq(tenants.id, tenantId));
     } else {
       return NextResponse.json({ error: "Invalid action" }, { status: 400 });

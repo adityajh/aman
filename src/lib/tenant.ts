@@ -3,6 +3,8 @@ import { authOptions } from "@/lib/auth";
 import { dbPool } from "@/lib/db";
 import { sql } from "drizzle-orm";
 
+export const MAX_ACTIVE_CLIENTS = 30;
+
 export async function getTenantContext() {
   const session = await getServerSession(authOptions);
 
@@ -12,7 +14,7 @@ export async function getTenantContext() {
 
   return {
     tenantId: session.user.tenantId,
-    planTier: session.user.planTier || "basic",
+    planTier: session.user.planTier || "deepen",
     tenantSlug: session.user.tenantSlug,
   };
 }
@@ -45,27 +47,27 @@ export async function withTenantContext<T>(
 // ─────────────────────────────────────────────
 
 const PLAN_FEATURES: Record<string, string[]> = {
-  basic: [
+  deepen: [
     "CLIENT_MANAGEMENT",
-    "SCHEDULING",
     "BILLING",
-    "REPORTS",
-    "SESSION_NOTES"
+    "SESSION_NOTES",
+    "CLINICAL_MEASUREMENT",
+    "FINANCIAL_REPORTS",
   ],
   pro: [
     "CLIENT_MANAGEMENT",
-    "SCHEDULING",
     "BILLING",
-    "REPORTS",
     "SESSION_NOTES",
     "CLINICAL_MEASUREMENT",
-    "PROGRESS_CHARTS",
-    "PDF_EXPORT"
+    "FINANCIAL_REPORTS",
+    "PRACTICE_OUTCOMES",
+    "PDF_EXPORT",
   ],
 };
 
 export function hasFeature(planTier: string, feature: string): boolean {
-  const tier = (planTier || "basic").toLowerCase();
+  let tier = (planTier || "deepen").toLowerCase();
+  if (tier === "basic") tier = "deepen";
   const features = PLAN_FEATURES[tier] || [];
   return features.includes(feature);
 }

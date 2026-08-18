@@ -1,16 +1,15 @@
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 
+import { db } from "@/lib/db";
+import { tenants } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
+
 export async function POST(req: Request) {
   try {
-    const { planTier, promoCode } = await req.json();
+    const { promoCode } = await req.json();
 
-    if (!planTier || (planTier !== "basic" && planTier !== "pro")) {
-      return NextResponse.json({ error: "Invalid plan selected" }, { status: 400 });
-    }
-
-    // Map planTier to Razorpay Plan IDs
-    const planId = planTier === "basic" ? "plan_TOl5mRuFjG4FZM" : "plan_TOl5SJ3ErBkUBB";
+    const planId = process.env.RAZORPAY_PLAN_DEEPEN || "plan_TOl5mRuFjG4FZM";
 
     const razorpay = new Razorpay({
       key_id: process.env.RAZORPAY_KEY_ID!,
@@ -19,12 +18,18 @@ export async function POST(req: Request) {
 
     const options: any = {
       plan_id: planId,
-      total_count: 100, // Max allowed by Razorpay (~8 years)
+      total_count: 100, // Monthly recurring
     };
 
-    if (promoCode && process.env.BETA_PROMO_CODE && process.env.RAZORPAY_BETA_OFFER_ID) {
-      if (promoCode.trim().toUpperCase() === process.env.BETA_PROMO_CODE.toUpperCase()) {
-        options.offer_id = process.env.RAZORPAY_BETA_OFFER_ID;
+    const foundingPromo = process.env.FOUNDING_PROMO_CODE || process.env.BETA_PROMO_CODE || "FOUNDING50";
+    const offerId = process.env.RAZORPAY_FOUNDING_OFFER_ID || process.env.RAZORPAY_BETA_OFFER_ID;
+
+    if (promoCode && offerId && promoCode.trim().toUpperCase() === foundingPromo.toUpperCase()) {
+      const existingFounding = await db.query.tenants.findMany({
+        where: eq(tenants.isFounding, true),
+      });
+      if (existingFounding.length < 50) {
+        options.offer_id = offerId;
       }
     }
 

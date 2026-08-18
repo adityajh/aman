@@ -54,6 +54,8 @@ Seven numbered documents compiled 31 July 2026. They cross-reference each other 
 | `one-page-plan.html` | **v1.1.** The living source. Mission, two value props, market, competition, pricing, costs at 10/100/1,000 users, path to 100,000 |
 | `Deepen-business-plan.pdf` | **The one you send.** Three A4 pages, brand fonts embedded, searchable text. Rendered from the HTML |
 | `_build-pdf.md` | How to regenerate the PDF after editing the HTML |
+| `pricing-and-build-plan-2026-08.md` | **Pricing decision of 17 Aug 2026 and the code change plan for it.** Supersedes the pricing in 03 and 04 until those are rewritten. One plan at ₹999, founding 50 at ₹699, Pro ₹1,999 later, 30 active-client fence, no annual |
+| `plans-chart-2026-08.html` | The plans as a one-page chart, with the honest competitor comparison |
 
 ## marketing/
 
@@ -65,6 +67,8 @@ Seven numbered documents compiled 31 July 2026. They cross-reference each other 
 | `name-deepen.html` | Why the name is what it is. Background, not a rule |
 | `homepage-copy-fixes.md` | **Open action.** Two claims on the current build must not ship |
 | `_working/` | Logo explorations and the colour swatch sheet. Kept because they record why rejected options were rejected |
+| `_working/home-mock-2026-08.html` | **Home page redesign v2**, ~530 words, three layers, one plan. The build reference for step 8 of the pricing-and-build plan |
+| `_working/outcome-report-mock-2026-08.html` | The Outcome Report in plain language, one page. What Pro will sell. Demo data |
 | `_archive/` | Superseded documents, dated in the filename |
 
 ## research/
@@ -82,7 +86,7 @@ Empty until the beta starts. Beta interview notes, the support log, objections, 
 
 ## Decided
 
-The name is **Deepen**. `deepen.health` and `deepen.co.in` are registered and set up. The colour system, the voice, the two value props, pricing, and the growth path are all settled. Do not reopen them without a reason.
+The name is **Deepen**. `deepen.health` and `deepen.co.in` are registered and set up. The colour system, the voice, the two value props, and the growth path are all settled. **Pricing was re-decided on 17 Aug 2026** after verifying PractiPal and PracFlow live: see `commercial/pricing-and-build-plan-2026-08.md`. Docs 02, 03, 04 and 05 still carry the July pricing and are to be updated after the code lands (step 11 of that plan). Do not reopen without a reason.
 
 ## Open, in order
 

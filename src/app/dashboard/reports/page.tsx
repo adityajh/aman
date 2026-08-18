@@ -73,7 +73,7 @@ function MetricCard({
 }
 
 export default function ReportsPage() {
-  const [data, setData] = useState<ReportData | null>(null);
+  const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -87,6 +87,27 @@ export default function ReportsPage() {
 
   if (loading) return <div className="p-8 text-slate-500">Loading report...</div>;
   if (!data) return <div className="p-8 text-red-500">Failed to load report.</div>;
+
+  if (data.locked) {
+    return (
+      <div className="p-8 space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Reports</h1>
+          <p className="text-slate-500">Practice-wide outcomes dashboard.</p>
+        </div>
+        <Card className="border-slate-200 bg-slate-50/50 p-8 text-center space-y-3">
+          <CardContent className="pt-6 space-y-3">
+            <h2 className="text-xl font-semibold text-slate-800">
+              How are you doing, across all of them? That's Deepen Pro. Coming.
+            </h2>
+            <p className="text-sm text-slate-500 max-w-md mx-auto">
+              Deepen answers "how is this client doing." Pro answers "how am I doing across my entire caseload."
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const noData = data.totalClosed === 0;
   const hasOutcomeData = data.outcomeCohortSize > 0;
@@ -107,6 +128,9 @@ export default function ReportsPage() {
               Outcome ratios based on {data.outcomeCohortSize} clients (initial ORS ≤ 25 with complete data).
             </span>
           )}
+        </p>
+        <p className="text-xs italic text-slate-400 mt-1">
+          These numbers describe a caseload, not a clinician.
         </p>
       </div>
 

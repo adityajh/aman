@@ -21,7 +21,6 @@ declare global {
 export default function SignupPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<"basic" | "pro">("pro");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -34,7 +33,7 @@ export default function SignupPage() {
       practiceName: formData.get("practiceName"),
       password: formData.get("password"),
       promoCode: formData.get("promoCode")?.toString().trim() || "",
-      planTier: selectedPlan,
+      planTier: "deepen",
     };
 
     try {
@@ -89,7 +88,7 @@ export default function SignupPage() {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_TOkt8Pm5ycPsNz",
         subscription_id: subscription_id,
         name: "Deepen",
-        description: `Deepen ${selectedPlan === "pro" ? "Pro" : "Basic"} Monthly Subscription`,
+        description: "Deepen Monthly Subscription",
         handler: async function (response: any) {
           try {
             // 3. Complete Signup with Signature
@@ -185,52 +184,26 @@ export default function SignupPage() {
                 <Input id="promoCode" name="promoCode" type="text" placeholder="e.g. BETA50" />
               </div>
 
-              <div className="space-y-3">
-                <Label>Select a Plan</Label>
-                <div className="grid grid-cols-2 gap-4">
-                  <div 
-                    onClick={() => setSelectedPlan("basic")}
-                    className={`cursor-pointer border rounded-lg p-4 transition-all ${
-                      selectedPlan === "basic" ? "border-teal-action ring-1 ring-teal-action bg-teal-action/5" : "hover:border-slate-300"
-                    }`}
-                  >
-                    <div className="flex justify-between items-center mb-2">
-                      <h3 className="font-semibold text-sm text-ink">Practice Tier</h3>
-                      {selectedPlan === "basic" && <Check className="h-4 w-4 text-teal-action" />}
-                    </div>
-                    <p className="text-xs text-slate-500 mb-2">₹999/mo</p>
-                    <ul className="text-[11px] text-slate-600 space-y-1">
-                      <li>• Client Management</li>
-                      <li>• Invoicing & Billing</li>
-                      <li>• Standard Session Notes</li>
-                    </ul>
-                  </div>
-
-                  <div 
-                    onClick={() => setSelectedPlan("pro")}
-                    className={`cursor-pointer border rounded-lg p-4 transition-all ${
-                      selectedPlan === "pro" ? "border-teal-action ring-1 ring-teal-action bg-teal-action/5" : "hover:border-slate-300"
-                    }`}
-                  >
-                    <div className="flex justify-between items-center mb-2">
-                      <h3 className="font-semibold text-sm text-teal-action">Pro Tier</h3>
-                      {selectedPlan === "pro" && <Check className="h-4 w-4 text-teal-action" />}
-                    </div>
-                    <p className="text-xs text-slate-500 mb-2">₹1,999/mo</p>
-                    <ul className="text-[11px] text-slate-600 space-y-1">
-                      <li>• Everything in Basic</li>
-                      <li>• Clinical Measurements (ORS/SRS)</li>
-                      <li>• Progress Charts & Trends</li>
-                    </ul>
-                  </div>
+              <div className="rounded-xl border border-teal-action/20 bg-teal-action/5 p-4 space-y-3">
+                <div className="flex justify-between items-baseline">
+                  <h3 className="font-semibold text-base text-ink font-serif">Deepen</h3>
+                  <p className="text-lg font-bold text-teal-ink">₹999 <span className="text-xs font-normal text-slate-500">/ month</span></p>
                 </div>
+                <ul className="text-xs text-slate-600 space-y-1.5 pt-1">
+                  <li>• Your month closes in ten minutes.</li>
+                  <li>• It quietly keeps track of how each client is doing.</li>
+                  <li>• For one counsellor. Nobody else can see your data, including us.</li>
+                </ul>
+                <p className="text-[11px] text-slate-400 font-medium border-t border-slate-200/60 pt-2">
+                  14 days free. Cancel in one click. No annual commitment.
+                </p>
               </div>
 
               <Button type="submit" className="w-full bg-teal-action hover:bg-teal-ink text-paper" disabled={loading}>
                 {loading ? (
                   <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Creating practice…</>
                 ) : (
-                  "Get Started"
+                  "Start 14-day free trial"
                 )}
               </Button>
 
