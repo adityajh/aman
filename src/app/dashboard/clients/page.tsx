@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { TZ_OPTIONS, IST, formatIST } from "@/lib/tz";
+import { CLIENT_INTAKE_CONSENT } from "@/lib/copy/client-check-in-notice";
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<any[]>([]);
@@ -37,7 +38,42 @@ export default function ClientsPage() {
   const [cancelSessionsOnTerminate, setCancelSessionsOnTerminate] = useState(false);
   const [clientStats, setClientStats] = useState<{ total: number; lastDate: string | null; billed: number; currency: string } | null>(null);
   const [ptrSaving, setPtrSaving] = useState(false);
+  const [addPoolConsent, setAddPoolConsent] = useState<"yes" | "no" | "not_asked">("not_asked");
+  const [poolConsentSaving, setPoolConsentSaving] = useState(false);
   const router = useRouter();
+
+  const handleCopyConsentText = async () => {
+    const text = `${CLIENT_INTAKE_CONSENT.body} [ ] ${CLIENT_INTAKE_CONSENT.yes}   [ ] ${CLIENT_INTAKE_CONSENT.no}`;
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Copied");
+    } catch {
+      toast.error("Could not copy to clipboard");
+    }
+  };
+
+  const handleSetPoolConsent = async (clientId: string, value: "yes" | "no" | "not_asked") => {
+    setPoolConsentSaving(true);
+    try {
+      const res = await fetch(`/api/clients/${clientId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ poolConsent: value }),
+        headers: { "Content-Type": "application/json" },
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setSelectedClient(updated);
+        setClients(prev => prev.map(c => c.id === updated.id ? updated : c));
+        toast.success("Consent updated");
+      } else {
+        toast.error("Failed to update consent");
+      }
+    } catch {
+      toast.error("An error occurred");
+    } finally {
+      setPoolConsentSaving(false);
+    }
+  };
 
   const handleSetPTR = async (clientId: string, value: boolean | null) => {
     setPtrSaving(true);
@@ -278,7 +314,7 @@ export default function ClientsPage() {
             </Select>
           </div>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setAddPoolConsent("not_asked"); }}>
           <DialogTrigger
             render={
               <Button 
@@ -361,6 +397,72 @@ export default function ClientsPage() {
                   All scheduling stays in IST. The client&apos;s local time is shown alongside in the sessions list.
                 </p>
               </div>
+
+              <div className="space-y-2 pt-2 border-t border-slate-100">
+                <Label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">
+                  Comparison pool consent
+                </Label>
+                <p className="text-xs text-slate-500">
+                  Read this to the client at intake, or hand it to them. Their answer is recorded on their file.
+                </p>
+                <div className="border border-slate-200 rounded-lg bg-slate-50 p-3 text-sm text-slate-700">
+                  {CLIENT_INTAKE_CONSENT.body}
+                </div>
+                <div className="flex flex-col gap-2 pt-1">
+                  <label className="flex items-center gap-2 text-sm text-slate-700">
+                    <input
+                      type="radio"
+                      name="poolConsent"
+                      value="yes"
+                      onChange={() => setAddPoolConsent("yes")}
+                      className="h-4 w-4"
+                    />
+                    {CLIENT_INTAKE_CONSENT.yes}
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-slate-700">
+                    <input
+                      type="radio"
+                      name="poolConsent"
+                      value="no"
+                      onChange={() => setAddPoolConsent("no")}
+                      className="h-4 w-4"
+                    />
+                    {CLIENT_INTAKE_CONSENT.no}
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-slate-700">
+                    <input
+                      type="radio"
+                      name="poolConsent"
+                      value="not_asked"
+                      defaultChecked
+                      onChange={() => setAddPoolConsent("not_asked")}
+                      className="h-4 w-4"
+                    />
+                    Not asked yet
+                  </label>
+                </div>
+                {addPoolConsent !== "not_asked" && (
+                  <div className="space-y-1 pt-1">
+                    <Label htmlFor="poolConsentMethod" className="text-xs text-slate-500">
+                      Consent method
+                    </Label>
+                    <select
+                      id="poolConsentMethod"
+                      name="poolConsentMethod"
+                      defaultValue="in_person"
+                      className="w-full h-9 rounded-md border border-slate-200 bg-white px-2 text-sm"
+                    >
+                      <option value="in_person">In person</option>
+                      <option value="paper">Signed on paper</option>
+                      <option value="message">By message</option>
+                    </select>
+                  </div>
+                )}
+                <Button type="button" variant="outline" size="sm" onClick={handleCopyConsentText}>
+                  Copy consent text
+                </Button>
+              </div>
+
               <Button type="submit" className="w-full">Save Client</Button>
             </form>
           </DialogContent>
@@ -565,6 +667,36 @@ export default function ClientsPage() {
                   <div className="space-y-2 col-span-2">
                     <Label htmlFor="edit-notes">Notes / Background</Label>
                     <Input id="edit-notes" name="intakeNotes" defaultValue={selectedClient.intakeNotes || ""} placeholder="Any relevant background..." />
+                  </div>
+                  <div className="space-y-2 col-span-2">
+                    <Label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">
+                      Comparison pool consent
+                    </Label>
+                    <div className="flex items-center gap-3">
+                      <span className={cn(
+                        "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ring-1 ring-inset",
+                        selectedClient.poolConsent === "yes" ? "bg-emerald-50 text-emerald-600 ring-emerald-200"
+                          : selectedClient.poolConsent === "no" ? "bg-rose-50 text-rose-600 ring-rose-200"
+                          : "bg-slate-50 text-slate-400 ring-slate-200",
+                      )}>
+                        {selectedClient.poolConsent === "yes" ? "Yes" : selectedClient.poolConsent === "no" ? "No" : "Not asked"}
+                      </span>
+                      {selectedClient.poolConsentAt && (
+                        <span className="text-xs text-slate-400">
+                          {formatIST(selectedClient.poolConsentAt, "d MMM yyyy")}
+                        </span>
+                      )}
+                      <select
+                        value={selectedClient.poolConsent || "not_asked"}
+                        disabled={poolConsentSaving}
+                        onChange={(e) => handleSetPoolConsent(selectedClient.id, e.target.value as "yes" | "no" | "not_asked")}
+                        className="h-8 rounded-md border border-slate-200 bg-white px-2 text-xs"
+                      >
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                        <option value="not_asked">Not asked</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
                 <div className="flex justify-end gap-3 pt-2">

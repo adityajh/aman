@@ -62,7 +62,20 @@ export async function POST(req: Request) {
         defaultFeeSchemeId,
         timezone,
         forceCreate,
+        poolConsent,
+        poolConsentMethod,
       } = body;
+
+      if (poolConsent !== undefined && !["yes", "no", "not_asked"].includes(poolConsent)) {
+        return NextResponse.json({ error: "Invalid poolConsent value" }, { status: 400 });
+      }
+      if (
+        poolConsentMethod !== undefined &&
+        poolConsentMethod !== null &&
+        !["in_person", "paper", "message"].includes(poolConsentMethod)
+      ) {
+        return NextResponse.json({ error: "Invalid poolConsentMethod value" }, { status: 400 });
+      }
 
       // Active Client Limit Check
       const tenantRow = await tx.query.tenants.findFirst({
@@ -116,6 +129,9 @@ export async function POST(req: Request) {
           defaultFee: defaultFee?.toString(),
           defaultFeeSchemeId: defaultFeeSchemeId || undefined,
           timezone: timezone || undefined,
+          poolConsent: poolConsent || undefined,
+          poolConsentMethod: poolConsentMethod || undefined,
+          poolConsentAt: poolConsent === "yes" || poolConsent === "no" ? new Date() : undefined,
         })
         .returning();
 

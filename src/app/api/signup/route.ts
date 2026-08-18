@@ -16,8 +16,17 @@ export async function POST(req: Request) {
       promoCode,
       razorpay_payment_id,
       razorpay_subscription_id,
-      razorpay_signature
+      razorpay_signature,
+      agreedToTerms,
+      termsVersion
     } = await req.json();
+
+    if (agreedToTerms !== true) {
+      return NextResponse.json(
+        { error: "You need to accept the terms to create an account." },
+        { status: 400 }
+      );
+    }
 
     const isBypass = promoCode?.toUpperCase() === "FREEBIE";
 
@@ -110,6 +119,8 @@ export async function POST(req: Request) {
       priceInrMonthly,
       razorpaySubscriptionId: isBypass ? null : razorpay_subscription_id,
       isExempt: isBypass,
+      termsAcceptedAt: new Date(),
+      termsVersion: termsVersion || "2026-08-18",
     }).returning();
 
     // Mark matched promo code as used

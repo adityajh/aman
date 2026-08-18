@@ -45,8 +45,9 @@ export default function TermsPage() {
         <p>
           Everything you put into Deepen, your sessions, notes, invoices, and client
           check-ins, belongs to you. You can export all of it in one click, at any time,
-          including after you cancel. We never sell your data, never share it with
-          employers or other platforms, and never use it to train any model.
+          including after you cancel. We never sell or licence client-level data. We never take an insurer, an employer
+          or a platform as a customer. We never build anything that lets an outside party look at
+          a named counsellor. And we never use your data to train any model.
         </p>
       </section>
 
@@ -84,10 +85,25 @@ export default function TermsPage() {
       <section>
         <H2>The comparison pool</H2>
         <p>
-          Deepen plans a benchmark pool that is not live yet. When it ships, it will be
-          off by default. If you switch it on, Deepen will share three de-identified
-          numbers per reading into a shared pool, so you can see how a reading compares
-          with others. You can switch it off again at any time.
+          The comparison pool is not live yet. When it is, this is how it will work, and this
+          wording is the one we are bound by.
+        </p>
+        <p>
+          We use de-identified data from your practice to build anonymous comparisons, and we
+          make those comparisons available to you and to other Deepen counsellors. That is the
+          only thing we use it for.
+        </p>
+        <p>
+          We do not sell it, licence it, or pass it to anyone outside Deepen. We will never give
+          any organisation information that identifies you, and we will never build anything that
+          sets your results beside a named colleague&rsquo;s. Nothing about your use of Deepen
+          depends on your clients agreeing to any of this.
+        </p>
+        <p>
+          Your clients decide for themselves. At intake, each client is asked, in plain words,
+          whether their anonymous scores may be used this way, and can say no or change their
+          mind at any time. Saying no changes nothing about their care, and nothing about your
+          account.
         </p>
       </section>
 

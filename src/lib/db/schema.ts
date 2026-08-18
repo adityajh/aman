@@ -35,6 +35,8 @@ export const tenants = pgTable("tenants", {
   razorpaySubscriptionId: text("razorpay_subscription_id"),
   isActive: boolean("is_active").notNull().default(true),
   isExempt: boolean("is_exempt").notNull().default(false),
+  termsAcceptedAt: timestamp("terms_accepted_at", { withTimezone: true }),
+  termsVersion: text("terms_version"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
 });
@@ -93,6 +95,12 @@ export const clients = pgTable(
     terminatedAt: timestamp("terminated_at", { withTimezone: true }),
     prematureTerminationManual: boolean("premature_termination_manual"),
     intakeNotes: text("intake_notes"),
+    poolConsent: text("pool_consent")
+      .$type<"yes" | "no" | "not_asked">()
+      .notNull()
+      .default("not_asked"),
+    poolConsentAt: timestamp("pool_consent_at", { withTimezone: true }),
+    poolConsentMethod: text("pool_consent_method").$type<"in_person" | "paper" | "message">(),
     timezone: text("timezone").notNull().default("Asia/Kolkata"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()

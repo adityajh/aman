@@ -50,10 +50,27 @@ export default function PrivacyPage() {
       <section>
         <H2>What we never do</H2>
         <ul className="list-disc pl-5 space-y-1">
-          <li>We never sell your data.</li>
-          <li>We never share it with employers or other platforms.</li>
-          <li>We never use it to train any model.</li>
+          <li>We never sell or licence client-level data.</li>
+          <li>We never take an insurer, an employer or a platform as a customer, and never pass data to one.</li>
+          <li>We never build anything that lets an outside party look at a named counsellor.</li>
+          <li>We never use your data to train any model.</li>
         </ul>
+      </section>
+
+      <section>
+        <H2>What we do with de-identified data</H2>
+        <p>
+          Two things, and only these. First, when the comparison pool is live, we use
+          de-identified readings from practices whose clients have agreed to build anonymous
+          comparisons, and we show those comparisons to Deepen counsellors. Second, we may
+          publish psychometric statistics about the measure itself, as aggregate figures that
+          identify no client and no counsellor. Nothing here is sold or licensed to anyone.
+        </p>
+        <p>
+          Your clients are asked at intake, in plain words, whether their anonymous scores may
+          be used this way. Their answer is recorded. Saying no changes nothing about their care
+          or your account.
+        </p>
       </section>
 
       <section>

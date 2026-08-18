@@ -26,7 +26,27 @@ export async function PATCH(
         terminationType,
         cancelPendingSessions,
         prematureTerminationManual,
+        poolConsent,
+        poolConsentMethod,
       } = body;
+
+      if (poolConsent !== undefined && !["yes", "no", "not_asked"].includes(poolConsent)) {
+        return NextResponse.json({ error: "Invalid poolConsent value" }, { status: 400 });
+      }
+      if (
+        poolConsentMethod !== undefined &&
+        poolConsentMethod !== null &&
+        !["in_person", "paper", "message"].includes(poolConsentMethod)
+      ) {
+        return NextResponse.json({ error: "Invalid poolConsentMethod value" }, { status: 400 });
+      }
+
+      let poolConsentFields = {};
+      if (poolConsent === "yes" || poolConsent === "no") {
+        poolConsentFields = { poolConsent, poolConsentAt: new Date() };
+      } else if (poolConsent === "not_asked") {
+        poolConsentFields = { poolConsent, poolConsentAt: null };
+      }
 
       // Reactivation logic & fence check
       let terminationFields = {};
@@ -99,6 +119,8 @@ export async function PATCH(
             prematureTerminationManual !== undefined
               ? prematureTerminationManual
               : undefined,
+          poolConsentMethod: poolConsentMethod || undefined,
+          ...poolConsentFields,
           ...terminationFields,
           updatedAt: new Date(),
         })

@@ -36,6 +36,8 @@ export default function SignupPage() {
       password: formData.get("password"),
       promoCode: formData.get("promoCode")?.toString().trim() || "",
       planTier: "deepen",
+      agreedToTerms,
+      termsVersion: "2026-08-18",
     };
 
     try {
