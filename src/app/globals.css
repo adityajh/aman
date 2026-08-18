@@ -17,6 +17,10 @@
   --color-teal-action: var(--teal-action);
   --color-terracotta: var(--terracotta);
   --color-hairline: var(--hairline);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-2: var(--ink-2);
+  --color-brick: var(--brick);
+  --color-teal: var(--teal-action);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -62,6 +66,9 @@
   --teal-action: #0F8A72;
   --terracotta: #C2632A;
   --hairline: #E4E1DA;
+  --ink-muted: #878D93;
+  --ink-2: #4A5157;
+  --brick: #B4472F;
 
   --background: var(--paper);
   --foreground: var(--ink);

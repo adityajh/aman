@@ -1,24 +1,20 @@
 import Link from "next/link";
-import { ArrowRight, Check, Minus } from "lucide-react";
-import { Logo } from "@/components/logo";
-import { Brandmark } from "@/components/brandmark";
 import { HomeHeader } from "@/components/home-header";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-paper text-ink font-sans">
-      {/* Navigation */}
       <HomeHeader />
 
       <main>
         {/* §1 Hero */}
         <section className="px-6 py-16 md:py-24 max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
           <div>
-            <h1 className="text-4xl md:text-6xl font-serif font-medium text-teal-ink tracking-tight mb-6 leading-tight">
-              Run your solo practice.<br />Know your clients are getting better.
+            <h1 className="text-4xl md:text-6xl font-serif font-medium text-teal-ink tracking-tight mb-6 leading-[1.05] max-w-[11ch]">
+              Run your practice. Know it&rsquo;s working.
             </h1>
-            <p className="text-lg md:text-xl text-ink/80 mb-8 max-w-lg font-sans leading-relaxed">
-              Close your monthly billing in ten minutes. Use a quiet, 90-second check-in to catch sliding clients before it's too late. Built for one counsellor, in India.
+            <p className="text-lg md:text-xl text-ink-2 mb-8 max-w-lg leading-relaxed">
+              Close your monthly billing in ten minutes. A quiet 90-second check-in tells you how each client is doing, while there&rsquo;s still time to help. Built for one counsellor, in India.
             </p>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-4">
               <Link
@@ -34,31 +30,42 @@ export default function Home() {
                 See how it works
               </a>
             </div>
-            <p className="text-xs text-muted font-medium">
-              14 days free. Cancel in one click. Export your data anytime.
+            <p className="text-sm text-ink-muted">
+              ₹999 a month. No card charged until day 14. Export everything, any time.
             </p>
           </div>
 
-          {/* Hero Demo Card */}
+          {/* Hero demo card */}
           <div className="bg-white border border-hairline rounded-xl p-6 shadow-xl space-y-4">
             <div className="flex justify-between items-baseline text-sm">
-              <span className="font-semibold text-slate-800">Client R. · session 6</span>
-              <span className="text-xs font-bold text-rose-600 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-rose-600 inline-block animate-pulse"></span>
-                Worth a closer look
+              <span className="font-semibold text-ink">Client A. · session 6</span>
+              <span className="text-xs font-semibold text-ink-2 flex items-center gap-1.5">
+                <svg viewBox="0 0 12 12" className="w-3 h-3 text-teal-action" aria-hidden="true">
+                  <path d="M2 6.5l2.5 2.5L10 3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Tracking
               </span>
             </div>
-            
-            <div className="relative h-44 w-full border-b border-hairline pt-2">
-              <svg viewBox="0 0 520 180" className="w-full h-full">
+
+            <div className="relative w-full">
+              <svg viewBox="0 0 520 210" className="w-full h-auto" role="img" aria-label="Demonstration chart: one client's wellbeing over six sessions, rising alongside clients who started in a similar place">
                 <g stroke="#E4E1DA" strokeWidth="1">
                   <line x1="40" y1="20" x2="500" y2="20" />
-                  <line x1="40" y1="60" x2="500" y2="60" />
-                  <line x1="40" y1="100" x2="500" y2="100" />
-                  <line x1="40" y1="140" x2="500" y2="140" />
+                  <line x1="40" y1="65" x2="500" y2="65" />
+                  <line x1="40" y1="110" x2="500" y2="110" />
+                  <line x1="40" y1="155" x2="500" y2="155" />
                 </g>
+                {/* band: clients who started in a similar place */}
+                <path
+                  d="M60,150 C150,138 240,112 320,94 C400,78 460,66 500,60 L500,104 C460,110 400,122 320,136 C240,150 150,166 60,172 Z"
+                  fill="#EEEBE4"
+                />
+                <text x="500" y="52" fontSize="11" fill="#878D93" textAnchor="end">
+                  clients who started in a similar place
+                </text>
+                {/* this client, rising */}
                 <polyline
-                  points="60,140 148,130 236,122 324,132 412,143 500,155"
+                  points="60,158 148,146 236,128 324,116 412,98 500,84"
                   fill="none"
                   stroke="#0F8A72"
                   strokeWidth="2.5"
@@ -66,109 +73,133 @@ export default function Home() {
                   strokeLinecap="round"
                 />
                 <g fill="#0F8A72" stroke="#fff" strokeWidth="2">
-                  <circle cx="60" cy="140" r="4.5" />
-                  <circle cx="148" cy="130" r="4.5" />
-                  <circle cx="236" cy="122" r="4.5" />
-                  <circle cx="324" cy="132" r="4.5" />
-                  <circle cx="412" cy="143" r="4.5" />
+                  <circle cx="60" cy="158" r="4.5" />
+                  <circle cx="148" cy="146" r="4.5" />
+                  <circle cx="236" cy="128" r="4.5" />
+                  <circle cx="324" cy="116" r="4.5" />
+                  <circle cx="412" cy="98" r="4.5" />
+                  <circle cx="500" cy="84" r="5" />
                 </g>
-                <circle cx="500" cy="155" r="5" fill="#B4472F" stroke="#fff" strokeWidth="2" />
-                <text x="500" y="172" fontSize="11" fill="#B4472F" textAnchor="end" fontWeight="600">
+                <text x="500" y="76" fontSize="11" fill="#0B4F43" textAnchor="end" fontWeight="600">
                   this client
                 </text>
                 <g fontSize="11" fill="#878D93">
-                  <text x="60" y="175" textAnchor="middle">s1</text>
-                  <text x="236" y="175" textAnchor="middle">s3</text>
-                  <text x="412" y="175" textAnchor="middle">s5</text>
-                  <text x="34" y="24" textAnchor="end">40</text>
-                  <text x="34" y="104" textAnchor="end">20</text>
+                  <text x="60" y="196" textAnchor="middle">s1</text>
+                  <text x="236" y="196" textAnchor="middle">s3</text>
+                  <text x="412" y="196" textAnchor="middle">s5</text>
+                  <text x="14" y="110" transform="rotate(-90 14 110)" textAnchor="middle">
+                    wellbeing, higher is better
+                  </text>
                 </g>
               </svg>
             </div>
 
-            <div className="border-l-4 border-rose-600 pl-3 py-1 text-xs text-slate-600">
-              <strong className="text-slate-900 font-semibold">Something to look at.</strong> Two readings below where this client started. The note says why.
+            {/* invoicing strip */}
+            <div className="flex items-center justify-between gap-4 border-t border-hairline pt-3 text-xs text-ink-2">
+              <span>
+                <strong className="text-ink font-semibold">August invoices</strong> · 23 sessions · 11 clients · two currencies · one click
+              </span>
+              <span className="shrink-0 text-[11px] font-semibold text-teal-ink bg-teal-action/10 rounded-full px-2.5 py-0.5">Sent</span>
             </div>
-            <p className="text-[10px] text-muted text-right italic">Demonstration data.</p>
+            <p className="text-[10px] text-ink-muted text-right italic">Demonstration data.</p>
           </div>
         </section>
 
-        {/* §2 How it works / Three Layers */}
+        {/* §2 Three layers */}
         <section id="how" className="py-16 bg-white border-y border-hairline">
           <div className="max-w-6xl mx-auto px-6">
             <h2 className="text-3xl md:text-4xl font-serif font-medium text-teal-ink mb-10">
-              Everything a solo counselor needs.
+              Three layers. Each one goes a little deeper.
             </h2>
             <div className="grid md:grid-cols-3 gap-6">
-              <div className="bg-paper border border-hairline rounded-xl p-6 relative flex flex-col justify-between">
+              <div className="bg-paper border border-hairline rounded-xl p-6 flex flex-col justify-between">
                 <div>
-                  <div className="w-12 h-1.5 bg-teal/40 rounded mb-6"></div>
-                  <h3 className="text-2xl font-serif text-teal-ink mb-2">Seamless Admin</h3>
-                  <p className="text-sm text-ink/80 leading-relaxed">
-                    Sessions, clinical notes, and one-click batch invoicing. Your month closes in ten minutes.
+                  <div className="w-14 h-1.5 bg-teal-action/40 rounded mb-6"></div>
+                  <h3 className="text-2xl font-serif text-teal-ink mb-2">Run the practice</h3>
+                  <p className="text-sm text-ink-2 leading-relaxed">
+                    Sessions, notes, and one-click batch invoicing. Your month closes in ten minutes.
                   </p>
                 </div>
-                <div className="mt-6 text-xs text-muted font-medium">In <b className="text-teal-ink">Deepen</b></div>
+                <div className="mt-6 text-xs text-ink-muted font-medium">In <b className="text-teal-ink">Deepen</b></div>
               </div>
 
-              <div className="bg-paper border border-hairline rounded-xl p-6 relative flex flex-col justify-between">
+              <div className="bg-paper border border-hairline rounded-xl p-6 flex flex-col justify-between">
                 <div>
-                  <div className="w-12 h-2 bg-teal rounded mb-6"></div>
-                  <h3 className="text-2xl font-serif text-teal-ink mb-2">Quiet Insights</h3>
-                  <p className="text-sm text-ink/80 leading-relaxed">
+                  <div className="w-14 h-2.5 bg-teal-action rounded mb-6"></div>
+                  <h3 className="text-2xl font-serif text-teal-ink mb-2">How is this client doing?</h3>
+                  <p className="text-sm text-ink-2 leading-relaxed">
                     A short check-in on their phone before each session. A chart per client. A flag when someone slides.
                   </p>
                 </div>
-                <div className="mt-6 text-xs text-muted font-medium">In <b className="text-teal-ink">Deepen</b></div>
+                <div className="mt-6 text-xs text-ink-muted font-medium">In <b className="text-teal-ink">Deepen</b></div>
               </div>
 
-              <div className="bg-paper border border-hairline rounded-xl p-6 relative flex flex-col justify-between">
+              <div className="bg-paper border border-hairline rounded-xl p-6 flex flex-col justify-between">
                 <div>
-                  <div className="w-12 h-3 bg-teal-ink rounded mb-6"></div>
+                  <div className="w-14 h-3.5 bg-teal-ink rounded mb-6"></div>
                   <h3 className="text-2xl font-serif text-teal-ink mb-2">
-                    Total Privacy <span className="text-[10px] uppercase font-bold text-terracotta border border-terracotta px-1.5 py-0.5 rounded ml-2">Coming</span>
+                    How am I doing?
+                    <span className="text-[10px] uppercase font-bold text-terracotta border border-terracotta px-1.5 py-0.5 rounded ml-2 align-middle">Coming</span>
                   </h3>
-                  <p className="text-sm text-ink/80 leading-relaxed">
-                    Your whole caseload on one page. Then the Outcome Report.
+                  <p className="text-sm text-ink-2 leading-relaxed">
+                    Your whole caseload on one page. Then the Outcome Report. When there isn&rsquo;t enough history to say something useful, it says so. It won&rsquo;t guess.
                   </p>
                 </div>
-                <div className="mt-6 text-xs text-muted font-medium">In <b className="text-teal-ink">Deepen Pro</b></div>
+                <div className="mt-6 text-xs text-ink-muted font-medium">In <b className="text-teal-ink">Deepen Pro</b></div>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* §2b The problem */}
+        <section className="py-16 px-6">
+          <div className="max-w-3xl mx-auto bg-white border border-hairline rounded-xl px-8 py-10 md:px-12 md:py-12">
+            <h2 className="text-3xl md:text-4xl font-serif font-medium text-teal-ink mb-5">
+              Session ends. You hope it helped.
+            </h2>
+            <p className="text-lg text-ink-2 leading-relaxed">
+              You need more than hope. You need a method. Ninety seconds, before each session, on your client&rsquo;s phone. See how each client is doing. <span className="font-serif italic text-teal-ink">Deepen your practice.</span>
+            </p>
           </div>
         </section>
 
         {/* §3 You'll know by session three */}
         <section className="py-16 max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
           <div>
-            <h2 className="text-3xl md:text-4xl font-serif font-medium text-teal-ink mb-4">
-              You'll know by session three.
+            <h2 className="text-3xl md:text-4xl font-serif font-medium text-teal-ink mb-2">
+              You&rsquo;ll know by session three.
             </h2>
-            <p className="text-lg text-ink/80 mb-4 leading-relaxed">
+            <p className="text-xs uppercase tracking-wider font-semibold text-teal-action mb-5">
+              Your practice, your thresholds.
+            </p>
+            <p className="text-lg text-ink-2 mb-4 leading-relaxed">
               Every reading is compared with where that client started. Never with anyone else. When someone slides, the note carries a flag and says why.
             </p>
-            <p className="text-sm text-muted">
-              Not a judgement about your work. A prompt to look closer while there's still time.
+            <p className="text-lg text-ink-2 mb-4 leading-relaxed">
+              Your evenings stop going to invoices, and you stop guessing about the client who worries you.
+            </p>
+            <p className="text-sm text-ink-muted">
+              Not a judgement about your work. A prompt to look closer while there&rsquo;s still time.
             </p>
           </div>
 
           <div className="bg-white border border-hairline rounded-xl p-6 shadow-sm space-y-3">
-            <p className="text-xs text-muted font-medium">Session note · Client R. · s6</p>
-            <p className="text-sm text-slate-800 leading-relaxed">
+            <p className="text-xs text-ink-muted font-medium">Session note · Client R. · s6</p>
+            <p className="text-sm text-ink leading-relaxed">
               Talked about the return to work. Sleep still poor. Bringing the manager conversation to next session.
             </p>
-            <div className="flex gap-4 text-xs text-slate-600 pt-1">
-              <span>Check-in <strong className="text-slate-900 font-bold">17</strong> <span className="text-slate-400">(started 21)</span></span>
-              <span>Working relationship <strong className="text-slate-900 font-bold">6.4</strong> <span className="text-slate-400">(was 8.1)</span></span>
+            <div className="flex gap-4 text-xs text-ink-2 pt-1">
+              <span>Check-in <strong className="text-ink font-bold">17</strong> <span className="text-ink-muted">(started 21)</span></span>
+              <span>Working relationship <strong className="text-ink font-bold">6.4</strong> <span className="text-ink-muted">(was 8.1)</span></span>
             </div>
-            <div className="border-l-4 border-rose-600 pl-3 py-1 text-xs text-slate-600">
-              <strong className="text-slate-900 font-semibold">Worth a closer look.</strong> Two readings below the start, and the relationship rating dropped this session.
+            <div className="border-l-4 border-brick pl-3 py-1 text-xs text-ink-2">
+              <strong className="text-ink font-semibold">Worth a closer look.</strong> Two readings below the start, and the relationship rating dropped this session.
             </div>
-            <p className="text-[10px] text-muted text-right italic">Demonstration data.</p>
+            <p className="text-[10px] text-ink-muted text-right italic">Demonstration data.</p>
           </div>
         </section>
 
-        {/* §4 Privacy Band */}
+        {/* §4 Privacy */}
         <section className="bg-teal-ink text-paper py-16 px-6">
           <div className="max-w-4xl mx-auto space-y-6">
             <h2 className="text-3xl md:text-4xl font-serif font-medium text-paper">
@@ -191,31 +222,31 @@ export default function Home() {
           <h2 className="text-3xl md:text-4xl font-serif font-medium text-teal-ink">
             One plan. Everything on.
           </h2>
-          <p className="text-sm text-muted">
-            Monthly. No card until day 14. Cancel any time and take everything with you.
+          <p className="text-sm text-ink-muted">
+            Monthly. No card charged until day 14. Cancel any time and take everything with you.
           </p>
 
           <div className="max-w-md mx-auto bg-white border-2 border-teal-ink rounded-2xl p-8 text-left space-y-6 shadow-xl">
-            <div className="text-4xl font-bold text-slate-900 tracking-tight">
-              ₹999 <span className="text-sm font-normal text-slate-500">/ month</span>
+            <div className="text-4xl font-bold text-ink tracking-tight">
+              ₹999 <span className="text-sm font-normal text-ink-muted">/ month</span>
             </div>
-            <ul className="space-y-3 text-sm text-slate-700">
+            <ul className="space-y-3 text-sm text-ink-2">
               <li className="flex items-start gap-2">
-                <span className="w-2 h-2 rounded-full bg-teal mt-1.5 shrink-0" /> Clients, sessions and notes
+                <span className="w-2 h-2 rounded-full bg-teal-action mt-1.5 shrink-0" /> Clients, sessions and notes
               </li>
               <li className="flex items-start gap-2">
-                <span className="w-2 h-2 rounded-full bg-teal mt-1.5 shrink-0" /> Invoices, receipts and part-payments, in one click
+                <span className="w-2 h-2 rounded-full bg-teal-action mt-1.5 shrink-0" /> Invoices, receipts and part-payments, in one click
               </li>
               <li className="flex items-start gap-2">
-                <span className="w-2 h-2 rounded-full bg-teal mt-1.5 shrink-0" /> A check-in each session, a chart per client, a flag when someone slides
+                <span className="w-2 h-2 rounded-full bg-teal-action mt-1.5 shrink-0" /> A check-in each session, a chart per client, a flag when someone slides
               </li>
               <li className="flex items-start gap-2">
-                <span className="w-2 h-2 rounded-full bg-teal mt-1.5 shrink-0" /> Full export, any time
+                <span className="w-2 h-2 rounded-full bg-teal-action mt-1.5 shrink-0" /> Full export, any time
               </li>
             </ul>
 
-            <div className="text-xs text-slate-500 pt-2 border-t border-hairline leading-relaxed">
-              <strong>Built exclusively for solo practitioners.</strong> Up to 30 active clients. Closed client records are kept forever and never count toward your limit. If you run a group clinic or agency, Deepen is not for you.
+            <div className="text-xs text-ink-muted pt-2 border-t border-hairline leading-relaxed">
+              For one counsellor. Up to 30 active clients, more than one person can see. Groups and organisations, this isn&rsquo;t for you.
             </div>
 
             <div className="pt-2">
@@ -228,8 +259,8 @@ export default function Home() {
             </div>
           </div>
 
-          <p className="text-xs text-muted pt-2 max-w-md mx-auto">
-            Deepen Pro, ₹1,999, arrives with the Outcome Report. Nobody on Deepen loses anything when it does.
+          <p className="text-sm text-ink-muted pt-2 max-w-md mx-auto leading-relaxed">
+            Coming: Deepen Pro, ₹1,999. For when you&rsquo;re ready to ask &ldquo;how am I doing, across all of them?&rdquo; Nobody on Deepen loses anything when it arrives.
           </p>
         </section>
 
@@ -240,50 +271,50 @@ export default function Home() {
           </h2>
           <div className="grid md:grid-cols-2 gap-8">
             <div>
-              <h3 className="text-sm font-semibold text-slate-900 mb-1">
-                I don't measure outcomes at the moment. Is this for me?
+              <h3 className="text-sm font-semibold text-ink mb-1">
+                I don&rsquo;t measure outcomes at the moment. Is this for me?
               </h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Yes. Your notes and billing get sorted either way, and the check-in is there when you're curious. Nobody sees it but you.
+              <p className="text-sm text-ink-2 leading-relaxed">
+                Yes. Your notes and billing get sorted either way, and the check-in is there when you&rsquo;re curious. Nobody sees it but you.
               </p>
             </div>
 
             <div>
-              <h3 className="text-sm font-semibold text-slate-900 mb-1">
+              <h3 className="text-sm font-semibold text-ink mb-1">
                 Do you do scheduling, video or a booking page?
               </h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                No, on purpose. If those are your main problem, PractiPal or PracFlow will serve you better, and we'd rather say so.
+              <p className="text-sm text-ink-2 leading-relaxed">
+                No, on purpose. Deepen does the two things a solo counsellor can&rsquo;t get anywhere else and leaves the rest to tools built for it.
               </p>
             </div>
 
             <div>
-              <h3 className="text-sm font-semibold text-slate-900 mb-1">
+              <h3 className="text-sm font-semibold text-ink mb-1">
                 Which measure do I use?
               </h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Whichever you're licensed to use, or a built-in one. Set it once and forget it.
+              <p className="text-sm text-ink-2 leading-relaxed">
+                Whichever you&rsquo;re licensed to use, or a built-in one. Set it once and forget it.
               </p>
             </div>
 
             <div>
-              <h3 className="text-sm font-semibold text-slate-900 mb-1">
+              <h3 className="text-sm font-semibold text-ink mb-1">
                 What if I stop paying?
               </h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
+              <p className="text-sm text-ink-2 leading-relaxed">
                 You export everything in one click. Nothing is held hostage.
               </p>
             </div>
           </div>
         </section>
 
-        {/* §7 Closing CTA */}
+        {/* §7 Closing */}
         <section className="py-20 text-center px-6 border-t border-hairline">
           <h2 className="text-4xl md:text-5xl font-serif font-medium text-teal-ink mb-4">
-            Fourteen days, everything on.
+            Stop guessing.
           </h2>
-          <p className="text-base text-slate-600 mb-8 max-w-md mx-auto">
-            See what a truly private, measurement-first practice feels like.
+          <p className="text-base text-ink-2 mb-8 max-w-md mx-auto">
+            See for yourself in fourteen days. Everything on, no card charged until day 14.
           </p>
           <Link
             href="/signup"
@@ -295,11 +326,11 @@ export default function Home() {
       </main>
 
       {/* §8 Footer */}
-      <footer className="border-t border-hairline py-8 px-6 text-xs text-muted">
+      <footer className="border-t border-hairline py-8 px-6 text-xs text-ink-muted">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-serif text-lg font-medium text-teal-ink">deepen<b>.</b></span>
-            <span>&nbsp; outcome tracking for counsellors</span>
+            <span className="font-serif text-lg font-medium text-teal-ink">deepen<b className="text-terracotta">.</b></span>
+            <span>outcome tracking for counsellors</span>
           </div>
           <div>Pricing · Privacy · Terms · Contact · © 2026</div>
         </div>
