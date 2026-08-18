@@ -9,28 +9,40 @@ export async function POST(req: Request) {
   try {
     const { promoCode } = await req.json();
 
-    const planId = process.env.RAZORPAY_PLAN_DEEPEN || "plan_TOl5mRuFjG4FZM";
+    const defaultPlanId = process.env.RAZORPAY_PLAN_DEEPEN || "plan_TOl5mRuFjG4FZM";
+    const foundingPlanId = process.env.RAZORPAY_PLAN_FOUNDING;
 
     const razorpay = new Razorpay({
       key_id: process.env.RAZORPAY_KEY_ID!,
       key_secret: process.env.RAZORPAY_KEY_SECRET!,
     });
 
-    const options: any = {
-      plan_id: planId,
-      total_count: 100, // Monthly recurring
-    };
-
     const foundingPromo = process.env.FOUNDING_PROMO_CODE || process.env.BETA_PROMO_CODE || "FOUNDING50";
     const offerId = process.env.RAZORPAY_FOUNDING_OFFER_ID || process.env.RAZORPAY_BETA_OFFER_ID;
 
-    if (promoCode && offerId && promoCode.trim().toUpperCase() === foundingPromo.toUpperCase()) {
+    let selectedPlanId = defaultPlanId;
+    let selectedOfferId: string | undefined = undefined;
+
+    if (promoCode && promoCode.trim().toUpperCase() === foundingPromo.toUpperCase()) {
       const existingFounding = await db.query.tenants.findMany({
         where: eq(tenants.isFounding, true),
       });
       if (existingFounding.length < 50) {
-        options.offer_id = offerId;
+        if (foundingPlanId) {
+          selectedPlanId = foundingPlanId;
+        } else if (offerId) {
+          selectedOfferId = offerId;
+        }
       }
+    }
+
+    const options: any = {
+      plan_id: selectedPlanId,
+      total_count: 100, // Monthly recurring
+    };
+
+    if (selectedOfferId) {
+      options.offer_id = selectedOfferId;
     }
 
     const subscription = await razorpay.subscriptions.create(options);

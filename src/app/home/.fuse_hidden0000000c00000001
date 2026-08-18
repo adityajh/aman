@@ -10,8 +10,8 @@ export default function Home() {
         {/* §1 Hero */}
         <section className="px-6 py-16 md:py-24 max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
           <div>
-            <h1 className="text-4xl md:text-6xl font-serif font-medium text-teal-ink tracking-tight mb-6 leading-[1.05]">
-              Run your practice.<br />Know it&rsquo;s working.
+            <h1 className="text-4xl md:text-6xl font-serif font-medium text-teal-ink tracking-tight mb-6 leading-[1.05] max-w-[11ch]">
+              Run your practice. Know it&rsquo;s working.
             </h1>
             <p className="text-lg md:text-xl text-ink-2 mb-8 max-w-lg leading-relaxed">
               Close your monthly billing in ten minutes. A quiet 90-second check-in tells you how each client is doing, while there&rsquo;s still time to help. Built for one counsellor, in India.
