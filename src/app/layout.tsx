@@ -20,8 +20,9 @@ const newsreader = Newsreader({
 });
 
 export const metadata: Metadata = {
-  title: "deepen.",
-  description: "Your analytics tell you about your business. Not your clients.",
+  title: "Deepen, outcome tracking for counsellors",
+  description:
+    "Run your practice. Know it's working. Invoicing in ten minutes and a short check-in each session, for one counsellor. Built in India.",
 };
 
 export default function RootLayout({

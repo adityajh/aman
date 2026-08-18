@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Loader2, ShieldCheck, Check } from "lucide-react";
@@ -21,6 +22,7 @@ declare global {
 export default function SignupPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -66,7 +68,7 @@ export default function SignupPage() {
       const subRes = await fetch("/api/create-subscription", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planTier: selectedPlan, promoCode: data.promoCode }),
+        body: JSON.stringify({ planTier: data.planTier, promoCode: data.promoCode }),
       });
 
       const subResText = await subRes.text();
@@ -199,7 +201,31 @@ export default function SignupPage() {
                 </p>
               </div>
 
-              <Button type="submit" className="w-full bg-teal-action hover:bg-teal-ink text-paper" disabled={loading}>
+              <div className="flex items-start gap-2">
+                <Checkbox
+                  id="agreedToTerms"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  className="mt-0.5"
+                />
+                <Label htmlFor="agreedToTerms" className="text-sm font-normal text-slate-600">
+                  I&rsquo;ve read the{" "}
+                  <Link href="/terms" className="text-teal-action hover:underline">
+                    terms
+                  </Link>{" "}
+                  and the{" "}
+                  <Link href="/privacy" className="text-teal-action hover:underline">
+                    privacy note
+                  </Link>
+                  .
+                </Label>
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full bg-teal-action hover:bg-teal-ink text-paper"
+                disabled={loading || !agreedToTerms}
+              >
                 {loading ? (
                   <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Creating practice…</>
                 ) : (

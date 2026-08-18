@@ -14,14 +14,14 @@ export default function Home() {
               Run your practice.<br />Know it&rsquo;s working.
             </h1>
             <p className="text-lg md:text-xl text-ink-2 mb-8 max-w-lg leading-relaxed">
-              Close your monthly billing in ten minutes. A quiet 90-second check-in tells you how each client is doing, while there&rsquo;s still time to help. Built for one counsellor, in India.
+              Close your monthly billing in ten minutes. A short check-in before each session and a check-out after tell you how each client is doing, while there&rsquo;s still time to help. Built for one counsellor, in India.
             </p>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-4">
               <Link
                 href="/signup"
                 className="px-8 py-3.5 bg-teal-action text-paper rounded-lg font-semibold text-base hover:bg-teal-ink transition-colors text-center shadow-md shadow-teal-action/20"
               >
-                Start your 14-day trial
+                Start my 14-day trial
               </Link>
               <a
                 href="#how"
@@ -108,9 +108,12 @@ export default function Home() {
         {/* §2 Three layers */}
         <section id="how" className="py-16 bg-white border-y border-hairline">
           <div className="max-w-6xl mx-auto px-6">
-            <h2 className="text-3xl md:text-4xl font-serif font-medium text-teal-ink mb-10">
+            <h2 className="text-3xl md:text-4xl font-serif font-medium text-teal-ink mb-3">
               Three layers. Each one goes a little deeper.
             </h2>
+            <p className="text-lg text-ink-2 mb-10 max-w-2xl">
+              Built for one counsellor, working alone. Every layer is yours and nobody else&rsquo;s.
+            </p>
             <div className="grid md:grid-cols-3 gap-6">
               <div className="bg-paper border border-hairline rounded-xl p-6 flex flex-col justify-between">
                 <div>
@@ -128,7 +131,7 @@ export default function Home() {
                   <div className="w-14 h-2.5 bg-teal-action rounded mb-6"></div>
                   <h3 className="text-2xl font-serif text-teal-ink mb-2">How is this client doing?</h3>
                   <p className="text-sm text-ink-2 leading-relaxed">
-                    A short check-in on their phone before each session. A chart per client. A flag when someone slides.
+                    A short check-in before the session, and a check-out after. A chart per client. A flag when someone slides.
                   </p>
                 </div>
                 <div className="mt-6 text-xs text-ink-muted font-medium">In <b className="text-teal-ink">Deepen</b></div>
@@ -151,15 +154,123 @@ export default function Home() {
           </div>
         </section>
 
+        {/* §2c Month closes */}
+        <section className="bg-teal-ink text-paper py-16 px-6">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="font-serif text-3xl md:text-4xl font-medium text-paper mb-3">
+              And your month closes in ten minutes.
+            </h2>
+            <p className="text-lg text-[#CFE3DD] max-w-2xl mb-10">
+              Log sessions as you go. One click generates every invoice, keeps rupee and dollar clients apart, applies your cancellation policy, and emails them out. Receipts and part-payments handled the way an accountant expects.
+            </p>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-white text-ink rounded-xl border border-hairline p-6 shadow-lg space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-serif text-lg font-medium text-ink">August 2026 invoices</h3>
+                  <span className="text-[11px] font-semibold text-teal-ink bg-teal-action/10 rounded-full px-2.5 py-0.5">14 drafts</span>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <span className="w-8 h-8 rounded-full bg-teal-action/10 text-teal-ink text-xs font-semibold flex items-center justify-center shrink-0">AK</span>
+                    <span className="text-sm text-ink flex-1">Aarav K.</span>
+                    <span className="text-sm text-ink-2 text-right">₹6,000 <span className="text-xs text-ink-muted">· 4 sessions</span></span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="w-8 h-8 rounded-full bg-teal-action/10 text-teal-ink text-xs font-semibold flex items-center justify-center shrink-0">PS</span>
+                    <span className="text-sm text-ink flex-1">Priya S.</span>
+                    <span className="text-sm text-ink-2 text-right">₹4,500 <span className="text-xs text-ink-muted">· 3 sessions</span></span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="w-8 h-8 rounded-full bg-teal-action/10 text-teal-ink text-xs font-semibold flex items-center justify-center shrink-0">RM</span>
+                    <span className="text-sm text-ink flex-1">Rohan M.</span>
+                    <span className="text-sm text-ink-2 text-right">$240 <span className="text-xs text-ink-muted">· 2 sessions</span></span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="w-8 h-8 rounded-full bg-teal-action/10 text-teal-ink text-xs font-semibold flex items-center justify-center shrink-0">NI</span>
+                    <span className="text-sm text-ink flex-1">Neha I.</span>
+                    <span className="text-sm text-ink-2 text-right">₹3,000 <span className="text-xs text-ink-muted">· 2 sessions</span></span>
+                  </div>
+                </div>
+                <div className="bg-teal-action text-paper rounded-lg text-center py-2.5 text-sm font-semibold">
+                  Generate and send all
+                </div>
+              </div>
+
+              <div className="bg-white text-ink rounded-xl border border-hairline p-6 shadow-lg space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-serif text-lg font-medium text-ink">Outstanding</h3>
+                  <span className="text-[11px] font-semibold text-teal-ink bg-teal-action/10 rounded-full px-2.5 py-0.5">₹12,500 due</span>
+                </div>
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-xs text-ink-muted text-left">
+                      <th className="font-medium pb-2">Client</th>
+                      <th className="font-medium pb-2">Due</th>
+                      <th className="font-medium pb-2">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="py-1.5 text-ink">Meera T.</td>
+                      <td className="py-1.5 text-ink-2">₹8,000</td>
+                      <td className="py-1.5 text-ink-2">Sent</td>
+                    </tr>
+                    <tr>
+                      <td className="py-1.5 text-ink">Kabir D.</td>
+                      <td className="py-1.5 text-ink-2">₹4,500</td>
+                      <td className="py-1.5 text-brick font-medium">30 days overdue</td>
+                    </tr>
+                    <tr>
+                      <td className="py-1.5 text-ink-muted">Sana P.</td>
+                      <td className="py-1.5 text-ink-muted">₹0</td>
+                      <td className="py-1.5 text-ink-muted">Settled</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p className="text-xs text-ink-muted">Reminders go out on the day you choose.</p>
+              </div>
+            </div>
+            <p className="text-[10px] italic text-[#9FC9BE] mt-4">Demonstration data.</p>
+          </div>
+        </section>
+
         {/* §2b The problem */}
         <section className="py-16 px-6">
-          <div className="max-w-3xl mx-auto bg-white border border-hairline rounded-xl px-8 py-10 md:px-12 md:py-12">
-            <h2 className="text-3xl md:text-4xl font-serif font-medium text-teal-ink mb-5">
-              Session ends. You hope it helped.
-            </h2>
-            <p className="text-lg text-ink-2 leading-relaxed">
-              You need more than hope. You need a method. Ninety seconds, before each session, on your client&rsquo;s phone. See how each client is doing. <span className="font-serif italic text-teal-ink">Deepen your practice.</span>
-            </p>
+          <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-serif font-medium text-teal-ink mb-5">
+                Session ends. You hope it helped.
+              </h2>
+              <p className="text-lg text-ink-2 leading-relaxed">
+                You need more than hope. You need a method. Ninety seconds: a short check-in before the session, and a check-out after. See how each client is doing. <span className="font-serif italic text-teal-ink">Deepen your practice.</span>
+              </p>
+            </div>
+
+            <div>
+              <div className="mx-auto w-[260px] rounded-[2rem] border-[6px] border-ink bg-white shadow-xl p-5 space-y-4">
+                <p className="text-xs text-ink-muted">Before today&rsquo;s session · 90 seconds</p>
+                <p className="font-serif text-lg text-teal-ink">
+                  Over the last week, how have you been feeling, overall?
+                </p>
+                <div className="flex items-center justify-between">
+                  <span className="w-5 h-5 rounded-full border border-hairline"></span>
+                  <span className="w-5 h-5 rounded-full border border-hairline"></span>
+                  <span className="w-5 h-5 rounded-full border border-hairline"></span>
+                  <span className="w-5 h-5 rounded-full border border-hairline"></span>
+                  <span className="w-5 h-5 rounded-full border border-hairline"></span>
+                  <span className="w-5 h-5 rounded-full bg-teal-action"></span>
+                  <span className="w-5 h-5 rounded-full border border-hairline"></span>
+                  <span className="w-5 h-5 rounded-full border border-hairline"></span>
+                  <span className="w-5 h-5 rounded-full border border-hairline"></span>
+                  <span className="w-5 h-5 rounded-full border border-hairline"></span>
+                </div>
+                <p className="text-xs text-ink-muted">1 of 4</p>
+                <div className="bg-teal-action text-paper rounded-lg text-center py-2 text-sm font-semibold">
+                  Next
+                </div>
+              </div>
+              <p className="text-[10px] italic text-ink-muted text-center mt-2">Demonstration.</p>
+            </div>
           </div>
         </section>
 
@@ -196,6 +307,38 @@ export default function Home() {
               <strong className="text-ink font-semibold">Worth a closer look.</strong> Two readings below the start, and the relationship rating dropped this session.
             </div>
             <p className="text-[10px] text-ink-muted text-right italic">Demonstration data.</p>
+          </div>
+        </section>
+
+        {/* §3b Things we will never build */}
+        <section className="max-w-6xl mx-auto px-6 py-16">
+          <h2 className="font-serif text-3xl md:text-4xl font-medium text-teal-ink mb-3">
+            Things we will never build.
+          </h2>
+          <p className="text-lg text-ink-2 max-w-2xl mb-8">
+            Not later either. Every one of these would turn your numbers into someone else&rsquo;s business.
+          </p>
+          <div className="grid md:grid-cols-5 gap-4">
+            <div className="bg-white border border-hairline rounded-xl p-5">
+              <div className="font-semibold text-ink text-sm mb-1">Scheduling or booking pages</div>
+              <p className="text-sm text-ink-2">Keep the calendar you have.</p>
+            </div>
+            <div className="bg-white border border-hairline rounded-xl p-5">
+              <div className="font-semibold text-ink text-sm mb-1">Seats or a second login</div>
+              <p className="text-sm text-ink-2">One counsellor, one account.</p>
+            </div>
+            <div className="bg-white border border-hairline rounded-xl p-5">
+              <div className="font-semibold text-ink text-sm mb-1">A supervisor or employer view</div>
+              <p className="text-sm text-ink-2">Nobody sees your numbers but you.</p>
+            </div>
+            <div className="bg-white border border-hairline rounded-xl p-5">
+              <div className="font-semibold text-ink text-sm mb-1">A directory or public profile</div>
+              <p className="text-sm text-ink-2">Your results are not a listing.</p>
+            </div>
+            <div className="bg-white border border-hairline rounded-xl p-5">
+              <div className="font-semibold text-ink text-sm mb-1">Badges, streaks or scores</div>
+              <p className="text-sm text-ink-2">You are not being graded.</p>
+            </div>
           </div>
         </section>
 
@@ -238,7 +381,7 @@ export default function Home() {
                 <span className="w-2 h-2 rounded-full bg-teal-action mt-1.5 shrink-0" /> Invoices, receipts and part-payments, in one click
               </li>
               <li className="flex items-start gap-2">
-                <span className="w-2 h-2 rounded-full bg-teal-action mt-1.5 shrink-0" /> A check-in each session, a chart per client, a flag when someone slides
+                <span className="w-2 h-2 rounded-full bg-teal-action mt-1.5 shrink-0" /> A check-in and check-out each session, a chart per client, a flag when someone slides
               </li>
               <li className="flex items-start gap-2">
                 <span className="w-2 h-2 rounded-full bg-teal-action mt-1.5 shrink-0" /> Full export, any time
@@ -246,7 +389,7 @@ export default function Home() {
             </ul>
 
             <div className="text-xs text-ink-muted pt-2 border-t border-hairline leading-relaxed">
-              For one counsellor. Up to 30 active clients, more than one person can see. Groups and organisations, this isn&rsquo;t for you.
+              For one counsellor. Up to 30 active clients, which is more than one counsellor can carry. Groups and organisations, this isn&rsquo;t for you.
             </div>
 
             <div className="pt-2">
@@ -254,7 +397,7 @@ export default function Home() {
                 href="/signup"
                 className="w-full block text-center py-3.5 bg-teal-action text-paper font-semibold rounded-lg hover:bg-teal-ink transition-colors shadow-md"
               >
-                Start your 14-day trial
+                Start my 14-day trial
               </Link>
             </div>
           </div>
@@ -320,7 +463,7 @@ export default function Home() {
             href="/signup"
             className="px-8 py-4 bg-teal-action text-paper rounded-lg font-semibold text-base hover:bg-teal-ink transition-colors inline-block shadow-lg"
           >
-            Start your 14-day trial
+            Start my 14-day trial
           </Link>
         </section>
       </main>
@@ -332,7 +475,12 @@ export default function Home() {
             <span className="font-serif text-lg font-medium text-teal-ink">deepen<b className="text-terracotta">.</b></span>
             <span>outcome tracking for counsellors</span>
           </div>
-          <div>Pricing · Privacy · Terms · Contact · © 2026</div>
+          <div className="flex items-center gap-1">
+            <Link href="#pricing" className="hover:text-teal-action transition-colors">
+              Pricing
+            </Link>
+            <span>· <Link href="/privacy" className="hover:text-teal-action transition-colors">Privacy</Link> · <Link href="/terms" className="hover:text-teal-action transition-colors">Terms</Link> · <Link href="/refunds" className="hover:text-teal-action transition-colors">Refunds</Link> · <Link href="/contact" className="hover:text-teal-action transition-colors">Contact</Link> · © 2026</span>
+          </div>
         </div>
       </footer>
     </div>
