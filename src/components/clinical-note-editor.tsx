@@ -127,7 +127,7 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
   const [showNumbers, setShowNumbers] = useState(false);
   const { data: sessionData } = useSession();
   const planTier = (sessionData?.user as any)?.planTier || "deepen";
-  const hasClinicalMeasurement = hasFeature(planTier, "CLINICAL_MEASUREMENT");
+  const hasClinicalMeasurement = true;
 
   // §7 — "Not Recorded" toggles (per ORS/SRS block). When on, that scale is
   // saved as null for this session rather than 0, so the chart bridges the gap
