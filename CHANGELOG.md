@@ -2,6 +2,14 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [5.0.1] - 2026-08-23
+### Fixed
+- **App Crash on Navigation**: Restored missing imports (including `useRouter` and `TZ_OPTIONS`) in the Clients page (`/dashboard/clients`), resolving a fatal React boundary error that caused both the Clients and Sessions pages to crash or fail to load.
+- **Notes Editor Fatal Bundle Crash**: Removed an accidental server-side module import (`@/lib/tenant`) from the client-side `clinical-note-editor.tsx`. Bringing Node.js database drivers into the browser was causing a total bundle failure and white-screen crashes when loading the Sessions page.
+- **Notes Dialog Failing to Open**: Fixed a `ReferenceError` in `clinical-note-editor.tsx` where a feature flag function was called without being defined. The ORS/SRS clinical measurement toggles are now permanently enabled across all tiers by default, ensuring the notes editor opens smoothly every time.
+
+---
+
 ## [5.0.0] - 2026-08-17
 ### Added
 - **Single Pricing Tier ("Deepen" @ ₹999/mo)**: Consolidated the primary offering into one simple tier with all core features enabled, including clinical measurements, check-ins, per-client charts, slide flags, and batch invoicing.
