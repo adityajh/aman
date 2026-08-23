@@ -5,6 +5,7 @@ declare module "next-auth" {
     tenantId?: string;
     tenantSlug?: string;
     planTier?: string;
+    isExempt?: boolean;
   }
 
   interface Session {
@@ -12,6 +13,7 @@ declare module "next-auth" {
       tenantId: string;
       tenantSlug: string;
       planTier: string;
+      isExempt?: boolean;
     };
   }
 }
@@ -21,5 +23,6 @@ declare module "next-auth/jwt" {
     tenantId?: string;
     tenantSlug?: string;
     planTier?: string;
+    isExempt?: boolean;
   }
 }

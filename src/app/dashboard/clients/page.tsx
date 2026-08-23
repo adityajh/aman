@@ -11,12 +11,14 @@ import { toast } from "sonner";
 import { Plus, User, Mail, Phone, IndianRupee, DollarSign, Pencil, X, Check, Loader2, UserMinus, LineChart, ListFilter, Calendar, AlertTriangle, Search } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
-import { TZ_OPTIONS, IST, formatIST } from "@/lib/tz";
-import { CLIENT_INTAKE_CONSENT } from "@/lib/copy/client-check-in-notice";
+import { useSession } from "next-auth/react";
 
 export default function ClientsPage() {
+  const { data: sessionData } = useSession();
+  const userPlan = (sessionData?.user as any)?.planTier;
+  const isExempt = (sessionData?.user as any)?.isExempt;
+  const isUnlimited = userPlan === "pro" || isExempt;
+
   const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -275,7 +277,7 @@ export default function ClientsPage() {
 
   return (
     <div className="p-8 space-y-6">
-      {activeCount >= 25 && (
+      {!isUnlimited && activeCount >= 25 && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-xs text-amber-800 flex items-center justify-between font-medium">
           <span><strong>{activeCount} of 30 active clients.</strong> Deepen is built for one counsellor.</span>
         </div>

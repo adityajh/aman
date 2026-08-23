@@ -77,12 +77,14 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Invalid poolConsentMethod value" }, { status: 400 });
       }
 
-      // Active Client Limit Check
+      // Active Client Limit Check (Exempt Deepen Pro & isExempt tenants)
       const tenantRow = await tx.query.tenants.findFirst({
         where: eq(tenants.id, tenantId),
       });
 
-      if (!tenantRow?.isExempt) {
+      const isUnlimited = tenantRow?.isExempt || tenantRow?.planTier === "pro";
+
+      if (!isUnlimited) {
         const activeCountRes: any = await tx.execute(sql`
           SELECT COUNT(*)::int AS count FROM clients WHERE is_active = true
         `);

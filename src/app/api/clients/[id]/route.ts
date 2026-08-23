@@ -60,7 +60,9 @@ export async function PATCH(
             where: eq(tenants.id, tenantId),
           });
 
-          if (!tenantRow?.isExempt) {
+          const isUnlimited = tenantRow?.isExempt || tenantRow?.planTier === "pro";
+
+          if (!isUnlimited) {
             const activeCountRes: any = await tx.execute(sql`
               SELECT COUNT(*)::int AS count FROM clients WHERE is_active = true
             `);

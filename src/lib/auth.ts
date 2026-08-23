@@ -27,6 +27,7 @@ export const authOptions: NextAuthOptions = {
             tenantId: users.tenantId,
             tenantSlug: tenants.slug,
             planTier: tenants.planTier,
+            isExempt: tenants.isExempt,
           })
           .from(users)
           .innerJoin(tenants, eq(users.tenantId, tenants.id))
@@ -50,6 +51,7 @@ export const authOptions: NextAuthOptions = {
           tenantId: user.tenantId,
           tenantSlug: user.tenantSlug,
           planTier: user.planTier,
+          isExempt: user.isExempt,
         };
       }
     })
@@ -63,6 +65,7 @@ export const authOptions: NextAuthOptions = {
         token.tenantId = user.tenantId;
         token.tenantSlug = user.tenantSlug;
         token.planTier = user.planTier;
+        token.isExempt = user.isExempt;
       }
       return token;
     },
@@ -71,6 +74,7 @@ export const authOptions: NextAuthOptions = {
         session.user.tenantId = token.tenantId as string;
         session.user.tenantSlug = token.tenantSlug as string;
         session.user.planTier = token.planTier as string;
+        session.user.isExempt = token.isExempt as boolean;
       }
       return session;
     }

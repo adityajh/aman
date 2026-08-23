@@ -12,6 +12,7 @@ import { Save, Loader2, AlertCircle, BarChart3, ClipboardList, Eye, EyeOff } fro
 import { cn } from "@/lib/utils";
 import { formatIST, istDateTimeToUTC } from "@/lib/tz";
 import { useSession } from "next-auth/react";
+import { hasFeature } from "@/lib/tenant";
 
 interface ClinicalNoteEditorProps {
   session: any; // Full session object for initial times
@@ -126,8 +127,8 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
   const [fetching, setFetching] = useState(true);
   const [showNumbers, setShowNumbers] = useState(false);
   const { data: sessionData } = useSession();
-  const planTier = (sessionData?.user as any)?.planTier || "basic";
-  const hasClinicalMeasurement = planTier === "pro";
+  const planTier = (sessionData?.user as any)?.planTier || "deepen";
+  const hasClinicalMeasurement = hasFeature(planTier, "CLINICAL_MEASUREMENT");
 
   // §7 — "Not Recorded" toggles (per ORS/SRS block). When on, that scale is
   // saved as null for this session rather than 0, so the chart bridges the gap
