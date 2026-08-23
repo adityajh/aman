@@ -12,6 +12,10 @@ import { Plus, User, Mail, Phone, IndianRupee, DollarSign, Pencil, X, Check, Loa
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { formatIST, IST, TZ_OPTIONS } from "@/lib/tz";
+import { CLIENT_INTAKE_CONSENT } from "@/lib/copy/client-check-in-notice";
 
 export default function ClientsPage() {
   const { data: sessionData } = useSession();
