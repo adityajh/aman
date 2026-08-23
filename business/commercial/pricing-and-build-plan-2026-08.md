@@ -16,7 +16,9 @@ One plan at launch. Everything switched on, including measurement. Pro arrives l
 | Status | Live at launch | Not sold until the Outcome Report ships |
 | Billing | Monthly only. **No annual option for now.** | Monthly only |
 | Feature flag | `deepen` | `pro` |
-| Fence | One counsellor. **Up to 30 active clients.** | Same fence |
+| Fence | One counsellor. **Up to 30 active clients.** | One counsellor. **Unlimited active clients.** |
+
+*See full comparison matrix in [product-comparison-table-2026-08.md](file:///Users/adityajhunjhunwala/Documents/Antigravity/Aman/business/commercial/product-comparison-table-2026-08.md).*
 
 **Founding 50.** The first fifty paying counsellors pay **₹699 / month**, locked for at least three years. Stated at signup. Counted server-side, never by hand.
 
