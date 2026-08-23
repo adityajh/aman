@@ -12,7 +12,6 @@ import { Save, Loader2, AlertCircle, BarChart3, ClipboardList, Eye, EyeOff } fro
 import { cn } from "@/lib/utils";
 import { formatIST, istDateTimeToUTC } from "@/lib/tz";
 import { useSession } from "next-auth/react";
-import { hasFeature } from "@/lib/tenant";
 
 interface ClinicalNoteEditorProps {
   session: any; // Full session object for initial times
