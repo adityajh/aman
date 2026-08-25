@@ -20,12 +20,13 @@ export async function GET(
 
       const total = completed.length;
       const lastDate = completed.length > 0 ? completed[0].scheduledAt : null;
+      const firstDate = completed.length > 0 ? completed[completed.length - 1].scheduledAt : null;
       const totalBilled = completed.reduce(
         (sum: any, s: any) => sum + Number(s.feeCharged || 0),
         0,
       );
 
-      return NextResponse.json({ total, lastDate, totalBilled });
+      return NextResponse.json({ total, lastDate, firstDate, totalBilled });
     } catch (error) {
       console.error(error);
       return new NextResponse("Internal Server Error", { status: 500 });

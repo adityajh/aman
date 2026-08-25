@@ -132,8 +132,8 @@ export function ClinicalNoteEditor({ session, onSave, onClose }: ClinicalNoteEdi
   // §7 — "Not Recorded" toggles (per ORS/SRS block). When on, that scale is
   // saved as null for this session rather than 0, so the chart bridges the gap
   // instead of plotting a misleading zero.
-  const [orsNotRecorded, setOrsNotRecorded] = useState(false);
-  const [srsNotRecorded, setSrsNotRecorded] = useState(false);
+  const [orsNotRecorded, setOrsNotRecorded] = useState(true);
+  const [srsNotRecorded, setSrsNotRecorded] = useState(true);
 
   // §7 — automated risk flagging. We auto-suggest "High Risk" from the
   // configurable practice-settings thresholds, but only until the counselor

@@ -21,7 +21,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import html2canvas from "html2canvas";
+import { toPng } from "html-to-image";
 import jsPDF from "jspdf";
 import { useSession } from "next-auth/react";
 
@@ -409,8 +409,8 @@ export function ClientProgressChart({ clientId, clientName, compact = false, var
       setEmailingPdf(true);
       toast.loading("Generating chart PDF...", { id: "pdf-toast" });
       
-      const canvas = await html2canvas(chartRef.current, { scale: 1 });
-      const imgData = canvas.toDataURL("image/png");
+      const imgData = await toPng(chartRef.current, { backgroundColor: '#ffffff', pixelRatio: 2 });
+      
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
@@ -418,7 +418,8 @@ export function ClientProgressChart({ clientId, clientName, compact = false, var
       });
       
       const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
       pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
       const pdfBase64 = pdf.output('datauristring').split(',')[1];
       

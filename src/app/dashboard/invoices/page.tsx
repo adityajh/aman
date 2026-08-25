@@ -125,7 +125,10 @@ function RowActions({
   );
 }
 
-export default function InvoicesPage() {
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+
+function InvoicesPageInner() {
   const [invoices, setInvoices] = useState<any[]>([]);
   const [unbilled, setUnbilled] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -159,15 +162,36 @@ export default function InvoicesPage() {
     }
   };
 
-  const [filterGenerated, setFilterGenerated] = useState(true);
-  const [filterSent, setFilterSent] = useState(true);
-  const [filterPaid, setFilterPaid] = useState(true);
-  const [filterOverdue, setFilterOverdue] = useState(true);
+  const searchParams = useSearchParams();
+  const st = searchParams.get("status") || "draft,sent,paid,overdue";
+  const [filterGenerated, setFilterGenerated] = useState(st.includes("draft"));
+  const [filterSent, setFilterSent] = useState(st.includes("sent"));
+  const [filterPaid, setFilterPaid] = useState(st.includes("paid"));
+  const [filterOverdue, setFilterOverdue] = useState(st.includes("overdue"));
 
   // Flat-list sorting + free-text search.
-  const [sortKey, setSortKey] = useState<"date" | "client" | "total" | "status">("date");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
-  const [search, setSearch] = useState("");
+  const [sortKey, setSortKey] = useState<"date" | "client" | "total" | "status">((searchParams.get("sort") as any) || "date");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">((searchParams.get("dir") as any) || "desc");
+  const [search, setSearch] = useState(searchParams.get("q") || "");
+  const router = useRouter();
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    const stArr = [];
+    if (filterGenerated) stArr.push("draft");
+    if (filterSent) stArr.push("sent");
+    if (filterPaid) stArr.push("paid");
+    if (filterOverdue) stArr.push("overdue");
+    const stStr = stArr.join(",");
+    if (stStr !== "draft,sent,paid,overdue") params.set("status", stStr);
+    
+    if (sortKey !== "date") params.set("sort", sortKey);
+    if (sortDir !== "desc") params.set("dir", sortDir);
+    if (search) params.set("q", search);
+    
+    const qs = params.toString();
+    router.replace(`/dashboard/invoices${qs ? `?${qs}` : ""}`, { scroll: false });
+  }, [filterGenerated, filterSent, filterPaid, filterOverdue, sortKey, sortDir, search, router]);
   const toggleSort = (key: "date" | "client" | "total" | "status") => {
     if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
     else { setSortKey(key); setSortDir(key === "client" ? "asc" : "desc"); }
@@ -703,5 +727,13 @@ export default function InvoicesPage() {
 
       
     </div>
+  );
+}
+
+export default function InvoicesPage() {
+  return (
+    <Suspense fallback={<div className="p-8 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-slate-300" /></div>}>
+      <InvoicesPageInner />
+    </Suspense>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -78,6 +78,17 @@ function SessionsPageInner() {
   const [timeSort, setTimeSort] = useState<"asc" | "desc">("desc");
   // Free-text search across client name / email.
   const [search, setSearch] = useState("");
+  const router = useRouter();
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (timeFilter !== "today") params.set("timeFilter", timeFilter);
+    if (clientFilter !== "all") params.set("clientId", clientFilter);
+    if (statusFilter !== "all") params.set("status", statusFilter);
+    if (search) params.set("q", search);
+    const qs = params.toString();
+    router.replace(`/dashboard/sessions${qs ? `?${qs}` : ""}`, { scroll: false });
+  }, [timeFilter, clientFilter, statusFilter, search, router]);
 
   const fetchData = async () => {
     try {

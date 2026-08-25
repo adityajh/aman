@@ -37,7 +37,10 @@ function Money({ map, tone }: { map: CurrencyMap; tone?: "owed" | "credit" | "pl
   );
 }
 
-export default function PaymentsPage() {
+import { Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+
+function PaymentsPageInner() {
   const [receipts, setReceipts] = useState<any[]>([]);
   const [invoices, setInvoices] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]);
@@ -45,19 +48,32 @@ export default function PaymentsPage() {
   const [feeSchemes, setFeeSchemes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [open, setOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const [open, setOpen] = useState(searchParams.get("newPayment") === "true");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
-  const [view, setView] = useState<"clients" | "invoices">("clients");
-  const [drillClientId, setDrillClientId] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
-  const [invoiceSortKey, setInvoiceSortKey] = useState<"date" | "number">("date");
-  const [invoiceSortDir, setInvoiceSortDir] = useState<"asc" | "desc">("desc");
+  const [view, setView] = useState<"clients" | "invoices">((searchParams.get("view") as any) || "clients");
+  const [drillClientId, setDrillClientId] = useState<string | null>(searchParams.get("drillClientId") || null);
+  const [search, setSearch] = useState(searchParams.get("q") || "");
+  const [invoiceSortKey, setInvoiceSortKey] = useState<"date" | "number">((searchParams.get("sort") as any) || "date");
+  const [invoiceSortDir, setInvoiceSortDir] = useState<"asc" | "desc">((searchParams.get("dir") as any) || "desc");
 
-  const [selectedClientId, setSelectedClientId] = useState("");
+  const [selectedClientId, setSelectedClientId] = useState(searchParams.get("clientId") || "");
   const [paymentMethod, setPaymentMethod] = useState("upi");
   const [paymentCurrency, setPaymentCurrency] = useState("INR");
+  const router = useRouter();
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (view !== "clients") params.set("view", view);
+    if (drillClientId) params.set("drillClientId", drillClientId);
+    if (search) params.set("q", search);
+    if (invoiceSortKey !== "date") params.set("sort", invoiceSortKey);
+    if (invoiceSortDir !== "desc") params.set("dir", invoiceSortDir);
+    const qs = params.toString();
+    router.replace(`/dashboard/payments${qs ? `?${qs}` : ""}`, { scroll: false });
+  }, [view, drillClientId, search, invoiceSortKey, invoiceSortDir, router]);
 
   const fetchData = async () => {
     try {
@@ -418,5 +434,13 @@ export default function PaymentsPage() {
         </>
       )}
     </div>
+  );
+}
+
+export default function PaymentsPage() {
+  return (
+    <Suspense fallback={<div className="p-8 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-slate-300" /></div>}>
+      <PaymentsPageInner />
+    </Suspense>
   );
 }

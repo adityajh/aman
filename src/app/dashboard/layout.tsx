@@ -14,7 +14,7 @@ export default async function DashboardLayout({
 }) {
   const session = await getServerSession(authOptions);
   const email = session?.user?.email?.toLowerCase() || "";
-  const envAdmins = (process.env.ADMIN_EMAILS || "vijay10gopal@gmail.com").split(",");
+  const envAdmins = (process.env.ADMIN_EMAILS || "").split(",");
   const adminEmails = [...envAdmins, "adityaj@adipa.com"].map(e => e.trim().toLowerCase());
   const isAdmin = adminEmails.includes(email);
   let context;

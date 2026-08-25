@@ -17,7 +17,10 @@ import { cn } from "@/lib/utils";
 import { formatIST, IST, TZ_OPTIONS } from "@/lib/tz";
 import { CLIENT_INTAKE_CONSENT } from "@/lib/copy/client-check-in-notice";
 
-export default function ClientsPage() {
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+
+function ClientsPageInner() {
   const { data: sessionData } = useSession();
   const userPlan = (sessionData?.user as any)?.planTier;
   const isExempt = (sessionData?.user as any)?.isExempt;
@@ -37,8 +40,11 @@ export default function ClientsPage() {
   const [terminateOpen, setTerminateOpen] = useState(false);
   const [terminationReason, setTerminationReason] = useState("");
   const [terminationType, setTerminationType] = useState("planned");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "terminated">("active");
-  const [search, setSearch] = useState("");
+  const searchParams = useSearchParams();
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "terminated">((searchParams.get("status") as any) || "active");
+  const [search, setSearch] = useState(searchParams.get("q") || "");
+  const [sortCol, setSortCol] = useState<"name" | "ors" | "srs">((searchParams.get("sort") as any) || "name");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">((searchParams.get("dir") as any) || "asc");
   const [conflictOpen, setConflictOpen] = useState(false);
   const [conflictClient, setConflictClient] = useState<any>(null);
   const [cancelSessionsOnTerminate, setCancelSessionsOnTerminate] = useState(false);
@@ -127,10 +133,39 @@ export default function ClientsPage() {
     return true;
   });
 
+  let sortedClients = [...filteredClients];
+  sortedClients.sort((a, b) => {
+    let aVal, bVal;
+    if (sortCol === "name") {
+      aVal = a.name.toLowerCase();
+      bVal = b.name.toLowerCase();
+    } else if (sortCol === "ors") {
+      aVal = a.latestOrsScore ?? -1;
+      bVal = b.latestOrsScore ?? -1;
+    } else if (sortCol === "srs") {
+      aVal = a.latestSrsScore ?? -1;
+      bVal = b.latestSrsScore ?? -1;
+    }
+    
+    if (aVal < bVal) return sortDir === "asc" ? -1 : 1;
+    if (aVal > bVal) return sortDir === "asc" ? 1 : -1;
+    return 0;
+  });
+
   useEffect(() => {
     fetchClients();
     fetch("/api/fee-schemes").then(r => r.json()).then(setFeeSchemes).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (statusFilter !== "active") params.set("status", statusFilter);
+    if (search) params.set("q", search);
+    if (sortCol !== "name") params.set("sort", sortCol);
+    if (sortDir !== "asc") params.set("dir", sortDir);
+    const qs = params.toString();
+    router.replace(`/dashboard/clients${qs ? `?${qs}` : ""}`, { scroll: false });
+  }, [statusFilter, search, sortCol, sortDir, router]);
 
   // Re-seed fee scheme state whenever edit mode opens (handles race where feeSchemes loads after click)
   useEffect(() => {
@@ -483,8 +518,12 @@ export default function ClientsPage() {
                 <TableHead>Name</TableHead>
                 <TableHead>Contact</TableHead>
                 <TableHead>Default Fee</TableHead>
-                <TableHead className="w-16 text-center">ORS</TableHead>
-                <TableHead className="w-16 text-center">SRS</TableHead>
+                <TableHead className="w-16 text-center cursor-pointer select-none hover:bg-slate-100" onClick={() => { setSortCol("ors"); setSortDir(sortCol === "ors" && sortDir === "desc" ? "asc" : "desc"); }}>
+                  ORS {sortCol === "ors" && (sortDir === "asc" ? "↑" : "↓")}
+                </TableHead>
+                <TableHead className="w-16 text-center cursor-pointer select-none hover:bg-slate-100" onClick={() => { setSortCol("srs"); setSortDir(sortCol === "srs" && sortDir === "desc" ? "asc" : "desc"); }}>
+                  SRS {sortCol === "srs" && (sortDir === "asc" ? "↑" : "↓")}
+                </TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -493,12 +532,12 @@ export default function ClientsPage() {
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-10">Loading clients...</TableCell>
                 </TableRow>
-              ) : filteredClients.length === 0 ? (
+              ) : sortedClients.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">No clients found.</TableCell>
+                  <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">No clients found.</TableCell>
                 </TableRow>
               ) : (
-                filteredClients.map((client) => (
+                sortedClients.map((client) => (
                   <TableRow key={client.id} className="hover:bg-slate-50 transition-colors">
                     <TableCell>
                       <div className="flex flex-col">
@@ -963,3 +1002,11 @@ export default function ClientsPage() {
   );
 }
 
+
+export default function ClientsPage() {
+  return (
+    <Suspense fallback={<div className="p-8 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-slate-300" /></div>}>
+      <ClientsPageInner />
+    </Suspense>
+  );
+}

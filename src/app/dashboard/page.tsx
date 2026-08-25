@@ -95,13 +95,13 @@ export default function DashboardPage() {
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-4">
-            <Link href="/clients" className={cn(buttonVariants({ variant: "default" }))}>
+            <Link href="/dashboard/clients" className={cn(buttonVariants({ variant: "default" }))}>
               Add New Client
             </Link>
-            <Link href="/sessions" className={cn(buttonVariants({ variant: "outline" }))}>
+            <Link href="/dashboard/sessions" className={cn(buttonVariants({ variant: "outline" }))}>
               Schedule Session
             </Link>
-            <Link href="/invoices" className={cn(buttonVariants({ variant: "secondary" }))}>
+            <Link href="/dashboard/invoices" className={cn(buttonVariants({ variant: "secondary" }))}>
               Run Monthly Billing
             </Link>
           </CardContent>

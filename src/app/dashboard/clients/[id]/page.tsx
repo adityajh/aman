@@ -14,6 +14,7 @@ export default function ClientDetailPage() {
   const [client, setClient] = useState<any>(null);
   const [stats, setStats] = useState<any>(null);
   const [feeSchemes, setFeeSchemes] = useState<any[]>([]);
+  const [sessions, setSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,11 +23,13 @@ export default function ClientDetailPage() {
       fetch(`/api/clients/${id}`).then((r) => (r.ok ? r.json() : null)),
       fetch(`/api/clients/${id}/stats`).then((r) => (r.ok ? r.json() : null)),
       fetch(`/api/fee-schemes`).then((r) => (r.ok ? r.json() : [])),
+      fetch(`/api/sessions?clientId=${id}`).then((r) => (r.ok ? r.json() : [])),
     ])
-      .then(([c, s, f]) => {
+      .then(([c, s, f, sess]) => {
         setClient(c);
         setStats(s);
         setFeeSchemes(Array.isArray(f) ? f : []);
+        setSessions(Array.isArray(sess) ? sess : (sess.sessions || []));
       })
       .finally(() => setLoading(false));
   }, [id]);
@@ -92,11 +95,11 @@ export default function ClientDetailPage() {
         </Card>
         <Card className="border-slate-200">
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="rounded-lg bg-emerald-50 p-2"><Wallet className="h-5 w-5 text-emerald-500" /></div>
+            <div className="rounded-lg bg-emerald-50 p-2"><CalendarDays className="h-5 w-5 text-emerald-500" /></div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Total Billed</p>
-              <p className="text-2xl font-bold text-slate-900 tabular-nums">
-                {sym}{Number(stats?.totalBilled ?? 0).toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">First Session</p>
+              <p className="text-lg font-bold text-slate-900">
+                {stats?.firstDate ? formatIST(new Date(stats.firstDate), "d MMM yyyy") : "—"}
               </p>
             </div>
           </CardContent>
@@ -109,6 +112,43 @@ export default function ClientDetailPage() {
           <ClientProgressChart clientId={id} clientName={client.name} variant="page" />
         </CardContent>
       </Card>
+
+      {/* Historical Notes */}
+      <div className="space-y-4 pt-4">
+        <h2 className="text-xl font-bold tracking-tight text-slate-900">Historical Session Notes</h2>
+        {sessions.filter(s => s.status === 'completed' && s.note).length === 0 ? (
+          <p className="text-sm text-slate-500">No session notes found.</p>
+        ) : (
+          <div className="space-y-4">
+            {sessions
+              .filter(s => s.status === 'completed' && s.note)
+              .sort((a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime())
+              .map(s => (
+              <Card key={s.id} className="border-slate-200 shadow-sm">
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-3 mb-4">
+                    <CalendarDays className="h-5 w-5 text-slate-400" />
+                    <span className="font-semibold text-slate-900">{formatIST(new Date(s.scheduledAt), "EEEE, d MMM yyyy 'at' h:mm a")}</span>
+                    {s.note.riskFlag && s.note.riskFlag !== "none" && (
+                      <Badge variant="outline" className={s.note.riskFlag === "high" ? "bg-rose-50 text-rose-700 border-rose-200" : "bg-amber-50 text-amber-700 border-amber-200"}>
+                        {s.note.riskFlag.toUpperCase()} RISK
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm text-slate-700">
+                    {s.note.subjective && <div><strong className="text-slate-900 block mb-1">Subjective / Check-in:</strong><p className="whitespace-pre-wrap">{s.note.subjective}</p></div>}
+                    {s.note.updates && <div><strong className="text-slate-900 block mb-1">Updates / Presentation:</strong><p className="whitespace-pre-wrap">{s.note.updates}</p></div>}
+                    {s.note.agenda && <div><strong className="text-slate-900 block mb-1">Agenda / Process:</strong><p className="whitespace-pre-wrap">{s.note.agenda}</p></div>}
+                    {s.note.clientActions && <div><strong className="text-slate-900 block mb-1">Client Actions (Homework):</strong><p className="whitespace-pre-wrap">{s.note.clientActions}</p></div>}
+                    {s.note.myActions && <div><strong className="text-slate-900 block mb-1">Therapist Actions:</strong><p className="whitespace-pre-wrap">{s.note.myActions}</p></div>}
+                    {s.note.feedback && <div><strong className="text-slate-900 block mb-1">Feedback:</strong><p className="whitespace-pre-wrap">{s.note.feedback}</p></div>}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
