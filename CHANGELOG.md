@@ -2,6 +2,21 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [5.0.2] - 2026-08-25
+### Added
+- **URL Syncing**: Dashboard pages (Clients, Sessions, Payments, Invoices) now sync filter and sort states to the URL, allowing states to persist across reloads and deep linking.
+- **Client Table Sorting**: Added interactive table sorting for ORS and SRS scores on the Clients page.
+- **Historical Session Notes**: Fetched and displayed historical session notes in a neat grid format beneath the progress charts on the individual client detail view.
+- **Pre-filled Payments**: The Payments page now reads `?newPayment=true&clientId=X` from the URL to automatically open the record payment dialog with the client pre-filled.
+
+### Changed
+- **Client Chart Stats**: Replaced "Total Billed" with "First Session Date" in the client detail charts view for better clinical context.
+- **Measurement Defaults**: The Clinical Note Editor now checks "Not recorded" by default for ORS/SRS scores instead of defaulting to 0, ensuring missing data isn't recorded as a poor score.
+
+### Fixed
+- **PDF Export Crash**: Switched from `html2canvas` to `html-to-image` to fix PDF generation crashes caused by unsupported Tailwind v4 `lab`/`oklab` colors.
+- **Admin Access**: Removed a hardcoded legacy platform admin email from the layout to ensure the super-admin portal correctly relies on environment variables.
+
 ## [5.0.1] - 2026-08-23
 ### Fixed
 - **App Crash on Navigation**: Restored missing imports (including `useRouter` and `TZ_OPTIONS`) in the Clients page (`/dashboard/clients`), resolving a fatal React boundary error that caused both the Clients and Sessions pages to crash or fail to load.
