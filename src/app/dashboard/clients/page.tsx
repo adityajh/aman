@@ -325,8 +325,8 @@ export default function ClientsPage() {
             render={
               <Button 
                 className="gap-2" 
-                disabled={activeCount >= 30}
-                title={activeCount >= 30 ? "Deepen is built for solo practices. You've reached the 30 active client limit." : undefined}
+                disabled={!isUnlimited && activeCount >= 30}
+                title={(!isUnlimited && activeCount >= 30) ? "Deepen is built for solo practices. You've reached the 30 active client limit." : undefined}
               >
                 <Plus className="h-4 w-4" /> Add Client
               </Button>

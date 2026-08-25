@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
-import { clients, tenants } from "@/lib/db/schema";
+import { clients, tenants, sessions } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, and, isNull } from "drizzle-orm";
 import { getTenantContext, withTenantContext, MAX_ACTIVE_CLIENTS } from "@/lib/tenant";
 
 export async function PATCH(
@@ -94,8 +94,6 @@ export async function PATCH(
 
         // Issue 5: Cancel uninvoiced sessions if requested
         if (cancelPendingSessions) {
-          const { sessions } = await import("@/lib/db/schema");
-          const { and, isNull } = await import("drizzle-orm");
           await tx
             .update(sessions)
             .set({
