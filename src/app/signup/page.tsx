@@ -199,7 +199,7 @@ export default function SignupPage() {
                   <li>• For one counsellor. Nobody else can see your data, including us.</li>
                 </ul>
                 <p className="text-[11px] text-slate-400 font-medium border-t border-slate-200/60 pt-2">
-                  14 days free. Cancel in one click. No long commitment.
+                  7 days free. Cancel in one click. No long commitment.
                 </p>
               </div>
 
@@ -207,7 +207,7 @@ export default function SignupPage() {
                 <Checkbox
                   id="agreedToTerms"
                   checked={agreedToTerms}
-                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  onCheckedChange={(checked) => setAgreedToTerms(checked === true)}
                   className="mt-0.5"
                 />
                 <Label htmlFor="agreedToTerms" className="text-sm font-normal text-slate-600">
@@ -223,7 +223,7 @@ export default function SignupPage() {
                 {loading ? (
                   <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Creating practice…</>
                 ) : (
-                  "Start my 14-day trial"
+                  "Start my 7-day trial"
                 )}
               </Button>
 

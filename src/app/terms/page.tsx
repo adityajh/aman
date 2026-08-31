@@ -113,8 +113,8 @@ export default function TermsPage() {
           Deepen costs ₹999 a month, billed monthly. There is no yearly plan.
         </p>
         <p>
-          Your trial runs for 14 days. We ask for a card at signup, but you are not
-          charged until day 14. You can cancel any time before then and you will not be
+          Your trial runs for 7 days. We ask for a card at signup, but you are not
+          charged until day 7. You can cancel any time before then and you will not be
           charged at all.
         </p>
       </section>

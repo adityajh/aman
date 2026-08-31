@@ -64,8 +64,8 @@ export async function POST(req: Request) {
       options.offer_id = selectedOfferId;
     }
 
-    // Add 14-day trial period dynamically
-    const trialDurationInSeconds = 14 * 24 * 60 * 60; // 14 days
+    // Add 7-day trial period dynamically
+    const trialDurationInSeconds = 7 * 24 * 60 * 60; // 7 days
     options.start_at = Math.floor(Date.now() / 1000) + trialDurationInSeconds;
 
     const subscription = await razorpay.subscriptions.create(options);

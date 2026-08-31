@@ -21,7 +21,7 @@ export default function Home() {
                 href="/signup"
                 className="px-8 py-3.5 bg-teal-action text-paper rounded-lg font-semibold text-base hover:bg-teal-ink transition-colors text-center shadow-md shadow-teal-action/20"
               >
-                Start my 14-day trial
+                Start my 7-day trial
               </Link>
               <a
                 href="#how"
@@ -31,7 +31,7 @@ export default function Home() {
               </a>
             </div>
             <p className="text-sm text-ink-muted">
-              ₹999 a month. No card charged until day 14. Export everything, any time.
+              ₹999 a month. No card charged until day 7. Export everything, any time.
             </p>
           </div>
 
@@ -352,7 +352,7 @@ export default function Home() {
             One plan. Everything on.
           </h2>
           <p className="text-sm text-ink-muted">
-            Monthly. No card charged until day 14. Cancel any time and take everything with you.
+            Monthly. No card charged until day 7. Cancel any time and take everything with you.
           </p>
 
           <div className="max-w-md mx-auto bg-white border-2 border-teal-ink rounded-2xl p-8 text-left space-y-6 shadow-xl">
@@ -383,7 +383,7 @@ export default function Home() {
                 href="/signup"
                 className="w-full block text-center py-3.5 bg-teal-action text-paper font-semibold rounded-lg hover:bg-teal-ink transition-colors shadow-md"
               >
-                Start my 14-day trial
+                Start my 7-day trial
               </Link>
             </div>
           </div>
@@ -443,13 +443,13 @@ export default function Home() {
             Stop guessing.
           </h2>
           <p className="text-base text-ink-2 mb-8 max-w-md mx-auto">
-            See for yourself in fourteen days. Everything on, no card charged until day 14.
+            See for yourself in seven days. Everything on, no card charged until day 7.
           </p>
           <Link
             href="/signup"
             className="px-8 py-4 bg-teal-action text-paper rounded-lg font-semibold text-base hover:bg-teal-ink transition-colors inline-block shadow-lg"
           >
-            Start my 14-day trial
+            Start my 7-day trial
           </Link>
         </section>
       </main>

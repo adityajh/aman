@@ -29,10 +29,10 @@ export function HomeHeader() {
         <Link href="#pricing" className="hover:text-teal-action transition-colors">Pricing</Link>
         <Link href="/login" className="hover:text-teal-action transition-colors">Log in</Link>
         <Link href="/signup" className="px-4 py-2 bg-teal-action text-paper rounded-md hover:bg-teal-ink transition-colors">
-          Start my 14-day trial
+          Start my 7-day trial
         </Link>
       </nav>
-
+ 
       {/* Mobile Navigation */}
       {isMobileMenuOpen && (
         <nav className="mt-4 flex flex-col gap-4 text-base font-medium md:hidden pb-4 border-t border-hairline pt-4 animate-in slide-in-from-top-4 fade-in duration-200">
@@ -40,7 +40,7 @@ export function HomeHeader() {
           <Link href="#pricing" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-teal-action transition-colors px-2 py-1">Pricing</Link>
           <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-teal-action transition-colors px-2 py-1">Log in</Link>
           <Link href="/signup" onClick={() => setIsMobileMenuOpen(false)} className="inline-block text-center w-full px-4 py-3 mt-2 bg-teal-action text-paper rounded-md hover:bg-teal-ink transition-colors">
-            Start my 14-day trial
+            Start my 7-day trial
           </Link>
         </nav>
       )}

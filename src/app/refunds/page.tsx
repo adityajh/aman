@@ -15,8 +15,8 @@ export default function RefundsPage() {
       <section>
         <H2>The trial</H2>
         <p>
-          Your 14-day trial is free. We ask for a card at signup, but you are not charged
-          until day 14. You can cancel any time before then and you will not be charged
+          Your 7-day trial is free. We ask for a card at signup, but you are not charged
+          until day 7. You can cancel any time before then and you will not be charged
           at all.
         </p>
       </section>
