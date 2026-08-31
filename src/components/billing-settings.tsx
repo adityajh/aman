@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, CreditCard, Download } from "lucide-react";
+import { Loader2, CreditCard, Download, FileText, ExternalLink } from "lucide-react";
 import Script from "next/script";
 import { formatIST } from "@/lib/tz";
 
@@ -164,6 +164,70 @@ export function BillingSettings() {
                       {formatIST(new Date(billingInfo.nextBillingDate), "d MMM yyyy")}
                     </p>
                   </div>
+                )}
+              </div>
+            )}
+            
+            {/* SaaS Invoices Table */}
+            {billingInfo && !billingInfo.isExempt && (
+              <div className="pt-6 border-t border-slate-100 space-y-3">
+                <h4 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-teal-700" /> Subscription Billing History
+                </h4>
+                {billingInfo.invoices && billingInfo.invoices.length > 0 ? (
+                  <div className="border border-slate-200 rounded-lg overflow-hidden text-sm">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                          <th className="p-3">Invoice #</th>
+                          <th className="p-3">Date</th>
+                          <th className="p-3">Amount</th>
+                          <th className="p-3">Status</th>
+                          <th className="p-3 text-right">Receipt</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {billingInfo.invoices.map((inv: any) => (
+                          <tr key={inv.id} className="hover:bg-slate-50/50">
+                            <td className="p-3 font-mono font-medium text-slate-800">{inv.invoiceNumber}</td>
+                            <td className="p-3 text-slate-600">
+                              {inv.date ? formatIST(new Date(inv.date), "d MMM yyyy") : "—"}
+                            </td>
+                            <td className="p-3 font-semibold text-slate-900">
+                              {inv.currency === "USD" ? "$" : "₹"}{inv.amount.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                            </td>
+                            <td className="p-3">
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold uppercase ${
+                                inv.status === 'paid' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                                inv.status === 'issued' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                                'bg-slate-100 text-slate-600'
+                              }`}>
+                                {inv.status}
+                              </span>
+                            </td>
+                            <td className="p-3 text-right">
+                              {inv.pdfUrl ? (
+                                <a
+                                  href={inv.pdfUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 text-xs font-semibold text-teal-700 hover:text-teal-900 hover:underline"
+                                >
+                                  Download <ExternalLink className="h-3 w-3" />
+                                </a>
+                              ) : (
+                                <span className="text-slate-400 text-xs">—</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-400 italic bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    No subscription invoices generated yet. Your monthly invoice will appear here after your first billing cycle.
+                  </p>
                 )}
               </div>
             )}
