@@ -80,8 +80,24 @@ export default function AdminPage() {
     }
   };
 
+  const [copiedCodes, setCopiedCodes] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("deepen_issued_codes");
+      if (saved) setCopiedCodes(new Set(JSON.parse(saved)));
+    } catch {}
+  }, []);
+
   const copyToClipboard = (code: string) => {
     navigator.clipboard.writeText(code);
+    setCopiedCodes((prev) => {
+      const updated = new Set(prev).add(code);
+      try {
+        localStorage.setItem("deepen_issued_codes", JSON.stringify(Array.from(updated)));
+      } catch {}
+      return updated;
+    });
     toast.success(`Copied ${code} to clipboard!`);
   };
 
@@ -160,16 +176,29 @@ export default function AdminPage() {
             <p className="text-xs text-slate-400 italic py-2">No available codes. Click "Generate 10 Codes" above to create some.</p>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 max-h-48 overflow-y-auto p-1 bg-slate-50 rounded-lg border">
-              {availableCodes.map((c) => (
-                <div
-                  key={c.id}
-                  onClick={() => copyToClipboard(c.code)}
-                  className="flex items-center justify-between bg-white border border-slate-200 hover:border-teal-400 rounded px-3 py-2 cursor-pointer transition shadow-xs group"
-                >
-                  <span className="text-xs font-mono font-bold text-slate-800">{c.code}</span>
-                  <Copy className="h-3 w-3 text-slate-400 group-hover:text-teal-600 shrink-0 ml-1" />
-                </div>
-              ))}
+              {availableCodes.map((c) => {
+                const isCopied = copiedCodes.has(c.code);
+                return (
+                  <div
+                    key={c.id}
+                    onClick={() => copyToClipboard(c.code)}
+                    className={`flex items-center justify-between border rounded px-3 py-2 cursor-pointer transition shadow-xs group ${
+                      isCopied
+                        ? "bg-amber-50/80 border-amber-300 hover:border-amber-400 text-amber-900"
+                        : "bg-white border-slate-200 hover:border-teal-400 text-slate-800"
+                    }`}
+                  >
+                    <span className="text-xs font-mono font-bold">{c.code}</span>
+                    {isCopied ? (
+                      <span className="text-[9px] font-sans font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-200/80 text-amber-900 shrink-0 ml-1">
+                        ISSUED
+                      </span>
+                    ) : (
+                      <Copy className="h-3 w-3 text-slate-400 group-hover:text-teal-600 shrink-0 ml-1" />
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

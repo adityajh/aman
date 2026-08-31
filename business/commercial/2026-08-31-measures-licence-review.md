@@ -1,5 +1,8 @@
 # Measures Licence Agreement, Performance Metrics PLLC
 
+> **Start with `2026-08-31-measures-position.md`.** That is the canonical statement and the
+> change list. This document is the working detail and evidence behind it.
+
 **Date:** 31 August 2026
 **Status:** active. Decision pending.
 **Source:** draft received from Scott D. Miller, PhD. "Performance Metrics Boilerplate
@@ -724,3 +727,104 @@ is the one that matters most, because it is the whole legal position in nine wor
 Placement: behind login, on the settings screen where thresholds are set, and optionally
 collapsed under an "about these measures" link in the note editor. Not the footer. Not the
 marketing site.
+
+---
+
+# Addendum 6, 31 August 2026. Linking counsellors to the licence, and analysing the data
+
+## A. Should we link counsellors to the free licence? Yes, and it helps us
+
+Linking is not distribution. We would be routing counsellors **into** his licensing system
+rather than around it, which is the opposite of the infringing act.
+
+It also does three useful things at once:
+
+1. **Best available good-faith evidence.** *Hawkins* weighs good faith explicitly. A product
+   that actively sends users to obtain a proper licence from the rights holder is the
+   picture of it.
+2. **Demonstrates the position rather than asserting it.** "Deepen does not supply these
+   instruments" is more convincing when we point at who does.
+3. **Solves compliance better than a checkbox.** A tick-box asserting a licence is weaker
+   than a tick-box next to the path to get one.
+
+### Rules for doing it
+
+- **Link the registration page, never the PDF.** Counsellors must pass through his licence
+  gate. Deep-linking past it undercuts the whole point.
+- **Never host, mirror or email the forms ourselves.** Clause 5 of the individual licence
+  forbids the counsellor distributing copies, and us hosting them is straightforward
+  infringement.
+- **No endorsement language.** "Get your free licence from the authors", not "our partner".
+- **Say the solo boundary.** The free licence is individual use. A counsellor in a practice
+  of two or more needs the group licence, $100 up to ten providers.
+
+### Better: make it a Measures page, not an ORS page
+
+List every supported instrument with its licensing status and where to get it. PHQ-9 and
+GAD-7, free, no licence needed. PCL-5, public domain. ORS and SRS, free individual licence,
+link. This reinforces the pluggable positioning, is genuinely useful, and avoids looking
+like a distribution channel for one author's product.
+
+## B. A finding that matters for India: no translation permitted
+
+Clause 4 of the individual licence:
+
+> "The licensee may NOT modify, translate into other languages, change the context,
+> wording, or organization of the measures or create any derivative work based on them."
+
+**A counsellor may not lawfully translate the ORS into Hindi, Marathi, Tamil or anything
+else.** Official translations exist but must come from the licensor.
+
+For a product whose market is Indian counsellors, many working in regional languages, that
+is a hard product constraint, not a footnote. PHQ-9 and GAD-7 ship free in roughly 80
+languages. This is a stronger argument for the PHQ and GAD default than anything currently
+in the strategy set, and it is a product argument rather than a legal one. Add it to 02.
+
+## C. Can we collect and analyse the data? Three separate questions
+
+Easy to conflate. They have different answers.
+
+### 1. Copyright: yes
+
+Scores are facts. Facts are not copyrightable. India's standard is *Eastern Book Company v
+D.B. Modak* (2008), a modicum of creativity, not effort. Aggregating, charting, computing
+reliable change, building norms, none of it reproduces his expression.
+
+### 2. Contract: yes, as things stand. Verified
+
+Two limbs, both clear.
+
+**Us.** Section 3.d of the draft, the perpetual ban on norms, cutoffs, predictive algorithms
+and statistical indices, binds us **only if we sign**. Unsigned, it does not exist.
+
+**The counsellor.** This was the open worry in Addendum 2 section E: does something in their
+own licence flow down and bar aggregation? **Checked. It does not.** The Binding License
+Agreement restricts: converting to electronic format, copying or transmitting electronic
+versions, modifying or translating or creating derivative works, distributing copies, and
+use outside a bona fide practice. **It contains no clause about aggregating scores, creating
+norms, or analysing data gathered.** There is no equivalent of 3.d in it.
+
+Caveat: that text is the Better Outcomes Now version. A counsellor could register through
+either site. Read Miller's version too before relying on this.
+
+### 3. DPDP: this is the real constraint, and the plan is already right
+
+`marketing/homepage-v3-plan-2026-08.md` sections 4 and 6 already have the correct shape:
+counsellor is the Data Fiduciary, Deepen processes on their instruction, benchmark pool off
+by default, three numbers per reading, de-identified, switchable off, consent wording
+written for DPDP.
+
+Nothing to redesign. Two things to actually do:
+
+- **Make the position real rather than claimed.** `homepage-copy-fixes.md` section 2 already
+  flags that the public FAQ asserts "fully compliant with the DPDP Act" with no review
+  behind it. That fix is still open and it is the blocker here, not the licence.
+- **Get the grant in the counsellor contract.** Our terms must say the counsellor owns their
+  data and grants Deepen the right to use de-identified aggregates for benchmarking, opt-in.
+  That is a Deepen-to-counsellor question. It has nothing to do with Miller.
+
+### Bottom line
+
+Copyright does not stop us. Contract does not stop us, as long as we do not sign. DPDP is
+the only real gate, and we already know what to build. **The benchmark pool is available to
+us. It stops being available the day we sign Scott's agreement.**
