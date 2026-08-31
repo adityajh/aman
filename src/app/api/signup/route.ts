@@ -46,9 +46,11 @@ export async function POST(req: Request) {
       }
     }
 
+    const cleanEmail = email.trim().toLowerCase();
+
     // 1. Check if email is already in use
     const existingUser = await db.query.users.findFirst({
-      where: eq(users.email, email),
+      where: eq(users.email, cleanEmail),
     });
 
     if (existingUser) {

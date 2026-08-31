@@ -634,3 +634,93 @@ The reader's route to the book does not change the analysis.
 
 **So: the pathway is sound, the current screen is not.** The fix is the one already listed
 in Addendum 2 section D, and it is an afternoon.
+
+---
+
+# Addendum 5, 31 August 2026. The code change list, and the attribution question
+
+Swept every user-facing occurrence of the names. Good news: the exposure is narrower than
+feared. **Eight lines in one file.** The instruction paragraph ("Looking back over the last
+week, including today...") is not in our code at all.
+
+## What is actually wrong
+
+Only one thing: `src/components/clinical-note-editor.tsx` reproduces his item wording.
+
+**ORS, lines 433 to 436. All four verbatim:**
+"Individually (Personal well-being)" · "Interpersonally (Family, close relationships)" ·
+"Socially (Work, school, friendships)" · "Overall (General sense of well-being)"
+
+**SRS, lines 460 to 463. Two verbatim, two paraphrased:**
+"Relationship (I felt heard, understood, and respected)" and "Overall (Today's session was
+right for me)" are his anchor sentences word for word. The other two are already reworded.
+
+Everything else that mentions ORS or SRS is **naming**, not reproduction, and is lawful
+nominative use. Chart series, stat labels, settings field labels, the CSV header "ORS
+Total", the section heading "SRS (Session Rating Scale)". All fine. Leave them.
+
+## Changes, in priority order
+
+### Must, this is the legal fix
+
+1. **Rewrite the eight item labels** in `clinical-note-editor.tsx`. Either drop to a single
+   total field per instrument, or keep four subscales under our own words. He owns his
+   sentences, not the four constructs.
+2. **Delete "PCOMS default: 5"** from `settings/page.tsx` line 369. PCOMS is Barry Duncan's
+   brand, and the line presents his benchmark as our supplied default. Say "commonly used
+   value: 5" or drop the number.
+3. **Stop shipping his numbers as defaults.** `schema.ts` lines 411 to 417 preset
+   `orsCutoff` 25, `srsCutoff` 36, `orsRciThreshold` 5, `orsAmberLow` 26, `orsGreenLow` 32.
+   Move to counsellor-entered at setup, no preset.
+
+### Should, good faith and defence
+
+4. **In-app notice** where measures are configured. Wording in section B below.
+5. **Setup confirmation**: "I hold any licence required for the measures I use." One
+   checkbox. Shifts responsibility where it belongs and evidences good faith.
+
+### Do not
+
+- **Do not rename internal identifiers.** `orsTotal`, `srsCutoff`, the DB columns, the API
+  routes. Code is not publication. Already the stated position in
+  `pricing-and-build-plan-2026-08.md`.
+- **Do not strip ORS and SRS from chart labels, settings or exports.** Naming is lawful and
+  stripping it makes the product worse for no gain.
+- **Do not add any of this to the public site.** The brand guide already bars naming
+  instruments in public copy. That rule now has a second reason to exist.
+
+## B. The attribution question
+
+**No trademark notice. A copyright acknowledgement, in-app only.**
+
+Four reasons not to write "ORS® is a trademark of Performance Metrics PLLC":
+
+1. **It may not be true.** His filed US marks appear to be FEEDBACK INFORMED TREATMENT and
+   FIT, not the scale names. Asserting an unverified registration, and using the ® symbol
+   for it, creates a problem rather than solving one.
+2. **Nominative fair use imposes no attribution duty.** There is no legal obligation.
+3. **But condition 3 of the *Consim* test is no suggestion of sponsorship or endorsement**,
+   and *Hawkins* weighs good faith. A short disclaimer serves both directly. Cheap
+   insurance, not obligation.
+4. **Section 10 of the draft contract requires a rights notice on the interface. We are not
+   signing.** Do not voluntarily adopt an obligation we declined.
+
+Credit the copyright accurately, and credit **all** the named authors, not only Miller.
+That matters given the co-ownership point in Addendum 1 section F.
+
+### Suggested wording, in-app, at the point measures are configured
+
+> The Outcome Rating Scale (ORS) and Session Rating Scale (SRS) are the copyright of their
+> authors. ORS © 2000 Scott D. Miller and Barry L. Duncan. SRS © 2002 Scott D. Miller,
+> Barry L. Duncan and Lynn Johnson. Deepen is not affiliated with, sponsored by, or
+> endorsed by them. Deepen records scores you have collected. It does not supply or
+> administer these instruments. You are responsible for holding any licence required for
+> the measures you use.
+
+Six sentences, four jobs: credits accurately, disclaims affiliation, states plainly what we
+do and do not do, and places licence responsibility on the counsellor. The third sentence
+is the one that matters most, because it is the whole legal position in nine words.
+
+Placement: behind login, on the settings screen where thresholds are set, and optionally
+collapsed under an "about these measures" link in the note editor. Not the footer. Not the
+marketing site.

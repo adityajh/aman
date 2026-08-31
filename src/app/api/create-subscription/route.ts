@@ -2,12 +2,24 @@ import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 
 import { db } from "@/lib/db";
-import { tenants, promoCodes } from "@/lib/db/schema";
+import { tenants, promoCodes, users } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 
 export async function POST(req: Request) {
   try {
-    const { promoCode } = await req.json();
+    const { promoCode, email } = await req.json();
+
+    if (email && typeof email === "string" && email.trim()) {
+      const existingUser = await db.query.users.findFirst({
+        where: eq(users.email, email.trim().toLowerCase()),
+      });
+      if (existingUser) {
+        return NextResponse.json(
+          { error: "This email is already registered. Please log in instead." },
+          { status: 409 }
+        );
+      }
+    }
 
     const defaultPlanId = process.env.RAZORPAY_PLAN_DEEPEN || "plan_TOl5mRuFjG4FZM";
     const foundingPlanId = process.env.RAZORPAY_PLAN_FOUNDING;

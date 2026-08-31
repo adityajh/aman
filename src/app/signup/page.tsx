@@ -70,7 +70,7 @@ export default function SignupPage() {
       const subRes = await fetch("/api/create-subscription", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planTier: data.planTier, promoCode: data.promoCode }),
+        body: JSON.stringify({ planTier: data.planTier, promoCode: data.promoCode, email: data.email }),
       });
 
       const subResText = await subRes.text();
