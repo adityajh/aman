@@ -74,6 +74,7 @@ export async function POST(
 
       await transporter.sendMail({
         from: `"${practiceProfile.practiceName}" <${process.env.SMTP_USER}>`,
+        replyTo: counselorEmail || (practiceProfile as any)?.email || undefined,
         to: sendTo,
         cc: ccEmail || undefined,
         subject,
