@@ -2,6 +2,14 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [5.0.3] - 2026-08-31
+### Added
+- **Dynamic Subscription Trial**: Integrated Razorpay's `start_at` parameter to dynamically schedule subscription payments. Clients authorize their cards during signup, but the actual monthly charge is deferred to start after the trial period.
+- **Bulleted Client Intake Consent**: Simplified the intake consent copy and reformatted it into three clean bullet points (Clinical Tracking, Anonymous Research, and Strict Privacy) inside the client creation dialog box.
+
+### Changed
+- **Trial Period Reduction**: Reduced the default free trial period from 14 days to 7 days across both backend logic and frontend copy, updating references on the homepage, terms page, refunds page, and signup screens.
+
 ## [5.0.2] - 2026-08-25
 ### Added
 - **URL Syncing**: Dashboard pages (Clients, Sessions, Payments, Invoices) now sync filter and sort states to the URL, allowing states to persist across reloads and deep linking.
