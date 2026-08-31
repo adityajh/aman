@@ -206,6 +206,7 @@ export async function POST(
 
       await transporter.sendMail({
         from: `"${practiceProfile.practiceName}" <${process.env.SMTP_USER}>`,
+        replyTo: counselorEmail || practiceProfile.email || undefined,
         to: sendTo,
         subject,
         html: testBanner + htmlContent,
