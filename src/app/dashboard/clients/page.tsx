@@ -282,8 +282,8 @@ function ClientsPageInner() {
     }
   };
 
-  const handleTerminateSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleTerminateSubmit = async (e?: React.MouseEvent | React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!selectedClient) return;
     setEditSaving(true);
     try {
@@ -446,7 +446,7 @@ function ClientsPageInner() {
                 <p className="text-xs text-slate-500">
                   Read this to the client at intake, or hand it to them. Their answer is recorded on their file.
                 </p>
-                <div className="border border-slate-200 rounded-lg bg-slate-50 p-3 text-sm text-slate-700">
+                <div className="border border-slate-200 rounded-lg bg-slate-50 p-3 text-sm text-slate-700 whitespace-pre-line">
                   {CLIENT_INTAKE_CONSENT.body}
                 </div>
                 <div className="flex flex-col gap-2 pt-1">
@@ -920,7 +920,7 @@ function ClientsPageInner() {
               <UserMinus className="h-5 w-5" /> Terminate Service
             </DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleTerminateSubmit} className="space-y-4 pt-4">
+          <div className="space-y-4 pt-4">
             <p className="text-sm text-slate-600">
               You are resolving active services for <span className="font-bold">{selectedClient?.name}</span>. Data will be preserved.
             </p>
@@ -962,11 +962,11 @@ function ClientsPageInner() {
             </div>
             <div className="flex justify-end gap-3 pt-4">
               <Button type="button" variant="outline" onClick={() => setTerminateOpen(false)}>Cancel</Button>
-              <Button type="submit" disabled={editSaving} className="bg-rose-500 hover:bg-rose-600 text-white font-bold gap-2">
+              <Button type="button" onClick={handleTerminateSubmit} disabled={editSaving} className="bg-rose-500 hover:bg-rose-600 text-white font-bold gap-2">
                 {editSaving && <Loader2 className="h-4 w-4 animate-spin" />} Terminate 
               </Button>
             </div>
-          </form>
+          </div>
         </DialogContent>
       </Dialog>
       {/* Conflict Dialog */}
