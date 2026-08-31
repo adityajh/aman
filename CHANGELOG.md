@@ -4,11 +4,19 @@ All notable changes to the Aman project will be documented in this file.
 
 ## [5.0.3] - 2026-08-31
 ### Added
+- **Subscription Billing History Table**: Added a Subscription Billing History table under Settings -> Deepen Billing (`/dashboard/settings`), fetching past Razorpay SaaS subscription invoices with dates, amounts, status, and direct PDF receipt download links.
+- **Issued Promo Code Highlight**: Generated promo codes on the `/admin` platform page now highlight in warm amber with an `ISSUED` tag once copied, persisting state across browser sessions.
+- **Automated 12-Month Founding Upgrade**: Added automated subscription plan upgrade logic in Webhooks and Settings sync. Once a Founding user completes 12 paid monthly cycles at ₹699/mo, their Razorpay subscription is automatically updated to the standard ₹999/mo plan starting cycle 13.
 - **Dynamic Subscription Trial**: Integrated Razorpay's `start_at` parameter to dynamically schedule subscription payments. Clients authorize their cards during signup, but the actual monthly charge is deferred to start after the trial period.
 - **Bulleted Client Intake Consent**: Simplified the intake consent copy and reformatted it into three clean bullet points (Clinical Tracking, Anonymous Research, and Strict Privacy) inside the client creation dialog box.
 
 ### Changed
+- **Email Reply-To Alignment**: Configured `replyTo` headers pointing to the counselor's registered email address across progress chart, invoice, and payment receipt mailings so client replies go directly to the therapist's inbox.
 - **Trial Period Reduction**: Reduced the default free trial period from 14 days to 7 days across both backend logic and frontend copy, updating references on the homepage, terms page, refunds page, and signup screens.
+
+### Fixed
+- **Progress Chart PDF Payload Limit**: Replaced uncompressed PNG capture with `toJpeg` image compression, shrinking generated chart PDF base64 payloads from >5MB to ~300KB and resolving Vercel `FUNCTION_PAYLOAD_TOO_LARGE` errors.
+- **Signup Pre-Check Duplicate Email**: Updated signup flow to verify whether an email is already registered in the database *before* opening the Razorpay subscription modal, preventing charges on duplicate email signups.
 
 ## [5.0.2] - 2026-08-25
 ### Added
