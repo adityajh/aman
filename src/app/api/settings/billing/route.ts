@@ -58,6 +58,32 @@ export async function GET() {
           .where(eq(tenants.id, tenant.id));
       }
 
+      // Check if Founding tenant completed 12 billing cycles -> update subscription to standard plan for month 13
+      const defaultPlanId = process.env.RAZORPAY_PLAN_DEEPEN || "plan_TOl5mRuFjG4FZM";
+      const foundingPlanId = process.env.RAZORPAY_PLAN_FOUNDING;
+      const paidCount = Number((subscription as any).paid_count || 0);
+
+      if (
+        tenant.isFounding &&
+        paidCount >= 12 &&
+        foundingPlanId &&
+        (subscription as any).plan_id === foundingPlanId
+      ) {
+        try {
+          await razorpay.subscriptions.update(tenant.razorpaySubscriptionId, {
+            plan_id: defaultPlanId,
+            schedule_change_at: "cycle_end",
+          });
+
+          await tx
+            .update(tenants)
+            .set({ priceInrMonthly: 999 })
+            .where(eq(tenants.id, tenant.id));
+        } catch (err) {
+          console.error("Failed to upgrade subscription after 12 cycles in settings billing route:", err);
+        }
+      }
+
       return NextResponse.json({
         status: subscription.status,
         planTier: tenant.planTier,

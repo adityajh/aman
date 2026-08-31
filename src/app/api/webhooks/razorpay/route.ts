@@ -59,6 +59,39 @@ export async function POST(req: Request) {
       .set({ isActive: isActive, updatedAt: new Date() })
       .where(eq(tenants.id, tenant.id));
 
+    // Check if Founding tenant completed 12 billing cycles -> update subscription to standard plan for month 13
+    const defaultPlanId = process.env.RAZORPAY_PLAN_DEEPEN || "plan_TOl5mRuFjG4FZM";
+    const foundingPlanId = process.env.RAZORPAY_PLAN_FOUNDING;
+    const paidCount = Number(subscription.paid_count || 0);
+
+    if (
+      tenant.isFounding &&
+      paidCount >= 12 &&
+      foundingPlanId &&
+      subscription.plan_id === foundingPlanId
+    ) {
+      try {
+        const razorpay = new (require("razorpay"))({
+          key_id: process.env.RAZORPAY_KEY_ID!,
+          key_secret: process.env.RAZORPAY_KEY_SECRET!,
+        });
+
+        await razorpay.subscriptions.update(subscriptionId, {
+          plan_id: defaultPlanId,
+          schedule_change_at: "cycle_end",
+        });
+
+        await db
+          .update(tenants)
+          .set({ priceInrMonthly: 999 })
+          .where(eq(tenants.id, tenant.id));
+
+        console.log(`Updated founding tenant ${tenant.slug} subscription to standard plan (${defaultPlanId}) after 12 paid cycles.`);
+      } catch (err) {
+        console.error(`Failed to upgrade tenant ${tenant.slug} subscription to standard plan:`, err);
+      }
+    }
+
     console.log(`Updated tenant ${tenant.slug} isActive to ${isActive} due to Razorpay event ${event.event} (${status})`);
 
     return NextResponse.json({ received: true });
