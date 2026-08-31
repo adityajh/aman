@@ -14,7 +14,7 @@ export default function Home() {
               Run your practice.<br />Know it&rsquo;s working.
             </h1>
             <p className="text-lg md:text-xl text-ink-2 mb-8 max-w-lg leading-relaxed">
-              Close your monthly billing in ten minutes. A short check-in before each session and a check-out after tell you how each client is doing, while there&rsquo;s still time to help. Built for one counsellor, in India.
+              Complete your monthly invoicing in ten minutes. A short check-in before each session and a check-out after tell you how each client is doing, while there&rsquo;s still time to help. Built for solo counselors.
             </p>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-4">
               <Link
@@ -109,10 +109,10 @@ export default function Home() {
         <section id="how" className="py-16 bg-white border-y border-hairline">
           <div className="max-w-6xl mx-auto px-6">
             <h2 className="text-3xl md:text-4xl font-serif font-medium text-teal-ink mb-3">
-              Three layers. Each one goes a little deeper.
+              Three layers. Plan. Invoice. Measure.
             </h2>
             <p className="text-lg text-ink-2 mb-10 max-w-2xl">
-              Built for one counsellor, working alone. Every layer is yours and nobody else&rsquo;s.
+              Built for solo counselors. Every layer is yours and nobody else&rsquo;s.
             </p>
             <div className="grid md:grid-cols-3 gap-6">
               <div className="bg-paper border border-hairline rounded-xl p-6 flex flex-col justify-between">
@@ -158,7 +158,7 @@ export default function Home() {
         <section className="bg-teal-ink text-paper py-16 px-6">
           <div className="max-w-6xl mx-auto">
             <h2 className="font-serif text-3xl md:text-4xl font-medium text-paper mb-3">
-              And your month closes in ten minutes.
+              Complete your monthly invoicing in ten minutes.
             </h2>
             <p className="text-lg text-[#CFE3DD] max-w-2xl mb-10">
               Log sessions as you go. One click generates every invoice, keeps rupee and dollar clients apart, applies your cancellation policy, and emails them out. Receipts and part-payments handled the way an accountant expects.
@@ -242,7 +242,7 @@ export default function Home() {
                 Session ends. You hope it helped.
               </h2>
               <p className="text-lg text-ink-2 leading-relaxed">
-                You need more than hope. You need a method. Ninety seconds: a short check-in before the session, and a check-out after. See how each client is doing. <span className="font-serif italic text-teal-ink">Deepen your practice.</span>
+                A short check-in before the session, a check-out after &mdash; ninety seconds, and you can see exactly how each client is doing, session to session. While there&rsquo;s still time to adjust. <span className="font-serif italic text-teal-ink">That&rsquo;s what Deepen is for.</span>
               </p>
             </div>
 
@@ -321,7 +321,7 @@ export default function Home() {
                 Nobody else ever sees this.
               </h2>
               <p className="text-lg text-[#CFE3DD] leading-relaxed">
-                Not your employer. Not a platform. Not us. Deepen is built for one counsellor and is never sold to organisations.
+                Not your employer. Not a platform. Not us. Deepen is built for solo counselors and is never sold to organisations.
               </p>
               <div className="flex flex-wrap gap-3 pt-2">
                 <span className="border border-white/20 rounded-full px-4 py-1.5 text-xs text-paper">One login per account</span>
@@ -367,7 +367,16 @@ export default function Home() {
                 <span className="w-2 h-2 rounded-full bg-teal-action mt-1.5 shrink-0" /> Invoices, receipts and part-payments, in one click
               </li>
               <li className="flex items-start gap-2">
+                <span className="w-2 h-2 rounded-full bg-teal-action mt-1.5 shrink-0" /> Track every client&rsquo;s payment balance easily
+              </li>
+              <li className="flex items-start gap-2">
                 <span className="w-2 h-2 rounded-full bg-teal-action mt-1.5 shrink-0" /> A check-in and check-out each session, a chart per client, a flag when someone slides
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="w-2 h-2 rounded-full bg-teal-action mt-1.5 shrink-0" /> Up to 30 active clients
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="w-2 h-2 rounded-full bg-teal-action mt-1.5 shrink-0" /> No spreadsheets, no chasing payments
               </li>
               <li className="flex items-start gap-2">
                 <span className="w-2 h-2 rounded-full bg-teal-action mt-1.5 shrink-0" /> Full export, any time
@@ -375,7 +384,7 @@ export default function Home() {
             </ul>
 
             <div className="text-xs text-ink-muted pt-2 border-t border-hairline leading-relaxed">
-              For one counsellor. Up to 30 active clients, which is more than one counsellor can carry. Groups and organisations, this isn&rsquo;t for you.
+              For solo counselors. Up to 30 active clients &mdash; more than one person can carry. Groups and organisations, this isn&rsquo;t for you.
             </div>
 
             <div className="pt-2">
@@ -419,10 +428,10 @@ export default function Home() {
 
             <div>
               <h3 className="text-sm font-semibold text-ink mb-1">
-                Which measure do I use?
+                How does the check-in work?
               </h3>
               <p className="text-sm text-ink-2 leading-relaxed">
-                Whichever you&rsquo;re licensed to use, or a built-in one. Set it once and forget it.
+                Four short questions before the session, one after. Your client answers on their phone in about ninety seconds. The scores attach to your session note and the chart updates on its own.
               </p>
             </div>
 
@@ -434,16 +443,34 @@ export default function Home() {
                 You export everything in one click. Nothing is held hostage.
               </p>
             </div>
+
+            <div>
+              <h3 className="text-sm font-semibold text-ink mb-1">
+                What if I only want Plan and Invoice?
+              </h3>
+              <p className="text-sm text-ink-2 leading-relaxed">
+                That&rsquo;s fine. Skip the check-in entirely &mdash; your client management, notes, and invoicing all work without it. When you&rsquo;re ready, Measure is already included. No extra cost, nothing to upgrade.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold text-ink mb-1">
+                Is there a limit on clients?
+              </h3>
+              <p className="text-sm text-ink-2 leading-relaxed">
+                Up to 30 active clients &mdash; more than a solo counselor can carry. Inactive clients don&rsquo;t count toward the limit, and their records stay as long as you need them.
+              </p>
+            </div>
           </div>
         </section>
 
         {/* §7 Closing */}
         <section className="py-20 text-center px-6 border-t border-hairline">
           <h2 className="text-4xl md:text-5xl font-serif font-medium text-teal-ink mb-4">
-            Stop guessing.
+            See it working.
           </h2>
           <p className="text-base text-ink-2 mb-8 max-w-md mx-auto">
-            See for yourself in seven days. Everything on, no card charged until day 7.
+            Seven days. Everything on. No card charged until day seven.
           </p>
           <Link
             href="/signup"

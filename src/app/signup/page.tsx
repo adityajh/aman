@@ -157,7 +157,7 @@ export default function SignupPage() {
           <CardHeader className="text-center space-y-2">
 
             <CardTitle className="text-2xl font-serif font-bold text-teal-ink">Create your Practice</CardTitle>
-            <CardDescription>Your month closes in ten minutes. Nobody else sees your data.</CardDescription>
+            <CardDescription>Complete your monthly invoicing in ten minutes. Nobody else sees your data.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -194,9 +194,9 @@ export default function SignupPage() {
                   <p className="text-lg font-bold text-teal-ink">₹999 <span className="text-xs font-normal text-slate-500">/ month</span></p>
                 </div>
                 <ul className="text-xs text-slate-600 space-y-1.5 pt-1">
-                  <li>• Your month closes in ten minutes.</li>
+                  <li>• Complete your monthly invoicing in ten minutes.</li>
                   <li>• It quietly keeps track of how each client is doing.</li>
-                  <li>• For one counsellor. Nobody else can see your data, including us.</li>
+                  <li>• For solo counselors. Nobody else can see your data, including us.</li>
                 </ul>
                 <p className="text-[11px] text-slate-400 font-medium border-t border-slate-200/60 pt-2">
                   7 days free. Cancel in one click. No long commitment.
@@ -210,7 +210,7 @@ export default function SignupPage() {
                   onCheckedChange={(checked) => setAgreedToTerms(checked === true)}
                   className="mt-0.5"
                 />
-                <Label htmlFor="agreedToTerms" className="text-sm font-normal text-slate-600">
+                <Label htmlFor="agreedToTerms" className="text-sm font-normal text-slate-600 cursor-pointer select-none">
                   I&rsquo;ve read the <Link href="/terms" className="text-teal-action hover:underline">terms</Link> and the <Link href="/privacy" className="text-teal-action hover:underline">privacy note</Link>.
                 </Label>
               </div>
