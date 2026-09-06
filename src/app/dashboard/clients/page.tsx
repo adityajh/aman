@@ -157,14 +157,33 @@ function ClientsPageInner() {
     fetch("/api/fee-schemes").then(r => r.json()).then(setFeeSchemes).catch(() => {});
   }, []);
 
+  // Sync state from URL params when browser back/forward navigation occurs
   useEffect(() => {
-    const params = new URLSearchParams();
-    if (statusFilter !== "active") params.set("status", statusFilter);
-    if (search) params.set("q", search);
-    if (sortCol !== "name") params.set("sort", sortCol);
-    if (sortDir !== "asc") params.set("dir", sortDir);
-    const qs = params.toString();
-    router.replace(`/dashboard/clients${qs ? `?${qs}` : ""}`, { scroll: false });
+    const urlStatus = searchParams.get("status") as any;
+    const urlQ = searchParams.get("q");
+    const urlSort = searchParams.get("sort") as any;
+    const urlDir = searchParams.get("dir") as any;
+    if (urlStatus && urlStatus !== statusFilter) setStatusFilter(urlStatus);
+    if (urlQ !== null && urlQ !== search) setSearch(urlQ);
+    if (urlSort && urlSort !== sortCol) setSortCol(urlSort);
+    if (urlDir && urlDir !== sortDir) setSortDir(urlDir);
+  }, [searchParams]);
+
+  // Debounced URL updates to prevent search input jittering during typing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const params = new URLSearchParams();
+      if (statusFilter !== "active") params.set("status", statusFilter);
+      if (search) params.set("q", search);
+      if (sortCol !== "name") params.set("sort", sortCol);
+      if (sortDir !== "asc") params.set("dir", sortDir);
+      const qs = params.toString();
+      const newUrl = `/dashboard/clients${qs ? `?${qs}` : ""}`;
+      if (typeof window !== "undefined" && window.location.search !== (qs ? `?${qs}` : "")) {
+        router.replace(newUrl, { scroll: false });
+      }
+    }, 300);
+    return () => clearTimeout(timer);
   }, [statusFilter, search, sortCol, sortDir, router]);
 
   // Re-seed fee scheme state whenever edit mode opens (handles race where feeSchemes loads after click)
@@ -316,9 +335,9 @@ function ClientsPageInner() {
 
   return (
     <div className="p-8 space-y-6">
-      {!isUnlimited && activeCount >= 25 && (
+      {!isUnlimited && activeCount >= 35 && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-xs text-amber-800 flex items-center justify-between font-medium">
-          <span><strong>{activeCount} of 30 active clients.</strong> Deepen is built for one counsellor.</span>
+          <span><strong>{activeCount} of 40 active clients.</strong> Deepen is built for one counsellor.</span>
         </div>
       )}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">

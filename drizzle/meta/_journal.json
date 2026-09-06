@@ -29,6 +29,13 @@
       "when": 1786695324144,
       "tag": "0003_thin_black_crow",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1788675496322,
+      "tag": "0004_update_settings_schema",
+      "breakpoints": true
     }
   ]
 }

@@ -342,7 +342,7 @@ export function ClientProgressChart({ clientId, clientName, compact = false, var
   const [loading, setLoading] = useState(true);
   const [emailingPdf, setEmailingPdf] = useState(false);
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
-  const [ccEmail, setCcEmail] = useState("counselor@deepen.health");
+  const [ccEmail, setCcEmail] = useState("");
   const chartRef = useRef<HTMLDivElement>(null);
   const { data: sessionData } = useSession();
   const planTier = (sessionData?.user as any)?.planTier || "basic";
@@ -355,6 +355,12 @@ export function ClientProgressChart({ clientId, clientName, compact = false, var
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [clientId]);
+
+  useEffect(() => {
+    if (sessionData?.user?.email && !ccEmail) {
+      setCcEmail(sessionData.user.email);
+    }
+  }, [sessionData?.user?.email, ccEmail]);
 
   if (loading) {
     return (

@@ -72,7 +72,7 @@ export async function PATCH(
                 {
                   error: "CLIENT_LIMIT",
                   message:
-                    "Deepen is built for one counsellor. Thirty active clients is more than one person can see, so we stop here. If you're a group or an organisation, Deepen isn't for you. If this is a mistake, write to us.",
+                    "Deepen is built for one counsellor. Forty active clients is more than one person can see, so we stop here. If you're a group or an organisation, Deepen isn't for you. If this is a mistake, write to us.",
                 },
                 { status: 403 },
               );

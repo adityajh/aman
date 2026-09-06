@@ -3,7 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { dbPool } from "@/lib/db";
 import { sql } from "drizzle-orm";
 
-export const MAX_ACTIVE_CLIENTS = 30;
+export const MAX_ACTIVE_CLIENTS = 40;
 
 export async function getTenantContext() {
   const session = await getServerSession(authOptions);

@@ -69,26 +69,62 @@ function SessionsPageInner() {
   const searchParams = useSearchParams();
   const [timeFilter, setTimeFilter] = useState<string>(searchParams.get("timeFilter") ?? "today");
   const [clientFilter, setClientFilter] = useState<string>(searchParams.get("clientId") ?? "all");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>(searchParams.get("status") ?? "all");
   // Custom date range (IST yyyy-MM-dd); used when timeFilter === "custom".
   const [customStart, setCustomStart] = useState<string>("");
   const [customEnd, setCustomEnd] = useState<string>("");
   // Optional client-name sort overlay on top of the default date ordering.
   const [clientSort, setClientSort] = useState<null | "asc" | "desc">(null);
-  const [timeSort, setTimeSort] = useState<"asc" | "desc">("desc");
+  
+  // Dynamic default sort: if filter is future/upcoming or scheduled, nearest session first (asc).
+  // Otherwise (all time, past, completed, today, etc.), most recent sessions first (desc).
+  const isFutureFilter = timeFilter === "future" || statusFilter === "scheduled";
+  const defaultSortDir = (searchParams.get("dir") as "asc" | "desc" | null) ?? (isFutureFilter ? "asc" : "desc");
+  const [timeSort, setTimeSort] = useState<"asc" | "desc">(defaultSortDir);
+  
   // Free-text search across client name / email.
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(searchParams.get("q") ?? "");
   const router = useRouter();
 
+  // Sync state from URL params when browser back/forward navigation occurs
   useEffect(() => {
-    const params = new URLSearchParams();
-    if (timeFilter !== "today") params.set("timeFilter", timeFilter);
-    if (clientFilter !== "all") params.set("clientId", clientFilter);
-    if (statusFilter !== "all") params.set("status", statusFilter);
-    if (search) params.set("q", search);
-    const qs = params.toString();
-    router.replace(`/dashboard/sessions${qs ? `?${qs}` : ""}`, { scroll: false });
-  }, [timeFilter, clientFilter, statusFilter, search, router]);
+    const urlTime = searchParams.get("timeFilter");
+    const urlClient = searchParams.get("clientId");
+    const urlStatus = searchParams.get("status");
+    const urlQ = searchParams.get("q");
+    const urlDir = searchParams.get("dir") as "asc" | "desc" | null;
+
+    if (urlTime && urlTime !== timeFilter) setTimeFilter(urlTime);
+    if (urlClient && urlClient !== clientFilter) setClientFilter(urlClient);
+    if (urlStatus && urlStatus !== statusFilter) setStatusFilter(urlStatus);
+    if (urlQ !== null && urlQ !== search) setSearch(urlQ);
+    if (urlDir && urlDir !== timeSort) setTimeSort(urlDir);
+  }, [searchParams]);
+
+  // Automatically update default sort direction when switching between future and past/all filters (unless explicit dir param present)
+  useEffect(() => {
+    if (!searchParams.get("dir")) {
+      setTimeSort(isFutureFilter ? "asc" : "desc");
+    }
+  }, [timeFilter, statusFilter]);
+
+  // Debounced URL updates to prevent typing jitter while preserving stickiness
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const params = new URLSearchParams();
+      if (timeFilter !== "today") params.set("timeFilter", timeFilter);
+      if (clientFilter !== "all") params.set("clientId", clientFilter);
+      if (statusFilter !== "all") params.set("status", statusFilter);
+      if (search) params.set("q", search);
+      if (timeSort !== (isFutureFilter ? "asc" : "desc")) params.set("dir", timeSort);
+      const qs = params.toString();
+      const newUrl = `/dashboard/sessions${qs ? `?${qs}` : ""}`;
+      if (typeof window !== "undefined" && window.location.search !== (qs ? `?${qs}` : "")) {
+        router.replace(newUrl, { scroll: false });
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [timeFilter, clientFilter, statusFilter, search, timeSort, isFutureFilter, router]);
 
   const fetchData = async () => {
     try {
@@ -651,7 +687,10 @@ function SessionsPageInner() {
       const sessionDate = new Date(s.scheduledAt);
       const DAY = 24 * 60 * 60 * 1000;
 
-      if (timeFilter === "today") {
+      if (timeFilter === "future") {
+        const start = new Date();
+        if (sessionDate < start) return false;
+      } else if (timeFilter === "today") {
         const start = istStartOfDayUTC();
         const end = new Date(start.getTime() + DAY);
         if (sessionDate < start || sessionDate >= end) return false;
@@ -760,6 +799,7 @@ function SessionsPageInner() {
               <SelectTrigger className="w-[180px] border-0 h-8 bg-transparent shadow-none font-semibold focus:ring-0">
                 <SelectValue>
                   {timeFilter === "all" ? "All Time" :
+                   timeFilter === "future" ? "Upcoming Sessions" :
                    timeFilter === "today" ? "Today" :
                    timeFilter === "week" ? "This Week" :
                    timeFilter === "ytd" ? "YTD (Apr-Mar)" :
@@ -769,6 +809,7 @@ function SessionsPageInner() {
               </SelectTrigger>
               <SelectContent className="bg-white border-slate-200">
                 <SelectItem value="all" label="All Time">All Time</SelectItem>
+                <SelectItem value="future" label="Upcoming Sessions">Upcoming Sessions</SelectItem>
                 <SelectItem value="today" label="Today">Today</SelectItem>
                 <SelectItem value="week" label="This Week">This Week</SelectItem>
                 <SelectItem value="month" label="This Month">This Month</SelectItem>

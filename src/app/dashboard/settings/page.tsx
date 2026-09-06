@@ -29,6 +29,7 @@ export default function SettingsPage() {
     email: "",
     monthlyQuote: "",
     upiId: "",
+    upiQrCode: "",
     orsCutoff: 25,
     srsCutoff: 36,
     orsDeteriorationThreshold: 5,
@@ -54,6 +55,7 @@ export default function SettingsPage() {
           email: settingsData.email || "",
           monthlyQuote: settingsData.monthlyQuote || "",
           upiId: settingsData.upiId || "",
+          upiQrCode: settingsData.upiQrCode || "",
           orsCutoff: settingsData.orsCutoff ?? 25,
           srsCutoff: settingsData.srsCutoff ?? 36,
           orsDeteriorationThreshold: settingsData.orsDeteriorationThreshold ?? 5,
@@ -187,7 +189,7 @@ export default function SettingsPage() {
                   id="counselorName"
                   value={settings.counselorName}
                   onChange={(e) => setSettings({ ...settings, counselorName: e.target.value })}
-                  placeholder="Vijay Gopal Sreenivasan"
+                  placeholder="Jane Doe"
                   required
                 />
               </div>
@@ -197,7 +199,7 @@ export default function SettingsPage() {
                   id="practiceName"
                   value={settings.practiceName}
                   onChange={(e) => setSettings({ ...settings, practiceName: e.target.value })}
-                  placeholder="Deepen Counseling"
+                  placeholder="Acme Counseling"
                   required
                 />
               </div>
@@ -250,6 +252,37 @@ export default function SettingsPage() {
                   onChange={(e) => setSettings({ ...settings, upiId: e.target.value })}
                   placeholder="name@bank / mobile@upi"
                 />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="upiQrCode">UPI QR Code</Label>
+                <div className="flex flex-col gap-4">
+                  {settings.upiQrCode && (
+                    <div className="relative w-32 h-32 border rounded-md overflow-hidden bg-white">
+                      <img src={settings.upiQrCode} alt="UPI QR Code Preview" className="w-full h-full object-contain" />
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="upiQrCode"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setSettings({ ...settings, upiQrCode: reader.result as string });
+                        };
+                        reader.readAsDataURL(file);
+                      }}
+                    />
+                    {settings.upiQrCode && (
+                      <Button type="button" variant="outline" size="sm" onClick={() => setSettings({ ...settings, upiQrCode: "" })}>
+                        Remove
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

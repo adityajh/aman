@@ -373,7 +373,7 @@ export default function Home() {
                 <span className="w-2 h-2 rounded-full bg-teal-action mt-1.5 shrink-0" /> A check-in and check-out each session, a chart per client, a flag when someone slides
               </li>
               <li className="flex items-start gap-2">
-                <span className="w-2 h-2 rounded-full bg-teal-action mt-1.5 shrink-0" /> Up to 30 active clients
+                <span className="w-2 h-2 rounded-full bg-teal-action mt-1.5 shrink-0" /> Up to 40 active clients
               </li>
               <li className="flex items-start gap-2">
                 <span className="w-2 h-2 rounded-full bg-teal-action mt-1.5 shrink-0" /> No spreadsheets, no chasing payments
@@ -384,7 +384,7 @@ export default function Home() {
             </ul>
 
             <div className="text-xs text-ink-muted pt-2 border-t border-hairline leading-relaxed">
-              For solo counselors. Up to 30 active clients &mdash; more than one person can carry. Groups and organisations, this isn&rsquo;t for you.
+              For solo counselors. Up to 40 active clients &mdash; more than one person can carry. Groups and organisations, this isn&rsquo;t for you.
             </div>
 
             <div className="pt-2">
@@ -458,7 +458,7 @@ export default function Home() {
                 Is there a limit on clients?
               </h3>
               <p className="text-sm text-ink-2 leading-relaxed">
-                Up to 30 active clients &mdash; more than a solo counselor can carry. Inactive clients don&rsquo;t count toward the limit, and their records stay as long as you need them.
+                Up to 40 active clients &mdash; more than a solo counselor can carry. Inactive clients don&rsquo;t count toward the limit, and their records stay as long as you need them.
               </p>
             </div>
           </div>

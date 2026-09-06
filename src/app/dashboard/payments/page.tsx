@@ -64,15 +64,37 @@ function PaymentsPageInner() {
   const [paymentCurrency, setPaymentCurrency] = useState("INR");
   const router = useRouter();
 
+  // Sync state from URL params when browser back/forward navigation occurs
   useEffect(() => {
-    const params = new URLSearchParams();
-    if (view !== "clients") params.set("view", view);
-    if (drillClientId) params.set("drillClientId", drillClientId);
-    if (search) params.set("q", search);
-    if (invoiceSortKey !== "date") params.set("sort", invoiceSortKey);
-    if (invoiceSortDir !== "desc") params.set("dir", invoiceSortDir);
-    const qs = params.toString();
-    router.replace(`/dashboard/payments${qs ? `?${qs}` : ""}`, { scroll: false });
+    const urlView = searchParams.get("view") as "clients" | "invoices" | null;
+    const urlDrill = searchParams.get("drillClientId");
+    const urlQ = searchParams.get("q");
+    const urlSort = searchParams.get("sort") as "date" | "number" | null;
+    const urlDir = searchParams.get("dir") as "asc" | "desc" | null;
+
+    if (urlView && urlView !== view) setView(urlView);
+    if (urlDrill !== undefined && urlDrill !== drillClientId) setDrillClientId(urlDrill);
+    if (urlQ !== null && urlQ !== search) setSearch(urlQ);
+    if (urlSort && urlSort !== invoiceSortKey) setInvoiceSortKey(urlSort);
+    if (urlDir && urlDir !== invoiceSortDir) setInvoiceSortDir(urlDir);
+  }, [searchParams]);
+
+  // Debounced URL updates to prevent search input jittering while preserving stickiness
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const params = new URLSearchParams();
+      if (view !== "clients") params.set("view", view);
+      if (drillClientId) params.set("drillClientId", drillClientId);
+      if (search) params.set("q", search);
+      if (invoiceSortKey !== "date") params.set("sort", invoiceSortKey);
+      if (invoiceSortDir !== "desc") params.set("dir", invoiceSortDir);
+      const qs = params.toString();
+      const newUrl = `/dashboard/payments${qs ? `?${qs}` : ""}`;
+      if (typeof window !== "undefined" && window.location.search !== (qs ? `?${qs}` : "")) {
+        router.replace(newUrl, { scroll: false });
+      }
+    }, 300);
+    return () => clearTimeout(timer);
   }, [view, drillClientId, search, invoiceSortKey, invoiceSortDir, router]);
 
   const fetchData = async () => {

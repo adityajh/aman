@@ -167,9 +167,14 @@ export async function POST(
                 <strong>Branch:</strong> Noida, Sector - 18<br>
                 <strong>Account #:</strong> 499 034528 006<br>
                 <strong>IFSC:</strong> HSBC 0110007<br>
-                <strong>Account Name:</strong> Vijay Gopal Sreenivasan
+                <strong>Account Name:</strong> ${practiceProfile.counselorName}
                 ${practiceProfile.upiId ? `<br><strong>UPI ID:</strong> ${practiceProfile.upiId}` : ""}
               </p>
+              ${practiceProfile.upiQrCode ? `
+              <div style="margin-top: 16px;">
+                <img src="${practiceProfile.upiQrCode}" alt="UPI QR Code" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 1px solid #cbd5e1;" />
+              </div>
+              ` : ""}
             </div>
             
             <div style="border-top: 1px solid #e2e8f0; padding-top: 24px; font-style: italic; color: #718096; font-size: 15px; text-align: center; line-height: 1.6;">
