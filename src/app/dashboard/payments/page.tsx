@@ -79,9 +79,25 @@ function PaymentsPageInner() {
     if (urlDir && urlDir !== invoiceSortDir) setInvoiceSortDir(urlDir);
   }, [searchParams]);
 
+  // Restore stickiness from sessionStorage if URL has no search params (e.g. sidebar navigation)
+  useEffect(() => {
+    if (!window.location.search) {
+      const savedView = sessionStorage.getItem("payments_view") as "clients" | "invoices" | null;
+      if (savedView && savedView !== view) setView(savedView);
+      const savedSort = sessionStorage.getItem("payments_sort") as "date" | "number" | null;
+      if (savedSort && savedSort !== invoiceSortKey) setInvoiceSortKey(savedSort);
+      const savedDir = sessionStorage.getItem("payments_dir") as "asc" | "desc" | null;
+      if (savedDir && savedDir !== invoiceSortDir) setInvoiceSortDir(savedDir);
+    }
+  }, []);
+
   // Debounced URL updates to prevent search input jittering while preserving stickiness
   useEffect(() => {
     const timer = setTimeout(() => {
+      sessionStorage.setItem("payments_view", view);
+      sessionStorage.setItem("payments_sort", invoiceSortKey);
+      sessionStorage.setItem("payments_dir", invoiceSortDir);
+
       const params = new URLSearchParams();
       if (view !== "clients") params.set("view", view);
       if (drillClientId) params.set("drillClientId", drillClientId);
@@ -165,6 +181,8 @@ function PaymentsPageInner() {
       upi: "bg-blue-50 text-blue-700 ring-blue-200", cash: "bg-lime-50 text-lime-700 ring-lime-200",
       bank_transfer: "bg-slate-50 text-slate-700 ring-slate-200", card: "bg-purple-50 text-purple-700 ring-purple-200",
       online: "bg-teal-50 text-teal-700 ring-teal-200", other: "bg-amber-50 text-amber-700 ring-amber-200",
+      write_off: "bg-slate-100 text-slate-600 ring-slate-200", credit: "bg-pink-50 text-pink-700 ring-pink-200",
+      refund: "bg-rose-50 text-rose-700 ring-rose-200",
     };
     return <span className={cn("inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ring-1 ring-inset", styles[method] || styles.other)}>{(method || "other").replace("_", " ")}</span>;
   };
@@ -229,7 +247,8 @@ function PaymentsPageInner() {
       rows.push({ date: i.issuedDate || i.billingMonth, created: i.createdAt, ref: i.invoiceNumber, kind: "invoice", desc: `Invoice · ${formatIST(new Date(i.billingMonth), "MMM yyyy")}`, currency: i.currency, invoiced: parseFloat(i.total || "0"), received: 0 });
     }
     for (const r of receipts.filter((x) => x.clientId === drillClientId)) {
-      rows.push({ date: r.paymentDate, created: r.createdAt, ref: r.receiptNumber, kind: "receipt", desc: `Payment · ${(r.method || "").replace("_", " ")}`, currency: r.currency, invoiced: 0, received: parseFloat(r.amount || "0"), id: r.id, sentAt: r.sentAt });
+      const isAdj = ["write_off", "credit", "refund"].includes(r.method || "");
+      rows.push({ date: r.paymentDate, created: r.createdAt, ref: r.receiptNumber, kind: "receipt", desc: `${isAdj ? "Adjustment" : "Payment"} · ${(r.method || "").replace("_", " ")}`, currency: r.currency, invoiced: 0, received: parseFloat(r.amount || "0"), id: r.id, sentAt: r.sentAt });
     }
     rows.sort((a, b) => a.date.localeCompare(b.date) || new Date(a.created).getTime() - new Date(b.created).getTime());
     const running: CurrencyMap = {};
@@ -245,9 +264,9 @@ function PaymentsPageInner() {
           <p className="text-slate-500">Client balances, invoice receivables, and receipts.</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger render={<Button className="gap-2 bg-lime-400 text-slate-950 hover:bg-lime-500 font-bold shadow-sm"><Plus className="h-4 w-4" /> Record Payment</Button>} />
+          <DialogTrigger render={<Button className="gap-2 bg-lime-400 text-slate-950 hover:bg-lime-500 font-bold shadow-sm"><Plus className="h-4 w-4" /> Record Payment / Adjustment</Button>} />
           <DialogContent className="max-w-xl">
-            <DialogHeader><DialogTitle>Record New Payment</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>Record Payment or Adjustment</DialogTitle></DialogHeader>
             <form onSubmit={handleRecordPayment} className="space-y-6 pt-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2 col-span-2">
@@ -277,9 +296,9 @@ function PaymentsPageInner() {
                 <div className="space-y-2">
                   <Label>Method</Label>
                   <Select value={paymentMethod} onValueChange={(v) => setPaymentMethod(v || "upi")}>
-                    <SelectTrigger className="border-slate-200 h-10 bg-white shadow-sm"><SelectValue>{({upi:"UPI",cash:"Cash",bank_transfer:"Bank Transfer",card:"Card",online:"Online",other:"Other"} as any)[paymentMethod] || "UPI"}</SelectValue></SelectTrigger>
+                    <SelectTrigger className="border-slate-200 h-10 bg-white shadow-sm"><SelectValue>{({upi:"UPI",cash:"Cash",bank_transfer:"Bank Transfer",card:"Card",online:"Online",other:"Other",write_off:"Write-off",credit:"Account Credit",refund:"Refund"} as any)[paymentMethod] || "UPI"}</SelectValue></SelectTrigger>
                     <SelectContent className="bg-white border-slate-200">
-                      <SelectItem value="upi" label="UPI">UPI</SelectItem><SelectItem value="cash" label="Cash">Cash</SelectItem><SelectItem value="bank_transfer" label="Bank Transfer">Bank Transfer</SelectItem><SelectItem value="card" label="Card">Card</SelectItem><SelectItem value="online" label="Online">Online</SelectItem><SelectItem value="other" label="Other">Other</SelectItem>
+                      <SelectItem value="upi" label="UPI">UPI</SelectItem><SelectItem value="cash" label="Cash">Cash</SelectItem><SelectItem value="bank_transfer" label="Bank Transfer">Bank Transfer</SelectItem><SelectItem value="card" label="Card">Card</SelectItem><SelectItem value="online" label="Online">Online</SelectItem><SelectItem value="write_off" label="Write-off">Write-off (Discount)</SelectItem><SelectItem value="credit" label="Account Credit">Account Credit</SelectItem><SelectItem value="refund" label="Refund">Refund (Negative)</SelectItem><SelectItem value="other" label="Other">Other</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -289,7 +308,7 @@ function PaymentsPageInner() {
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" type="button" onClick={() => setOpen(false)} className="text-slate-600">Cancel</Button>
                 <Button type="submit" disabled={isSubmitting || !selectedClientId} className="bg-lime-400 text-slate-950 hover:bg-lime-500 font-bold px-8 shadow-md">
-                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}Confirm Receipt
+                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}Save Entry
                 </Button>
               </div>
             </form>

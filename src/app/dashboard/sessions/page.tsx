@@ -67,7 +67,7 @@ function SessionsPageInner() {
 
   // Filters — initialised from URL params if present
   const searchParams = useSearchParams();
-  const [timeFilter, setTimeFilter] = useState<string>(searchParams.get("timeFilter") ?? "today");
+  const [timeFilter, setTimeFilter] = useState<string>(searchParams.get("timeFilter") ?? "future");
   const [clientFilter, setClientFilter] = useState<string>(searchParams.get("clientId") ?? "all");
   const [statusFilter, setStatusFilter] = useState<string>(searchParams.get("status") ?? "all");
   // Custom date range (IST yyyy-MM-dd); used when timeFilter === "custom".
@@ -101,6 +101,18 @@ function SessionsPageInner() {
     if (urlDir && urlDir !== timeSort) setTimeSort(urlDir);
   }, [searchParams]);
 
+  // Restore stickiness from sessionStorage if URL has no search params (e.g. sidebar navigation)
+  useEffect(() => {
+    if (!window.location.search) {
+      const savedTime = sessionStorage.getItem("sessions_timeFilter");
+      const savedClient = sessionStorage.getItem("sessions_clientId");
+      const savedStatus = sessionStorage.getItem("sessions_status");
+      if (savedTime && savedTime !== timeFilter) setTimeFilter(savedTime);
+      if (savedClient && savedClient !== clientFilter) setClientFilter(savedClient);
+      if (savedStatus && savedStatus !== statusFilter) setStatusFilter(savedStatus);
+    }
+  }, []);
+
   // Automatically update default sort direction when switching between future and past/all filters (unless explicit dir param present)
   useEffect(() => {
     if (!searchParams.get("dir")) {
@@ -111,8 +123,12 @@ function SessionsPageInner() {
   // Debounced URL updates to prevent typing jitter while preserving stickiness
   useEffect(() => {
     const timer = setTimeout(() => {
+      sessionStorage.setItem("sessions_timeFilter", timeFilter);
+      sessionStorage.setItem("sessions_clientId", clientFilter);
+      sessionStorage.setItem("sessions_status", statusFilter);
+
       const params = new URLSearchParams();
-      if (timeFilter !== "today") params.set("timeFilter", timeFilter);
+      if (timeFilter !== "future") params.set("timeFilter", timeFilter);
       if (clientFilter !== "all") params.set("clientId", clientFilter);
       if (statusFilter !== "all") params.set("status", statusFilter);
       if (search) params.set("q", search);

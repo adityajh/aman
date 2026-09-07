@@ -320,7 +320,7 @@ export const payments = pgTable(
     paymentDate: date("payment_date").notNull().default(sql`CURRENT_DATE`),
     currency: text("currency").notNull().default("INR"),
     method: text("method")
-      .$type<"cash" | "upi" | "bank_transfer" | "card" | "online" | "other">()
+      .$type<"cash" | "upi" | "bank_transfer" | "card" | "online" | "write_off" | "credit" | "refund" | "other">()
       .notNull(),
     referenceId: text("reference_id"),
     notes: text("notes"),
@@ -353,7 +353,7 @@ export const receipts = pgTable(
     currency: text("currency").notNull().default("INR"),
     paymentDate: date("payment_date").notNull().default(sql`CURRENT_DATE`),
     method: text("method")
-      .$type<"cash" | "upi" | "bank_transfer" | "card" | "online" | "other">()
+      .$type<"cash" | "upi" | "bank_transfer" | "card" | "online" | "write_off" | "credit" | "refund" | "other">()
       .notNull(),
     referenceId: text("reference_id"),
     notes: text("notes"),

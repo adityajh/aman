@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { payments, invoices } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
-import { sql, gte } from "drizzle-orm";
+import { sql, gte, and, notInArray } from "drizzle-orm";
 import { formatIST, istStartOfMonthUTC, istStartOfFYUTC } from "@/lib/tz";
 import { getTenantContext, withTenantContext } from "@/lib/tenant";
 
@@ -23,6 +23,8 @@ export async function GET() {
         .where(sql`status IN ('draft', 'sent', 'partial', 'overdue')`)
         .groupBy(sql`COALESCE(${invoices.currency}, 'INR')`);
 
+      const nonRevenueMethods = ["write_off", "credit", "refund"];
+
       // 2. Total received this month (grouped by currency)
       const thisMonthRes = await tx
         .select({
@@ -30,7 +32,12 @@ export async function GET() {
           total: sql<number>`SUM(CAST(${payments.amount} AS NUMERIC))`,
         })
         .from(payments)
-        .where(gte(payments.paymentDate, firstOfOfMonth))
+        .where(
+          and(
+            gte(payments.paymentDate, firstOfOfMonth),
+            notInArray(payments.method, nonRevenueMethods)
+          )
+        )
         .groupBy(sql`COALESCE(${payments.currency}, 'INR')`);
 
       // 3. YTD total received (grouped by currency) - FY logic (April to March)
@@ -40,7 +47,12 @@ export async function GET() {
           total: sql<number>`SUM(CAST(${payments.amount} AS NUMERIC))`,
         })
         .from(payments)
-        .where(gte(payments.paymentDate, firstOfFY))
+        .where(
+          and(
+            gte(payments.paymentDate, firstOfFY),
+            notInArray(payments.method, nonRevenueMethods)
+          )
+        )
         .groupBy(sql`COALESCE(${payments.currency}, 'INR')`);
 
       return NextResponse.json({

@@ -159,19 +159,36 @@ function ClientsPageInner() {
 
   // Sync state from URL params when browser back/forward navigation occurs
   useEffect(() => {
-    const urlStatus = searchParams.get("status") as any;
+    const urlStatus = searchParams.get("status") as "all" | "active" | "terminated" | null;
     const urlQ = searchParams.get("q");
     const urlSort = searchParams.get("sort") as any;
-    const urlDir = searchParams.get("dir") as any;
+    const urlDir = searchParams.get("dir") as "asc" | "desc" | null;
+
     if (urlStatus && urlStatus !== statusFilter) setStatusFilter(urlStatus);
     if (urlQ !== null && urlQ !== search) setSearch(urlQ);
     if (urlSort && urlSort !== sortCol) setSortCol(urlSort);
     if (urlDir && urlDir !== sortDir) setSortDir(urlDir);
   }, [searchParams]);
 
+  // Restore stickiness from sessionStorage if URL has no search params (e.g. sidebar navigation)
+  useEffect(() => {
+    if (!window.location.search) {
+      const savedStatus = sessionStorage.getItem("clients_status") as "all" | "active" | "terminated" | null;
+      if (savedStatus && savedStatus !== statusFilter) setStatusFilter(savedStatus);
+      const savedSortCol = sessionStorage.getItem("clients_sortCol") as any;
+      if (savedSortCol && savedSortCol !== sortCol) setSortCol(savedSortCol);
+      const savedSortDir = sessionStorage.getItem("clients_sortDir") as any;
+      if (savedSortDir && savedSortDir !== sortDir) setSortDir(savedSortDir);
+    }
+  }, []);
+
   // Debounced URL updates to prevent search input jittering during typing
   useEffect(() => {
     const timer = setTimeout(() => {
+      sessionStorage.setItem("clients_status", statusFilter);
+      sessionStorage.setItem("clients_sortCol", sortCol);
+      sessionStorage.setItem("clients_sortDir", sortDir);
+
       const params = new URLSearchParams();
       if (statusFilter !== "active") params.set("status", statusFilter);
       if (search) params.set("q", search);

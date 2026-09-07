@@ -2,6 +2,19 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [5.0.4] - 2026-09-07
+### Added
+- **UPI QR Code on Invoices**: Added support for uploading a UPI QR Code in Billing Settings. If present, the QR code is automatically appended to generated invoice PDFs and emails for easier payments.
+- **Filter Stickiness**: Added `sessionStorage` stickiness to the Clients, Sessions, and Payments dashboard pages. Filter and sort preferences now persist across sidebar navigation.
+
+### Changed
+- **Increased Active Client Limit**: Raised the active client limit from 30 to 40 for non-exempt subscriptions, updating both the enforcement logic and marketing homepage copy.
+- **Session View Default**: Changed the default view on the Sessions page from "Today" to "Upcoming Sessions", which natively sorts nearest-future-session first.
+- **Email CC Pre-fill**: The Progress Chart email dialog now pre-fills the CC field with the logged-in counselor's email address by default.
+
+### Fixed
+- **Hardcoded Email/Name Fallbacks**: Removed leftover legacy hardcoded strings ("Vijay Gopal Sreenivasan" / "Deepen Counseling") from invoice previews, invoice sending, and chart progress routes, replacing them with generic fallbacks if settings are missing.
+
 ## [5.0.3] - 2026-08-31
 ### Added
 - **Subscription Billing History Table**: Added a Subscription Billing History table under Settings -> Deepen Billing (`/dashboard/settings`), fetching past Razorpay SaaS subscription invoices with dates, amounts, status, and direct PDF receipt download links.

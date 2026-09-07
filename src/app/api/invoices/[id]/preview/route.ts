@@ -40,14 +40,14 @@ export async function GET(
         return ta - tb;
       });
 
-      const profile = settings || {
-        practiceName: "Deepen Counseling",
-        counselorName: "Vijay Gopal Sreenivasan",
-        address: "Noida, Uttar Pradesh",
+      const profile = settingsRow || {
+        counselorName: "Jane Doe",
+        practiceName: "Acme Counseling",
+        address: "Somewhere",
         phone: "+91-0000000000",
-        email: "counselor@deepen.health",
+        email: "counselor@example.com",
         monthlyQuote: "Progress is not a straight line.",
-        upiId: "",
+        upiId: "counselor@upi",
       };
 
       const formatCurrency = (val: any) => {

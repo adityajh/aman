@@ -41,7 +41,7 @@ export async function POST(req: Request) {
       } = await req.json();
       let remainingPayment = parseFloat(amount);
 
-      if (isNaN(remainingPayment) || remainingPayment <= 0) {
+      if (isNaN(remainingPayment) || (remainingPayment <= 0 && method !== "refund")) {
         return new NextResponse("Invalid amount", { status: 400 });
       }
 
@@ -55,8 +55,8 @@ export async function POST(req: Request) {
       const [receipt] = await tx
         .insert(receipts)
         .values({
-            tenantId: tenantId,
-            receiptNumber,
+          tenantId: tenantId,
+          receiptNumber,
           clientId,
           amount: remainingPayment.toFixed(2),
           currency,
@@ -67,17 +67,19 @@ export async function POST(req: Request) {
         })
         .returning();
 
-      // 1. Fetch outstanding invoices of the SAME CURRENCY (FIFO)
-      const outstandingInvoices = await tx.query.invoices.findMany({
-        where: and(
-          eq(invoices.clientId, clientId),
-          eq(invoices.currency, currency),
-          inArray(invoices.status, ["draft", "sent", "partial", "overdue"]),
-        ),
-        orderBy: [asc(invoices.issuedDate), asc(invoices.createdAt)],
-      });
-
       const paymentRecords = [];
+
+      // Only perform FIFO allocation for positive amounts that reduce debt (payments, write_offs, credits)
+      if (remainingPayment > 0) {
+        // 1. Fetch outstanding invoices of the SAME CURRENCY (FIFO)
+        const outstandingInvoices = await tx.query.invoices.findMany({
+          where: and(
+            eq(invoices.clientId, clientId),
+            eq(invoices.currency, currency),
+            inArray(invoices.status, ["draft", "sent", "partial", "overdue"]),
+          ),
+          orderBy: [asc(invoices.issuedDate), asc(invoices.createdAt)],
+        });
 
       // 2. FIFO Allocation (only within the same currency)
       for (const inv of outstandingInvoices) {
@@ -145,6 +147,20 @@ export async function POST(req: Request) {
           notes: notes
             ? `${notes} (Excess ${currency} Credit)`
             : `Excess ${currency} Credit`,
+        });
+      }
+      } else if (remainingPayment < 0 && method === "refund") {
+        paymentRecords.push({
+          tenantId,
+          receiptId: receipt.id,
+          clientId,
+          invoiceId: null,
+          amount: remainingPayment.toFixed(2),
+          paymentDate: payDate,
+          currency,
+          method,
+          referenceId,
+          notes: notes || `Refund`,
         });
       }
 

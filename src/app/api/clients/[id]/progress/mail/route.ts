@@ -34,8 +34,8 @@ export async function POST(
         return new NextResponse("Client email is required", { status: 400 });
 
       const practiceProfile = settings || {
-        practiceName: "Deepen Counseling",
-        email: "counselor@deepen.health",
+        practiceName: "Acme Counseling",
+        email: "counselor@example.com",
       };
 
       const transporter = nodemailer.createTransport({
