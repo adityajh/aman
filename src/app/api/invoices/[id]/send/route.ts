@@ -45,13 +45,13 @@ export async function POST(
       }
 
       const practiceProfile = settings || {
-        practiceName: "Deepen Counseling",
-        counselorName: "Vijay Gopal Sreenivasan",
-        address: "Noida, Uttar Pradesh",
+        counselorName: "Jane Doe",
+        practiceName: "Acme Counseling",
+        address: "Somewhere",
         phone: "+91-0000000000",
-        email: "counselor@deepen.health",
+        email: "counselor@example.com",
         monthlyQuote: "Progress is not a straight line.",
-        upiId: "",
+        upiId: "counselor@upi",
       };
 
       const formatCurrency = (val: any) => {
@@ -93,6 +93,42 @@ export async function POST(
           pass: process.env.SMTP_PASS, // This should be a Gmail App Password
         },
       });
+      
+      const attachments: any[] = [];
+      let qrCodeHtml = "";
+
+      if (practiceProfile.upiQrCode) {
+        if (practiceProfile.upiQrCode.startsWith("data:image/")) {
+          const matches = practiceProfile.upiQrCode.match(/^data:image\/([a-zA-Z+]+);base64,(.+)$/);
+          if (matches && matches.length === 3) {
+            const ext = matches[1];
+            const data = matches[2];
+            attachments.push({
+              filename: `upi-qr.${ext}`,
+              content: data,
+              encoding: "base64",
+              cid: "upiQrCode" // same cid value as in the html img src
+            });
+            qrCodeHtml = `
+              <div style="margin-top: 16px;">
+                <img src="cid:upiQrCode" alt="UPI QR Code" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 1px solid #cbd5e1;" />
+              </div>
+            `;
+          } else {
+            qrCodeHtml = `
+              <div style="margin-top: 16px;">
+                <img src="${practiceProfile.upiQrCode}" alt="UPI QR Code" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 1px solid #cbd5e1;" />
+              </div>
+            `;
+          }
+        } else {
+          qrCodeHtml = `
+            <div style="margin-top: 16px;">
+              <img src="${practiceProfile.upiQrCode}" alt="UPI QR Code" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 1px solid #cbd5e1;" />
+            </div>
+          `;
+        }
+      }
 
       const htmlContent = `
       <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #edf2f7; border-radius: 12px; color: #1a202c; background-color: #ffffff;">
@@ -170,11 +206,7 @@ export async function POST(
                 <strong>Account Name:</strong> ${practiceProfile.counselorName}
                 ${practiceProfile.upiId ? `<br><strong>UPI ID:</strong> ${practiceProfile.upiId}` : ""}
               </p>
-              ${practiceProfile.upiQrCode ? `
-              <div style="margin-top: 16px;">
-                <img src="${practiceProfile.upiQrCode}" alt="UPI QR Code" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 1px solid #cbd5e1;" />
-              </div>
-              ` : ""}
+              ${qrCodeHtml}
             </div>
             
             <div style="border-top: 1px solid #e2e8f0; padding-top: 24px; font-style: italic; color: #718096; font-size: 15px; text-align: center; line-height: 1.6;">
@@ -215,6 +247,7 @@ export async function POST(
         to: sendTo,
         subject,
         html: testBanner + htmlContent,
+        attachments: attachments.length > 0 ? attachments : undefined,
       });
 
       // In live mode, mark the invoice as sent. In test mode, leave it as draft
