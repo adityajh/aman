@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Save, Loader2, User, Building, MapPin, Phone, Mail, Quote, Activity, Lock, CreditCard, Download } from "lucide-react";
+import { Save, Loader2, User, Building, MapPin, Phone, Mail, Quote, Activity, Lock, CreditCard, Download, Bell, Copy, Check } from "lucide-react";
 import { formatIST } from "@/lib/tz";
 import { BillingSettings } from "@/components/billing-settings";
 
@@ -19,6 +19,8 @@ export default function SettingsPage() {
   const [updatingPassword, setUpdatingPassword] = useState(false);
   const [cancellingSubscription, setCancellingSubscription] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [sendingReminders, setSendingReminders] = useState(false);
+  const [copiedCron, setCopiedCron] = useState(false);
   const [passwordForm, setPasswordForm] = useState({ newPassword: "", confirmPassword: "" });
   const [billingInfo, setBillingInfo] = useState<any>(null);
   const [settings, setSettings] = useState({
@@ -39,6 +41,8 @@ export default function SettingsPage() {
     orsGreenLow: 32,
     invoiceDueDays: 15,
     emailOverride: false,
+    reminderEnabled: false,
+    reminderDaysAfterDue: 3,
   });
 
   useEffect(() => {
@@ -65,6 +69,8 @@ export default function SettingsPage() {
           orsGreenLow: settingsData.orsGreenLow ?? 32,
           invoiceDueDays: settingsData.invoiceDueDays ?? 15,
           emailOverride: settingsData.emailOverride ?? false,
+          reminderEnabled: settingsData.reminderEnabled ?? false,
+          reminderDaysAfterDue: settingsData.reminderDaysAfterDue ?? 3,
         });
       }
       if (billingData && !billingData.error) {
@@ -470,7 +476,96 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        <div className="flex justify-end pt-4 pb-12">
+        <Card className={settings.reminderEnabled ? "border-lime-300" : ""}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5 text-primary" /> Payment Reminders
+              {settings.reminderEnabled && (
+                <span className="ml-2 text-[10px] font-bold uppercase tracking-widest bg-lime-100 text-lime-800 px-2 py-0.5 rounded">Active</span>
+              )}
+            </CardTitle>
+            <CardDescription>
+              When enabled, overdue invoices automatically receive a reminder email. Reminders re-send every 7 days until the invoice is paid.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <label className="flex items-center gap-3 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={settings.reminderEnabled}
+                onChange={(e) => setSettings({ ...settings, reminderEnabled: e.target.checked })}
+                className="h-5 w-5 accent-lime-500"
+              />
+              <span className="text-sm font-medium">
+                {settings.reminderEnabled
+                  ? "Auto-reminders are ON — overdue clients will be emailed."
+                  : "Auto-reminders are OFF."}
+              </span>
+            </label>
+
+            {settings.reminderEnabled && (
+              <div className="flex items-center gap-3 max-w-xs">
+                <Label htmlFor="reminderDaysAfterDue" className="whitespace-nowrap">Days after due date</Label>
+                <Input
+                  id="reminderDaysAfterDue"
+                  type="number"
+                  min={1}
+                  value={settings.reminderDaysAfterDue}
+                  onChange={(e) => setSettings({ ...settings, reminderDaysAfterDue: parseInt(e.target.value) || 3 })}
+                  className="w-24"
+                />
+              </div>
+            )}
+
+            <div className="space-y-2 pt-2 border-t border-slate-100">
+              <Label className="text-xs text-slate-500">Cron Endpoint</Label>
+              <div className="flex items-center gap-2">
+                <code className="text-xs bg-slate-100 border border-slate-200 rounded px-3 py-2 flex-1 text-slate-700 font-mono overflow-x-auto">
+                  POST {typeof window !== "undefined" ? window.location.origin : "https://your-domain.com"}/api/invoices/remind
+                </code>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0"
+                  onClick={() => {
+                    const url = `${window.location.origin}/api/invoices/remind`;
+                    navigator.clipboard.writeText(url);
+                    setCopiedCron(true);
+                    setTimeout(() => setCopiedCron(false), 2000);
+                  }}
+                >
+                  {copiedCron ? <Check className="h-3.5 w-3.5 text-lime-600" /> : <Copy className="h-3.5 w-3.5" />}
+                </Button>
+              </div>
+              <p className="text-[11px] text-slate-400">Add this URL to Vercel Cron (or any cron scheduler) with <code>Authorization: Bearer $CRON_SECRET</code>.</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="flex items-center justify-between pt-4 pb-12">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={sendingReminders}
+            className="gap-2 text-slate-600"
+            onClick={async () => {
+              setSendingReminders(true);
+              try {
+                const res = await fetch("/api/invoices/remind", { method: "POST" });
+                const data = await res.json();
+                if (res.ok) {
+                  toast.success(data.message || `${data.sent} reminder(s) sent.`);
+                } else {
+                  toast.error(data.message || "Failed to send reminders.");
+                }
+              } catch { toast.error("An error occurred."); }
+              finally { setSendingReminders(false); }
+            }}
+          >
+            {sendingReminders ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bell className="h-4 w-4" />}
+            Send Reminders Now
+          </Button>
           <Button type="submit" disabled={saving} size="lg" className="min-w-[200px] gap-2">
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             Save Settings

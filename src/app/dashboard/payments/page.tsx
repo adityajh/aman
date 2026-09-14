@@ -263,7 +263,19 @@ function PaymentsPageInner() {
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Payments Ledger</h1>
           <p className="text-slate-500">Client balances, invoice receivables, and receipts.</p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={(o) => {
+          if (o && drillClientId) {
+            // Pre-fill the client when opening from the drill-in view
+            setSelectedClientId(drillClientId);
+            const client = clients.find(c => c.id === drillClientId);
+            if (client?.defaultFeeSchemeId) {
+              const s = feeSchemes.find(f => f.id === client.defaultFeeSchemeId);
+              if (s) setPaymentCurrency(s.currency);
+            }
+          }
+          if (!o) setSelectedClientId("");
+          setOpen(o);
+        }}>
           <DialogTrigger render={<Button className="gap-2 bg-lime-400 text-slate-950 hover:bg-lime-500 font-bold shadow-sm"><Plus className="h-4 w-4" /> Record Payment / Adjustment</Button>} />
           <DialogContent className="max-w-xl">
             <DialogHeader><DialogTitle>Record Payment or Adjustment</DialogTitle></DialogHeader>

@@ -124,23 +124,23 @@ function SrsChart({
       <ComposedChart data={srsPoints} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
         <defs>
           <linearGradient id="srsArea" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.65} />
-            <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.05} />
+            <stop offset="0%" stopColor="#7c3aed" stopOpacity={0.8} />
+            <stop offset="100%" stopColor="#7c3aed" stopOpacity={0.05} />
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
         <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
         <YAxis domain={[0, 40]} tick={{ fontSize: 11, fill: "#94a3b8" }} ticks={[0, 10, 20, 30, 36, 40]} width={28} />
         {/* Soft "below cutoff" zone */}
-        <ReferenceArea y1={0} y2={thresholds.srsCutoff} fill="#f59e0b" fillOpacity={0.15} />
+        <ReferenceArea y1={0} y2={thresholds.srsCutoff} fill="#f59e0b" fillOpacity={0.22} />
         <Tooltip content={<ChartTooltip unit="SRS" />} />
         <Area type="monotone" dataKey="srs" stroke="transparent" fill="url(#srsArea)" connectNulls isAnimationActive={false} legendType="none" />
         <Line
           type="monotone"
           dataKey="srs"
-          stroke="#8b5cf6"
+          stroke="#7c3aed"
           strokeWidth={2.5}
-          dot={{ r: 4, fill: "#8b5cf6" }}
+          dot={{ r: 4, fill: "#7c3aed" }}
           activeDot={{ r: 6 }}
           name="SRS (Alliance)"
         />
@@ -166,8 +166,8 @@ function OrsFullChart({
       <ComposedChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
         <defs>
           <linearGradient id="orsArea" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.65} />
-            <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.05} />
+            <stop offset="0%" stopColor="#2563eb" stopOpacity={0.7} />
+            <stop offset="100%" stopColor="#2563eb" stopOpacity={0.05} />
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
@@ -175,20 +175,20 @@ function OrsFullChart({
         <YAxis domain={[0, 40]} tick={{ fontSize: 11, fill: "#94a3b8" }} ticks={[0, 10, 20, 25, 30, 40]} width={28} />
 
         {/* Soft background zones instead of hard dashed lines */}
-        <ReferenceArea y1={0} y2={thresholds.orsAmberLow - 1} fill="#ef4444" fillOpacity={0.15} />
-        <ReferenceArea y1={thresholds.orsAmberLow - 1} y2={thresholds.orsGreenLow - 1} fill="#f59e0b" fillOpacity={0.15} />
-        <ReferenceArea y1={thresholds.orsGreenLow - 1} y2={40} fill="#22c55e" fillOpacity={0.15} />
+        <ReferenceArea y1={0} y2={thresholds.orsAmberLow - 1} fill="#ef4444" fillOpacity={0.22} />
+        <ReferenceArea y1={thresholds.orsAmberLow - 1} y2={thresholds.orsGreenLow - 1} fill="#f59e0b" fillOpacity={0.22} />
+        <ReferenceArea y1={thresholds.orsGreenLow - 1} y2={40} fill="#22c55e" fillOpacity={0.22} />
 
         <Tooltip content={<ChartTooltip unit="ORS" />} />
-        <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
+        <Legend wrapperStyle={{ fontSize: 13, paddingTop: 8 }} />
 
         <Area type="monotone" dataKey="ors" stroke="transparent" fill="url(#orsArea)" connectNulls isAnimationActive={false} legendType="none" />
         <Line
           type="monotone"
           dataKey="ors"
-          stroke="#3b82f6"
+          stroke="#2563eb"
           strokeWidth={2.5}
-          dot={{ r: 4, fill: "#3b82f6" }}
+          dot={{ r: 4, fill: "#2563eb" }}
           activeDot={{ r: 6 }}
           name="ORS (Progress)"
           connectNulls
@@ -196,8 +196,8 @@ function OrsFullChart({
         <Line
           type="monotone"
           dataKey="trend"
-          stroke="#94a3b8"
-          strokeWidth={1.5}
+          stroke="#64748b"
+          strokeWidth={2}
           strokeDasharray="6 3"
           dot={false}
           name="Trend Line"
@@ -288,15 +288,15 @@ function PredictedProgressChart({ clientId }: { clientId: string }) {
               return [`${v ?? "—"}`, label];
             }}
           />
-          <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
+          <Legend wrapperStyle={{ fontSize: 13, paddingTop: 8 }} />
 
           {/* Cohort expected band (lower–upper) */}
           <Area
             type="monotone"
             dataKey="band"
             stroke="transparent"
-            fill="#a78bfa"
-            fillOpacity={0.18}
+            fill="#7c3aed"
+            fillOpacity={0.28}
             name="Expected range"
             connectNulls
             isAnimationActive={false}
@@ -305,8 +305,8 @@ function PredictedProgressChart({ clientId }: { clientId: string }) {
           <Line
             type="monotone"
             dataKey="cohortAvg"
-            stroke="#a78bfa"
-            strokeWidth={1.5}
+            stroke="#7c3aed"
+            strokeWidth={2}
             strokeDasharray="6 3"
             dot={false}
             name="Similar clients (avg)"
@@ -316,9 +316,9 @@ function PredictedProgressChart({ clientId }: { clientId: string }) {
           <Line
             type="monotone"
             dataKey="clientOrs"
-            stroke="#3b82f6"
+            stroke="#2563eb"
             strokeWidth={2.5}
-            dot={{ r: 4, fill: "#3b82f6" }}
+            dot={{ r: 4, fill: "#2563eb" }}
             activeDot={{ r: 6 }}
             name="This client"
             connectNulls

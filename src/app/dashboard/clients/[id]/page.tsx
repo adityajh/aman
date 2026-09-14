@@ -5,9 +5,92 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, CalendarDays, Wallet, Activity, Loader2 } from "lucide-react";
+import { ArrowLeft, CalendarDays, Activity, Loader2, ChevronDown, ChevronUp, ChevronsUpDown } from "lucide-react";
 import { ClientProgressChart } from "@/components/client-progress-chart";
 import { formatIST } from "@/lib/tz";
+import { cn } from "@/lib/utils";
+
+// ── Note field config — labels match the clinical-note-editor form exactly ──
+const NOTE_FIELDS: { key: string; label: string; color: string; bgColor: string; borderColor: string }[] = [
+  { key: "updates",       label: "Updates (from last week)",  color: "text-sky-700",    bgColor: "bg-sky-50",    borderColor: "border-sky-300" },
+  { key: "subjective",    label: "Session Notes",             color: "text-indigo-700", bgColor: "bg-indigo-50", borderColor: "border-indigo-300" },
+  { key: "clientActions", label: "Client Actions",            color: "text-amber-700",  bgColor: "bg-amber-50",  borderColor: "border-amber-300" },
+  { key: "myActions",     label: "My Actions",                color: "text-teal-700",   bgColor: "bg-teal-50",   borderColor: "border-teal-300" },
+  { key: "agenda",        label: "Next Session Agenda",       color: "text-violet-700", bgColor: "bg-violet-50", borderColor: "border-violet-300" },
+  { key: "feedback",      label: "Feedback on Session",       color: "text-rose-700",   bgColor: "bg-rose-50",   borderColor: "border-rose-300" },
+];
+
+function SessionNoteCard({ session, defaultExpanded }: { session: any; defaultExpanded: boolean }) {
+  const [expanded, setExpanded] = useState(defaultExpanded);
+  const note = session.note;
+
+  const firstField = NOTE_FIELDS.find((f) => note[f.key]?.trim());
+  const previewText = firstField ? note[firstField.key].trim().split("\n")[0].slice(0, 120) : null;
+  const filledFields = NOTE_FIELDS.filter((f) => note[f.key]?.trim());
+
+  return (
+    <div className="relative pl-8">
+      {/* Timeline dot */}
+      <div className="absolute left-0 top-4 w-3.5 h-3.5 rounded-full bg-white border-2 border-slate-300 shadow-sm" />
+
+      <Card
+        className={cn(
+          "border-slate-200 shadow-sm transition-all duration-200",
+          !expanded && "hover:border-slate-300 cursor-pointer"
+        )}
+        onClick={!expanded ? () => setExpanded(true) : undefined}
+      >
+        <CardContent className="p-4">
+          {/* Header — always visible */}
+          <div
+            className="flex items-center gap-3 cursor-pointer select-none"
+            onClick={() => setExpanded((v) => !v)}
+          >
+            <CalendarDays className="h-4 w-4 text-slate-400 shrink-0" />
+            <span className="font-semibold text-slate-900 text-sm">
+              {formatIST(new Date(session.scheduledAt), "EEEE, d MMM yyyy 'at' h:mm a")}
+            </span>
+            {note.riskFlag && note.riskFlag !== "none" && (
+              <Badge
+                variant="outline"
+                className={cn(
+                  "text-[10px] shrink-0",
+                  note.riskFlag === "high"
+                    ? "bg-rose-50 text-rose-700 border-rose-200"
+                    : "bg-amber-50 text-amber-700 border-amber-200"
+                )}
+              >
+                {note.riskFlag.toUpperCase()} RISK
+              </Badge>
+            )}
+            <div className="ml-auto text-slate-400 shrink-0">
+              {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </div>
+          </div>
+
+          {/* Collapsed one-line preview */}
+          {!expanded && previewText && (
+            <p className="mt-2 ml-7 text-sm text-slate-500 line-clamp-1">{previewText}</p>
+          )}
+
+          {/* Expanded: colour-coded note fields */}
+          {expanded && (
+            <div className="mt-4 space-y-3">
+              {filledFields.map((f) => (
+                <div key={f.key} className={cn("rounded-lg border-l-4 pl-3 pr-3 py-2.5", f.bgColor, f.borderColor)}>
+                  <p className={cn("text-[10px] font-bold uppercase tracking-widest mb-1", f.color)}>
+                    {f.label}
+                  </p>
+                  <p className="text-sm text-slate-700 whitespace-pre-wrap">{note[f.key]}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 export default function ClientDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +99,8 @@ export default function ClientDetailPage() {
   const [feeSchemes, setFeeSchemes] = useState<any[]>([]);
   const [sessions, setSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [allExpanded, setAllExpanded] = useState(false);
+  const [expandKey, setExpandKey] = useState(0);
 
   useEffect(() => {
     if (!id) return;
@@ -34,8 +119,14 @@ export default function ClientDetailPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const currency = feeSchemes.find((f) => f.id === client?.defaultFeeSchemeId)?.currency ?? "INR";
-  const sym = currency === "USD" ? "$" : "₹";
+  const notedSessions = sessions
+    .filter((s) => s.status === "completed" && s.note)
+    .sort((a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime());
+
+  const handleToggleAll = () => {
+    setAllExpanded((v) => !v);
+    setExpandKey((k) => k + 1);
+  };
 
   if (loading) {
     return (
@@ -113,42 +204,41 @@ export default function ClientDetailPage() {
         </CardContent>
       </Card>
 
-      {/* Historical Notes */}
+      {/* Historical Notes — vertical timeline */}
       <div className="space-y-4 pt-4">
-        <h2 className="text-xl font-bold tracking-tight text-slate-900">Historical Session Notes</h2>
-        {sessions.filter(s => s.status === 'completed' && s.note).length === 0 ? (
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold tracking-tight text-slate-900">Historical Session Notes</h2>
+          {notedSessions.length > 0 && (
+            <button
+              onClick={handleToggleAll}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 bg-white shadow-sm"
+            >
+              <ChevronsUpDown className="h-3.5 w-3.5" />
+              {allExpanded ? "Collapse all" : "Expand all"}
+            </button>
+          )}
+        </div>
+
+        {notedSessions.length === 0 ? (
           <p className="text-sm text-slate-500">No session notes found.</p>
         ) : (
-          <div className="space-y-4">
-            {sessions
-              .filter(s => s.status === 'completed' && s.note)
-              .sort((a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime())
-              .map(s => (
-              <Card key={s.id} className="border-slate-200 shadow-sm">
-                <CardContent className="p-5">
-                  <div className="flex items-center gap-3 mb-4">
-                    <CalendarDays className="h-5 w-5 text-slate-400" />
-                    <span className="font-semibold text-slate-900">{formatIST(new Date(s.scheduledAt), "EEEE, d MMM yyyy 'at' h:mm a")}</span>
-                    {s.note.riskFlag && s.note.riskFlag !== "none" && (
-                      <Badge variant="outline" className={s.note.riskFlag === "high" ? "bg-rose-50 text-rose-700 border-rose-200" : "bg-amber-50 text-amber-700 border-amber-200"}>
-                        {s.note.riskFlag.toUpperCase()} RISK
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm text-slate-700">
-                    {s.note.subjective && <div><strong className="text-slate-900 block mb-1">Subjective / Check-in:</strong><p className="whitespace-pre-wrap">{s.note.subjective}</p></div>}
-                    {s.note.updates && <div><strong className="text-slate-900 block mb-1">Updates / Presentation:</strong><p className="whitespace-pre-wrap">{s.note.updates}</p></div>}
-                    {s.note.agenda && <div><strong className="text-slate-900 block mb-1">Agenda / Process:</strong><p className="whitespace-pre-wrap">{s.note.agenda}</p></div>}
-                    {s.note.clientActions && <div><strong className="text-slate-900 block mb-1">Client Actions (Homework):</strong><p className="whitespace-pre-wrap">{s.note.clientActions}</p></div>}
-                    {s.note.myActions && <div><strong className="text-slate-900 block mb-1">Therapist Actions:</strong><p className="whitespace-pre-wrap">{s.note.myActions}</p></div>}
-                    {s.note.feedback && <div><strong className="text-slate-900 block mb-1">Feedback:</strong><p className="whitespace-pre-wrap">{s.note.feedback}</p></div>}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="relative">
+            {/* Vertical timeline line */}
+            <div className="absolute left-[6px] top-5 bottom-5 w-[2px] bg-slate-200 rounded-full" />
+            <div className="space-y-4">
+              {notedSessions.map((s) => (
+                <SessionNoteCard
+                  key={s.id + "-" + expandKey}
+                  session={s}
+                  defaultExpanded={allExpanded}
+                />
+              ))}
+            </div>
           </div>
         )}
       </div>
     </div>
   );
 }
+
+

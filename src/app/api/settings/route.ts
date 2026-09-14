@@ -40,6 +40,8 @@ export async function POST(req: Request) {
         orsGreenLow,
         emailOverride,
         invoiceDueDays,
+        reminderEnabled,
+        reminderDaysAfterDue,
       } = body;
 
       const existing = await tx.query.practiceSettings.findFirst();
@@ -66,6 +68,9 @@ export async function POST(req: Request) {
             invoiceDueDays,
             emailOverride:
               emailOverride === undefined ? undefined : !!emailOverride,
+            reminderEnabled:
+              reminderEnabled === undefined ? undefined : !!reminderEnabled,
+            reminderDaysAfterDue,
             updatedAt: new Date(),
           })
           .where(sql`id = ${existing.id}`)
@@ -93,6 +98,8 @@ export async function POST(req: Request) {
             orsGreenLow,
             invoiceDueDays,
             emailOverride: !!emailOverride,
+            reminderEnabled: !!reminderEnabled,
+            reminderDaysAfterDue,
           })
           .returning();
         return NextResponse.json(inserted[0]);

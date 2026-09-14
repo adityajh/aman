@@ -142,6 +142,9 @@ export const invoices = pgTable(
       .notNull()
       .default("draft"),
     sentAt: timestamp("sent_at", { withTimezone: true }),
+    // Tracks when the last payment reminder email was sent for this invoice.
+    // Used to throttle re-sends to once every 7 days.
+    lastReminderAt: timestamp("last_reminder_at", { withTimezone: true }),
     pdfUrl: text("pdf_url"),
     paymentLink: text("payment_link"),
     notes: text("notes"),
@@ -424,6 +427,11 @@ export const practiceSettings = pgTable(
     // own address (`email` column above) instead of the client's. Used for
     // dry-runs against real data before going live with a batch.
     emailOverride: boolean("email_override").notNull().default(false),
+    // Automated payment reminders — when enabled the /api/invoices/remind
+    // cron endpoint sends a reminder email to clients with overdue invoices.
+    reminderEnabled: boolean("reminder_enabled").notNull().default(false),
+    // Number of days past the due date before sending the first reminder.
+    reminderDaysAfterDue: integer("reminder_days_after_due").notNull().default(3),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
       .default(sql`now()`),
