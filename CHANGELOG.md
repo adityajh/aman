@@ -2,6 +2,19 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [5.0.5] - 2026-09-14
+
+### Added
+- **Automated Payment Reminders**: New "Payment Reminders" section in Settings. When enabled, clients with overdue invoices automatically receive a reminder email. Reminders re-send every 7 days until the invoice is marked paid. A "Send Reminders Now" button allows manual triggers. Backed by a new `POST /api/invoices/remind` route (cron-compatible, secured via `CRON_SECRET`) and two new `practice_settings` columns (`reminder_enabled`, `reminder_days_after_due`) plus a `last_reminder_at` throttle column on the `invoices` table.
+
+### Changed
+- **Session Notes — Timeline Accordion**: Replaced the flat two-column grid in the client detail page with a vertical timeline accordion. Each session entry is collapsed by default (showing only the date, risk badge, and a one-line preview). Clicking a card expands it to reveal all filled fields as **colour-coded label pills** (sky for Updates, indigo for Session Notes, amber for Client Actions, teal for My Actions, violet for Next Session Agenda, rose for Feedback on Session). Field labels now match the clinical note editor form exactly and are consistent across both views. An **Expand all / Collapse all** button sits at the top-right of the section.
+- **Chart Color Contrast**: Improved visual clarity across all three progress charts (ORS, SRS, Predicted Progress). Zone band fill opacity increased from 0.15 → 0.22 and cohort band from 0.18 → 0.28. Data lines use richer blues (`#2563eb`) and violets (`#7c3aed`). Trend line darkened from light slate to `#64748b` with thicker stroke. Legend font bumped from 12 → 13px.
+- **Payment Dialog Pre-fill**: When clicking "Record Payment / Adjustment" from within a specific client's ledger drill-in view, the client name is now automatically pre-selected in the dialog and the currency is auto-detected from their default fee scheme.
+
+### Fixed
+- **Invoice Preview Crash** (backport note): Fixed a variable naming typo (`settingsRow` → `settings`) in the invoice preview API route that was causing all invoice previews to throw a 500 error.
+
 ## [5.0.4] - 2026-09-07
 ### Added
 - **UPI QR Code on Invoices**: Added support for uploading a UPI QR Code in Billing Settings. If present, the QR code is automatically appended to generated invoice PDFs and emails for easier payments.
