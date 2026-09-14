@@ -40,7 +40,7 @@ export async function GET(
         return ta - tb;
       });
 
-      const profile = settingsRow || {
+      const profile = settings || {
         counselorName: "Jane Doe",
         practiceName: "Acme Counseling",
         address: "Somewhere",
