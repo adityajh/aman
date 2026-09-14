@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Save, Loader2, User, Building, MapPin, Phone, Mail, Quote, Activity, Lock, CreditCard, Download, Bell, Copy, Check } from "lucide-react";
+import { Save, Loader2, User, Building, MapPin, Phone, Mail, Quote, Activity, Lock, CreditCard, Download, Bell } from "lucide-react";
 import { formatIST } from "@/lib/tz";
 import { BillingSettings } from "@/components/billing-settings";
 
@@ -20,7 +20,6 @@ export default function SettingsPage() {
   const [cancellingSubscription, setCancellingSubscription] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [sendingReminders, setSendingReminders] = useState(false);
-  const [copiedCron, setCopiedCron] = useState(false);
   const [passwordForm, setPasswordForm] = useState({ newPassword: "", confirmPassword: "" });
   const [billingInfo, setBillingInfo] = useState<any>(null);
   const [settings, setSettings] = useState({
@@ -517,29 +516,6 @@ export default function SettingsPage() {
               </div>
             )}
 
-            <div className="space-y-2 pt-2 border-t border-slate-100">
-              <Label className="text-xs text-slate-500">Cron Endpoint</Label>
-              <div className="flex items-center gap-2">
-                <code className="text-xs bg-slate-100 border border-slate-200 rounded px-3 py-2 flex-1 text-slate-700 font-mono overflow-x-auto">
-                  POST {typeof window !== "undefined" ? window.location.origin : "https://your-domain.com"}/api/invoices/remind
-                </code>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="shrink-0"
-                  onClick={() => {
-                    const url = `${window.location.origin}/api/invoices/remind`;
-                    navigator.clipboard.writeText(url);
-                    setCopiedCron(true);
-                    setTimeout(() => setCopiedCron(false), 2000);
-                  }}
-                >
-                  {copiedCron ? <Check className="h-3.5 w-3.5 text-lime-600" /> : <Copy className="h-3.5 w-3.5" />}
-                </Button>
-              </div>
-              <p className="text-[11px] text-slate-400">Add this URL to Vercel Cron (or any cron scheduler) with <code>Authorization: Bearer $CRON_SECRET</code>.</p>
-            </div>
           </CardContent>
         </Card>
 
