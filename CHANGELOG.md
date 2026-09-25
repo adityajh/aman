@@ -2,6 +2,11 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [5.0.6] - 2026-09-25
+
+### Fixed
+- **Sessions Sort Order**: Fixed a visual mismatch on the Sessions table where rows appeared out of order when sorted by TIME (IST). The sort was running on `scheduledAt` (the originally scheduled time), but the TIME column displays `actualStartTime` when a session started at a different time than planned. The sort now uses `actualStartTime ?? scheduledAt` — matching the display column exactly — so rows always appear in the correct visual time order.
+
 ## [5.0.5] - 2026-09-14
 
 ### Added

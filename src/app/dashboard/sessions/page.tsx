@@ -770,10 +770,11 @@ function SessionsPageInner() {
   const displayedSessions = useMemo(() => {
     let result = [...filteredSessions];
 
-    // 1. Sort by time
+    // 1. Sort by time — use actualStartTime when it exists so the sort order
+    //    matches what the TIME (IST) column displays (which also prefers actual).
     result.sort((a, b) => {
-      const ta = new Date(a.scheduledAt).getTime();
-      const tb = new Date(b.scheduledAt).getTime();
+      const ta = new Date(a.actualStartTime ?? a.scheduledAt).getTime();
+      const tb = new Date(b.actualStartTime ?? b.scheduledAt).getTime();
       return timeSort === "asc" ? ta - tb : tb - ta;
     });
 
