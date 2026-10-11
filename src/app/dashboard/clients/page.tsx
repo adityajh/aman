@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Plus, User, Mail, Phone, IndianRupee, DollarSign, Pencil, X, Check, Loader2, UserMinus, LineChart, ListFilter, Calendar, AlertTriangle, Search } from "lucide-react";
+import { Plus, User, Mail, Phone, IndianRupee, DollarSign, Pencil, X, Check, Loader2, UserMinus, LineChart, ListFilter, Calendar, AlertTriangle, Search, UploadCloud } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useSession } from "next-auth/react";
@@ -391,8 +391,16 @@ function ClientsPageInner() {
             </Select>
           </div>
         </div>
-        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setAddPoolConsent("not_asked"); }}>
-          <DialogTrigger
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline"
+            className="gap-2"
+            onClick={() => router.push("/dashboard/clients/import")}
+          >
+            <UploadCloud className="h-4 w-4" /> Import Clients
+          </Button>
+          <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setAddPoolConsent("not_asked"); }}>
+            <DialogTrigger
             render={
               <Button 
                 className="gap-2" 
@@ -544,6 +552,7 @@ function ClientsPageInner() {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <Card>
