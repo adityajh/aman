@@ -45,7 +45,7 @@ export async function POST(req: Request) {
 
       for (const client of newClients) {
         try {
-          const { name, email, phone, defaultFeeSchemeId, defaultFee, timezone } = client;
+          const { name, email, phone, defaultFeeSchemeId, defaultFee, timezone, amountDue } = client;
           
           if (!name) {
             errors.push({ email, error: "Name is required" });
@@ -73,6 +73,9 @@ export async function POST(req: Request) {
               defaultFee: defaultFee ? defaultFee.toString() : undefined,
               defaultFeeSchemeId: defaultFeeSchemeId || undefined,
               timezone: timezone || "Asia/Kolkata",
+              intakeNotes: (amountDue && String(amountDue).trim() !== "" && String(amountDue).trim() !== "0") 
+                ? `Imported Balance Due: ${amountDue}` 
+                : undefined,
             })
             .returning();
           

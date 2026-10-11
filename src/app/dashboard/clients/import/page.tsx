@@ -19,6 +19,7 @@ type MappingFields = {
   phone: string;
   defaultFee: string;
   timezone: string;
+  amountDue: string;
 };
 
 export default function ImportClientsPage() {
@@ -36,6 +37,7 @@ export default function ImportClientsPage() {
     phone: "",
     defaultFee: "",
     timezone: "",
+    amountDue: "",
   });
 
   const [previewData, setPreviewData] = useState<any[]>([]);
@@ -64,12 +66,13 @@ export default function ImportClientsPage() {
       const extractedHeaders = (data[0] || []).map((h: any) => h ? String(h).trim() : "").filter(Boolean);
       
       // Auto-map if possible
-      const autoMap = { name: "", email: "", phone: "", defaultFee: "", timezone: "" };
+      const autoMap = { name: "", email: "", phone: "", defaultFee: "", timezone: "", amountDue: "" };
       extractedHeaders.forEach(h => {
         const lower = h.toLowerCase();
         if (lower.includes("name") && !autoMap.name) autoMap.name = h;
         else if (lower.includes("email") && !autoMap.email) autoMap.email = h;
         else if (lower.includes("phone") && !autoMap.phone) autoMap.phone = h;
+        else if (lower.includes("due") || lower.includes("balance") && !autoMap.amountDue) autoMap.amountDue = h;
         else if ((lower.includes("fee") || lower.includes("price")) && !autoMap.defaultFee) autoMap.defaultFee = h;
         else if (lower.includes("timezone") || lower.includes("tz")) autoMap.timezone = h;
       });
@@ -97,6 +100,7 @@ export default function ImportClientsPage() {
         phone: mapping.phone ? row[mapping.phone] : "",
         defaultFee: mapping.defaultFee ? row[mapping.defaultFee] : "",
         timezone: mapping.timezone ? row[mapping.timezone] : "Asia/Kolkata",
+        amountDue: mapping.amountDue ? row[mapping.amountDue] : "",
       };
     }).filter(row => row.name); // only keep rows that have a name
 
@@ -178,10 +182,10 @@ export default function ImportClientsPage() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4 max-w-lg">
-              {(["name", "email", "phone", "defaultFee", "timezone"] as (keyof MappingFields)[]).map(field => (
+              {(["name", "email", "phone", "defaultFee", "timezone", "amountDue"] as (keyof MappingFields)[]).map(field => (
                 <div key={field} className="grid grid-cols-2 items-center gap-4">
                   <Label className="capitalize font-medium text-slate-700">
-                    {field === "defaultFee" ? "Default Fee" : field}
+                    {field === "defaultFee" ? "Default Fee" : field === "amountDue" ? "Balance Due" : field}
                     {field === "name" && <span className="text-rose-500 ml-1">*</span>}
                   </Label>
                   <Select 
@@ -226,6 +230,7 @@ export default function ImportClientsPage() {
                     <TableHead>Email</TableHead>
                     <TableHead>Phone</TableHead>
                     <TableHead>Default Fee</TableHead>
+                    <TableHead>Balance Due</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -235,11 +240,12 @@ export default function ImportClientsPage() {
                       <TableCell>{row.email || "-"}</TableCell>
                       <TableCell>{row.phone || "-"}</TableCell>
                       <TableCell>{row.defaultFee || "-"}</TableCell>
+                      <TableCell>{row.amountDue || "-"}</TableCell>
                     </TableRow>
                   ))}
                   {previewData.length > 50 && (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center py-4 text-slate-500">
+                      <TableCell colSpan={5} className="text-center py-4 text-slate-500">
                         ...and {previewData.length - 50} more rows
                       </TableCell>
                     </TableRow>
