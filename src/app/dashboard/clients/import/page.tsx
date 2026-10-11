@@ -117,9 +117,9 @@ export default function ImportClientsPage() {
       
       if (res.ok) {
         if (data.errors && data.errors.length > 0) {
-          toast.warning(\`Imported \${data.inserted} clients, with \${data.errors.length} errors.\`);
+          toast.warning(`Imported ${data.inserted} clients, with ${data.errors.length} errors.`);
         } else {
-          toast.success(\`Successfully imported \${data.inserted} clients.\`);
+          toast.success(`Successfully imported ${data.inserted} clients.`);
         }
         router.push("/dashboard/clients");
       } else {

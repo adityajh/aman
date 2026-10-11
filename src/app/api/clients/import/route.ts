@@ -32,7 +32,7 @@ export async function POST(req: Request) {
           return NextResponse.json(
             {
               error: "CLIENT_LIMIT",
-              message: \`You have \${count} active clients. Adding \${newClients.length} would exceed the \${MAX_ACTIVE_CLIENTS} active client limit.\`,
+              message: `You have ${count} active clients. Adding ${newClients.length} would exceed the ${MAX_ACTIVE_CLIENTS} active client limit.`,
             },
             { status: 403 }
           );
