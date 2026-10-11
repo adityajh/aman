@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
-import { ArrowLeft, UploadCloud, Check, Loader2, AlertTriangle, FileUp } from "lucide-react";
+import { ArrowLeft, UploadCloud, Check, Loader2, AlertTriangle, FileUp, Download } from "lucide-react";
 import * as XLSX from "xlsx";
 import { TZ_OPTIONS, IST } from "@/lib/tz";
 
@@ -108,6 +108,32 @@ export default function ImportClientsPage() {
     setStep(3);
   };
 
+  const handleDownloadTemplate = () => {
+    const templateData = [
+      {
+        "Full Name": "Jane Doe",
+        "Email Address": "jane@example.com",
+        "Phone Number": "+91 9876543210",
+        "Fee Per Session": 1500,
+        "Timezone": "Asia/Kolkata",
+        "Amount Due": 3000,
+      },
+      {
+        "Full Name": "John Smith",
+        "Email Address": "john@example.com",
+        "Phone Number": "+91 9123456789",
+        "Fee Per Session": 2000,
+        "Timezone": "Asia/Kolkata",
+        "Amount Due": 0,
+      },
+    ];
+
+    const ws = XLSX.utils.json_to_sheet(templateData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Clients");
+    XLSX.writeFile(wb, "Clients_Import_Template.xlsx");
+  };
+
   const handleImport = async () => {
     setImporting(true);
     try {
@@ -150,7 +176,7 @@ export default function ImportClientsPage() {
 
       {step === 1 && (
         <Card className="mt-8 border-dashed border-2 bg-slate-50/50">
-          <CardContent className="flex flex-col items-center justify-center py-24 text-center">
+          <CardContent className="flex flex-col items-center justify-center py-20 text-center">
             <div className="rounded-full bg-slate-100 p-4 mb-4">
               <FileUp className="h-8 w-8 text-slate-500" />
             </div>
@@ -165,9 +191,17 @@ export default function ImportClientsPage() {
               ref={fileInputRef}
               onChange={handleFileUpload}
             />
-            <Button onClick={() => fileInputRef.current?.click()} className="gap-2">
-              <UploadCloud className="h-4 w-4" /> Choose File
-            </Button>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Button onClick={() => fileInputRef.current?.click()} className="gap-2">
+                <UploadCloud className="h-4 w-4" /> Choose File
+              </Button>
+              <Button variant="outline" onClick={handleDownloadTemplate} className="gap-2">
+                <Download className="h-4 w-4" /> Download Template (.xlsx)
+              </Button>
+            </div>
+            <p className="text-xs text-slate-400 mt-4">
+              Need a sample sheet? Download the template above with pre-configured headers.
+            </p>
           </CardContent>
         </Card>
       )}
