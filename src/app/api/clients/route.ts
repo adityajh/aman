@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { clients, tenants } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
 import { asc, eq, sql } from "drizzle-orm";
-import { getTenantContext, withTenantContext, MAX_ACTIVE_CLIENTS } from "@/lib/tenant";
+import { getTenantContext, withTenantContext } from "@/lib/tenant";
 
 export async function GET() {
   const { tenantId, planTier } = await getTenantContext();
@@ -35,11 +35,36 @@ export async function GET() {
       const lastSessionRows = Array.isArray(lastSessionRes) ? lastSessionRes : (lastSessionRes.rows ?? []);
       const lastSessionMap = new Map<string, string>(lastSessionRows.map((r: any) => [r.cid, r.last_session_at]));
 
+      // Distinct clients active this calendar month (session or invoice in Asia/Kolkata)
+      const activeThisMonthRes: any = await tx.execute(sql`
+        SELECT DISTINCT client_id FROM (
+          SELECT s.client_id
+          FROM sessions s
+          WHERE s.scheduled_at >= DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata') AT TIME ZONE 'Asia/Kolkata'
+            AND s.scheduled_at < (DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata') + INTERVAL '1 month') AT TIME ZONE 'Asia/Kolkata'
+            AND s.status != 'cancelled'
+          UNION
+          SELECT inv.client_id
+          FROM invoices inv
+          WHERE (
+            (inv.billing_month >= (DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata'))::date
+             AND inv.billing_month < ((DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata') + INTERVAL '1 month'))::date)
+            OR
+            (inv.issued_date >= (DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata'))::date
+             AND inv.issued_date < ((DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata') + INTERVAL '1 month'))::date)
+          )
+          AND inv.status != 'void'
+        ) sub
+      `);
+      const activeRows = Array.isArray(activeThisMonthRes) ? activeThisMonthRes : (activeThisMonthRes.rows ?? []);
+      const activeThisMonthSet = new Set<string>(activeRows.map((r: any) => r.client_id));
+
       const enriched = allClients.map((c: any) => ({
         ...c,
         latestOrsFlag: flagMap.get(c.id)?.o ?? null,
         latestSrsFlag: flagMap.get(c.id)?.sr ?? null,
         lastSessionAt: lastSessionMap.get(c.id) ?? null,
+        isActiveThisMonth: activeThisMonthSet.has(c.id),
       }));
       return NextResponse.json(enriched);
     } catch (error) {
@@ -75,30 +100,6 @@ export async function POST(req: Request) {
         !["in_person", "paper", "message"].includes(poolConsentMethod)
       ) {
         return NextResponse.json({ error: "Invalid poolConsentMethod value" }, { status: 400 });
-      }
-
-      // Active Client Limit Check (Exempt Deepen Pro & isExempt tenants)
-      const tenantRow = await tx.query.tenants.findFirst({
-        where: eq(tenants.id, tenantId),
-      });
-
-      const isUnlimited = tenantRow?.isExempt || tenantRow?.planTier === "pro";
-
-      if (!isUnlimited) {
-        const activeCountRes: any = await tx.execute(sql`
-          SELECT COUNT(*)::int AS count FROM clients WHERE is_active = true
-        `);
-        const count = activeCountRes[0]?.count ?? activeCountRes.rows?.[0]?.count ?? 0;
-        if (count >= MAX_ACTIVE_CLIENTS) {
-          return NextResponse.json(
-            {
-              error: "CLIENT_LIMIT",
-              message:
-                "Deepen is built for one counsellor. Forty active clients is more than one person can see, so we stop here. If you're a group or an organisation, Deepen isn't for you. If this is a mistake, write to us.",
-            },
-            { status: 403 },
-          );
-        }
       }
 
       // Duplicate Check

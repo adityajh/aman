@@ -247,10 +247,19 @@ function SessionsPageInner() {
       });
 
       if (res.ok) {
-        const created = repeatEnabled && count > 1
-          ? `${count} sessions scheduled`
-          : "Session scheduled";
-        toast.success(created);
+        const warning = res.headers.get("X-Monthly-Client-Limit-Warning");
+        const activeCount = res.headers.get("X-Monthly-Active-Count");
+        if (warning === "exceeded") {
+          toast.warning(
+            `Session scheduled. Note: You have reached ${activeCount || "40+"} active clients this month. Deepen standard is built for solo practices (up to 40 active clients/mo). Consider upgrading to Pro.`,
+            { duration: 6000 }
+          );
+        } else {
+          const created = repeatEnabled && count > 1
+            ? `${count} sessions scheduled`
+            : "Session scheduled";
+          toast.success(created);
+        }
         setOpen(false);
         resetForm();
         fetchData();

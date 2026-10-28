@@ -38,6 +38,29 @@ export async function GET() {
         updatedAt: tenants.updatedAt,
         clientCount: sql<number>`count(distinct ${clients.id})::int`,
         lastActive: sql<Date | null>`max(${sessions.updatedAt})`,
+        monthlyActiveClients: sql<number>`(
+          SELECT COALESCE(COUNT(DISTINCT sub.client_id), 0)::int
+          FROM (
+            SELECT s2.client_id
+            FROM sessions s2
+            WHERE s2.tenant_id = ${tenants.id}
+              AND s2.scheduled_at >= DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata') AT TIME ZONE 'Asia/Kolkata'
+              AND s2.scheduled_at < (DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata') + INTERVAL '1 month') AT TIME ZONE 'Asia/Kolkata'
+              AND s2.status != 'cancelled'
+            UNION
+            SELECT inv.client_id
+            FROM invoices inv
+            WHERE inv.tenant_id = ${tenants.id}
+              AND (
+                (inv.billing_month >= (DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata'))::date
+                 AND inv.billing_month < ((DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata') + INTERVAL '1 month'))::date)
+                OR
+                (inv.issued_date >= (DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata'))::date
+                 AND inv.issued_date < ((DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata') + INTERVAL '1 month'))::date)
+              )
+              AND inv.status != 'void'
+          ) sub
+        )`,
       })
       .from(tenants)
       .leftJoin(clients, eq(tenants.id, clients.tenantId))

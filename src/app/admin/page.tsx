@@ -257,7 +257,8 @@ export default function AdminPage() {
                 <th className="px-6 py-4">Practice / User</th>
                 <th className="px-6 py-4">Plan & Price</th>
                 <th className="px-6 py-4">Signup Date</th>
-                <th className="px-6 py-4 text-center">Clients</th>
+                <th className="px-6 py-4 text-center">Roster</th>
+                <th className="px-6 py-4 text-center">Active (This Month)</th>
                 <th className="px-6 py-4">Last Active</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4 text-right">Actions</th>
@@ -288,6 +289,24 @@ export default function AdminPage() {
                   </td>
                   <td className="px-6 py-4 text-slate-600 text-center font-medium">
                     {t.clientCount || 0}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    {t.planTier === "pro" || t.isExempt ? (
+                      <span className="inline-flex items-center gap-1.5 text-slate-600 text-xs font-medium justify-center">
+                        {t.monthlyActiveClients || 0}
+                        <span className="text-[10px] text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded font-semibold border border-teal-200">
+                          Unlimited
+                        </span>
+                      </span>
+                    ) : (t.monthlyActiveClients || 0) > 40 ? (
+                      <span className="inline-flex items-center gap-1 text-amber-800 bg-amber-50 px-2 py-0.5 rounded text-xs font-bold border border-amber-300">
+                        {t.monthlyActiveClients} / 40 ⚠️ Over Limit
+                      </span>
+                    ) : (
+                      <span className="text-slate-700 text-xs font-medium">
+                        {t.monthlyActiveClients || 0} / 40
+                      </span>
+                    )}
                   </td>
                   <td className="px-6 py-4 text-slate-600 whitespace-nowrap text-sm">
                     {t.lastActive ? formatIST(new Date(t.lastActive), "MMM d, yyyy") : "Never"}

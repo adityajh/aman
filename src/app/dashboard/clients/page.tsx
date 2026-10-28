@@ -349,12 +349,16 @@ function ClientsPageInner() {
   };
 
   const activeCount = clients.filter(c => c.isActive).length;
+  const monthlyActiveCount = clients.filter(c => (c as any).isActiveThisMonth).length;
 
   return (
     <div className="p-8 space-y-6">
-      {!isUnlimited && activeCount >= 35 && (
+      {!isUnlimited && monthlyActiveCount >= 35 && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-xs text-amber-800 flex items-center justify-between font-medium">
-          <span><strong>{activeCount} of 40 active clients.</strong> Deepen is built for one counsellor.</span>
+          <span>
+            <strong>{monthlyActiveCount} of 40 active clients this month.</strong> Deepen standard is built for solo practices.
+            {monthlyActiveCount > 40 && " You are currently over the 40 monthly client limit."}
+          </span>
         </div>
       )}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -401,16 +405,12 @@ function ClientsPageInner() {
           </Button>
           <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setAddPoolConsent("not_asked"); }}>
             <DialogTrigger
-            render={
-              <Button 
-                className="gap-2" 
-                disabled={!isUnlimited && activeCount >= 30}
-                title={(!isUnlimited && activeCount >= 30) ? "Deepen is built for solo practices. You've reached the 30 active client limit." : undefined}
-              >
-                <Plus className="h-4 w-4" /> Add Client
-              </Button>
-            }
-          />
+              render={
+                <Button className="gap-2">
+                  <Plus className="h-4 w-4" /> Add Client
+                </Button>
+              }
+            />
           <DialogContent className="sm:max-w-2xl bg-white border-slate-200">
             <DialogHeader>
               <DialogTitle className="text-xl font-bold text-slate-900">Add New Client</DialogTitle>

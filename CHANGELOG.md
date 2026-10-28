@@ -2,6 +2,22 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [5.0.7] - 2026-10-28
+
+### Changed
+- **Broadened "Active Clients" Definition to Monthly Active Clients (MAC)**:
+  - Transitioned the active client definition for plan limits from a static total roster count (`clients.isActive = true`) to active clients within any given calendar month (clients with at least one non-cancelled session or non-void invoice issued/billed in that month).
+  - Unlocked client roster storage: Counselors can now maintain their entire contact book in Deepen without hitting hard creation blocks or having to terminate and reactivate clients.
+  - Soft warning on 40+ monthly active clients: Scheduling a session for a client when monthly active clients exceeds 40 now gracefully proceeds with a soft warning toast instead of blocking the counselor.
+- **Client Import Tool — Up to 100 Clients per Batch**:
+  - Raised the single batch import limit to 100 clients (from 40) in `POST /api/clients/import`.
+  - Added batch size validation and UI alert guidance in `/dashboard/clients/import` for files exceeding 100 rows.
+
+### Added
+- **Admin Panel — "Active (This Month)" Column**:
+  - Added a dedicated column in the `/admin` Registered Practices table displaying each tenant's real-time monthly active client count (e.g. `24 / 40`, with an `Over Limit ⚠️` indicator when exceeding 40 on standard tier, and `Unlimited` badges for Pro/Exempt tenants).
+  - Added `isActiveThisMonth` flag to `GET /api/clients` to power real-time monthly capacity indicators in the counselor dashboard.
+
 ## [5.0.6] - 2026-09-25
 
 ### Fixed

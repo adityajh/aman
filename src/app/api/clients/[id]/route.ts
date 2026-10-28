@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { clients, tenants, sessions } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
 import { eq, sql, and, isNull } from "drizzle-orm";
-import { getTenantContext, withTenantContext, MAX_ACTIVE_CLIENTS } from "@/lib/tenant";
+import { getTenantContext, withTenantContext } from "@/lib/tenant";
 
 export async function PATCH(
   req: Request,
@@ -48,38 +48,9 @@ export async function PATCH(
         poolConsentFields = { poolConsent, poolConsentAt: null };
       }
 
-      // Reactivation logic & fence check
+      // Reactivation logic & clear termination fields
       let terminationFields = {};
       if (isActive === true) {
-        const existingClient = await tx.query.clients.findFirst({
-          where: eq(clients.id, id),
-        });
-
-        if (existingClient && !existingClient.isActive) {
-          const tenantRow = await tx.query.tenants.findFirst({
-            where: eq(tenants.id, tenantId),
-          });
-
-          const isUnlimited = tenantRow?.isExempt || tenantRow?.planTier === "pro";
-
-          if (!isUnlimited) {
-            const activeCountRes: any = await tx.execute(sql`
-              SELECT COUNT(*)::int AS count FROM clients WHERE is_active = true
-            `);
-            const count = activeCountRes[0]?.count ?? activeCountRes.rows?.[0]?.count ?? 0;
-            if (count >= MAX_ACTIVE_CLIENTS) {
-              return NextResponse.json(
-                {
-                  error: "CLIENT_LIMIT",
-                  message:
-                    "Deepen is built for one counsellor. Forty active clients is more than one person can see, so we stop here. If you're a group or an organisation, Deepen isn't for you. If this is a mistake, write to us.",
-                },
-                { status: 403 },
-              );
-            }
-          }
-        }
-
         terminationFields = {
           terminationReason: null,
           terminationType: null,

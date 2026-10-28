@@ -1,8 +1,13 @@
 import { db } from "@/lib/db";
-import { sessions, practiceSettings } from "@/lib/db/schema";
+import { sessions, practiceSettings, tenants } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
 import { desc, eq } from "drizzle-orm";
-import { getTenantContext, withTenantContext } from "@/lib/tenant";
+import {
+  getTenantContext,
+  withTenantContext,
+  MAX_MONTHLY_ACTIVE_CLIENTS,
+  getMonthlyActiveClientCount,
+} from "@/lib/tenant";
 
 export async function GET(req: Request) {
   const { tenantId, planTier } = await getTenantContext();
@@ -189,9 +194,24 @@ export async function POST(req: Request) {
 
       const inserted = await tx.insert(sessions).values(rows).returning();
 
+      // Check if this tenant has exceeded 40 monthly active clients (standard tier soft warning)
+      const tenantRow = await tx.query.tenants.findFirst({
+        where: eq(tenants.id, tenantId),
+      });
+      const isUnlimited = tenantRow?.isExempt || tenantRow?.planTier === "pro";
+
+      const headers: Record<string, string> = {};
+      if (!isUnlimited) {
+        const monthlyCount = await getMonthlyActiveClientCount(tx, tenantId, start);
+        if (monthlyCount > MAX_MONTHLY_ACTIVE_CLIENTS) {
+          headers["X-Monthly-Client-Limit-Warning"] = "exceeded";
+          headers["X-Monthly-Active-Count"] = String(monthlyCount);
+        }
+      }
+
       // Backward-compat: when no recurrence, return a single object so existing
       // callers don't break. Recurring calls always get the array.
-      return NextResponse.json(totalCount === 1 ? inserted[0] : inserted);
+      return NextResponse.json(totalCount === 1 ? inserted[0] : inserted, { headers });
     } catch (error) {
       console.error(error);
       return new NextResponse("Internal Server Error", { status: 500 });

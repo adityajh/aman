@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { clients, tenants } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
 import { eq, sql } from "drizzle-orm";
-import { getTenantContext, withTenantContext, MAX_ACTIVE_CLIENTS } from "@/lib/tenant";
+import { getTenantContext, withTenantContext, MAX_IMPORT_BATCH_CLIENTS } from "@/lib/tenant";
 
 export async function POST(req: Request) {
   const { tenantId, planTier } = await getTenantContext();
@@ -15,28 +15,15 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "No clients to import" }, { status: 400 });
       }
 
-      // Active Client Limit Check
-      const tenantRow = await tx.query.tenants.findFirst({
-        where: eq(tenants.id, tenantId),
-      });
-
-      const isUnlimited = tenantRow?.isExempt || tenantRow?.planTier === "pro";
-
-      if (!isUnlimited) {
-        const activeCountRes: any = await tx.execute(sql`
-          SELECT COUNT(*)::int AS count FROM clients WHERE is_active = true
-        `);
-        const count = activeCountRes[0]?.count ?? activeCountRes.rows?.[0]?.count ?? 0;
-        
-        if (count + newClients.length > MAX_ACTIVE_CLIENTS) {
-          return NextResponse.json(
-            {
-              error: "CLIENT_LIMIT",
-              message: `You have ${count} active clients. Adding ${newClients.length} would exceed the ${MAX_ACTIVE_CLIENTS} active client limit.`,
-            },
-            { status: 403 }
-          );
-        }
+      // Single import batch limit check (up to 100 clients per batch)
+      if (newClients.length > MAX_IMPORT_BATCH_CLIENTS) {
+        return NextResponse.json(
+          {
+            error: "IMPORT_LIMIT",
+            message: `You can import up to ${MAX_IMPORT_BATCH_CLIENTS} clients in a single batch. Your file contains ${newClients.length} clients. Please split your file into batches of ${MAX_IMPORT_BATCH_CLIENTS} or fewer.`,
+          },
+          { status: 400 }
+        );
       }
 
       // Insert them sequentially to avoid returning a large array of errors if there's a problem

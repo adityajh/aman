@@ -170,7 +170,7 @@ export default function ImportClientsPage() {
         </Button>
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Import Clients</h1>
-          <p className="text-slate-500">Upload an Excel or CSV file to quickly add multiple clients.</p>
+          <p className="text-slate-500">Upload an Excel or CSV file to quickly add up to 100 clients at once.</p>
         </div>
       </div>
 
@@ -182,7 +182,7 @@ export default function ImportClientsPage() {
             </div>
             <h3 className="text-lg font-semibold text-slate-900">Upload your file</h3>
             <p className="text-sm text-slate-500 max-w-sm mb-6 mt-1">
-              Select an .xlsx, .xls, or .csv file containing your client roster. The first row should contain column headers.
+              Select an .xlsx, .xls, or .csv file containing your client roster (up to 100 clients per batch). The first row should contain column headers.
             </p>
             <input 
               type="file" 
@@ -256,6 +256,17 @@ export default function ImportClientsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            {previewData.length > 100 && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-xs text-amber-800 flex items-start gap-3">
+                <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+                <div>
+                  <p className="font-semibold">Batch limit exceeded ({previewData.length} clients detected)</p>
+                  <p className="mt-0.5">
+                    You can import up to 100 clients in a single batch. Please split your spreadsheet into batches of 100 or fewer rows before importing.
+                  </p>
+                </div>
+              </div>
+            )}
             <div className="border rounded-md max-h-[500px] overflow-auto">
               <Table>
                 <TableHeader className="bg-slate-50 sticky top-0">
@@ -289,7 +300,7 @@ export default function ImportClientsPage() {
             </div>
             <div className="flex gap-3 justify-end pt-4 border-t border-slate-100">
               <Button variant="outline" onClick={() => setStep(2)}>Back</Button>
-              <Button onClick={handleImport} disabled={importing} className="gap-2">
+              <Button onClick={handleImport} disabled={importing || previewData.length > 100} className="gap-2">
                 {importing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                 Import {previewData.length} Clients
               </Button>

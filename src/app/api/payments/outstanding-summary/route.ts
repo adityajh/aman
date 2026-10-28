@@ -23,7 +23,7 @@ export async function GET() {
         .where(sql`status IN ('draft', 'sent', 'partial', 'overdue')`)
         .groupBy(sql`COALESCE(${invoices.currency}, 'INR')`);
 
-      const nonRevenueMethods = ["write_off", "credit", "refund"];
+      const nonRevenueMethods: ("write_off" | "credit" | "refund")[] = ["write_off", "credit", "refund"];
 
       // 2. Total received this month (grouped by currency)
       const thisMonthRes = await tx
