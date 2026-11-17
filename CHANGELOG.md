@@ -2,7 +2,7 @@
 
 All notable changes to the Aman project will be documented in this file.
 
-## [Unreleased]
+## [5.1.0] - 2026-11-17
 
 ### Added
 - **Online Payments via Razorpay Connect**: Counsellors can connect their own Razorpay account from **Settings → Online payments** (OAuth: she signs in on Razorpay and approves access; Deepen never sees her password). Money goes from the client straight to her account. Deepen never holds funds.
@@ -39,7 +39,9 @@ All notable changes to the Aman project will be documented in this file.
 - **Hardcoded bank details**: `POST /api/invoices/[id]/send` prints one specific HSBC account (Noida branch) in the Payment Information block of every practice's invoice email.
 - **Subscription webhook unreachable**: the middleware matcher doesn't exclude `/api/webhooks/*`, so Razorpay's subscription webhook is redirected to `/login`. The handler also skips signature verification when `RAZORPAY_WEBHOOK_SECRET` is unset.
 
-## [5.0.7] - 2026-10-28
+---
+
+## [5.0.8] - 2026-10-28
 
 ### Changed
 - **Broadened "Active Clients" Definition to Monthly Active Clients (MAC)**:
@@ -55,10 +57,26 @@ All notable changes to the Aman project will be documented in this file.
   - Added a dedicated column in the `/admin` Registered Practices table displaying each tenant's real-time monthly active client count (e.g. `24 / 40`, with an `Over Limit ⚠️` indicator when exceeding 40 on standard tier, and `Unlimited` badges for Pro/Exempt tenants).
   - Added `isActiveThisMonth` flag to `GET /api/clients` to power real-time monthly capacity indicators in the counselor dashboard.
 
+---
+
+## [5.0.7] - 2026-10-11
+
+### Added
+- **Client Bulk Import Wizard (`/dashboard/clients/import` & `POST /api/clients/import`)**:
+  - Added a 3-step CSV/Excel (`.csv`, `.xlsx`, `.xls`) bulk client import flow accessible via the **Import** button on the Clients page.
+  - **Automatic & Manual Column Mapping**: Auto-detects headers and allows mapping to `Full Name` (required), `Email Address`, `Phone Number`, `Fee Per Session`, `Timezone` (defaults to `Asia/Kolkata`), and `Amount Due`.
+  - **Opening Balance / Amount Due Mapping**: Non-zero mapped `Amount Due` values are automatically stored in the client's `intakeNotes` (`Imported Balance Due: ...`).
+  - **Download Sample Template**: Added a **Download Template** button on Step 1 that generates a ready-to-fill `Clients_Import_Template.xlsx` spreadsheet via SheetJS (`xlsx`).
+  - **Duplicate Email Check & Preview**: Previews mapped rows before import and skips duplicate emails gracefully while reporting per-row errors.
+
+---
+
 ## [5.0.6] - 2026-09-25
 
 ### Fixed
 - **Sessions Sort Order**: Fixed a visual mismatch on the Sessions table where rows appeared out of order when sorted by TIME (IST). The sort was running on `scheduledAt` (the originally scheduled time), but the TIME column displays `actualStartTime` when a session started at a different time than planned. The sort now uses `actualStartTime ?? scheduledAt` — matching the display column exactly — so rows always appear in the correct visual time order.
+
+---
 
 ## [5.0.5] - 2026-09-14
 
@@ -69,6 +87,7 @@ All notable changes to the Aman project will be documented in this file.
 - **Session Notes — Timeline Accordion**: Replaced the flat two-column grid in the client detail page with a vertical timeline accordion. Each session entry is collapsed by default (showing only the date, risk badge, and a one-line preview). Clicking a card expands it to reveal all filled fields as **colour-coded label pills** (sky for Updates, indigo for Session Notes, amber for Client Actions, teal for My Actions, violet for Next Session Agenda, rose for Feedback on Session). Field labels now match the clinical note editor form exactly and are consistent across both views. An **Expand all / Collapse all** button sits at the top-right of the section.
 - **Chart Color Contrast**: Improved visual clarity across all three progress charts (ORS, SRS, Predicted Progress). Zone band fill opacity increased from 0.15 → 0.22 and cohort band from 0.18 → 0.28. Data lines use richer blues (`#2563eb`) and violets (`#7c3aed`). Trend line darkened from light slate to `#64748b` with thicker stroke. Legend font bumped from 12 → 13px.
 - **Payment Dialog Pre-fill**: When clicking "Record Payment / Adjustment" from within a specific client's ledger drill-in view, the client name is now automatically pre-selected in the dialog and the currency is auto-detected from their default fee scheme.
+- **Settings UI Cleanup**: Removed developer-facing cron endpoint instructions from the Payment Reminders card in `/dashboard/settings`.
 
 ### Fixed
 - **Invoice Preview Crash** (backport note): Fixed a variable naming typo (`settingsRow` → `settings`) in the invoice preview API route that was causing all invoice previews to throw a 500 error.

@@ -10,12 +10,12 @@ Aman is a lightweight, single-counselor practice management tool built to stream
 
 | Field | Detail |
 |---|---|
-| **Product Name** | Aman |
+| **Product Name** | Deepen (formerly Aman) |
 | **Architecture** | Multi-tenant SaaS (RLS isolated PostgreSQL) |
-| **Primary User** | Independent therapists and multi-counselor clinics |
+| **Primary User** | Independent therapists and solo counselors |
 | **Invoicing Cycle** | Monthly — batch invoices sent by email from within the system |
-| **Stack** | Next.js 14 · Neon (PostgreSQL) · Resend · Razorpay · Claude AI API |
-| **Hosting** | Vercel (frontend + API routes) · Neon (serverless Postgres) |
+| **Stack** | Next.js 16 · React 19 · Neon (PostgreSQL) · Resend · Razorpay (Subscriptions & Connect) |
+| **Hosting** | Vercel (frontend + API routes + Cron) · Neon (serverless Postgres) |
 
 ---
 
@@ -91,11 +91,16 @@ All tables use UUID primary keys and include `created_at` / `updated_at` timesta
 | `email` | TEXT | For invoice emails |
 | `phone` | TEXT | WhatsApp/SMS *(Phase 2)* |
 | `date_of_birth` | DATE | Optional |
-| `default_fee` | NUMERIC(10,2) | Default session fee in INR |
+| `default_fee` | NUMERIC(10,2) | Default session fee |
+| `default_fee_scheme_id` | UUID FK | References `fee_schemes(id)` (`INR` or `USD`) |
 | `fee_type` | TEXT | `hourly \| per_session \| package \| sliding_scale` |
+| `timezone` | TEXT | Default `'Asia/Kolkata'` |
 | `tags` | TEXT[] | e.g. `['anxiety','cbt','teenager']` |
 | `is_active` | BOOLEAN | Default `true`; soft-delete via `false` |
 | `intake_notes` | TEXT | Private counselor notes — not on client portal |
+| `pool_consent` | TEXT | `yes \| no \| not_asked` (comparison pool intake consent) |
+| `pool_consent_at` | TIMESTAMPTZ | Timestamp when consent was recorded |
+| `pool_consent_method` | TEXT | `in_person \| paper \| message` |
 | `created_at` | TIMESTAMPTZ | Auto-set |
 
 ### 4.2 `sessions`
@@ -156,6 +161,7 @@ All tables use UUID primary keys and include `created_at` / `updated_at` timesta
 | `amount_paid` | NUMERIC(10,2) | Running total from payments; auto-updated by trigger |
 | `status` | TEXT | `draft \| sent \| paid \| partial \| overdue \| void` |
 | `sent_at` | TIMESTAMPTZ | When emailed to client |
+| `last_reminder_at` | TIMESTAMPTZ | Last overdue payment reminder email timestamp (7-day throttle) |
 | `pdf_url` | TEXT | Stored invoice PDF URL |
 | `payment_link` | TEXT | Short URL of the open Razorpay payment link; `null` once the link is paid, cancelled or expired |
 | `payment_link_id` | TEXT | Razorpay link id (`plink_…`), kept for history |
@@ -347,12 +353,13 @@ All routes are Next.js App Router API routes under `/app/api/`. All endpoints re
 
 | Method | Route | Description |
 |---|---|---|
-| GET | `/api/clients` | List all active clients |
+| GET | `/api/clients` | List all clients (includes `isActiveThisMonth` MAC indicator) |
 | POST | `/api/clients` | Create client |
+| POST | `/api/clients/import` | Bulk import up to 100 clients per batch (CSV/XLSX mapped rows) |
 | GET | `/api/clients/[id]` | Get client + sessions + invoice summary |
 | PATCH | `/api/clients/[id]` | Update client |
 | GET | `/api/sessions` | List sessions (filter by client, month, status) |
-| POST | `/api/sessions` | Log a new session |
+| POST | `/api/sessions` | Log a new session (with soft warning if >40 Monthly Active Clients) |
 | PATCH | `/api/sessions/[id]` | Update session status, fee, modality |
 | GET | `/api/sessions/[id]/note` | Get SOAP note for session |
 | POST | `/api/sessions/[id]/note` | Create / update SOAP note |
@@ -361,9 +368,12 @@ All routes are Next.js App Router API routes under `/app/api/`. All endpoints re
 | POST | `/api/invoices/batch` | Generate batch invoices for a month |
 | GET | `/api/invoices/[id]` | Get invoice + line items + payments |
 | POST | `/api/invoices/[id]/send` | Generate PDF + send email via Resend |
+| POST | `/api/invoices/[id]/receipt` | Send payment receipt email to client |
+| POST | `/api/invoices/remind` | Send overdue invoice reminder emails (manual or `CRON_SECRET`) |
 | PATCH | `/api/invoices/[id]` | Update status, notes, due date |
 | POST | `/api/invoices/[id]/void` | Void an invoice |
 | POST | `/api/payments` | Record a payment (FIFO across outstanding invoices) |
+| GET | `/api/payments/outstanding-summary` | Per-client outstanding balance summary |
 | GET | `/api/payments/connect` | Start Razorpay OAuth |
 | GET | `/api/payments/connect/callback` | OAuth return; stores encrypted tokens |
 | GET / PATCH / DELETE | `/api/payments/connection` | Connection status, receipt preference, disconnect |
@@ -371,6 +381,7 @@ All routes are Next.js App Router API routes under `/app/api/`. All endpoints re
 | POST | `/api/public/razorpay/webhook` | **Public** — `payment_link.paid`, signature-verified |
 | GET | `/api/public/razorpay/return` | **Public** — client returns after paying; re-checks the link |
 | GET | `/api/public/razorpay/reconcile` | **Public, `CRON_SECRET`** — daily backstop and token refresh |
+| GET / PATCH | `/api/admin/tenants` | Super-admin practice list (with `monthlyActiveClientCount`) and controls |
 | GET | `/api/dashboard` | Aggregated stats: revenue, unbilled, overdue |
 | GET | `/api/portal/[token]` | **Public** — client portal data (token validation, no auth) |
 

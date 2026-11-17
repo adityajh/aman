@@ -5,24 +5,26 @@ Aman is a modern, lightweight practice management system designed for independen
 ## ✨ Core Features
 
 - **Practice Dashboard**: High-level metrics for unbilled sessions, revenue, upcoming appointments, clinical risk flags, and client progress summaries.
-- **Client Management**: Secure database for client records, default fee schemes (INR & USD), termination workflow with invoicing options, and duplicate email detection with reactivation flow.
-- **Sessions Dashboard**: Fast scheduling with modality tracking and recurring sessions. Filter by Active/All/individual clients and by time period (Today, This Week, This Month, YTD, or a custom date range); sort by client name. Duration shows actual clocked time for completed sessions and planned time for scheduled ones. Cancel/no-show with a reason and a 0/50/100% fee quick-fill.
+- **Client Management & Bulk Import**: Secure database for client records, default fee schemes (INR & USD), termination workflow with invoicing options, and duplicate email detection with reactivation flow. Includes a **3-step CSV/Excel Bulk Import Wizard** (up to 100 clients per batch) with downloadable `.xlsx` template, column mapping, and opening balance import. Plan limits use **Monthly Active Clients (MAC)** so counselors can store their full contact book without restrictions.
+- **Sessions Dashboard**: Fast scheduling with modality tracking and recurring sessions. Defaults to **Upcoming Sessions**, with filter/sort state persisted in the URL and `sessionStorage`. Filter by Active/All/individual clients and by time period (Upcoming, Today, This Week, This Month, YTD, or a custom date range); sort by time (using actual start time when available) or client name. Duration shows actual clocked time for completed sessions and planned time for scheduled ones. Cancel/no-show with a reason and a 0/50/100% fee quick-fill.
 - **Pro-rata billing**: Session fees scale to the actual duration by 15-minute quartile (e.g. 45 min → 0.75×), with a standard-hour grace band for near-60-minute sessions.
-- **Clinical Note Editor**: Professional structured note editor (SOAP / Custom) with ORS & SRS rating scales (0–10) — set via precision sliders or typed directly to one decimal. Completing a note auto-marks the session as billable.
-- **Progress Charts**: Per-client ORS & SRS trend charts with RCI/CSC detection, colour-banded benchmarks, and regression trend projection.
-- **Invoicing Engine**: One-click batch generation of monthly invoices. Fully currency-aware — INR and USD clients are handled separately in batch totals and all display symbols.
+- **Clinical Note Editor**: Professional structured note editor (SOAP / Custom) with ORS & SRS rating scales (0–10 per dimension, 0–40 total) — set via precision sliders or typed directly to one decimal. Completing a note auto-marks the session as billable.
+- **Progress Charts & Session Timeline**: Per-client ORS & SRS trend charts with RCI/CSC detection, colour-banded benchmarks, regression trend projection, PDF export/emailing, and a collapsible **Session Notes Timeline Accordion** with colour-coded field pills.
+- **Invoicing Engine & Automated Reminders**: One-click batch generation of monthly invoices with live opening/outstanding balance summaries and optional **UPI QR Code** embedding. Fully currency-aware — INR and USD clients are handled separately in batch totals and all display symbols. Supports **Automated Payment Reminders** (7-day overdue reminder emails via cron or manual trigger).
 - **Payments Ledger**: Multi-currency payment recording with FIFO allocation across outstanding invoices. Write-offs, account credit and refunds are recorded as adjustments and kept out of received totals.
 - **Online Payments**: Counsellors connect their own Razorpay account. Invoices and reminders carry a Pay online link, paid links are recorded automatically with a receipt, and money goes straight to the counsellor. See [Online payments](#online-payments-razorpay-connect) for setup.
-- **Resend Integration**: Automated delivery of branded HTML invoices directly to client emails.
+- **Resend Integration**: Automated delivery of branded HTML invoices, payment receipts, overdue reminders, and progress chart PDFs directly to client emails (with `replyTo` routed to the counselor).
 
 ## 🛠 Tech Stack
 
-- **Framework**: [Next.js 16+](https://nextjs.org/) (App Router, Turbopack)
-- **Database**: [Neon](https://neon.tech/) (Serverless Postgres)
+- **Framework**: [Next.js 16+](https://nextjs.org/) (App Router, Turbopack) & React 19
+- **Database**: [Neon](https://neon.tech/) (Serverless Postgres with Row-Level Security)
 - **ORM**: [Drizzle ORM](https://orm.drizzle.team/)
 - **Authentication**: [NextAuth.js](https://next-auth.js.org/)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/) & [shadcn/ui](https://ui.shadcn.com/)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) & [shadcn/ui](https://ui.shadcn.com/)
+- **Payments**: [Razorpay](https://razorpay.com/) (SaaS Subscriptions & Razorpay Connect OAuth Payment Links)
 - **Email**: [Resend](https://resend.com/) + [Nodemailer](https://nodemailer.com/) (Gmail SMTP fallback)
+- **Data Import / Export**: [SheetJS (`xlsx`)](https://sheetjs.com/), `jspdf`, `html-to-image`
 
 ## 🚀 Getting Started
 

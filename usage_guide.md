@@ -9,6 +9,8 @@ Before you can schedule sessions, you need to add your clients.
 - Go to the **Clients** tab in the sidebar.
 - Click **"Add Client"**.
 - Fill in the name, contact details, and assign a **Default Fee Scheme** (INR or USD).
+- **Bulk Importing Clients**: Click **"Import"** on the Clients page to upload a `.csv` or `.xlsx` spreadsheet (up to 100 clients per batch). You can click **"Download Template"** on Step 1 to get a ready-to-fill Excel template (`Clients_Import_Template.xlsx`), map your columns (`Full Name`, `Email Address`, `Phone Number`, `Fee Per Session`, `Timezone`, and `Amount Due`), and preview rows before importing.
+- **Monthly Active Clients (Plan Capacity)**: You can keep your entire client directory in Deepen without limits. Your standard plan capacity (40 active clients/month) only counts clients who have a non-cancelled session or non-void invoice in the current calendar month, and shows a soft warning if you schedule beyond 40.
 - **Duplicate Email Detection**: If you add a client with an email that already exists, you will be prompted to either **Restart/Reactivate** the existing client or **Create a New Profile Anyway** (for family members sharing an email).
 - **Terminating a Client**: Click "Terminate Service" from the client's detail view. You will be asked whether pending sessions should still be invoiced — if not, they will be automatically cancelled.
 
@@ -25,10 +27,10 @@ Standardize your billing by creating reusable fee structures.
 
 ## 🗓 3. Scheduling & Completing Sessions
 The core of your daily practice.
-- Go to the **Sessions** tab (defaults to **This Month**, **Active Clients** view).
+- Go to the **Sessions** tab (defaults to **Upcoming Sessions**, **Active Clients** view; your filter and sort selections stay sticky across navigation).
 - Click **"New Session"**. The client's default fee scheme will be auto-populated. You can also set up **recurring** sessions.
-- **Filtering**: Use the time dropdown — **Today, This Week, This Month, YTD,** or **Custom Range** (pick From/To dates). Each window is bounded, so future recurring sessions won't leak into the current period. Use **All Time** to see everything.
-- **Sorting by client**: Click the **Client** column header to sort the list alphabetically (click again to reverse, once more to return to date order).
+- **Filtering**: Use the time dropdown — **Upcoming Sessions, Today, This Week, This Month, YTD,** or **Custom Range** (pick From/To dates). Each window is bounded, so future recurring sessions won't leak into the current period. Use **All Time** to see everything.
+- **Sorting**: Click the **Time (IST)** column header to sort chronologically (uses the actual session start time when recorded, or the scheduled time otherwise), or click the **Client** column header to sort alphabetically.
 - **Duration column**: For completed sessions the **actual** clocked duration shows in black, with the **billed** minutes beneath it; scheduled sessions show their **planned** duration in blue.
 - **Cancelling / No-Show**: Click the ✕ icon on any **Scheduled** row. Choose Cancellation or No-Show, optionally enter a reason, and set the fee — use the **0% / 50% / 100%** quick-fill buttons or type a custom amount (set to 0 to skip billing).
 - **Writing Notes**: After a session ends, click **"Write Note"** to open the clinical editor.
@@ -47,6 +49,8 @@ Aman makes batch billing effortless.
 - Each client row shows their pending amount in the correct currency (`₹` or `$`).
 - If you have both INR and USD clients selected, the header will show **separate totals** for each currency.
 - Click **"Generate Invoices"** to create invoices, then **"Send"** to email them.
+- **UPI QR Code**: Upload your UPI QR code under **Settings → Billing Settings** to automatically embed it in invoice PDFs and emails.
+- **Automated Payment Reminders**: Enable overdue reminders under **Settings → Payment Reminders** to automatically email clients with overdue invoices every 7 days (or click **"Send Reminders Now"** to trigger manually).
 
 ---
 
@@ -86,9 +90,11 @@ Your "Practice Overview" gives you a real-time pulse on your practice:
 
 ---
 
-## 📈 6. Progress Tracking
+## 📈 6. Progress Tracking & Session Notes Timeline
 - Click the chart icon (📈) next to any client to see their **ORS and SRS progress charts** over time.
-- ORS and SRS scores are recorded in the clinical note editor (0–10). Drag the precision sliders, or toggle to numbers mode and **type the value directly** (decimals like `7.5` are supported).
+- ORS and SRS scores are recorded in the clinical note editor (0–10 per dimension, 0–40 total). Drag the precision sliders, or toggle to numbers mode and **type the value directly** (decimals like `7.5` are supported).
+- **Session Notes Timeline**: Below the progress charts on a client's detail page, all historical session notes appear in a collapsible timeline accordion. Click any session card to expand its colour-coded field pills, or use **Expand all / Collapse all** at the top right.
+- **Export / Email Charts**: Download a client's progress chart as a PDF or email it directly from the client detail view (your email is pre-filled in CC).
 
 ---
 
