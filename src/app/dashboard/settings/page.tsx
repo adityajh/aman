@@ -31,6 +31,11 @@ export default function SettingsPage() {
     monthlyQuote: "",
     upiId: "",
     upiQrCode: "",
+    bankName: "",
+    bankBranch: "",
+    bankAccountName: "",
+    bankAccountNumber: "",
+    bankIfsc: "",
     orsCutoff: 25,
     srsCutoff: 36,
     orsDeteriorationThreshold: 5,
@@ -59,6 +64,11 @@ export default function SettingsPage() {
           monthlyQuote: settingsData.monthlyQuote || "",
           upiId: settingsData.upiId || "",
           upiQrCode: settingsData.upiQrCode || "",
+          bankName: settingsData.bankName || "",
+          bankBranch: settingsData.bankBranch || "",
+          bankAccountName: settingsData.bankAccountName || "",
+          bankAccountNumber: settingsData.bankAccountNumber || "",
+          bankIfsc: settingsData.bankIfsc || "",
           orsCutoff: settingsData.orsCutoff ?? 25,
           srsCutoff: settingsData.srsCutoff ?? 36,
           orsDeteriorationThreshold: settingsData.orsDeteriorationThreshold ?? 5,
@@ -246,9 +256,55 @@ export default function SettingsPage() {
               <CardTitle className="flex items-center gap-2">
                 <Building className="h-5 w-5 text-primary" /> Payment Details
               </CardTitle>
-              <CardDescription>Specify your primary UPI ID for collections.</CardDescription>
+              <CardDescription>How clients can pay you. These details appear on your invoices. Leave a field empty to leave it off.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="text-sm font-medium">Bank transfer</div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="bankAccountName">Account name</Label>
+                  <Input
+                    id="bankAccountName"
+                    value={settings.bankAccountName}
+                    onChange={(e) => setSettings({ ...settings, bankAccountName: e.target.value })}
+                    placeholder="Defaults to your name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bankAccountNumber">Account number</Label>
+                  <Input
+                    id="bankAccountNumber"
+                    value={settings.bankAccountNumber}
+                    onChange={(e) => setSettings({ ...settings, bankAccountNumber: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bankIfsc">IFSC</Label>
+                  <Input
+                    id="bankIfsc"
+                    value={settings.bankIfsc}
+                    onChange={(e) => setSettings({ ...settings, bankIfsc: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bankName">Bank</Label>
+                  <Input
+                    id="bankName"
+                    value={settings.bankName}
+                    onChange={(e) => setSettings({ ...settings, bankName: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bankBranch">Branch</Label>
+                  <Input
+                    id="bankBranch"
+                    value={settings.bankBranch}
+                    onChange={(e) => setSettings({ ...settings, bankBranch: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="text-xs text-muted-foreground">Bank details show on invoices once an account number is entered.</div>
+              <div className="border-t pt-4 text-sm font-medium">UPI</div>
               <div className="space-y-2">
                 <Label htmlFor="upiId">UPI ID</Label>
                 <Input

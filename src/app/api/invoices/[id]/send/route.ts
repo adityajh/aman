@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { eq, and, lt, lte, not } from "drizzle-orm";
 import { formatIST } from "@/lib/tz";
 import { getTenantContext, withTenantContext } from "@/lib/tenant";
+import { paymentDetailsLines } from "@/lib/payment-details-html";
 
 export async function POST(
   req: Request,
@@ -96,6 +97,7 @@ export async function POST(
       
       const attachments: any[] = [];
       let qrCodeHtml = "";
+      const paymentLines = paymentDetailsLines(practiceProfile);
 
       if (practiceProfile.upiQrCode) {
         if (practiceProfile.upiQrCode.startsWith("data:image/")) {
@@ -196,18 +198,14 @@ export async function POST(
               </table>
             </div>
 
+            ${paymentLines || qrCodeHtml ? `
             <div style="background-color: #ebf8ff; padding: 20px; border-radius: 8px; border: 1px solid #bee3f8; margin-bottom: 32px;">
               <h3 style="margin: 0 0 12px; font-size: 13px; color: #2c5282; text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em;">Payment Information</h3>
-              <p style="margin: 0; font-size: 14px; color: #2d3748; line-height: 1.8;">
-                <strong>Bank:</strong> HSBC<br>
-                <strong>Branch:</strong> Noida, Sector - 18<br>
-                <strong>Account #:</strong> 499 034528 006<br>
-                <strong>IFSC:</strong> HSBC 0110007<br>
-                <strong>Account Name:</strong> ${practiceProfile.counselorName}
-                ${practiceProfile.upiId ? `<br><strong>UPI ID:</strong> ${practiceProfile.upiId}` : ""}
-              </p>
+              ${paymentLines ? `<p style="margin: 0; font-size: 14px; color: #2d3748; line-height: 1.8;">
+                ${paymentLines}
+              </p>` : ""}
               ${qrCodeHtml}
-            </div>
+            </div>` : ""}
             
             <div style="border-top: 1px solid #e2e8f0; padding-top: 24px; font-style: italic; color: #718096; font-size: 15px; text-align: center; line-height: 1.6;">
               "${practiceProfile.monthlyQuote}"

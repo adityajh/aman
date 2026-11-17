@@ -411,6 +411,14 @@ export const practiceSettings = pgTable(
     email: text("email").default(""),
     upiId: text("upi_id"),
     upiQrCode: text("upi_qr_code"),
+    // Bank transfer details printed on this practice's invoices. All optional;
+    // the block appears once an account number is entered. bankAccountName
+    // falls back to counselorName when empty.
+    bankName: text("bank_name"),
+    bankBranch: text("bank_branch"),
+    bankAccountName: text("bank_account_name"),
+    bankAccountNumber: text("bank_account_number"),
+    bankIfsc: text("bank_ifsc"),
     monthlyQuote: text("monthly_quote").default("Progress is not a straight line."),
     orsCutoff: integer("ors_cutoff").notNull().default(25),
     srsCutoff: integer("srs_cutoff").notNull().default(36),

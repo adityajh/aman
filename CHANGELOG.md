@@ -2,6 +2,17 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [5.0.9] - 2026-11-17
+
+### Fixed
+- **Bank details on invoices are now each practice's own**: Invoice emails and the invoice preview printed one hardcoded HSBC account for every practice, under that practice's counsellor name. A client of any other practice paying by bank transfer would have been sent someone else's account. The payment block is now built from the practice's own settings, and is left off when the practice has entered neither bank details nor a UPI ID.
+
+### Added
+- **Bank transfer details in Settings**: The Payment Details card has a new Bank transfer section (account name, account number, IFSC, bank, branch). Bank details appear on invoices once an account number is entered; account name defaults to the counsellor's name. The original practice's HSBC details were moved into its own settings so its invoices read as before.
+
+### Database
+- Five nullable text columns on `practice_settings`: `bank_name`, `bank_branch`, `bank_account_name`, `bank_account_number`, `bank_ifsc`. Hand-applied SQL in `drizzle/manual/2026-11-practice-bank-details.sql`, which also fills them for `aman-counseling`.
+
 ## [5.0.8] - 2026-11-17
 
 ### Fixed
