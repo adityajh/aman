@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 import { getTenantContext, withTenantContext } from "@/lib/tenant";
+import { tenants } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function POST() {
   const { tenantId } = await getTenantContext();
   return await withTenantContext(tenantId, async (tx) => {
     try {
-      const tenant = await tx.query.tenants.findFirst();
+      const tenant = await tx.query.tenants.findFirst({
+        where: eq(tenants.id, tenantId),
+      });
       
       if (!tenant || !tenant.razorpaySubscriptionId) {
         return NextResponse.json({ error: "No active subscription found" }, { status: 404 });
