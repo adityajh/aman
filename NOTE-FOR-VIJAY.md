@@ -1,5 +1,7 @@
 # Note for Vijay — Reports page + Predicted Progress graph
 
+> **Historical note, June 2026.** Kept for the record; check `CHANGELOG.md` for later changes. The green, amber and red verdicts described here are still what the app shows (Nov 2026). The brand guide (Aug 2026) asks for brick instead of red, "worth a closer look" instead of "behind", and no "at risk" or "distress" labels. That change has not been made in code yet.
+
 Hey Vijay,
 
 We just shipped a new **Reports** page (live in the sidebar between Clients and Sessions). Quick rundown of what it does and how to read it.

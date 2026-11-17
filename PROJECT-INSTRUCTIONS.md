@@ -21,7 +21,11 @@ Admin is the wedge. The "am I any good?" question is the product. Pro (₹1,999)
 
 ## Honest state
 
-Zero revenue, one free tenant. No payment collection, no trial enforcement, no onboarding, no data import. **Automated measure delivery does not exist.** Counsellors type scores by hand, which is the single biggest product gap. The Outcome Report doesn't exist either. Pricing is inferred, not validated.
+*Revenue and tenant count last stated August 2026; re-check before quoting. Product facts checked against the code 17 November 2026.*
+
+Zero revenue, one free tenant. Signup now takes a Razorpay subscription with a 7-day trial, and clients can be bulk-imported (up to 100 at a time). There is still no onboarding flow. **Automated measure delivery does not exist.** Counsellors type scores by hand, which is the single biggest product gap. The Outcome Report doesn't exist either. Pricing is inferred, not validated.
+
+Online payments for counsellors' clients (Razorpay Connect) are built on the `feat/razorpay-connect-payment-links` branch, not merged or live.
 
 Never claim revenue, customers plural, or validated pricing.
 
@@ -60,10 +64,11 @@ Next.js 16 · React 19 · Neon Postgres · Drizzle · NextAuth v4 · Vercel.
 
 1. **This is not the Next.js in your training data.** Read `node_modules/next/dist/docs/` first.
 2. **Every tenant-scoped DB call goes through `withTenantContext()`** (`src/lib/tenant.ts`), with `tenantId` set on inserts. A leak here is a clinical-data breach.
-3. **Never hard-delete.** Soft-delete plus audit log.
+3. **Never hard-delete clinical records.** Clients are soft-deleted (`is_active = false`). The `audit_log` table exists but nothing writes to it yet, so there is no change history. Receipts and payment allocations are hard-deleted when a counsellor removes one; the invoice totals are recalculated.
 4. **Money logic is load-bearing**, pro-rata 15-min quartiles with the 53–70 min grace band, manual overrides honoured, invoice numbers from `MAX+1`, INR and USD never mixed.
 5. **IST timezone**. `src/lib/tz.ts`; ranges are `[start, end)`.
 6. Update `CHANGELOG.md` for anything user-visible.
+7. **There is one database.** `.env.local` and Vercel previews point at the production Neon database (AWS us-east-1). Test write paths with a throwaway client and Settings → Test Mode. Schema changes are applied by hand as SQL; the Drizzle journal is not kept in sync. Put one-off SQL in `drizzle/manual/`.
 
 ## How to work here
 
@@ -74,9 +79,12 @@ Next.js 16 · React 19 · Neon Postgres · Drizzle · NextAuth v4 · Vercel.
 
 ## Blocking / unverified
 
-1. **Rename to Deepen not yet executed in code**. `practiceSettings` still defaults to "Aman Counseling" and a co-founder's real name and city. Blocks the pricing page, footer, and launch. Domains are registered. TM search still open.
+1. **Rename to Deepen, partly executed.** `practiceSettings` now defaults to blank practice and counsellor names. The repo, package name and some internal strings still say Aman. TM search still open.
+   - **Still blocking:** the invoice email (`src/app/api/invoices/[id]/send/route.ts`) hardcodes one person's HSBC bank account in the Payment Information block, for every practice.
 2. **Indian supervision rates**, the primary pricing anchor for Pro, not found. Ask the clinical co-founder before any price goes public.
 3. **Willingness to pay ₹1,999**, inferred from credential-buying behaviour, not observed. Beta question 1 tests it.
 4. **IP review** of the pluggable-instrument model, blocks launch.
 5. **Competitor cells**, inferred from marketing pages. Re-verify before publishing any comparison.
-6. **ORS scale inconsistency**, editor and schema use 0–10; Reports logic and `NOTE-FOR-VIJAY.md` describe the standard 0–40. Confirm with the clinical co-founder.
+6. ~~**ORS scale inconsistency**~~ Resolved: the editor records each item 0–10 and stores totals 0–40 (`ors_total`, `srs_total`), which is what Reports uses.
+7. **"Hosted in India" is not true today.** The home page, privacy page and terms say data is hosted in India. The Neon database is in AWS us-east-1. Either move the database to an India region or change the wording. Legal pages, so treat as blocking.
+8. **Instrument item labels still reproduced.** The note editor still shows the eight ORS/SRS item labels word for word, and "PCOMS" appears in Settings. That is group A of `HANDOVER-measures-AB-2026-08-31.md`, not yet done.
