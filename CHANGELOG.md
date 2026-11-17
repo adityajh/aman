@@ -2,7 +2,7 @@
 
 All notable changes to the Aman project will be documented in this file.
 
-## [5.1.0] - 2026-11-17
+## [Unreleased]
 
 ### Added
 - **Online Payments via Razorpay Connect**: Counsellors can connect their own Razorpay account from **Settings → Online payments** (OAuth: she signs in on Razorpay and approves access; Deepen never sees her password). Money goes from the client straight to her account. Deepen never holds funds.
@@ -41,7 +41,14 @@ All notable changes to the Aman project will be documented in this file.
 
 ---
 
-## [5.0.8] - 2026-10-28
+## [5.0.8] - 2026-11-17
+
+### Fixed
+- **Billing read the wrong practice's account**: The Deepen Billing section in Settings, Cancel subscription, Reactivate subscription, and the dashboard's active-subscription check looked up "the current tenant" without filtering by tenant ID. The `tenants` table has no row-level security, so each lookup returned whichever practice Postgres listed first rather than the signed-in one. Practices with a live subscription saw "no subscription", could not cancel, and a reactivation would have written their new Razorpay subscription onto another practice's account. The founding-plan upgrade and status sync inside the billing view acted on the same wrong row, and the inactive-subscription lockout was never applied. All four lookups are now scoped to the signed-in tenant (`src/app/api/settings/billing/route.ts`, `.../billing/cancel/route.ts`, `.../billing/reactivate/route.ts`, `src/app/dashboard/layout.tsx`).
+
+---
+
+## [5.0.7] - 2026-10-28
 
 ### Changed
 - **Broadened "Active Clients" Definition to Monthly Active Clients (MAC)**:
@@ -59,7 +66,9 @@ All notable changes to the Aman project will be documented in this file.
 
 ---
 
-## [5.0.7] - 2026-10-11
+## [Unversioned] - 2026-10-11
+
+*Shipped on 11 Oct without a CHANGELOG entry; logged later. Listed without a number so the published 5.0.7 and 5.0.8 keep theirs.*
 
 ### Added
 - **Client Bulk Import Wizard (`/dashboard/clients/import` & `POST /api/clients/import`)**:
