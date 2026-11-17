@@ -1,5 +1,7 @@
 # Database change required · consent columns (migration 0009)
 
+> **Status (17 Nov 2026): most likely applied.** The live client form and signup use these columns, and the consent changes shipped in CHANGELOG 5.0.3. Not verified against the database. Run the queries under "Verify after running" to confirm, then mark this note done.
+
 *18 August 2026. For the agent that owns the database. Code is already deployed on `preview`; the database has not been changed. Until this runs, creating a client and signing up will fail with "column does not exist".*
 
 ## What to run

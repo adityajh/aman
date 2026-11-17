@@ -54,7 +54,7 @@ Seven numbered documents compiled 31 July 2026. They cross-reference each other 
 | `one-page-plan.html` | **v1.1.** The living source. Mission, two value props, market, competition, pricing, costs at 10/100/1,000 users, path to 100,000 |
 | `Deepen-business-plan.pdf` | **The one you send.** Three A4 pages, brand fonts embedded, searchable text. Rendered from the HTML |
 | `_build-pdf.md` | How to regenerate the PDF after editing the HTML |
-| `pricing-and-build-plan-2026-08.md` | **Pricing decision of 17 Aug 2026 and the code change plan for it.** Supersedes the pricing in 03 and 04 until those are rewritten. One plan at ₹999, founding 50 at ₹699, Pro ₹1,999 later, 30 active-client fence, no annual |
+| `pricing-and-build-plan-2026-08.md` | **Pricing decision of 17 Aug 2026 and the code change plan for it.** Supersedes the pricing in 03 and 04 until those are rewritten. One plan at ₹999, founding 50 at ₹699, Pro ₹1,999 later, 30 active-client fence, no annual. *Since changed in code: the fence is 40 monthly active clients, counted per calendar month (CHANGELOG 5.0.4, 5.0.7)* |
 | `plans-chart-2026-08.html` | The plans as a one-page chart, with the honest competitor comparison |
 
 ## marketing/
@@ -95,7 +95,7 @@ The name is **Deepen**. `deepen.health` and `deepen.co.in` are registered and se
 3. **Point the domains at the build.** `deepen.health` is primary, `deepen.co.in` redirects to it. Set both in one pass so email and links never split.
 4. India trademark search, classes 9 and 42. Fold into the IP review that already blocks launch.
 5. Say the name cold to the clinical co-founder.
-6. Execute the rename in code. `practiceSettings` still defaults to a real person's name and city.
+6. Execute the rename in code. *Partly done (Nov 2026): `practiceSettings` defaults are now blank. The repo and package are still named aman, and the invoice email still hardcodes one person's bank account.*
 
 ---
 
