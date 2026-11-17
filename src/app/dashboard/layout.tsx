@@ -3,6 +3,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { getTenantContext, withTenantContext } from "@/lib/tenant";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { tenants } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
@@ -36,7 +38,9 @@ export default async function DashboardLayout({
   try {
     const data = await withTenantContext(tenantId, async (tx) => {
       const settings = await tx.query.practiceSettings.findFirst();
-      const tenant = await tx.query.tenants.findFirst();
+      const tenant = await tx.query.tenants.findFirst({
+        where: eq(tenants.id, tenantId),
+      });
       return { settings, tenant };
     });
     if (data.settings?.practiceName) {

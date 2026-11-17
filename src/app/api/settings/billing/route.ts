@@ -8,7 +8,9 @@ export async function GET() {
   const { tenantId } = await getTenantContext();
   return await withTenantContext(tenantId, async (tx) => {
     try {
-      const tenant = await tx.query.tenants.findFirst();
+      const tenant = await tx.query.tenants.findFirst({
+        where: eq(tenants.id, tenantId),
+      });
 
       if (!tenant) {
         return NextResponse.json({ error: "Tenant not found" }, { status: 404 });

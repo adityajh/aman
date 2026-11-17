@@ -34,7 +34,9 @@ export async function POST(req: Request) {
     }
 
     return await withTenantContext(tenantId, async (tx) => {
-      const tenant = await tx.query.tenants.findFirst();
+      const tenant = await tx.query.tenants.findFirst({
+        where: eq(tenants.id, tenantId),
+      });
       if (!tenant) {
         return NextResponse.json({ error: "Tenant not found" }, { status: 404 });
       }
