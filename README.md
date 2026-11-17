@@ -1,6 +1,6 @@
-# Aman — Clinical Practice Management
+# Deepen — Outcome tracking for counsellors
 
-Aman is a modern, lightweight practice management system designed for independent therapists and multi-counselor clinics. Built as a secure, multi-tenant SaaS platform, it streamlines the "Golden Path" of clinical work: scheduling sessions, writing clinical notes, and automating monthly invoicing.
+Deepen (formerly Aman; the repo and package still use the old name) is a lightweight practice tool for independent counsellors in solo practice. Built as a multi-tenant SaaS platform, it covers the "Golden Path" of clinical work: scheduling sessions, writing session notes with outcome scores, and monthly invoicing and payments.
 
 ## ✨ Core Features
 
@@ -10,10 +10,10 @@ Aman is a modern, lightweight practice management system designed for independen
 - **Pro-rata billing**: Session fees scale to the actual duration by 15-minute quartile (e.g. 45 min → 0.75×), with a standard-hour grace band for near-60-minute sessions.
 - **Clinical Note Editor**: Professional structured note editor (SOAP / Custom) with ORS & SRS rating scales (0–10 per dimension, 0–40 total) — set via precision sliders or typed directly to one decimal. Completing a note auto-marks the session as billable.
 - **Progress Charts & Session Timeline**: Per-client ORS & SRS trend charts with RCI/CSC detection, colour-banded benchmarks, regression trend projection, PDF export/emailing, and a collapsible **Session Notes Timeline Accordion** with colour-coded field pills.
-- **Invoicing Engine & Automated Reminders**: One-click batch generation of monthly invoices with live opening/outstanding balance summaries and optional **UPI QR Code** embedding. Fully currency-aware — INR and USD clients are handled separately in batch totals and all display symbols. Supports **Automated Payment Reminders** (7-day overdue reminder emails via cron or manual trigger).
+- **Invoicing Engine & Automated Reminders**: One-click batch generation of monthly invoices with live opening/outstanding balance summaries and optional **UPI QR Code** embedding. Fully currency-aware — INR and USD clients are handled separately in batch totals and all display symbols. Supports **Payment Reminders**: overdue reminder emails, re-sent at most every 7 days, triggered from Settings → "Send Reminders Now". The endpoint accepts a `CRON_SECRET` but no cron is scheduled for it yet.
 - **Payments Ledger**: Multi-currency payment recording with FIFO allocation across outstanding invoices. Write-offs, account credit and refunds are recorded as adjustments and kept out of received totals.
 - **Online Payments**: Counsellors connect their own Razorpay account. Invoices and reminders carry a Pay online link, paid links are recorded automatically with a receipt, and money goes straight to the counsellor. See [Online payments](#online-payments-razorpay-connect) for setup.
-- **Resend Integration**: Automated delivery of branded HTML invoices, payment receipts, overdue reminders, and progress chart PDFs directly to client emails (with `replyTo` routed to the counselor).
+- **Email Delivery**: Branded HTML invoices, payment receipts, overdue reminders, and progress chart PDFs sent to clients over Gmail SMTP (Nodemailer), from the practice name with `replyTo` set to the counsellor. A practice-wide Test Mode redirects all client emails to the counsellor.
 
 ## 🛠 Tech Stack
 
@@ -23,16 +23,16 @@ Aman is a modern, lightweight practice management system designed for independen
 - **Authentication**: [NextAuth.js](https://next-auth.js.org/)
 - **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) & [shadcn/ui](https://ui.shadcn.com/)
 - **Payments**: [Razorpay](https://razorpay.com/) (SaaS Subscriptions & Razorpay Connect OAuth Payment Links)
-- **Email**: [Resend](https://resend.com/) + [Nodemailer](https://nodemailer.com/) (Gmail SMTP fallback)
+- **Email**: [Nodemailer](https://nodemailer.com/) over Gmail SMTP. The `resend` package is installed but not used in the code.
 - **Data Import / Export**: [SheetJS (`xlsx`)](https://sheetjs.com/), `jspdf`, `html-to-image`
 
 ## 🚀 Getting Started
 
 ### 1. Prerequisites
 
-- Node.js 18+
+- Node.js 20.9+ (required by Next.js 16; Vercel defaults to Node 24)
 - A Neon PostgreSQL database
-- A Resend API account
+- A Gmail account with an App Password (for sending email)
 
 ### 2. Installation
 
@@ -48,15 +48,29 @@ Create a `.env.local` file in the root directory:
 
 ```env
 DATABASE_URL=postgresql://...
-RESEND_API_KEY=re_...
 NEXTAUTH_SECRET=your_32_char_secret
 NEXTAUTH_URL=http://localhost:3000
 
-# Gmail SMTP (for invoice sending)
+# Gmail SMTP (invoices, receipts, reminders, progress emails)
 SMTP_USER=you@gmail.com
 SMTP_PASS=your_app_password
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=465
+
+# Deepen's own subscription billing (Razorpay)
+RAZORPAY_KEY_ID=...
+RAZORPAY_KEY_SECRET=...
+NEXT_PUBLIC_RAZORPAY_KEY_ID=...
+RAZORPAY_WEBHOOK_SECRET=...           # subscription webhook signature
+RAZORPAY_PLAN_DEEPEN=plan_...
+RAZORPAY_PLAN_FOUNDING=plan_...
+RAZORPAY_FOUNDING_OFFER_ID=offer_...
+RAZORPAY_BETA_OFFER_ID=offer_...
+FOUNDING_PROMO_CODE=...
+BETA_PROMO_CODE=...
+
+# Platform admin (/admin)
+ADMIN_EMAILS=you@example.com,other@example.com
 ```
 
 ### Online payments (Razorpay Connect)
@@ -85,6 +99,8 @@ Schema: run `drizzle/manual/2026-11-razorpay-connect.sql` once. A daily cron (`v
 npx drizzle-kit push
 ```
 
+> **Careful:** there is one database. `.env.local` and Vercel preview deployments both point at the production Neon database, so `drizzle-kit push` and any local testing change live data. The Drizzle migration journal is not kept in sync, so schema changes are applied by hand: one-off SQL files live in `drizzle/manual/`. Test write paths with a throwaway client and Settings → Test Mode on.
+
 ### 5. Run Development Server
 
 ```bash
@@ -99,7 +115,7 @@ npm run dev
 - [ ] **Phase 3**: AI Assistance (SOAP Note drafting via Claude API)
 - [ ] **Phase 4**: Client Portal (Token-gated payment history view)
 - [ ] **Online payments** (Razorpay Connect): built, awaiting Razorpay partner approval and end-to-end testing
-- [ ] **Phase 5**: Calendar View (Scheduling, recurring sessions, reminders)
+- [ ] **Phase 5**: Calendar View (month/week view, session reminders to clients)
 
 ## 📄 License
 

@@ -1,6 +1,6 @@
 # AMAN — Counselor Session Logging & Invoicing System
 ### Technical Architecture & Developer Handover Document
-*Version 1.0 | April 2026*
+*Version 1.0 April 2026 · revised November 2026 to match the code*
 
 ---
 
@@ -14,20 +14,23 @@ Aman is a lightweight, single-counselor practice management tool built to stream
 | **Architecture** | Multi-tenant SaaS (RLS isolated PostgreSQL) |
 | **Primary User** | Independent therapists and solo counselors |
 | **Invoicing Cycle** | Monthly — batch invoices sent by email from within the system |
-| **Stack** | Next.js 16 · React 19 · Neon (PostgreSQL) · Resend · Razorpay (Subscriptions & Connect) |
+| **Stack** | Next.js 16 · React 19 · Neon (PostgreSQL) · Gmail SMTP (Nodemailer) · Razorpay (Subscriptions & Connect) |
 | **Hosting** | Vercel (frontend + API routes + Cron) · Neon (serverless Postgres) |
 
 ---
 
 ## 2. Core Goals
 
-- Log sessions immediately after they happen, with structured SOAP notes
-- Generate and email monthly invoices to clients — no manual spreadsheet work
-- Track outstanding payments and flag overdue invoices
-- Give clients a read-only portal to view invoice history and payment status
-- Surface client progress trends over time *(Phase 2)*
-- Add AI-assisted note drafting to reduce documentation time *(Phase 2)*
-- Integrate a calendar view for scheduling and session planning *(Phase 3)*
+| Goal | Status |
+|---|---|
+| Log sessions immediately after they happen, with structured notes and outcome scores (ORS/SRS) | Built |
+| Generate and email monthly invoices — no manual spreadsheet work | Built |
+| Track outstanding payments and flag overdue invoices, with reminder emails | Built |
+| Surface client progress trends over time (ORS/SRS charts, predicted progress) | Built |
+| Let clients pay online, recorded automatically (Razorpay Connect) | Built, not yet live |
+| Give clients a read-only portal to view invoice history and payment status | Not built |
+| AI-assisted note drafting | Not built |
+| Calendar view for scheduling | Not built |
 
 ---
 
@@ -35,46 +38,41 @@ Aman is a lightweight, single-counselor practice management tool built to stream
 
 ### 3.1 High-Level Diagram
 
-Aman follows a monolithic Next.js architecture — frontend, API routes, and background jobs all within one Vercel deployment. This keeps the system simple, cheap, and fast to iterate on.
+A monolithic Next.js app: UI, API routes and scheduled jobs all in one Vercel deployment.
 
 ```
 ┌──────────────────────────────────────────────────────┐
-│            AMAN — Next.js 14 App (Vercel)            │
+│         DEEPEN — Next.js 16 App (Vercel)             │
 │  ┌────────────────┐  ┌──────────────────────────┐   │
-│  │  React / UI    │  │  /api/* Route Handlers   │   │
-│  │  (shadcn/ui)   │  │  (sessions, invoices,    │   │
-│  │                │  │   clients, notes)        │   │
+│  │  React 19 UI   │  │  /api/* Route Handlers   │   │
+│  │  (shadcn/ui)   │  │  + Vercel Cron           │   │
 │  └────────────────┘  └──────────────────────────┘   │
 └────────────────────────────┬─────────────────────────┘
                              │
       ┌──────────────────────┼──────────────────────┐
       ▼                      ▼                      ▼
-┌──────────┐        ┌──────────────┐      ┌──────────────┐
-│   Neon   │        │    Resend    │      │   Razorpay   │
-│ Postgres │        │ (email +     │      │ (payment     │
-│          │        │  invoice PDF)│      │  gateway)    │
-└──────────┘        └──────────────┘      └──────────────┘
-                                                │ Phase 2
-                                     ┌──────────────────┐
-                                     │  Anthropic API   │
-                                     │  (AI SOAP notes) │
-                                     └──────────────────┘
+┌──────────┐        ┌──────────────┐      ┌──────────────────────┐
+│   Neon   │        │  Gmail SMTP  │      │       Razorpay       │
+│ Postgres │        │ (Nodemailer) │      │ Subscriptions (ours) │
+│  + RLS   │        │              │      │ Connect (counsellor) │
+└──────────┘        └──────────────┘      └──────────────────────┘
 ```
 
 ### 3.2 Tech Stack
 
-| Layer | Technology | Rationale |
+| Layer | Technology | Notes |
 |---|---|---|
-| Frontend | Next.js 14 (App Router) | Full-stack React, file-based routing, co-located API |
-| UI Components | shadcn/ui + Tailwind CSS | Accessible, unstyled-first, fast to build |
-| Database | Neon (serverless PostgreSQL) | Scales to zero, pay-per-use, excellent Vercel integration |
-| ORM | Drizzle ORM | Type-safe, lightweight, works natively with Neon |
-| Auth | NextAuth.js (Credentials) | Simple email/password for single counselor login |
-| Email & PDFs | Resend + React Email | Reliable transactional email; React-based invoice templates |
-| Payments | Razorpay | India-first, UPI support, easy integration |
-| AI Notes | Anthropic Claude API | SOAP note drafting from session summary *(Phase 2)* |
-| Hosting | Vercel | Zero-config Next.js deployment, serverless functions |
-| File Storage | Vercel Blob | Invoice PDF storage (small volume, no separate bucket needed) |
+| Frontend | Next.js 16 (App Router, Turbopack), React 19 | Read `node_modules/next/dist/docs/` before changing framework code; APIs differ from older versions |
+| UI Components | shadcn/ui (Base UI) + Tailwind CSS v4 | Brand tokens (paper, ink, teal, terracotta) in `globals.css` |
+| Database | Neon (serverless PostgreSQL) | One database for local, preview and production |
+| ORM | Drizzle ORM | HTTP driver for simple queries, WebSocket pool for RLS transactions |
+| Auth | NextAuth.js (Credentials) | Email + password per counsellor; session carries `tenantId` and `planTier` |
+| Email | Nodemailer over Gmail SMTP | HTML templates built inline in the API routes. `resend` is installed but unused |
+| PDFs | `jspdf` + `html-to-image` (client side) | Progress chart PDFs. Invoices are sent as HTML emails, not PDFs |
+| Payments | Razorpay | Subscriptions bill counsellors for Deepen; Connect (OAuth) lets clients pay counsellors |
+| Import | SheetJS (`xlsx`) | Client bulk import wizard |
+| Hosting | Vercel | Cron in `vercel.json` |
+| File storage | None | The UPI QR code is stored as a data URL in `practice_settings` |
 
 ---
 
@@ -89,7 +87,7 @@ All tables use UUID primary keys and include `created_at` / `updated_at` timesta
 | `id` | UUID PK | `gen_random_uuid()` |
 | `name` | TEXT NOT NULL | Full name |
 | `email` | TEXT | For invoice emails |
-| `phone` | TEXT | WhatsApp/SMS *(Phase 2)* |
+| `phone` | TEXT | Contact number |
 | `date_of_birth` | DATE | Optional |
 | `default_fee` | NUMERIC(10,2) | Default session fee |
 | `default_fee_scheme_id` | UUID FK | References `fee_schemes(id)` (`INR` or `USD`) |
@@ -101,7 +99,11 @@ All tables use UUID primary keys and include `created_at` / `updated_at` timesta
 | `pool_consent` | TEXT | `yes \| no \| not_asked` (comparison pool intake consent) |
 | `pool_consent_at` | TIMESTAMPTZ | Timestamp when consent was recorded |
 | `pool_consent_method` | TEXT | `in_person \| paper \| message` |
-| `created_at` | TIMESTAMPTZ | Auto-set |
+| `termination_reason` | TEXT | Set when a client is terminated |
+| `termination_type` | TEXT | `planned \| unplanned` |
+| `terminated_at` | TIMESTAMPTZ | |
+| `premature_termination_manual` | BOOLEAN | Counsellor's manual override of the premature-ending flag |
+| `created_at`, `updated_at` | TIMESTAMPTZ | Auto-set |
 
 ### 4.2 `sessions`
 
@@ -110,6 +112,7 @@ All tables use UUID primary keys and include `created_at` / `updated_at` timesta
 | `id` | UUID PK | |
 | `client_id` | UUID FK | References `clients(id)` |
 | `scheduled_at` | TIMESTAMPTZ | Session date + time |
+| `ended_at` | TIMESTAMPTZ | |
 | `duration_min` | INTEGER | Default `60` |
 | `actual_start_time` | TIMESTAMPTZ | Capture clock-in time |
 | `actual_end_time` | TIMESTAMPTZ | Capture clock-out time |
@@ -121,28 +124,37 @@ All tables use UUID primary keys and include `created_at` / `updated_at` timesta
 | `modality` | TEXT | `in_person \| video \| phone` |
 | `fee_charged` | NUMERIC(10,2) | Actual fee — may differ from client default |
 | `fee_override` | BOOLEAN | `true` if fee differs from client default |
+| `fee_scheme_id` | UUID FK NULL | References `fee_schemes(id)` |
 | `invoice_id` | UUID FK NULL | Set once billed; `NULL` = unbilled |
 | `created_at` | TIMESTAMPTZ | |
 
-### 4.3 `session_notes` (SOAP & Clinical)
+### 4.3 `session_notes`
+
+One note per session. The editor uses the custom fields below; the SOAP columns are kept for older notes.
 
 | Column | Type | Notes |
 |---|---|---|
 | `id` | UUID PK | |
-| `session_id` | UUID FK UNIQUE | One note per session |
-| `subjective` | TEXT | S: Client's reported feelings / complaints |
-| `objective` | TEXT | O: Counselor's observations |
-| `assessment` | TEXT | A: Clinical interpretation, patterns |
-| `plan` | TEXT | P: Next steps, homework, goals |
-| `ors_score` | NUMERIC(3,1) | Outcome Rating Scale (0.0-10.0) |
-| `srs_score` | NUMERIC(3,1) | Session Rating Scale (0.0-10.0) |
-| `ors_status` | TEXT | `CSC Achieved \| RCI Achieved \| Stable \| Deteriorating` |
-| `srs_status` | TEXT | `Satisfied \| Attention Required` |
-| `goal_progress` | TEXT | Free text on progress toward treatment goals |
-| `note_type` | TEXT | `SOAP` (default) \| `DAP \| BIRP \| free` |
-| `ai_drafted` | BOOLEAN | `true` if AI generated the draft *(Phase 2)* |
-| `completed_at` | TIMESTAMPTZ | `NULL` = draft in progress |
-| `created_at` | TIMESTAMPTZ | |
+| `session_id` | UUID FK | One note per session |
+| `updates` | TEXT | Updates (from last week) |
+| `subjective` | TEXT | Shown as "Session Notes" in the editor |
+| `client_actions` | TEXT | Client Actions |
+| `my_actions` | TEXT | My Actions |
+| `agenda` | TEXT | Next Session Agenda |
+| `feedback` | TEXT | Feedback on Session |
+| `objective`, `assessment`, `plan` | TEXT | Legacy SOAP fields |
+| `ors_individual`, `ors_interpersonal`, `ors_social`, `ors_overall` | NUMERIC(5,1) | ORS dimensions, 0–10 each; `null` = not recorded |
+| `ors_total` | NUMERIC(5,1) | 0–40 |
+| `srs_relationship`, `srs_goals`, `srs_approach`, `srs_overall` | NUMERIC(5,1) | SRS dimensions, 0–10 each |
+| `srs_total` | NUMERIC(5,1) | 0–40 |
+| `ors_flag`, `srs_flag` | BOOLEAN | Set from the thresholds in `practice_settings` |
+| `risk_flag` | TEXT | `none \| low \| medium \| high` |
+| `mood_score` | INTEGER | Legacy |
+| `goal_progress` | TEXT | |
+| `note_type` | TEXT | |
+| `ai_drafted` | BOOLEAN | Reserved for AI drafting (not built) |
+| `completed_at` | TIMESTAMPTZ | `NULL` = draft |
+| `created_at`, `updated_at` | TIMESTAMPTZ | |
 
 ### 4.4 `invoices`
 
@@ -150,19 +162,19 @@ All tables use UUID primary keys and include `created_at` / `updated_at` timesta
 |---|---|---|
 | `id` | UUID PK | |
 | `client_id` | UUID FK | References `clients(id)` |
-| `invoice_number` | TEXT UNIQUE | `INV-2026-0001` — auto-generated |
+| `invoice_number` | TEXT | `INV-2026-0001` — auto-generated; unique per tenant |
 | `billing_month` | DATE | First day of billed month e.g. `2026-04-01` |
 | `issued_date` | DATE | Default `CURRENT_DATE` |
-| `due_date` | DATE | Typically `issued_date + 7` days |
+| `due_date` | DATE | `issued_date` + `practice_settings.invoice_due_days` (default 15) |
 | `subtotal` | NUMERIC(10,2) | Sum of line items |
 | `discount` | NUMERIC(10,2) | Default `0` |
 | `tax_amount` | NUMERIC(10,2) | Default `0` |
 | `total` | NUMERIC(10,2) | `subtotal - discount` |
-| `amount_paid` | NUMERIC(10,2) | Running total from payments; auto-updated by trigger |
+| `amount_paid` | NUMERIC(10,2) | Running total of allocated payments; maintained by the app (`lib/record-payment.ts`, payment and receipt deletes) |
 | `status` | TEXT | `draft \| sent \| paid \| partial \| overdue \| void` |
 | `sent_at` | TIMESTAMPTZ | When emailed to client |
 | `last_reminder_at` | TIMESTAMPTZ | Last overdue payment reminder email timestamp (7-day throttle) |
-| `pdf_url` | TEXT | Stored invoice PDF URL |
+| `pdf_url` | TEXT | Unused (invoices are sent as HTML email) |
 | `payment_link` | TEXT | Short URL of the open Razorpay payment link; `null` once the link is paid, cancelled or expired |
 | `payment_link_id` | TEXT | Razorpay link id (`plink_…`), kept for history |
 | `payment_link_amount` | NUMERIC(10,2) | Amount the link was made for; a stale link is replaced when this differs from what's owed |
@@ -186,15 +198,33 @@ All tables use UUID primary keys and include `created_at` / `updated_at` timesta
 | Column | Type | Notes |
 |---|---|---|
 | `id` | UUID PK | |
-| `invoice_id` | UUID FK | References `invoices(id)` |
-| `amount` | NUMERIC(10,2) | Amount received |
+| `receipt_id` | UUID FK | References `receipts(id)`; the payment event this allocation came from |
+| `invoice_id` | UUID FK NULL | References `invoices(id)`; `null` = excess credit or refund |
+| `client_id` | UUID FK | References `clients(id)` |
+| `amount` | NUMERIC(10,2) | Amount allocated (negative for refunds) |
+| `currency` | TEXT | `INR \| USD` |
 | `payment_date` | DATE | |
 | `method` | TEXT | `cash \| upi \| bank_transfer \| card \| online \| write_off \| credit \| refund \| other` (`write_off`, `credit`, `refund` are adjustments, excluded from received totals) |
 | `reference_id` | TEXT | UPI ref, cheque no., Razorpay payment id |
 | `notes` | TEXT | Optional |
 | `created_at` | TIMESTAMPTZ | |
 
-Each payment event is a numbered row in `receipts` (client-facing); `payments` rows are its allocations across invoices. Online payments set `receipts.provider_payment_id` to the Razorpay payment id, unique per tenant, so a payment can never be recorded twice.
+### 4.6b `receipts`
+
+One row per payment event, numbered `RCP-<year>-<NNNN>` (client-facing). Its money is split across `payments` allocation rows. Deleting a receipt cascades its allocations and recalculates the invoices it touched.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | UUID PK | |
+| `receipt_number` | TEXT | Unique per tenant |
+| `client_id` | UUID FK | |
+| `amount`, `currency` | NUMERIC(10,2), TEXT | |
+| `payment_date` | DATE | |
+| `method` | TEXT | Same values as `payments.method` |
+| `reference_id`, `notes` | TEXT | |
+| `provider_payment_id` | TEXT | Razorpay payment id for online payments; unique per tenant so a payment is never recorded twice |
+| `sent_at` | TIMESTAMPTZ | When the receipt was emailed |
+| `created_at` | TIMESTAMPTZ | |
 
 ### 4.6a `payment_connections`
 
@@ -214,7 +244,17 @@ A counsellor's own Razorpay account, connected by OAuth. One row per tenant and 
 | `auto_send_receipts` | BOOLEAN | Default `true` |
 | `connected_at`, `updated_at` | TIMESTAMPTZ | |
 
-### 4.7 `portal_tokens` *(Phase 2)*
+### 4.6c Other tables
+
+| Table | Purpose |
+|---|---|
+| `tenants` | One per practice: name, slug, `plan_tier` (`deepen \| pro`), founding seat and price, Razorpay subscription id, `is_active`, `is_exempt`, terms acceptance |
+| `users` | Counsellor logins (email, password hash), linked to a tenant |
+| `fee_schemes` | Named fees per tenant with amount and currency (`INR \| USD`) |
+| `practice_settings` | One per tenant: counsellor and practice details, UPI ID and QR, monthly quote, ORS/SRS thresholds, `invoice_due_days`, `email_override` (Test Mode), reminder settings |
+| `promo_codes` | Founding/beta pricing codes, issued from `/admin` |
+
+### 4.7 `portal_tokens` *(table exists; client portal not built)*
 
 | Column | Type | Notes |
 |---|---|---|
@@ -227,7 +267,7 @@ A counsellor's own Razorpay account, connected by OAuth. One row per tenant and 
 
 ### 4.8 `audit_log`
 
-Append-only. All CRUD operations on sessions, invoices, and payments write here via application middleware.
+The table exists, but nothing in the app writes to it yet.
 
 | Column | Type | Notes |
 |---|---|---|
@@ -241,58 +281,47 @@ Append-only. All CRUD operations on sessions, invoices, and payments write here 
 
 ### 4.9 Database Helpers
 
-The SQL schema file includes the following auto-generated triggers:
+`aman_schema.sql` (the original hand-written schema) defines a `set_updated_at()` trigger, an `update_invoice_amount_paid()` trigger on `payments`, and three views (`v_unbilled_sessions`, `v_client_invoice_summary`, `v_dashboard_stats`). The app does not rely on any of them: Drizzle (`src/lib/db/schema.ts`) is the source of truth, and the app sets `amount_paid` and `updated_at` itself. Whether these objects exist in the live database hasn't been checked. If the payment trigger exists it recalculates the same total, so it doesn't conflict.
 
-- **`set_updated_at()`** — fires `BEFORE UPDATE` on `clients`, `sessions`, `session_notes`, `invoices`
-- **`update_invoice_amount_paid()`** — fires `AFTER INSERT` on `payments`; auto-recalculates `invoices.amount_paid` and updates status to `paid` or `partial`
-
-And three useful views:
-
-- **`v_unbilled_sessions`** — completed sessions with no `invoice_id`
-- **`v_client_invoice_summary`** — billed, paid, and outstanding totals per client
-- **`v_dashboard_stats`** — single-row aggregate: unbilled count, overdue count, outstanding amount, this month's revenue, upcoming sessions in 7 days, active risk flags
+**Row-level security.** Every tenant table has a `tenant_isolation_policy` for the `authenticated` role (`enable_rls.js`). `withTenantContext()` switches to that role and sets `app.current_tenant_id` for the transaction. Code that runs without a logged-in session (webhooks, cron) uses the HTTP driver with an explicit `tenant_id` filter instead.
 
 ---
 
 ## 5. Feature List by Phase
 
-### Phase 1 — Core MVP *(Weeks 1–5)*
-*Goal: A working system the counselor can use daily. The loop: log session → write note → invoice → record payment.*
+### Phase 1 — Core MVP
 
-| # | Feature | Details | Status |
-|---|---|---|---|
-| 1 | Auth | Single counselor login (email + password via NextAuth) | [DONE] |
-| 2 | Client management | Add, edit, archive clients. Default fee, contact, tags | [DONE] |
-| 3 | Session logging | Log date, duration, type, status, modality, fee | [DONE] |
-| 4 | SOAP notes | Structured note per session. Blocks: S / O / A / P | [DONE] |
-| 5 | Session status flow | `Scheduled → Completed / No-show / Cancelled` | [DONE] |
-| 6 | Monthly invoice generation | Batch invoice from unbilled sessions | [DONE] |
-| 7 | Invoice PDF | Branded PDF via React Email | [DONE] |
-| 8 | Email invoice | Send PDF via Gmail SMTP (Nodemailer) | [DONE] |
-| 9 | Payment recording | Mark invoice paid/partial; record method + reference | [DONE] |
-| 10 | Dashboard | Unbilled sessions, generated revenue, upcoming sessions | [DONE] |
-
-### Phase 2 — Intelligence & Client Portal *(Weeks 6–10)*
-*Goal: Reduce counselor effort on notes. Give clients a self-serve payment view.*
-
-| # | Feature | Details |
+| # | Feature | Status |
 |---|---|---|
-| 9* | AI SOAP note drafting | Counselor types a quick session summary → Claude API generates full S/O/A/P draft. Counselor reviews and saves. |
-| 11 | No-show / cancellation logging | Log reason, apply cancellation fee if applicable, flag on invoice |
-| 17 | Progress tracking | Mood score (1–10) per session. Progress chart on client profile. Goal completion tracking. |
-| 18 | Audit log | Every insert/update/delete on key tables logged with old + new state |
-| CP | Client portal — payment view only | Token-based shareable link. Client sees: invoice list, status, amounts due. No session notes visible. |
+| 1 | Auth (email + password via NextAuth), multi-tenant signup with Razorpay subscription | Done |
+| 2 | Client management: add, edit, terminate, reactivate, duplicate detection, bulk import (up to 100) | Done |
+| 3 | Session logging and scheduling, cancel/no-show with fee | Done |
+| 4 | Session notes (custom fields) with ORS/SRS | Done |
+| 5 | Monthly batch invoices, pro-rata billing, INR and USD | Done |
+| 6 | Invoice email (HTML over Gmail SMTP), Test Mode | Done |
+| 7 | Payments ledger: receipts, FIFO allocation, write-offs, credit, refunds | Done |
+| 8 | Dashboard | Done |
 
-### Phase 3 — Calendaring & Session Planning *(Weeks 11–14)*
-*Goal: Replace any external calendar dependency. Plan sessions from within Aman.*
+### Phase 2 — Intelligence, payments, portal
 
-| # | Feature | Details |
+| # | Feature | Status |
 |---|---|---|
-| C1 | Calendar view | Monthly/weekly view of all sessions. Color-coded by status. |
-| C2 | Session scheduling | Create upcoming sessions from the calendar. Recurring session support (weekly, fortnightly). |
-| C3 | Upcoming sessions widget | Dashboard panel: next 7 days with quick-log action |
-| C4 | Session reminders | Email reminders to clients 24h before via Resend |
-| C5 | iCal export | Export as `.ics` for Google Calendar / Apple Calendar |
+| 9 | Progress charts, RCI/CSC flags, predicted progress, PDF export and email | Done |
+| 10 | Payment reminders (manual trigger) | Done; not scheduled as a cron yet |
+| 11 | Online payments (Razorpay Connect) | Built, awaiting Razorpay partner approval and testing |
+| 12 | AI note drafting | Not built |
+| 13 | Audit log | Table only |
+| 14 | Client portal (payment view) | Not built |
+
+### Phase 3 — Calendaring
+
+| # | Feature | Status |
+|---|---|---|
+| C1 | Calendar view (month/week) | Not built |
+| C2 | Recurring sessions | Done (in the Sessions page) |
+| C3 | Upcoming sessions view | Done (Sessions page default) |
+| C4 | Session reminders to clients | Not built |
+| C5 | iCal export | Not built |
 
 ---
 
@@ -306,33 +335,25 @@ This is the most critical flow. It must feel frictionless.
 |---|---|---|
 | 1 | Session status → Completed | Button on session card |
 | 2 | SOAP note editor opens | Auto-prompt if no note exists |
-| 3 | Counselor fills or AI-drafts note | Free type or 'Draft with AI' button *(Phase 2)* |
+| 3 | Counselor fills the note and ORS/SRS | Free type; AI drafting not built |
 | 4 | Note saved | Session shows green ✓ badge |
 | 5 | Session shows as 'Unbilled' | Orange badge until invoiced |
 | 6 | At month end: batch invoice | Select month → select clients → generate all invoices |
-| 7 | Review + send | Preview PDF → click Send → email goes via Resend |
+| 7 | Review + send | Preview → click Send → HTML email over Gmail SMTP |
 
-> **Design rule:** A session cannot be marked "Completed" without a note. An unbilled completed session shows a persistent orange badge until invoiced.
+> Completing a note marks the session billable. Unbilled completed sessions appear in the batch invoice list until invoiced.
 
 ### 6.2 Monthly Invoicing Workflow
 
-1. Navigate to **Invoicing → New Batch Invoice**
-2. Select billing month (defaults to previous month)
-3. System shows all clients with unbilled completed sessions in that month
-4. Counselor selects which clients to invoice (all or subset)
-5. System generates draft invoices with line items per session
-6. Counselor reviews each invoice; can add a manual line item or note
-7. Click **Generate & Send All** — PDFs created, emails sent via Resend
-8. Invoice status → `Sent`. Sessions linked to `invoice_id`.
+1. Go to **Invoices → New Batch**
+2. Deepen lists clients with unbilled completed sessions, with pending amounts per currency
+3. Counsellor selects clients and clicks **Generate Invoices** (status `draft`, shown as "Generated")
+4. Counsellor reviews (preview) and clicks **Send** per invoice: HTML email over Gmail SMTP, with opening balance, UPI details and QR, and a Pay online button if Razorpay is connected
+5. Invoice status → `sent`. Sessions linked to `invoice_id`. With Test Mode on, the email goes to the counsellor and the status stays `draft`
 
-### 6.3 Client Portal Access
+### 6.3 Client Portal Access *(not built)*
 
-1. Counselor generates a portal link for a client (**Settings → Client Portal**)
-2. Link contains a signed token (JWT, 30-day expiry)
-3. Client opens link in browser — no login required
-4. Client sees: invoice list, status (Paid / Partial / Overdue), amounts, payment date
-5. Client **cannot** see SOAP notes, session details, or other clients
-6. *(Phase 2)* Razorpay payment button on overdue invoices
+Planned: a token link where the client sees invoices, status and amounts, and never notes or sessions. The `portal_tokens` table exists; no routes or pages do. The only public client page today is `/portal/paid`.
 
 ### 6.4 Online Payment Workflow (Razorpay Connect)
 
@@ -349,45 +370,58 @@ Money flows client → counsellor's own Razorpay account → her bank. Deepen ne
 
 ## 7. API Route Reference
 
-All routes are Next.js App Router API routes under `/app/api/`. All endpoints require an authenticated session except `/api/portal/[token]`.
+All routes live under `src/app/api/`. Everything requires a logged-in session except routes excluded in `src/middleware.ts`: `/api/auth`, `/api/signup`, `/api/create-subscription`, `/api/admin` (checks `ADMIN_EMAILS` itself) and `/api/public/*` (each checks its own signature or secret).
 
 | Method | Route | Description |
 |---|---|---|
-| GET | `/api/clients` | List all clients (includes `isActiveThisMonth` MAC indicator) |
-| POST | `/api/clients` | Create client |
-| POST | `/api/clients/import` | Bulk import up to 100 clients per batch (CSV/XLSX mapped rows) |
-| GET | `/api/clients/[id]` | Get client + sessions + invoice summary |
-| PATCH | `/api/clients/[id]` | Update client |
-| GET | `/api/sessions` | List sessions (filter by client, month, status) |
-| POST | `/api/sessions` | Log a new session (with soft warning if >40 Monthly Active Clients) |
-| PATCH | `/api/sessions/[id]` | Update session status, fee, modality |
-| GET | `/api/sessions/[id]/note` | Get SOAP note for session |
-| POST | `/api/sessions/[id]/note` | Create / update SOAP note |
-| POST | `/api/notes/ai-draft` | Submit session summary → get AI SOAP draft *(Phase 2)* |
-| GET | `/api/invoices` | List invoices (filter by month, status, client) |
-| POST | `/api/invoices/batch` | Generate batch invoices for a month |
-| GET | `/api/invoices/[id]` | Get invoice + line items + payments |
-| POST | `/api/invoices/[id]/send` | Generate PDF + send email via Resend |
-| POST | `/api/invoices/[id]/receipt` | Send payment receipt email to client |
-| POST | `/api/invoices/remind` | Send overdue invoice reminder emails (manual or `CRON_SECRET`) |
-| PATCH | `/api/invoices/[id]` | Update status, notes, due date |
-| POST | `/api/invoices/[id]/void` | Void an invoice |
-| POST | `/api/payments` | Record a payment (FIFO across outstanding invoices) |
-| GET | `/api/payments/outstanding-summary` | Per-client outstanding balance summary |
-| GET | `/api/payments/connect` | Start Razorpay OAuth |
-| GET | `/api/payments/connect/callback` | OAuth return; stores encrypted tokens |
+| GET / POST | `/api/clients` | List (with `isActiveThisMonth`) / create clients |
+| GET / PATCH | `/api/clients/[id]` | Get / update a client (incl. terminate, reactivate) |
+| GET | `/api/clients/[id]/stats` | Session count, first and last session |
+| GET | `/api/clients/[id]/progress` | ORS/SRS series for charts |
+| GET | `/api/clients/[id]/predicted-progress` | Predicted trajectory |
+| POST | `/api/clients/[id]/progress/mail` | Email the progress chart PDF |
+| POST | `/api/clients/import` | Bulk import up to 100 clients |
+| GET / POST | `/api/sessions` | List / create sessions (soft warning above 40 monthly active clients) |
+| GET / PATCH / DELETE | `/api/sessions/[id]` | Session detail and updates |
+| GET / POST | `/api/sessions/[id]/note` | Session note |
+| GET / POST | `/api/fee-schemes` | List / create fee schemes |
+| PUT / DELETE | `/api/fee-schemes/[id]` | Update / delete a fee scheme |
+| GET | `/api/invoices` | List invoices |
+| GET | `/api/invoices/unbilled` | Unbilled sessions by client |
+| POST | `/api/invoices/batch` | Generate invoices |
+| GET | `/api/invoices/[id]/preview` | HTML preview |
+| POST | `/api/invoices/[id]/send` | Email the invoice |
+| POST | `/api/invoices/[id]/receipt` | Record a payment against this invoice, optionally email a receipt |
+| POST | `/api/invoices/[id]/void` | Void (refused if payments exist; settles any payment link first) |
+| POST | `/api/invoices/[id]/payment-link` | Create or return the pay-online link |
+| POST | `/api/invoices/remind` | Send overdue reminders (session, or `CRON_SECRET`) |
+| GET / POST | `/api/payments` | List payments / record a payment (FIFO) |
+| DELETE | `/api/payments/[id]` | Delete one allocation |
+| GET | `/api/payments/outstanding-summary` | Outstanding and received totals by currency |
+| GET | `/api/payments/connect`, `/api/payments/connect/callback` | Razorpay Connect OAuth |
 | GET / PATCH / DELETE | `/api/payments/connection` | Connection status, receipt preference, disconnect |
-| POST | `/api/invoices/[id]/payment-link` | Create or return the invoice's pay-online link |
+| GET | `/api/receipts` | List receipts |
+| DELETE | `/api/receipts/[id]` | Delete a receipt and its allocations |
+| GET | `/api/reports` | Practice reports |
+| GET | `/api/dashboard` | Dashboard stats |
+| GET / POST | `/api/settings` | Practice settings |
+| POST | `/api/settings/password` | Change password |
+| GET | `/api/settings/export` | Data export |
+| GET | `/api/settings/billing` | Deepen subscription status and history |
+| POST | `/api/settings/billing/cancel`, `/api/settings/billing/reactivate` | Cancel / reactivate the subscription |
+| POST | `/api/signup`, `/api/create-subscription` | **Public** — signup and subscription start |
+| POST | `/api/webhooks/razorpay` | Subscription webhook. **Currently unreachable**: middleware redirects it to `/login` |
 | POST | `/api/public/razorpay/webhook` | **Public** — `payment_link.paid`, signature-verified |
 | GET | `/api/public/razorpay/return` | **Public** — client returns after paying; re-checks the link |
 | GET | `/api/public/razorpay/reconcile` | **Public, `CRON_SECRET`** — daily backstop and token refresh |
-| GET / PATCH | `/api/admin/tenants` | Super-admin practice list (with `monthlyActiveClientCount`) and controls |
-| GET | `/api/dashboard` | Aggregated stats: revenue, unbilled, overdue |
-| GET | `/api/portal/[token]` | **Public** — client portal data (token validation, no auth) |
+| GET / PATCH | `/api/admin/tenants` | Platform admin: practices and controls (`ADMIN_EMAILS`) |
+| GET / POST | `/api/admin/promo-codes` | Platform admin: promo codes |
 
 ---
 
-## 8. Revised Project Plan
+## 8. Original Project Plan (April 2026, historical)
+
+Kept for reference. Current status is in section 5.
 
 ### Phase 1 — Core MVP
 
@@ -433,6 +467,12 @@ All secrets stored in Vercel environment variables. Never commit to repo.
 | `SMTP_PASS` | Gmail App Password (16-char) |
 | `SMTP_HOST` | `smtp.gmail.com` |
 | `SMTP_PORT` | `465` |
+| `RAZORPAY_WEBHOOK_SECRET` | Signature secret for the subscription webhook (if unset, the handler skips verification) |
+| `NEXT_PUBLIC_RAZORPAY_KEY_ID` | Public key for Razorpay Checkout at signup |
+| `RAZORPAY_PLAN_DEEPEN`, `RAZORPAY_PLAN_FOUNDING` | Subscription plan ids |
+| `RAZORPAY_FOUNDING_OFFER_ID`, `RAZORPAY_BETA_OFFER_ID` | Subscription offer ids |
+| `FOUNDING_PROMO_CODE`, `BETA_PROMO_CODE` | Signup promo codes |
+| `ADMIN_EMAILS` | Comma-separated emails allowed into `/admin` |
 | `RAZORPAY_KEY_ID` | Razorpay key for Deepen's own subscription billing |
 | `RAZORPAY_KEY_SECRET` | Razorpay secret for Deepen's own subscription billing |
 | `RAZORPAY_OAUTH_CLIENT_ID` | Partner OAuth app client id (counsellors' online payments) |
@@ -442,40 +482,36 @@ All secrets stored in Vercel environment variables. Never commit to repo.
 | `PAYMENT_TOKEN_ENCRYPTION_KEY` | 32 random bytes, base64; encrypts stored Razorpay tokens |
 | `CRON_SECRET` | Sent by Vercel Cron to `/api/public/razorpay/reconcile` |
 | `APP_URL` | Public base URL for OAuth and payment-link callbacks (defaults to `NEXTAUTH_URL`) |
-| `ANTHROPIC_API_KEY` | Claude API key for AI note drafting *(Phase 2)* |
-| `PORTAL_JWT_SECRET` | Secret for signing client portal tokens |
+| `RESEND_API_KEY` | Present in `.env.local` but unused by the code |
 
 ---
 
-## 10. Recommended Folder Structure
+## 10. Folder Structure
 
 ```
-aman/
+src/
+├── middleware.ts               # Auth gate; public-route allowlist
 ├── app/
-│   ├── (auth)/login/           # Login page
-│   ├── (dashboard)/            # Protected layout
-│   │   ├── page.tsx            # Dashboard
-│   │   ├── clients/            # Client list + detail
-│   │   ├── sessions/           # Session log + detail
-│   │   ├── invoices/           # Invoice list + batch
-│   │   └── settings/           # Counselor settings
-│   ├── api/
-│   │   ├── clients/
-│   │   ├── sessions/
-│   │   ├── invoices/
-│   │   ├── payments/
-│   │   ├── dashboard/
-│   │   └── portal/[token]/     # Public portal endpoint
-│   └── portal/[token]/         # Public portal UI (no layout)
-├── components/                 # Shared UI components
+│   ├── home, login, signup, terms, privacy, refunds, contact   # Public pages
+│   ├── portal/paid/            # Public: client thank-you after paying online
+│   ├── admin/                  # Platform admin
+│   ├── dashboard/              # Protected app
+│   │   ├── clients/ ([id], import)
+│   │   ├── sessions/  invoices/  payments/  fees/
+│   │   ├── reports/  inactive/  settings/
+│   └── api/                    # Route handlers (section 7)
+├── components/                 # App components + ui/ (shadcn)
 ├── lib/
-│   ├── db/                     # Drizzle schema + client
-│   ├── email/                  # React Email templates
-│   ├── pdf/                    # Invoice PDF generator
-│   ├── ai/                     # Claude API wrapper (Phase 2)
-│   └── utils/
-├── .env.local
-└── drizzle.config.ts
+│   ├── db/                     # Drizzle schema + clients (HTTP and pooled)
+│   ├── tenant.ts               # Tenant context, RLS wrapper, plan features, MAC counts
+│   ├── record-payment.ts       # Shared payment recording
+│   ├── receipt-email.ts        # Receipt email
+│   ├── razorpay-connect.ts     # Razorpay OAuth + API
+│   ├── payment-links.ts        # Payment link lifecycle and sync
+│   ├── secret-box.ts           # Token encryption
+│   ├── tz.ts  receipts.ts  credit.ts  riskFlags.ts  utils.ts
+│   └── copy/                   # UI copy
+drizzle/                        # Drizzle output; manual/ holds hand-applied SQL
 ```
 
 ---
@@ -485,15 +521,15 @@ aman/
 - **Speed over features** — ship Phase 1 in 5 weeks, get the counselor using it before building Phase 2
 - **Session → Note → Invoice is the golden path** — every UI decision should make this loop faster
 - **No-show and cancellations are first-class** — they affect billing and must be logged properly
-- **Never delete data** — use soft deletes (`is_active = false`) and the audit log
-- **Invoice emails go from the system** — use Resend with a verified custom domain for deliverability
+- **Never delete data** — use soft deletes (`is_active = false`); the audit log is not wired up yet
+- **Invoice emails go from the system** — currently Gmail SMTP from the practice name; a verified sending domain would help deliverability
 - **Client portal is read-only, token-gated** — no auth system for clients needed
 - **Monthly invoicing is the billing rhythm** — don't over-engineer per-session invoicing
 - **Mobile-responsive from day one** — the counselor may log sessions from a phone
 
 ---
 
-## 12. Open Questions for Counselor Before Dev Starts
+## 12. Open Questions for Counselor Before Dev Starts (April 2026, historical)
 
 | # | Question | Impacts |
 |---|---|---|
