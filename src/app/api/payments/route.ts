@@ -1,9 +1,8 @@
 import { db } from "@/lib/db";
-import { payments, invoices, receipts } from "@/lib/db/schema";
+import { payments } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
-import { desc, asc, eq, and, inArray } from "drizzle-orm";
-import { istTodayStr } from "@/lib/tz";
-import { nextReceiptNumber } from "@/lib/receipts";
+import { desc } from "drizzle-orm";
+import { recordPayment } from "@/lib/record-payment";
 import { getTenantContext, withTenantContext } from "@/lib/tenant";
 
 export async function GET() {
@@ -27,7 +26,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const { tenantId, planTier } = await getTenantContext();
+  const { tenantId } = await getTenantContext();
   return await withTenantContext(tenantId, async (tx) => {
     try {
       const {
@@ -39,142 +38,29 @@ export async function POST(req: Request) {
         referenceId,
         notes,
       } = await req.json();
-      let remainingPayment = parseFloat(amount);
+      const amountNum = parseFloat(amount);
 
-      if (isNaN(remainingPayment) || (remainingPayment <= 0 && method !== "refund")) {
+      if (isNaN(amountNum) || (amountNum <= 0 && method !== "refund")) {
         return new NextResponse("Invalid amount", { status: 400 });
       }
 
-      const payDate = paymentDate || istTodayStr();
-
-      // 0. Create the receipt (the client-facing payment event). Allocation rows
-      //    below all reference this receipt.
-      const rcptYear =
-        parseInt(payDate.slice(0, 4), 10) || new Date().getUTCFullYear();
-      const receiptNumber = await nextReceiptNumber(rcptYear);
-      const [receipt] = await tx
-        .insert(receipts)
-        .values({
-          tenantId: tenantId,
-          receiptNumber,
-          clientId,
-          amount: remainingPayment.toFixed(2),
-          currency,
-          paymentDate: payDate,
-          method,
-          referenceId,
-          notes,
-        })
-        .returning();
-
-      const paymentRecords = [];
-
-      // Only perform FIFO allocation for positive amounts that reduce debt (payments, write_offs, credits)
-      if (remainingPayment > 0) {
-        // 1. Fetch outstanding invoices of the SAME CURRENCY (FIFO)
-        const outstandingInvoices = await tx.query.invoices.findMany({
-          where: and(
-            eq(invoices.clientId, clientId),
-            eq(invoices.currency, currency),
-            inArray(invoices.status, ["draft", "sent", "partial", "overdue"]),
-          ),
-          orderBy: [asc(invoices.issuedDate), asc(invoices.createdAt)],
-        });
-
-      // 2. FIFO Allocation (only within the same currency)
-      for (const inv of outstandingInvoices) {
-        if (remainingPayment <= 0) break;
-
-        const total = parseFloat(inv.total);
-        const paid = parseFloat(inv.amountPaid || "0");
-        const owed = total - paid;
-
-        if (owed <= 0) continue;
-
-        const allocation = Math.min(remainingPayment, owed);
-        const newPaid = paid + allocation;
-        remainingPayment -= allocation;
-
-        // Update invoice
-        let status: "paid" | "partial" | "sent" | "overdue" | "draft" =
-          "partial";
-        if (newPaid >= total) {
-          status = "paid";
-        } else {
-          // preserve overdue/sent state if not fully paid
-          status = inv.status as any;
-          if (status === "draft") status = "partial";
-        }
-
-        await tx
-          .update(invoices)
-          .set({
-            amountPaid: newPaid.toFixed(2),
-            status,
-            updatedAt: new Date(),
-          })
-          .where(eq(invoices.id, inv.id));
-
-        // Prepare payment record (allocation of this receipt to the invoice)
-        paymentRecords.push({
-          tenantId,
-          receiptId: receipt.id,
-          clientId,
-          invoiceId: inv.id,
-          amount: allocation.toFixed(2),
-          paymentDate: payDate,
-          currency,
-          method,
-          referenceId,
-          notes: notes
-            ? `${notes} (Allocated to ${inv.invoiceNumber})`
-            : `Allocated to ${inv.invoiceNumber}`,
-        });
-      }
-
-      // 3. Handle leftover (Credit / Overpayment in that currency)
-      if (remainingPayment > 0) {
-        paymentRecords.push({
-          tenantId,
-          receiptId: receipt.id,
-          clientId,
-          invoiceId: null,
-          amount: remainingPayment.toFixed(2),
-          paymentDate: payDate,
-          currency,
-          method,
-          referenceId,
-          notes: notes
-            ? `${notes} (Excess ${currency} Credit)`
-            : `Excess ${currency} Credit`,
-        });
-      }
-      } else if (remainingPayment < 0 && method === "refund") {
-        paymentRecords.push({
-          tenantId,
-          receiptId: receipt.id,
-          clientId,
-          invoiceId: null,
-          amount: remainingPayment.toFixed(2),
-          paymentDate: payDate,
-          currency,
-          method,
-          referenceId,
-          notes: notes || `Refund`,
-        });
-      }
-
-      // 4. Batch insert payments
-      if (paymentRecords.length > 0) {
-        await tx.insert(payments).values(paymentRecords);
-      }
+      const result = await recordPayment(tx, {
+        tenantId,
+        clientId,
+        amount: amountNum,
+        currency,
+        paymentDate,
+        method,
+        referenceId,
+        notes,
+      });
 
       return NextResponse.json({
         success: true,
-        receiptNumber,
-        allocated: paymentRecords.length,
-        excess: remainingPayment > 0 ? remainingPayment.toFixed(2) : "0",
-        currency,
+        receiptNumber: result.receiptNumber,
+        allocated: result.allocations.length,
+        excess: result.excess.toFixed(2),
+        currency: result.currency,
       });
     } catch (error: any) {
       console.error(

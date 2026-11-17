@@ -5,6 +5,8 @@ import { NextResponse } from "next/server";
 import { eq, and, lt, lte, not, isNull, or } from "drizzle-orm";
 import { formatIST } from "@/lib/tz";
 import { getTenantContext, withTenantContext } from "@/lib/tenant";
+import { ensurePaymentLink } from "@/lib/payment-links";
+import { payOnlineButtonHtml } from "@/lib/pay-online-html";
 import { sql } from "drizzle-orm";
 
 const REMINDER_THROTTLE_DAYS = 7;
@@ -110,6 +112,7 @@ export async function POST(req: Request) {
 
         const currencySymbol = invoice.currency === "USD" ? "$" : "₹";
         const amountOwed = parseFloat(invoice.total || "0") - parseFloat((invoice as any).amountPaid || "0");
+        const payUrl = await ensurePaymentLink(tx, tenantId, invoice, practiceProfile.practiceName);
 
         const reminderBanner = `
           <div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:16px;margin-bottom:20px;">
@@ -156,6 +159,8 @@ export async function POST(req: Request) {
                 </tr>
               </table>
             </div>
+
+            ${payUrl ? payOnlineButtonHtml(payUrl, invoice.currency, amountOwed) : ""}
 
             ${practiceProfile.upiId ? `
             <div style="background-color: #ebf8ff; padding: 16px; border-radius: 8px; border: 1px solid #bee3f8; margin-bottom: 24px;">

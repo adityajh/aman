@@ -147,6 +147,11 @@ export const invoices = pgTable(
     lastReminderAt: timestamp("last_reminder_at", { withTimezone: true }),
     pdfUrl: text("pdf_url"),
     paymentLink: text("payment_link"),
+    // Razorpay payment link on the counsellor's own connected account.
+    // paymentLink holds its short URL; the amount is what the link was made
+    // for, so a stale link (after a part-payment) can be replaced.
+    paymentLinkId: text("payment_link_id"),
+    paymentLinkAmount: numeric("payment_link_amount", { precision: 10, scale: 2 }),
     notes: text("notes"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -360,6 +365,9 @@ export const receipts = pgTable(
       .notNull(),
     referenceId: text("reference_id"),
     notes: text("notes"),
+    // Razorpay payment id for payments that came in online. Unique per
+    // tenant so the same payment can never be recorded twice.
+    providerPaymentId: text("provider_payment_id"),
     // When a receipt PDF/email was sent to the client (null = not sent).
     sentAt: timestamp("sent_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -369,6 +377,36 @@ export const receipts = pgTable(
   (t) => ({
     clientIdx: index("idx_receipts_client").on(t.clientId),
     uniqueReceiptNum: uniqueIndex("idx_receipts_tenant_num").on(t.tenantId, t.receiptNumber),
+    uniqueProviderPayment: uniqueIndex("idx_receipts_tenant_provider_payment").on(t.tenantId, t.providerPaymentId),
+  })
+);
+
+// ─────────────────────────────────────────────
+// PAYMENT CONNECTIONS
+// ─────────────────────────────────────────────
+// A counsellor's own payment gateway account, connected by OAuth. Money goes
+// from the client straight to her account; Deepen only creates links and
+// records payments. Tokens are encrypted at rest (see lib/secret-box.ts).
+export const paymentConnections = pgTable(
+  "payment_connections",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
+    provider: text("provider").$type<"razorpay">().notNull().default("razorpay"),
+    accountId: text("account_id").notNull(),
+    mode: text("mode").$type<"test" | "live">().notNull(),
+    accessTokenEnc: text("access_token_enc").notNull(),
+    refreshTokenEnc: text("refresh_token_enc").notNull(),
+    tokenExpiresAt: timestamp("token_expires_at", { withTimezone: true }).notNull(),
+    status: text("status").$type<"active" | "revoked" | "error">().notNull().default("active"),
+    lastError: text("last_error"),
+    autoSendReceipts: boolean("auto_send_receipts").notNull().default(true),
+    connectedAt: timestamp("connected_at", { withTimezone: true }).notNull().default(sql`now()`),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    tenantProviderIdx: uniqueIndex("idx_payment_connections_tenant_provider").on(t.tenantId, t.provider),
+    accountIdx: index("idx_payment_connections_account").on(t.accountId),
   })
 );
 

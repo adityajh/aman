@@ -50,6 +50,33 @@ Aman makes batch billing effortless.
 
 ---
 
+## 💳 4a. Getting Paid Online
+Connect your own Razorpay account once, and every invoice gets a **Pay online** link. Clients pay by UPI, card or netbanking, the money goes straight to your bank, and Deepen records the payment for you.
+- Go to **Settings → Online payments** and click **Connect Razorpay**.
+- Sign in on Razorpay's page and approve access. No Razorpay account yet? You can create one there.
+- From then on, invoice and reminder emails show a **Pay ₹X online** button (INR invoices only).
+- To send a link yourself, open an invoice's **…** menu and choose **Copy payment link**, then paste it into WhatsApp or a message.
+- When a client pays, the invoice is marked paid and a receipt is emailed to them. You can switch off automatic receipts in Settings.
+- Razorpay charges its fee on each online payment. Your UPI details stay on the invoice for clients who prefer paying directly.
+- **Disconnect Razorpay** in Settings cancels any open links. Payments already recorded stay.
+
+## ✂️ 4b. Writing Off a Balance
+Sometimes you decide not to collect money a client owes: a waived missed session, a hardship discount, a small amount left over. A write-off clears it from what they owe without counting it as money received.
+1. Go to **Payments** and click **Record Payment / Adjustment**.
+2. Pick the client and the currency.
+3. Under **Method**, choose **Write-off (Discount)**.
+4. Enter the amount in **Amount Received** and set the date.
+5. Add a short reason in **Internal Notes** (only you see it), then **Save Entry**.
+
+Good to know:
+- It's applied to the oldest unpaid invoice first.
+- Keep it at or below what the client owes. Anything extra becomes credit on their account.
+- It shows in the client's ledger as "Adjustment · write off" and isn't counted in your received totals.
+- It gets a receipt number like a payment. Don't email that receipt to the client.
+- To undo it, delete it from the client's ledger.
+
+---
+
 ## 📊 5. Understanding Your Dashboard
 Your "Practice Overview" gives you a real-time pulse on your practice:
 - **Unbilled Sessions**: Work you've completed but haven't invoiced yet.

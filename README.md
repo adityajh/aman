@@ -11,7 +11,8 @@ Aman is a modern, lightweight practice management system designed for independen
 - **Clinical Note Editor**: Professional structured note editor (SOAP / Custom) with ORS & SRS rating scales (0–10) — set via precision sliders or typed directly to one decimal. Completing a note auto-marks the session as billable.
 - **Progress Charts**: Per-client ORS & SRS trend charts with RCI/CSC detection, colour-banded benchmarks, and regression trend projection.
 - **Invoicing Engine**: One-click batch generation of monthly invoices. Fully currency-aware — INR and USD clients are handled separately in batch totals and all display symbols.
-- **Payments Ledger**: Multi-currency payment recording with FIFO allocation across outstanding invoices.
+- **Payments Ledger**: Multi-currency payment recording with FIFO allocation across outstanding invoices. Write-offs, account credit and refunds are recorded as adjustments and kept out of received totals.
+- **Online Payments**: Counsellors connect their own Razorpay account. Invoices and reminders carry a Pay online link, paid links are recorded automatically with a receipt, and money goes straight to the counsellor. See [Online payments](#online-payments-razorpay-connect) for setup.
 - **Resend Integration**: Automated delivery of branded HTML invoices directly to client emails.
 
 ## 🛠 Tech Stack
@@ -56,6 +57,26 @@ SMTP_HOST=smtp.gmail.com
 SMTP_PORT=465
 ```
 
+### Online payments (Razorpay Connect)
+
+Counsellors connect their own Razorpay account from Settings → Online payments. Invoices and reminders then carry a Pay online link, and paid links are recorded automatically. Money goes straight to the counsellor's account; Deepen never holds it.
+
+```env
+RAZORPAY_OAUTH_CLIENT_ID=...          # Razorpay partner dashboard → OAuth app
+RAZORPAY_OAUTH_CLIENT_SECRET=...
+RAZORPAY_OAUTH_MODE=test              # "live" once the partner app is approved
+RAZORPAY_CONNECT_WEBHOOK_SECRET=...   # secret on the partner app's webhook
+PAYMENT_TOKEN_ENCRYPTION_KEY=...      # node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+CRON_SECRET=...                       # Vercel Cron sends this to the daily check
+APP_URL=https://your-domain           # optional, defaults to NEXTAUTH_URL
+```
+
+On the Razorpay partner app, set:
+- Redirect URL: `<APP_URL>/api/payments/connect/callback`
+- Webhook: `<APP_URL>/api/public/razorpay/webhook`, event `payment_link.paid`
+
+Schema: run `drizzle/manual/2026-11-razorpay-connect.sql` once. A daily cron (`vercel.json`) records any payment a webhook missed and refreshes tokens. Without these variables, the Settings card shows that online payments aren't switched on, and everything else works as before.
+
 ### 4. Database Setup
 
 ```bash
@@ -75,6 +96,7 @@ npm run dev
 - [x] **Phase 2**: UX Hardening (Multi-currency, session cancellation, duplicate client detection, reactivation flow, invoicing integrity)
 - [ ] **Phase 3**: AI Assistance (SOAP Note drafting via Claude API)
 - [ ] **Phase 4**: Client Portal (Token-gated payment history view)
+- [ ] **Online payments** (Razorpay Connect): built, awaiting Razorpay partner approval and end-to-end testing
 - [ ] **Phase 5**: Calendar View (Scheduling, recurring sessions, reminders)
 
 ## 📄 License

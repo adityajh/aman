@@ -157,7 +157,9 @@ All tables use UUID primary keys and include `created_at` / `updated_at` timesta
 | `status` | TEXT | `draft \| sent \| paid \| partial \| overdue \| void` |
 | `sent_at` | TIMESTAMPTZ | When emailed to client |
 | `pdf_url` | TEXT | Stored invoice PDF URL |
-| `payment_link` | TEXT | Razorpay payment link *(Phase 2)* |
+| `payment_link` | TEXT | Short URL of the open Razorpay payment link; `null` once the link is paid, cancelled or expired |
+| `payment_link_id` | TEXT | Razorpay link id (`plink_…`), kept for history |
+| `payment_link_amount` | NUMERIC(10,2) | Amount the link was made for; a stale link is replaced when this differs from what's owed |
 | `notes` | TEXT | Optional counselor note on invoice |
 | `created_at` | TIMESTAMPTZ | |
 
@@ -181,10 +183,30 @@ All tables use UUID primary keys and include `created_at` / `updated_at` timesta
 | `invoice_id` | UUID FK | References `invoices(id)` |
 | `amount` | NUMERIC(10,2) | Amount received |
 | `payment_date` | DATE | |
-| `method` | TEXT | `cash \| upi \| bank_transfer \| card \| online \| other` |
-| `reference_id` | TEXT | UPI ref, cheque no., Razorpay ID |
+| `method` | TEXT | `cash \| upi \| bank_transfer \| card \| online \| write_off \| credit \| refund \| other` (`write_off`, `credit`, `refund` are adjustments, excluded from received totals) |
+| `reference_id` | TEXT | UPI ref, cheque no., Razorpay payment id |
 | `notes` | TEXT | Optional |
 | `created_at` | TIMESTAMPTZ | |
+
+Each payment event is a numbered row in `receipts` (client-facing); `payments` rows are its allocations across invoices. Online payments set `receipts.provider_payment_id` to the Razorpay payment id, unique per tenant, so a payment can never be recorded twice.
+
+### 4.6a `payment_connections`
+
+A counsellor's own Razorpay account, connected by OAuth. One row per tenant and provider. RLS tenant isolation.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | UUID PK | |
+| `tenant_id` | UUID FK | References `tenants(id)` |
+| `provider` | TEXT | `razorpay` |
+| `account_id` | TEXT | Razorpay account id (`acc_…`) |
+| `mode` | TEXT | `test \| live` |
+| `access_token_enc` / `refresh_token_enc` | TEXT | AES-256-GCM encrypted (`lib/secret-box.ts`) |
+| `token_expires_at` | TIMESTAMPTZ | Refreshed when under 7 days remain |
+| `status` | TEXT | `active \| revoked \| error` |
+| `last_error` | TEXT | Shown in Settings when access is lost |
+| `auto_send_receipts` | BOOLEAN | Default `true` |
+| `connected_at`, `updated_at` | TIMESTAMPTZ | |
 
 ### 4.7 `portal_tokens` *(Phase 2)*
 
@@ -306,6 +328,17 @@ This is the most critical flow. It must feel frictionless.
 5. Client **cannot** see SOAP notes, session details, or other clients
 6. *(Phase 2)* Razorpay payment button on overdue invoices
 
+### 6.4 Online Payment Workflow (Razorpay Connect)
+
+Money flows client → counsellor's own Razorpay account → her bank. Deepen never holds funds; it creates links and records payments.
+
+1. Counsellor clicks **Settings → Online payments → Connect Razorpay**, signs in on Razorpay and approves access. Deepen stores her account id and encrypted tokens.
+2. When an INR invoice or reminder is sent, Deepen creates (or reuses) a payment link on her account for the amount still owed. The link carries `deepen_tenant_id` and `deepen_invoice_id` in its notes. A link for a stale amount is cancelled and replaced.
+3. Client pays by UPI, card or netbanking and lands on `/portal/paid`.
+4. Deepen records the payment only after fetching the link from Razorpay and seeing it captured. Three triggers run the same check: the `payment_link.paid` webhook, the client's return redirect, and the daily cron.
+5. The payment is recorded through `lib/record-payment.ts` (same path as manual payments), applied to that invoice first, with method `online`. A receipt email goes out if enabled.
+6. Voiding an invoice cancels its link (or refuses the void if the client already paid). The daily check closes links on invoices settled another way. Disconnecting cancels all open links.
+
 ---
 
 ## 7. API Route Reference
@@ -330,7 +363,14 @@ All routes are Next.js App Router API routes under `/app/api/`. All endpoints re
 | POST | `/api/invoices/[id]/send` | Generate PDF + send email via Resend |
 | PATCH | `/api/invoices/[id]` | Update status, notes, due date |
 | POST | `/api/invoices/[id]/void` | Void an invoice |
-| POST | `/api/payments` | Record a payment against an invoice |
+| POST | `/api/payments` | Record a payment (FIFO across outstanding invoices) |
+| GET | `/api/payments/connect` | Start Razorpay OAuth |
+| GET | `/api/payments/connect/callback` | OAuth return; stores encrypted tokens |
+| GET / PATCH / DELETE | `/api/payments/connection` | Connection status, receipt preference, disconnect |
+| POST | `/api/invoices/[id]/payment-link` | Create or return the invoice's pay-online link |
+| POST | `/api/public/razorpay/webhook` | **Public** — `payment_link.paid`, signature-verified |
+| GET | `/api/public/razorpay/return` | **Public** — client returns after paying; re-checks the link |
+| GET | `/api/public/razorpay/reconcile` | **Public, `CRON_SECRET`** — daily backstop and token refresh |
 | GET | `/api/dashboard` | Aggregated stats: revenue, unbilled, overdue |
 | GET | `/api/portal/[token]` | **Public** — client portal data (token validation, no auth) |
 
@@ -382,8 +422,15 @@ All secrets stored in Vercel environment variables. Never commit to repo.
 | `SMTP_PASS` | Gmail App Password (16-char) |
 | `SMTP_HOST` | `smtp.gmail.com` |
 | `SMTP_PORT` | `465` |
-| `RAZORPAY_KEY_ID` | Razorpay public key *(Phase 2)* |
-| `RAZORPAY_KEY_SECRET` | Razorpay secret *(Phase 2)* |
+| `RAZORPAY_KEY_ID` | Razorpay key for Deepen's own subscription billing |
+| `RAZORPAY_KEY_SECRET` | Razorpay secret for Deepen's own subscription billing |
+| `RAZORPAY_OAUTH_CLIENT_ID` | Partner OAuth app client id (counsellors' online payments) |
+| `RAZORPAY_OAUTH_CLIENT_SECRET` | Partner OAuth app client secret |
+| `RAZORPAY_OAUTH_MODE` | `test` or `live` |
+| `RAZORPAY_CONNECT_WEBHOOK_SECRET` | Signing secret for the partner app webhook |
+| `PAYMENT_TOKEN_ENCRYPTION_KEY` | 32 random bytes, base64; encrypts stored Razorpay tokens |
+| `CRON_SECRET` | Sent by Vercel Cron to `/api/public/razorpay/reconcile` |
+| `APP_URL` | Public base URL for OAuth and payment-link callbacks (defaults to `NEXTAUTH_URL`) |
 | `ANTHROPIC_API_KEY` | Claude API key for AI note drafting *(Phase 2)* |
 | `PORTAL_JWT_SECRET` | Secret for signing client portal tokens |
 

@@ -5,6 +5,8 @@ import { NextResponse } from "next/server";
 import { eq, and, lt, lte, not } from "drizzle-orm";
 import { formatIST } from "@/lib/tz";
 import { getTenantContext, withTenantContext } from "@/lib/tenant";
+import { ensurePaymentLink } from "@/lib/payment-links";
+import { payOnlineButtonHtml } from "@/lib/pay-online-html";
 
 export async function POST(
   req: Request,
@@ -82,6 +84,9 @@ export async function POST(
       const totalPrevReceived = previousReceipts.reduce((sum: number, rec: any) => sum + parseFloat(rec.amount), 0);
       const openingBalance = totalPrevInvoiced - totalPrevReceived;
       const totalOutstanding = openingBalance + parseFloat(invoice.total);
+
+      // Pay-online link on the counsellor's own Razorpay account (if connected).
+      const payUrl = await ensurePaymentLink(tx, tenantId, invoice, practiceProfile.practiceName);
 
       // Configure Nodemailer transporter (Gmail SMTP)
       const transporter = nodemailer.createTransport({
@@ -198,6 +203,7 @@ export async function POST(
 
             <div style="background-color: #ebf8ff; padding: 20px; border-radius: 8px; border: 1px solid #bee3f8; margin-bottom: 32px;">
               <h3 style="margin: 0 0 12px; font-size: 13px; color: #2c5282; text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em;">Payment Information</h3>
+              ${payUrl ? payOnlineButtonHtml(payUrl, invoice.currency, Math.max(0, parseFloat(invoice.total) - parseFloat(invoice.amountPaid || "0"))) : ""}
               <p style="margin: 0; font-size: 14px; color: #2d3748; line-height: 1.8;">
                 <strong>Bank:</strong> HSBC<br>
                 <strong>Branch:</strong> Noida, Sector - 18<br>

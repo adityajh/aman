@@ -2,6 +2,43 @@
 
 All notable changes to the Aman project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- **Online Payments via Razorpay Connect**: Counsellors can connect their own Razorpay account from **Settings → Online payments** (OAuth: she signs in on Razorpay and approves access; Deepen never sees her password). Money goes from the client straight to her account. Deepen never holds funds.
+  - **Pay online button** in invoice and payment-reminder emails for INR invoices, for the amount still owed. UPI details stay on the invoice for clients who prefer paying directly.
+  - **Copy payment link** in each invoice's "…" menu, for sharing over WhatsApp or SMS.
+  - **Automatic recording**: a paid link is recorded as an `online` payment with a receipt, allocated to that invoice first. A payment is only recorded after Deepen re-fetches the link from Razorpay and sees it captured. Three triggers feed the same check: the `payment_link.paid` webhook, the client's return from the payment page, and a daily check.
+  - **Automatic receipt email** when a client pays online (on by default, switchable in Settings).
+  - **Client thank-you page** at `/portal/paid`.
+  - **Daily check** (Vercel Cron, 08:00 IST, `GET /api/public/razorpay/reconcile`): records payments a webhook missed, cancels open links on invoices settled or voided another way, and refreshes Razorpay tokens before they expire.
+  - **Disconnect** cancels all open links first; payments already recorded stay.
+- **New routes**: `GET /api/payments/connect`, `GET /api/payments/connect/callback`, `GET|PATCH|DELETE /api/payments/connection`, `POST /api/invoices/[id]/payment-link`, `POST /api/public/razorpay/webhook`, `GET /api/public/razorpay/return`, `GET /api/public/razorpay/reconcile`.
+
+### Changed
+- **Shared payment recording**: the receipt-and-FIFO-allocation logic moved out of `POST /api/payments` into `lib/record-payment.ts`, used by both manual and online payments. Manual behaviour is unchanged, except the success toast now counts only invoices the payment was applied to (excess credit is no longer counted as an invoice).
+- **Shared receipt email**: the receipt email moved out of `POST /api/invoices/[id]/receipt` into `lib/receipt-email.ts`. Same email, same Test Mode behaviour.
+- **Voiding an invoice with a payment link**: Deepen checks the link first. If the client already paid online, the payment is recorded and the void is refused; otherwise the link is cancelled.
+- **Middleware**: `/api/public/*` is reachable without login. Each route there checks its own signature or secret. The thank-you page sits under the existing public `/portal` prefix.
+
+### Security
+- Razorpay access and refresh tokens are encrypted at rest (AES-256-GCM, `lib/secret-box.ts`).
+- Webhooks without a valid signature are always rejected (no "skip if secret missing" fallback).
+- Each Razorpay payment id can be recorded only once per practice (unique index on `receipts`).
+
+### Database
+- New table `payment_connections` (RLS tenant isolation, added to `enable_rls.js`).
+- New columns: `invoices.payment_link_id`, `invoices.payment_link_amount`, `receipts.provider_payment_id` (+ unique index).
+- Additive only. Apply `drizzle/manual/2026-11-razorpay-connect.sql` once before deploying.
+
+### Configuration
+- New env vars: `RAZORPAY_OAUTH_CLIENT_ID`, `RAZORPAY_OAUTH_CLIENT_SECRET`, `RAZORPAY_OAUTH_MODE`, `RAZORPAY_CONNECT_WEBHOOK_SECRET`, `PAYMENT_TOKEN_ENCRYPTION_KEY`, `CRON_SECRET`, optional `APP_URL`. Without them the Settings card says online payments aren't switched on and nothing else changes.
+- New `vercel.json` with the daily cron.
+
+### Known issues (found during this work, not yet fixed)
+- **Hardcoded bank details**: `POST /api/invoices/[id]/send` prints one specific HSBC account (Noida branch) in the Payment Information block of every practice's invoice email.
+- **Subscription webhook unreachable**: the middleware matcher doesn't exclude `/api/webhooks/*`, so Razorpay's subscription webhook is redirected to `/login`. The handler also skips signature verification when `RAZORPAY_WEBHOOK_SECRET` is unset.
+
 ## [5.0.7] - 2026-10-28
 
 ### Changed

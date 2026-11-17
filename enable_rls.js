@@ -4,7 +4,7 @@ const sql = neon(process.env.DATABASE_URL);
 
 const tables = [
   "practice_settings", "clients", "sessions", "session_notes", "invoices", 
-  "invoice_line_items", "payments", "receipts", "portal_tokens", "fee_schemes"
+  "invoice_line_items", "payments", "receipts", "portal_tokens", "fee_schemes", "payment_connections"
 ];
 
 async function main() {

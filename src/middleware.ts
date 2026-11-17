@@ -53,8 +53,9 @@ export const config = {
      * - /portal (client facing routes)
      * - /api/auth (NextAuth endpoints)
      * - /api/signup (Registration endpoint)
+     * - /api/public/* (Razorpay webhook, client return, cron: each checks its own signature or secret)
      * - Static files (_next, favicons, etc.)
      */
-    "/((?!login|signup|portal|api/auth|api/signup|api/create-subscription|api/admin|home|terms|privacy|refunds|contact|_next/static|_next/image|favicon.ico).*)",
+    "/((?!login|signup|portal|api/auth|api/signup|api/create-subscription|api/admin|api/public/|home|terms|privacy|refunds|contact|_next/static|_next/image|favicon.ico).*)",
   ],
 };

@@ -36,7 +36,8 @@ import {
   Wallet,
   TrendingUp,
   Hourglass,
-  FileX
+  FileX,
+  Link2
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -89,12 +90,37 @@ function RowActions({
   invoice,
   onPreview,
   onVoid,
+  onlinePayments,
 }: {
   invoice: any;
   onPreview: () => void;
   onVoid: () => void;
+  onlinePayments: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const [copying, setCopying] = useState(false);
+  const canPayOnline =
+    onlinePayments &&
+    invoice.currency === "INR" &&
+    ["draft", "sent", "partial", "overdue"].includes(invoice.status);
+  const copyPaymentLink = async () => {
+    setCopying(true);
+    try {
+      const res = await fetch(`/api/invoices/${invoice.id}/payment-link`, { method: "POST" });
+      if (!res.ok) {
+        toast.error((await res.text()) || "Couldn't create a payment link.");
+        return;
+      }
+      const { url } = await res.json();
+      await navigator.clipboard.writeText(url);
+      toast.success("Payment link copied. Paste it into a message to your client.");
+      close();
+    } catch {
+      toast.error("Couldn't copy the payment link.");
+    } finally {
+      setCopying(false);
+    }
+  };
   const router = useRouter();
   const close = () => setOpen(false);
   const canVoid = invoice.status !== "paid" && invoice.status !== "void" && parseFloat(invoice.amountPaid || "0") === 0;
@@ -108,10 +134,16 @@ function RowActions({
           </Button>
         }
       />
-      <PopoverContent align="end" className="w-44 p-1 gap-0">
+      <PopoverContent align="end" className="w-52 p-1 gap-0">
         <button className={item} onClick={() => { onPreview(); close(); }}>
           <Eye className="h-4 w-4 text-slate-400" /> View
         </button>
+        {canPayOnline && (
+          <button className={item} onClick={copyPaymentLink} disabled={copying}>
+            {copying ? <Loader2 className="h-4 w-4 animate-spin text-slate-400" /> : <Link2 className="h-4 w-4 text-teal-action" />}
+            Copy payment link
+          </button>
+        )}
         <button className={item} onClick={() => { router.push('/dashboard/payments'); close(); }}>
           <Wallet className="h-4 w-4 text-emerald-500" /> Open Ledger
         </button>
@@ -137,6 +169,15 @@ function InvoicesPageInner() {
   const [open, setOpen] = useState(false);
   const [previewId, setPreviewId] = useState<string | null>(null);
 
+
+  // Whether the practice has Razorpay connected (shows "Copy payment link").
+  const [onlinePayments, setOnlinePayments] = useState(false);
+  useEffect(() => {
+    fetch("/api/payments/connection")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((c) => setOnlinePayments(Boolean(c?.connected)))
+      .catch(() => {});
+  }, []);
 
   // Void-invoice dialog state.
   const [voidInvoice, setVoidInvoice] = useState<any | null>(null);
@@ -659,6 +700,7 @@ function InvoicesPageInner() {
                           onPreview={() => setPreviewId(invoice.id)}
                           
                           onVoid={() => setVoidInvoice(invoice)}
+                          onlinePayments={onlinePayments}
                         />
                       </div>
                     </TableCell>

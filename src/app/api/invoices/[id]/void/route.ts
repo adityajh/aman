@@ -1,8 +1,9 @@
 import { db } from "@/lib/db";
 import { invoices, invoiceLineItems, sessions } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { getTenantContext, withTenantContext } from "@/lib/tenant";
+import { closePaymentLinkForVoid } from "@/lib/payment-links";
 
 // POST /api/invoices/[id]/void
 //
@@ -25,6 +26,30 @@ export async function POST(
 ) {
   const { id } = await params;
   const { tenantId, planTier } = await getTenantContext();
+
+  // If this invoice has an online payment link, settle it first: record a
+  // payment that came in, or cancel the link so the client can't pay a void bill.
+  const [linked] = await db
+    .select({ id: invoices.id, paymentLinkId: invoices.paymentLinkId })
+    .from(invoices)
+    .where(and(eq(invoices.tenantId, tenantId), eq(invoices.id, id)));
+  if (linked?.paymentLinkId) {
+    try {
+      if (await closePaymentLinkForVoid(tenantId, linked)) {
+        return new NextResponse(
+          "The client has already paid this invoice online. The payment is now recorded, so it can't be voided.",
+          { status: 400 },
+        );
+      }
+    } catch (e) {
+      console.error("[void] closing payment link failed", e);
+      return new NextResponse(
+        "Couldn't reach Razorpay to cancel this invoice's payment link. Try again in a minute.",
+        { status: 502 },
+      );
+    }
+  }
+
   return await withTenantContext(tenantId, async (tx) => {
     try {
       const invoice = await tx.query.invoices.findFirst({

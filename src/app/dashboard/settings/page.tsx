@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Save, Loader2, User, Building, MapPin, Phone, Mail, Quote, Activity, Lock, CreditCard, Download, Bell } from "lucide-react";
 import { formatIST } from "@/lib/tz";
 import { BillingSettings } from "@/components/billing-settings";
+import { OnlinePaymentsSettings } from "@/components/online-payments-settings";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -548,6 +549,10 @@ export default function SettingsPage() {
           </Button>
         </div>
       </form>
+
+      <div className="space-y-6 pt-8 border-t border-slate-200">
+        <OnlinePaymentsSettings />
+      </div>
 
       <form onSubmit={handlePasswordSubmit} className="space-y-6 pt-8 border-t border-slate-200">
         <Card>
