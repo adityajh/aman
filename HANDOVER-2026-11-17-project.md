@@ -19,20 +19,24 @@ Read this whole note before touching anything. Then read, in order:
 - **Test write paths** with a throwaway client and Settings → Test Mode (`practice_settings.email_override`), which redirects client emails to the counsellor.
 - **Neon access.** The database host is `ep-proud-wildflower-amwa5kz2.c-5.us-east-1.aws.neon.tech` (AWS us-east-1). It is **not** in the Neon organisation the Neon MCP connector can see ("Lets Enterprise"), so Neon tools (branches, snapshots, password reset) don't work on it. It is probably a Vercel-managed Neon database; Adi was told to check Vercel → aman project → Storage. You can still reach it via the connection string in `.env.local`.
 - **Credential exposure, not yet acted on.** The previous session accidentally printed the full `DATABASE_URL`, password included, into its tool log. Adi was advised to reset the `neondb_owner` password and update `.env.local` and Vercel. Assume this has not been done; remind him once.
-- **Deploys.** Pushing a branch makes Vercel build a preview, and previews use the production database. Do not push a branch whose code expects a schema change that hasn't been applied.
+- **Deploys.** Pushing a branch makes Vercel build a preview, and previews use the production database. Do not push a branch whose code expects a schema change that hasn't been applied. For the payments branch that matters a lot: Drizzle selects every column it knows about, so before the SQL is applied every `invoices` or `receipts` query on that preview fails (Invoices and Payments pages, sending, reminders).
 - **Git.** Commit or push only when Adi asks. One branch per concern. End commit messages with the `Co-Authored-By` line in use on this repo.
 
 ---
 
 ## 2. Branches
 
-Nothing below is pushed or merged. `main` is at `69b87c8`.
+None of these branches is pushed or merged yet. `main` is at `59d7d52` (see "Also on main" below), and each branch has had `main` merged into it, with no rebase, so the commit IDs below are stable.
 
 | Branch | Commits on top of `main` | What it holds | Can merge? |
 |---|---|---|---|
-| `feat/razorpay-connect-payment-links` | `3c628f8`, `1928bba`, `78bf0de` | Online payments feature (section 3) plus doc updates (CHANGELOG, README, usage guide, architecture doc). `1928bba` is a docs commit made under Adi's name by someone other than the previous agent | **No.** Needs the schema change and Razorpay setup first |
-| `docs/sync-project-docs` | `f302feb` | Fixes to `PROJECT-INSTRUCTIONS.md`, `business/README.md`, `drizzle/NOTE-0009-consent.md`, `NOTE-FOR-VIJAY.md` | Yes, any time |
-| `docs/client-diary-scope` | `f92cdb7` | Client diary research, scope and design prompt (section 4) | Yes, any time |
+| `feat/razorpay-connect-payment-links` | `3c628f8`, `1928bba`, `78bf0de`, merge `9a7141c` | Online payments feature (section 3) plus doc updates (CHANGELOG, README, usage guide, architecture doc). `1928bba` is a docs commit made under Adi's name by someone other than the previous agent; two lines of its `usage_guide.md` edits are inaccurate (see the reply file) | **No.** Needs the schema change and Razorpay setup first |
+| `docs/sync-project-docs` | `f302feb`, `06a7132`, merge `0e2e89b`, plus the commit adding the reply file | Fixes to `PROJECT-INSTRUCTIONS.md`, `business/README.md`, `drizzle/NOTE-0009-consent.md`, `NOTE-FOR-VIJAY.md`; this handover note; the reply to the cloud agent | Yes, any time |
+| `docs/client-diary-scope` | `f92cdb7`, merge `fcfa920` | Client diary research, scope and design prompt (section 4) | Yes, any time |
+
+**Also on `main`:** `59d7d52`, by the cloud agent working from GitHub. It fixes billing, cancel/reactivate and the dashboard lockout, which read whichever practice Postgres listed first instead of the signed-in one (CHANGELOG 5.0.8). Its note is `NOTE-FOR-PREVIOUS-AGENT-2026-11-17.md` on `claude/compassionate-fermat-98iytt`. The reply is `REPLY-TO-NOTE-FOR-PREVIOUS-AGENT-2026-11-17.md` on `docs/sync-project-docs`.
+
+**CHANGELOG numbering:** online payments is `[Unreleased]`. 5.0.8 is the billing fix and 5.0.7 is monthly active clients, as on `main`. The 11 Oct bulk import is logged as `[Unversioned]`.
 
 The README and architecture doc on the payments branch were brought in line with the whole codebase, not just payments. They reach `main` when that branch merges. Adi chose that over a separate docs branch.
 
@@ -133,6 +137,8 @@ Adi said "no" when offered fixes. Raise them; don't fix them uninvited.
 - **Writing rules** from the brand and business docs: no exclamation marks, no em-dashes in business docs, "counsellor", and "flag" rather than "alert".
 
 ---
+
+**Coordination:** the cloud agent plans to fix item 1 next, with per-practice bank fields. The payments branch also edits that invoice email (the Pay online line sits just above the bank details). Whoever merges second resolves one small conflict. Details are in the reply file, section 4.
 
 ## 8. Suggested next steps
 
