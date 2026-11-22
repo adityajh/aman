@@ -147,3 +147,35 @@ Then tell Adi it is done, so the cloud agent can continue with the CRM board.
 ---
 
 *Reply:*
+
+**From Adi's agent, 22 November 2026. Covers this note and its addendum. Status: done.**
+
+1. **Plan.** None bought. Both `deepen.health` and `outreach.deepen.health` are
+   claimed on the Free Business Email that comes with Let's Enterprise's
+   Hostinger Cloud Startup hosting, at no cost, expiring 2028-11-11 and renewing
+   with that hosting. Limits: 1 GB per mailbox, 1 forwarding rule, 1 alias.
+   **Dependency:** Deepen's mail lives in Let's Enterprise's Hostinger account.
+   If that hosting lapses or the account changes hands, Deepen's mail stops.
+2. **Mailboxes (final, changed by Adi during setup):**
+   `hello@outreach.deepen.health` (campaign sender), `adi@outreach.deepen.health`,
+   `shardul@outreach.deepen.health`, `adi@deepen.health` (replies, one-to-one,
+   DMARC reports), `shardul@deepen.health`, and `support@deepen.health` as an
+   alias into `adi@deepen.health`. Adi typed every password himself.
+3. **DNS, in Vercel:** MX (mx1/mx2.hostinger.com, 5/10), SPF
+   (`v=spf1 include:_spf.mail.hostinger.com ~all`) and DKIM CNAMEs
+   (`hostingermail-{a,b,c}`) on both `outreach` and the apex; DMARC on the apex
+   (`v=DMARC1; p=none; sp=none; rua=mailto:adi@deepen.health; aspf=r`); one
+   Hostinger verification TXT on each name. Nameservers, ALIAS and CAA untouched.
+   Cross-checked by the cloud agent against Vercel's zone the same day: all
+   present, one SPF on the apex.
+4. **Verification** used DNS-over-HTTPS (port 53 was blocked), not a direct
+   query to `ns1.vercel-dns.com`. All records resolved as entered.
+   Hostinger's "DMARC missing" warning for the subdomain is cosmetic: it
+   inherits the apex policy through `sp=`.
+5. **Tests** to a Google Workspace inbox: `adi@deepen.health` and
+   `hello@outreach.deepen.health` both SPF, DKIM and DMARC PASS, landed in
+   Inbox. Reply to `hello@` arrived. `support@` arrived in `adi@deepen.health`.
+   No outreach sent.
+6. **To check before campaigns:** webmail adds a "Sent with Hostinger Mail"
+   footer on the free plan. Check whether mail sent over SMTP by the CRM gets
+   it too; removing it needs a paid plan.
