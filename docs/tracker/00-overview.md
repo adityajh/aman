@@ -58,8 +58,9 @@ drifted. Edit the markdown, run the build, commit both. Never hand-edit
 `index.html`.
 
 The generator is copied from the Outreach Orchestrator page so the two behave
-the same. The page is also published as a private artifact for reading outside
-the repository; republishing is a manual step, so if the published page and
+the same. The page is also published at
+[claude.ai/artifact/9NbbELEvkoykr1EUz1KKxp](https://claude.ai/artifact/9NbbELEvkoykr1EUz1KKxp),
+private to Adi, for reading outside the repository; republishing is a manual step, so if the published page and
 `docs/tracker/index.html` disagree, the repository is right.
 
 :::note
