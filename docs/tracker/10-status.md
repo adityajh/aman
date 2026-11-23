@@ -7,8 +7,8 @@ production database that day; deploy and settings figures from Vercel.
 
 | | |
 |---|---|
-| `main` | `33c2bf3`, CHANGELOG 5.0.9 (per-practice bank details) |
-| Last production deploy | [[done]] `33c2bf3`, ready, 17 Nov 2026 |
+| Latest app release | CHANGELOG 5.0.9, per-practice bank details (`33c2bf3`, 17 Nov 2026) |
+| Production deploys | [[done]] every push to `main` since has built and gone live |
 | Runtime errors | One cluster: 35 "terminating connection" errors since July. Each log entry prints the full database URL, password included (see Backlog) |
 | Database password | [[blocked]] exposed, not yet reset. `DATABASE_URL` in Vercel unchanged since April |
 | Row-level security | [[done]] on and enforced on all 10 clinical and money tables |
