@@ -3,6 +3,12 @@
 Most recent first. Product changes are on the **Changelog** tab; this tab adds the operational events around them (accounts, DNS, infrastructure)
 that never reach that file.
 
+## 24 November 2026
+
+- **Changelog tab** added, rendered from `CHANGELOG.md` itself; the generator gained one level of nested bullets to carry it. This log became the Ops log.
+- **Documents tab** added: every document in the repository, what it is for, and whether it can be trusted.
+- **Archived** four one-off notes to `docs/archive/` (the 17 Nov handover, the two notes between agents, the note for Vijay). `README.md` and `aman_architecture.md` were left in place, because their rewrites wait on the payments branch.
+
 ## 23 November 2026
 
 - This page created, generated from `docs/tracker/` by a copy of the Outreach Orchestrator's generator.
@@ -23,4 +29,4 @@ that never reach that file.
 ## Earlier
 
 See `CHANGELOG.md`, from 1.0.0 on 5 Apr 2026 to 5.0.7 on 28 Oct 2026, and the
-handover of 17 Nov 2026 (`HANDOVER-2026-11-17-project.md`).
+handover of 17 Nov 2026 (`docs/archive/HANDOVER-2026-11-17-project.md`).

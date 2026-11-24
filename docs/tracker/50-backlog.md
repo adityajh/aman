@@ -42,6 +42,7 @@ being done or by being decided against, not by going quiet.
 |---|---|
 | `07-operating-plan.md` section 3.2 still rules out cold outreach | [[todo]] |
 | `usage_guide.md`: reminders are not automatic; invoices are emails, not PDFs | [[todo]] lands with the payments branch |
-| `aman_architecture.md` describes the April single-counsellor design | [[open]] |
+| `aman_architecture.md` and `README.md` are out of date on `main` | [[wait]] rewritten on the payments branch |
+| `product-comparison-table-2026-08.md` still says 14-day trial and a 30-client limit | [[todo]] |
 | README says MIT; there is no LICENSE file and the package is private | [[open]] Adi's call |
 | Merge `docs/outreach-mailbox-setup` (mailbox notes and the agent's report) | [[todo]] |
