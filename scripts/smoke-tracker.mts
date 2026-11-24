@@ -247,6 +247,13 @@ throwsAt("throw: an unknown line -- raw HTML", 3,
   () => body("<div>raw</div>"), /raw HTML/);
 throwsAt("throw: an unknown line -- an indented continuation, i.e. a nested list", 3,
   () => body("  - nested"), /indentation/);
+check("bullets: a '  - ' child under a bullet nests one level",
+  body("- parent", "  - child one", "  - child two", "- next"),
+  "<ul><li>parent<ul><li>child one</li><li>child two</li></ul></li><li>next</li></ul>");
+throwsAt("throw: a child two levels deep is still refused", 5,
+  () => body("- a", "  - b", "    - c"), /indentation/);
+throwsAt("throw: a '  - ' child under a numbered item is refused", 4,
+  () => body("1. a", "  - b"), /indentation/);
 throwsAt("throw: an unknown line -- an asterisk bullet", 3, () => body("* item"), /lists use '- '/);
 throwsAt("throw: an unknown line -- '+' bullet", 3, () => body("+ item"), /lists use '- '/);
 throwsAt("throw: an unknown line -- underscore emphasis", 3, () => body("_italic_"), /\*italic\*/);
@@ -544,7 +551,7 @@ if (!existsSync(SRC_DIR) || sourceFiles(SRC_DIR).length === 0) {
     .flatMap((m) => m[1].trim().split(/\s+/)))].sort();
   check("drift: every class the REAL page emits has a rule in the stylesheet it ships with",
     live.filter((c) => !new RegExp(`\\.${c}[^\\w-]`).test(fresh.slice(fresh.indexOf("<style>")))), []);
-  check("drift: the real page is built from all eight sources, one tab each",
+  check("drift: the real page is built from every source, linked ones included, one tab each",
     [sourceFiles(SRC_DIR).length, (fresh.match(/role="tabpanel"/g) ?? []).length],
     [sourceFiles(SRC_DIR).length, sourceFiles(SRC_DIR).length]);
 }

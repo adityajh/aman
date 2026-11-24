@@ -67,7 +67,7 @@ Next.js 16 · React 19 · Neon Postgres · Drizzle · NextAuth v4 · Vercel.
 3. **Never hard-delete clinical records.** Clients are soft-deleted (`is_active = false`). The `audit_log` table exists but nothing writes to it yet, so there is no change history. Receipts and payment allocations are hard-deleted when a counsellor removes one; the invoice totals are recalculated.
 4. **Money logic is load-bearing**, pro-rata 15-min quartiles with the 53–70 min grace band, manual overrides honoured, invoice numbers from `MAX+1`, INR and USD never mixed.
 5. **IST timezone**. `src/lib/tz.ts`; ranges are `[start, end)`.
-6. Update `CHANGELOG.md` for anything user-visible.
+6. Update `CHANGELOG.md` for anything user-visible, then run `npm run build:tracker` and commit `docs/tracker/index.html` with it: the plan and tracker page (`docs/tracker/`) renders `CHANGELOG.md` as its Changelog tab, and `npm run check:tracker` fails if the two drift.
 7. **There is one database.** `.env.local` and Vercel previews point at the production Neon database (AWS us-east-1). Test write paths with a throwaway client and Settings → Test Mode. Schema changes are applied by hand as SQL; the Drizzle journal is not kept in sync. Put one-off SQL in `drizzle/manual/`.
 
 ## How to work here

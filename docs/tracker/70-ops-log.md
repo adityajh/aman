@@ -1,7 +1,6 @@
-# Changelog
+# Ops log
 
-Most recent first. Product changes are logged in full in `CHANGELOG.md`; this
-tab adds the operational events around them (accounts, DNS, infrastructure)
+Most recent first. Product changes are on the **Changelog** tab; this tab adds the operational events around them (accounts, DNS, infrastructure)
 that never reach that file.
 
 ## 23 November 2026

@@ -57,6 +57,11 @@ The markdown in `docs/tracker/` is the source. The page is generated from it by
 drifted. Edit the markdown, run the build, commit both. Never hand-edit
 `index.html`.
 
+The **Changelog** tab is not a copy: it is `CHANGELOG.md` from the repository
+root, read at build time. So any commit that edits `CHANGELOG.md` must also run
+`npm run build:tracker`, or `npm run check:tracker` fails. One nested bullet
+level (`  - `) is allowed there; anything deeper fails the build.
+
 The generator is copied from the Outreach Orchestrator page so the two behave
 the same. The page is also published at
 [claude.ai/artifact/9NbbELEvkoykr1EUz1KKxp](https://claude.ai/artifact/9NbbELEvkoykr1EUz1KKxp),

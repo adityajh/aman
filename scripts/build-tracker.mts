@@ -61,7 +61,7 @@ export const SUPPORTED = {
     "## Heading",
     "### Heading",
     "paragraph (blank-line separated)",
-    "- item (contiguous, one level)",
+    "- item (contiguous), with optional '  - child' items one level deep",
     "1. item (contiguous, one level)",
     "| table | with |---| separator row",
     "> quote (contiguous)",
@@ -358,15 +358,27 @@ function blocks(lines: Line[], file: string, ctx: Ctx, allowCallout: boolean): s
       continue;
     }
 
-    // - bullets
+    // - bullets, each optionally followed by '  - ' children (ONE nested level).
+    // Deepen addition: CHANGELOG.md groups sub-points under a bullet, and
+    // flattening it would lose that structure. A child must sit directly under
+    // a bullet; a child with no parent, or any deeper indent, still throws via
+    // the indentation check at the top of this loop.
     if (/^- /.test(t)) {
       const items: string[] = [];
       let j = i;
       while (j < lines.length && /^- /.test(lines[j].text)) {
         const m = /^- (.+)$/.exec(lines[j].text);
         if (m === null) bad(file, lines[j].n, "a bullet needs text after '- '", lines[j].text);
-        items.push(`<li>${renderInline(m[1], file, lines[j].n)}</li>`);
+        const head = renderInline(m[1], file, lines[j].n);
         j++;
+        const kids: string[] = [];
+        while (j < lines.length && /^ {2}- /.test(lines[j].text)) {
+          const k = /^ {2}- (.+)$/.exec(lines[j].text);
+          if (k === null) bad(file, lines[j].n, "a nested bullet needs text after '  - '", lines[j].text);
+          kids.push(`<li>${renderInline(k[1], file, lines[j].n)}</li>`);
+          j++;
+        }
+        items.push(kids.length === 0 ? `<li>${head}</li>` : `<li>${head}<ul>${kids.join("")}</ul></li>`);
       }
       out.push(`<ul>${items.join("")}</ul>`);
       i = j;
@@ -467,20 +479,41 @@ export function parseFileName(file: string): { order: string; slug: string } {
   return { order: m[1], slug: m[2] };
 }
 
-export function parseDoc(file: string, src: string): Doc {
+export function parseDoc(file: string, src: string, origin: string = file): Doc {
   const { order, slug } = parseFileName(file);
-  return { file, order, slug, label: labelOf(src, file), html: renderMarkdown(src, file) };
+  return { file, order, slug, label: labelOf(src, origin), html: renderMarkdown(src, origin) };
 }
 
 /** Source files in tab order: filename sort order, which is why they are NN-. */
+/** Deepen addition: tabs whose source lives elsewhere in the repository, read
+ *  in place so there is never a second copy to drift. Keyed by the tab's
+ *  NN-slug.md name (which sets its position); the value is the real file,
+ *  relative to the repository root. Applied only when building SRC_DIR, so a
+ *  test building a scratch directory sees exactly that directory. Parse errors
+ *  name the real file, not the tab name. */
+export const LINKED: Readonly<Record<string, string>> = {
+  "60-changelog.md": "CHANGELOG.md",
+};
+
 export function sourceFiles(dir: string): string[] {
-  return readdirSync(dir)
-    .filter((f) => /^\d{2}-.+\.md$/.test(f))
-    .sort();
+  const own = readdirSync(dir).filter((f) => /^\d{2}-.+\.md$/.test(f));
+  const linked = dir === SRC_DIR ? Object.keys(LINKED) : [];
+  const clash = linked.filter((f) => own.includes(f));
+  if (clash.length > 0) {
+    throw new Error(`${dir}/${clash[0]}: this name is a LINKED tab; rename the file or the link`);
+  }
+  return [...own, ...linked].sort();
 }
 
 export function readDocs(dir: string): Doc[] {
-  return sourceFiles(dir).map((f) => parseDoc(f, readFileSync(join(dir, f), "utf8")));
+  return sourceFiles(dir).map((f) => {
+    const real = dir === SRC_DIR ? LINKED[f] : undefined;
+    if (real === undefined) return parseDoc(f, readFileSync(join(dir, f), "utf8"));
+    if (!existsSync(real)) {
+      throw new Error(`${real}: linked as ${f}, but it does not exist (run from the repository root)`);
+    }
+    return parseDoc(f, readFileSync(real, "utf8"), real);
+  });
 }
 
 /** The tab-list builder. Buttons, not links: the hash is written by the click
@@ -730,6 +763,7 @@ if (import.meta.url === ENTRY) {
   const out = join(dir, OUT_NAME);
   const { html, docs } = buildFromDir(dir);
   writeFileSync(out, html);
-  console.log(`${out} <- ${dir}/*.md (${docs.length} tabs, ${html.length} bytes)`);
+  const links = dir === SRC_DIR ? Object.values(LINKED) : [];
+  console.log(`${out} <- ${dir}/*.md${links.length ? " + " + links.join(", ") : ""} (${docs.length} tabs, ${html.length} bytes)`);
   console.log(`  tabs: ${docs.map((d) => d.slug).join(", ")}`);
 }
