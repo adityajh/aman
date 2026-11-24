@@ -13,7 +13,7 @@ means kept as the record of a moment, not maintained.
 | Document | What it is | State |
 |---|---|---|
 | [PROJECT-INSTRUCTIONS.md](https://github.com/adityajh/aman/blob/main/PROJECT-INSTRUCTIONS.md) | The thesis, hard rules, never-build list, guardrails and blockers. Read first | Current |
-| [AGENTS.md](https://github.com/adityajh/aman/blob/main/AGENTS.md) | This Next.js is version 16; read its bundled docs before writing code. `CLAUDE.md` points here | Current |
+| [AGENTS.md](https://github.com/adityajh/aman/blob/main/AGENTS.md) | Loaded automatically by every agent session (`CLAUDE.md` points here). Next.js 16 warning, then: start at this tracker, one production database, keep the tracker true | Current |
 | [CHANGELOG.md](https://github.com/adityajh/aman/blob/main/CHANGELOG.md) | Every product release since 1.0.0. Rendered as the Changelog tab | Current |
 | [business/README.md](https://github.com/adityajh/aman/blob/main/business/README.md) | Map of the business workspace and the order to read it in | Current |
 

@@ -8,6 +8,7 @@ that never reach that file.
 - **Changelog tab** added, rendered from `CHANGELOG.md` itself; the generator gained one level of nested bullets to carry it. This log became the Ops log.
 - **Documents tab** added: every document in the repository, what it is for, and whether it can be trusted.
 - **Archived** four one-off notes to `docs/archive/` (the 17 Nov handover, the two notes between agents, the note for Vijay). `README.md` and `aman_architecture.md` were left in place, because their rewrites wait on the payments branch.
+- **Agents now start at the tracker.** `AGENTS.md`, which every Claude Code session in this repository loads automatically, points to it first and states the keep-it-true rule; `PROJECT-INSTRUCTIONS.md` points to it for current state.
 
 ## 23 November 2026
 

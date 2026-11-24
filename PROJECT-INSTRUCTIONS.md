@@ -6,6 +6,8 @@ A clinical practice management product for solo counsellors in India, built arou
 
 Repo: `github.com/adityajh/aman` (`main`). Local: `~/Documents/Antigravity/Aman`.
 
+**Current state of the product and the work: the plan and tracker**, `docs/tracker/` in the repo, published at https://claude.ai/artifact/9NbbELEvkoykr1EUz1KKxp. Status, roadmap, backlog and a map of every document live there, not here.
+
 **Read `business/strategy/03-business-strategy.md` before doing substantive work.** The full document set and reading order are in `business/README.md`.
 
 ## Who
@@ -56,7 +58,9 @@ Not signups, not MRR. Judge product decisions against it.
 ## Where things go
 
 `business/`, numbered docs 01–07 are the canonical set; `research/`, `commercial/`, `marketing/`, `customers/` accumulate new work. See `business/README.md`.
-Root. `aman_architecture.md`, `CHANGELOG.md` (the real history), `usage_guide.md`.
+`docs/tracker/`, the plan and tracker: live status, architecture, decisions, roadmap, backlog, ops log and the Documents map. Keep it true in the same commit as the change it describes.
+`docs/archive/`, one-off notes kept as the record of a moment, not maintained.
+Root. `CHANGELOG.md` (the real history, also the tracker's Changelog tab), `usage_guide.md`. `aman_architecture.md` and `README.md` are out of date on `main`; their rewrites are on the payments branch.
 
 ## Engineering guardrails
 
